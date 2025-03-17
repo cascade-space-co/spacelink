@@ -1,0 +1,54 @@
+[project]
+name = "pyradio"
+version = "0.1.0"
+description = "Python module for radio computation"
+authors = [
+    {name = "Heliosphere Network"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "numpy (>=2.2.4,<3.0.0)",
+    "scipy (>=1.15.2,<2.0.0)"
+]
+
+[tool.poetry]
+packages = [
+    { include = "conversions.py" }
+]
+
+[tool.poetry.group.test.dependencies]
+pytest = ">=7.4.0"
+pytest-cov = ">=4.1.0"
+
+[tool.pytest.ini_options]
+addopts = "-ra -q --cov=. --cov-report=term-missing"
+testpaths = [
+    "tests",
+    "."
+]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+source = ["."]
+branch = true
+omit = [
+    "test_*.py",
+    "tests/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+show_missing = true
+fail_under = 90
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
