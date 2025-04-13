@@ -11,16 +11,17 @@ from typing import Union
 # Speed of light in meters per second
 SPEED_OF_LIGHT = 299792458
 
+
 def db2linear(db_value: Union[float, int]) -> float:
     """
     Convert a value from decibels (dB) to linear scale.
-    
+
     Args:
         db_value: The value in decibels to convert
-        
+
     Returns:
         float: The equivalent value in linear scale
-        
+
     Examples:
         >>> db2linear(0)
         1.0
@@ -31,19 +32,20 @@ def db2linear(db_value: Union[float, int]) -> float:
     """
     return 10 ** (db_value / 10)
 
+
 def db(linear_value: Union[float, int]) -> float:
     """
     Convert a value from linear scale to decibels (dB).
-    
+
     Args:
         linear_value: The linear value to convert (must be positive)
-        
+
     Returns:
         float: The equivalent value in decibels
-        
+
     Raises:
         ValueError: If linear_value is less than or equal to 0
-        
+
     Examples:
         >>> db(1)
         0.0
@@ -54,21 +56,22 @@ def db(linear_value: Union[float, int]) -> float:
     """
     if linear_value <= 0:
         raise ValueError("Linear value must be positive")
-    return 10 * math.log10(linear_value) 
+    return 10 * math.log10(linear_value)
+
 
 def wavelength(frequency: Union[float, int]) -> float:
     """
     Calculate the wavelength from a frequency.
-    
+
     Args:
         frequency: The frequency in Hertz (Hz)
-        
+
     Returns:
         float: The wavelength in meters
-        
+
     Raises:
         ValueError: If frequency is less than or equal to 0
-        
+
     Examples:
         >>> wavelength(1000000)  # 1 MHz
         299.792458

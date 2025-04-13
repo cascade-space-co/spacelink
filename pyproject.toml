@@ -13,6 +13,11 @@ python = ">=3.10"
 numpy = ">=1.24.0,<3.0.0"
 scipy = ">=1.10.0,<2.0.0"
 
+[tool.poetry.group.dev.dependencies]
+sphinx = "^7.2.6"
+sphinx-rtd-theme = "^2.0.0"
+sphinx-autodoc-typehints = "^1.25.2"
+
 [tool.poetry.group.test.dependencies]
 pytest = ">=7.4.0"
 pytest-cov = ">=4.1.0"
