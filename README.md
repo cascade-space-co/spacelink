@@ -1,23 +1,45 @@
-# pyradio
-Python module for radio computation
+# PyRadio
+
+A Python library for radio frequency calculations, including satellite dish modeling and RF conversions.
 
 ## Installation
 
-This project uses Poetry for dependency management. To install:
-
 ```bash
-# Install project dependencies
+# Install using poetry
 poetry install
 
-# Install with test dependencies
-poetry install --with test
+# Or install directly with pip
+pip install .
 ```
 
 ## Development
 
-### Running Tests
+### Setup
 
-Run tests using Poetry:
+```bash
+# Install dependencies and the package in development mode
+poetry install
+
+```
+
+### Project Structure
+```
+pyradio/
+├── src/                    # Source code
+│   └── pyradio/           # Main package
+│       ├── __init__.py    # Package initialization and public API
+│       ├── dish.py        # Dish class implementation
+│       └── conversions.py # Conversion utilities
+├── tests/                 # Test directory
+│   ├── __init__.py
+│   ├── test_dish.py
+│   └── test_conversions.py
+├── pyproject.toml         # Project configuration
+├── poetry.lock           # Dependency lock file
+└── README.md             # Project documentation
+```
+
+### Running Tests
 
 ```bash
 # Run all tests
@@ -26,26 +48,35 @@ poetry run pytest
 # Run with verbose output
 poetry run pytest -v
 
-# Show coverage report in terminal
-poetry run pytest --cov-report term-missing
+# Run with print statement output
+poetry run pytest -s
 
-# Generate HTML coverage report
-poetry run pytest --cov-report html
+# Run with coverage report
+poetry run pytest --cov=pyradio
+
+# Run a specific test file
+poetry run pytest tests/test_dish.py
 ```
 
-The test suite is configured to:
-- Run all tests in the project root and `tests` directory
-- Generate coverage reports
-- Require 90% code coverage
-- Show test summary and execution report
+### Building Documentation
 
-### Dependencies
-
-- Python >= 3.13
-- NumPy >= 2.2.4
-- SciPy >= 1.15.2
+```bash
+# Build HTML documentation
+poetry run sphinx-build -b html docs/source docs/build
+```
 
 ## Features
 
-- Conversion between decibel (dB) and linear scales
-- More features coming soon...
+- Satellite dish modeling
+  - Gain calculation
+  - Half-power beamwidth
+  - G/T ratio
+  - System temperature modeling
+- RF conversions
+  - dB to linear power ratio
+  - Frequency to wavelength
+  - And more...
+
+## License
+
+MIT License - see LICENSE file for details

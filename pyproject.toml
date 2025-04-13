@@ -1,43 +1,33 @@
-[project]
+[tool.poetry]
 name = "pyradio"
 version = "0.1.0"
 description = "Python module for radio computation"
-authors = [
-    {name = "Heliosphere Network"}
-]
+authors = ["Heliosphere Network"]
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "numpy (>=2.2.4,<3.0.0)",
-    "scipy (>=1.15.2,<2.0.0)"
+packages = [
+    { include = "pyradio", from = "src" }
 ]
 
-[tool.poetry]
-packages = [
-    { include = "conversions.py" }
-]
+[tool.poetry.dependencies]
+python = ">=3.10"
+numpy = ">=1.24.0,<3.0.0"
+scipy = ">=1.10.0,<2.0.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = ">=7.4.0"
 pytest-cov = ">=4.1.0"
 
 [tool.pytest.ini_options]
-addopts = "-ra -q --cov=. --cov-report=term-missing"
+addopts = "-ra -q --cov=src --cov-report=term-missing"
 testpaths = [
-    "tests",
-    "."
+    "tests"
 ]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 
 [tool.coverage.run]
-source = ["."]
+source = ["src"]
 branch = true
-omit = [
-    "test_*.py",
-    "tests/*",
-    "setup.py",
-]
 
 [tool.coverage.report]
 exclude_lines = [

@@ -5,7 +5,8 @@ This module contains pytest-style tests for the dB to linear conversion function
 """
 
 import pytest
-from conversions import db2linear, db
+import numpy as np
+from pyradio.conversions import db, db2linear, wavelength
 
 def test_db2linear_common_values():
     """Test db2linear with common values."""
