@@ -12,7 +12,7 @@ from typing import Union
 SPEED_OF_LIGHT = 299792458
 
 
-def db2linear(db_value: Union[float, int]) -> float:
+def db2linear(db_value: float) -> float:
     """
     Convert a value from decibels (dB) to linear scale.
 
@@ -33,7 +33,7 @@ def db2linear(db_value: Union[float, int]) -> float:
     return 10 ** (db_value / 10)
 
 
-def db(linear_value: Union[float, int]) -> float:
+def db(linear_value: float) -> float:
     """
     Convert a value from linear scale to decibels (dB).
 
@@ -59,7 +59,7 @@ def db(linear_value: Union[float, int]) -> float:
     return 10 * math.log10(linear_value)
 
 
-def wavelength(frequency: Union[float, int]) -> float:
+def wavelength(frequency: float) -> float:
     """
     Calculate the wavelength from a frequency.
 
@@ -83,3 +83,60 @@ def wavelength(frequency: Union[float, int]) -> float:
     if frequency <= 0:
         raise ValueError("Frequency must be positive")
     return SPEED_OF_LIGHT / frequency
+
+
+def ghz(frequency: float) -> float:
+    """
+    Convert a frequency from GHz to Hz.
+    
+    Args:
+        frequency: The frequency in GHz
+        
+    Returns:
+        float: The frequency in Hz
+        
+    Examples:
+        >>> ghz(1.0)
+        1000000000.0
+        >>> ghz(2.4)  # WiFi frequency
+        2400000000.0
+    """
+    return frequency * 1e9
+
+
+def mhz(frequency: float) -> float:
+    """
+    Convert a frequency from MHz to Hz.
+    
+    Args:
+        frequency: The frequency in MHz
+        
+    Returns:
+        float: The frequency in Hz
+        
+    Examples:
+        >>> mhz(1.0)
+        1000000.0
+        >>> mhz(88.5)  # FM radio frequency
+        88500000.0
+    """
+    return frequency * 1e6
+
+
+def kilometers(distance: float) -> float:
+    """
+    Convert a distance from kilometers to meters.
+    
+    Args:
+        distance: The distance in kilometers
+        
+    Returns:
+        float: The distance in meters
+        
+    Examples:
+        >>> kilometers(1.0)
+        1000.0
+        >>> kilometers(36e3)  # Geostationary orbit altitude
+        36000000.0
+    """
+    return distance * 1000

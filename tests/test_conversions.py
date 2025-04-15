@@ -6,7 +6,10 @@ This module contains pytest-style tests for the dB to linear conversion function
 
 import pytest
 import numpy as np
-from pyradio.conversions import db, db2linear, wavelength
+from pyradio.conversions import (
+    db, db2linear, wavelength,
+    ghz, mhz, kilometers
+)
 
 
 def test_db2linear_common_values():
@@ -58,10 +61,50 @@ def test_roundtrip_conversion(db_val):
     assert db_val == pytest.approx(db_result)
 
 
+def test_wavelength():
+    """Test wavelength calculations."""
+    # Test common frequencies
+    assert wavelength(1e9) == pytest.approx(0.299792458)  # 1 GHz
+    assert wavelength(2.4e9) == pytest.approx(0.124913524)  # WiFi 2.4 GHz
+    assert wavelength(5.8e9) == pytest.approx(0.051688355)  # WiFi 5.8 GHz
+    
+    # Test with very high and low frequencies
+    assert wavelength(1e12) == pytest.approx(0.299792458e-3)  # 1 THz
+    assert wavelength(1e6) == pytest.approx(299.792458)  # 1 MHz
+
+
 def test_wavelength_invalid_values():
     """Test wavelength with invalid values that should raise exceptions."""
     with pytest.raises(ValueError):
         wavelength(0)
-
+    
     with pytest.raises(ValueError):
         wavelength(-1)
+
+
+def test_ghz():
+    """Test GHz to Hz conversion."""
+    assert ghz(1.0) == 1e9
+    assert ghz(2.4) == 2.4e9
+    assert ghz(0.5) == 0.5e9
+    assert ghz(10) == 10e9
+
+
+def test_mhz():
+    """Test MHz to Hz conversion."""
+    assert mhz(1.0) == 1e6
+    assert mhz(88.5) == 88.5e6
+    assert mhz(0.5) == 0.5e6
+    assert mhz(100) == 100e6
+
+
+def test_kilometers():
+    """Test kilometers to meters conversion."""
+    assert kilometers(1.0) == 1000
+    assert kilometers(36e3) == 36e6
+    assert kilometers(0.5) == 500
+    assert kilometers(100) == 100000
+    
+    # Test with negative values
+    assert kilometers(-1.0) == -1000
+    assert kilometers(-0.5) == -500
