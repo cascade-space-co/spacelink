@@ -25,6 +25,7 @@ jupytext = "^1.16.0"
 [tool.poetry.group.test.dependencies]
 pytest = ">=7.4.0"
 pytest-cov = ">=4.1.0"
+pyyaml = "^6.0.2"
 
 [tool.pytest.ini_options]
 addopts = "-ra -q --cov=src --cov-report=term-missing"

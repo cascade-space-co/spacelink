@@ -135,14 +135,16 @@ class Link:
         """
         Calculate the Effective Isotropic Radiated Power (EIRP) in dBW.
         
-        EIRP = Transmitter Power + Transmitter Antenna Gain - Implementation Loss
+        EIRP = Transmitter Power + Transmitter Antenna Gain
+        
+        Note: Implementation loss is accounted for in the link margin calculation,
+        not in the EIRP calculation.
         
         Returns:
             float: EIRP in dBW
         """
         return (self.tx_power_dbw + 
-                self.tx_antenna.gain(self.frequency_hz) - 
-                self.implementation_loss_db)
+                self.tx_antenna.gain(self.frequency_hz))
                 
     @property
     def path_loss_db(self) -> float:
@@ -229,15 +231,15 @@ class Link:
         """
         Calculate the link margin in dB.
         
-        Link Margin = Eb/N0 - Required Eb/N0
+        Link Margin = Eb/N0 - Required Eb/N0 - Implementation Loss
         
-        Args:
-            data_rate_bps: Data rate in bits per second
-            
+        Implementation loss is subtracted here rather than in the EIRP calculation,
+        as it represents losses in the communication system that degrade performance.
+        
         Returns:
             float: Link margin in dB
         """
-        return self.ebno_db() - self.required_ebno_db
+        return self.ebno_db() - self.required_ebno_db - self.implementation_loss_db
         
     def __str__(self) -> str:
         """

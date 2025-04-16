@@ -38,7 +38,8 @@ class FixedGain(Antenna):
     A class representing an antenna with fixed gain.
     
     This class implements the Antenna interface for an antenna with a constant gain
-    regardless of frequency.
+    regardless of frequency. The gain can be positive or negative, as some
+    antennas (like small whip antennas or patch antennas) can have negative gain.
     
     Attributes:
         gain_db: Fixed antenna gain in dB
@@ -49,14 +50,8 @@ class FixedGain(Antenna):
         Initialize a FixedGain antenna.
         
         Args:
-            gain_db: Fixed antenna gain in dB
-            
-        Raises:
-            ValueError: If gain is negative
+            gain_db: Fixed antenna gain in dB (can be positive or negative)
         """
-        if gain_db < 0:
-            raise ValueError("Gain cannot be negative")
-            
         self.gain_db = gain_db
         
     def gain(self, frequency_hz: float) -> float:

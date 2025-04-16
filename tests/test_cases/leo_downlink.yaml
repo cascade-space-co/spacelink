@@ -1,0 +1,50 @@
+name: leo_downlink
+description: >
+  LEO satellite downlink at 2.25 GHz to a 3.7m ground station dish.
+  Typical configuration for remote sensing or small satellite communications.
+
+# Frequency and distance parameters
+frequency_ghz: 2.25  # Downlink frequency
+distance_km: 2000.0  # Typical LEO satellite distance
+
+# Downlink parameters
+bandwidth_mhz: 2.0  # Downlink bandwidth
+
+# Transmitter parameters (satellite)
+tx_power_dbw: 7.0  # 5W satellite transmitter
+tx_antenna_gain_db: 5.0  # Satellite antenna gain
+
+# Receiver parameters (ground station)
+rx_dish_diameter_m: 3.7
+rx_dish_efficiency: 0.65
+rx_antenna_gain_db: 36.94  # Pre-computed for 3.7m dish at 2.25 GHz
+system_noise_temp_k: 100.0
+antenna_noise_temp_k: 50.0
+
+# Additional losses
+implementation_loss_db: 0.5  # Implementation loss of 0.5 dB
+polarization_loss_db: 0.5
+pointing_loss_db: 1.0
+atmospheric_loss_db: 0.3
+required_ebno_db: 9.6
+
+# Reference values for calculations
+ref_values:
+  # Physical parameters
+  wavelength_m: 0.13324  # Speed of light / downlink frequency
+  
+  # Antenna parameters
+  rx_dish_3db_beamwidth_deg: 2.5208  # Ground station dish beamwidth
+  
+  # Path loss
+  free_space_path_loss_db: 165.51  # Without additional losses
+  path_loss_db: 166.81  # Free space + atmospheric + pointing losses
+  
+  # Link budget calculated by actual Link implementation
+  eirp_dbw: 12.00  # tx_power_dbw + tx_antenna_gain_db (7.0 + 5.0)
+  received_power_dbw: -118.37  # EIRP + rx_antenna_gain_db - path_loss_db - polarization_loss_db
+  system_noise_temperature_k: 150.0  # system_noise_temp_k + antenna_noise_temp_k
+  noise_power_dbw: -143.83  # thermal noise in 2 MHz bandwidth
+  carrier_to_noise_ratio_db: 25.46  # received_power_dbw - noise_power_dbw
+  ebno_db: 25.46  # Same as C/N since bandwidth = data rate
+  link_margin_db: 15.36  # ebno_db - required_ebno_db - implementation_loss_db

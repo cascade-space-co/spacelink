@@ -1,0 +1,56 @@
+name: deep_space
+description: >
+  Deep space communication link at 8.4 GHz (X-band) from a spacecraft
+  to a 70m Deep Space Network antenna. Typical configuration for
+  planetary missions beyond Mars.
+
+# Frequency and distance parameters
+frequency_ghz: 8.4  # X-band downlink
+distance_km: 600000000.0  # ~4 AU (typical distance to outer planets)
+bandwidth_khz: 20.0  # Narrow bandwidth for deep space
+
+# Transmitter parameters (spacecraft)
+tx_power_dbw: 10.0  # 10W spacecraft transmitter
+tx_dish_diameter_m: 2.5
+tx_dish_efficiency: 0.60
+tx_antenna_gain_db: 44.63  # Pre-computed for 2.5m dish at 8.4 GHz
+
+# Receiver parameters (DSN 70m ground station)
+rx_dish_diameter_m: 70.0
+rx_dish_efficiency: 0.70
+rx_antenna_gain_db: 74.25  # Pre-computed for 70m dish at 8.4 GHz
+system_noise_temp_k: 25.0  # Cryogenically cooled receivers
+antenna_noise_temp_k: 15.0  # Cold sky background
+
+# Additional losses
+implementation_loss_db: 0.5  # Implementation loss of 0.5 dB
+polarization_loss_db: 0.2
+pointing_loss_db: 1.5
+atmospheric_loss_db: 0.5
+required_ebno_db: 9.6
+
+# Reference values for calculations
+ref_values:
+  # Physical parameters
+  wavelength_m: 0.03569  # Speed of light / frequency
+  
+  # Antenna parameters
+  tx_dish_3db_beamwidth_deg: 0.9993  # Spacecraft antenna beamwidth
+  rx_dish_3db_beamwidth_deg: 0.0357  # DSN antenna beamwidth
+  
+  # Path loss
+  free_space_path_loss_db: 286.50  # Without additional losses
+  path_loss_db: 290.50  # With additional losses (atmospheric + pointing)
+  
+  # Link budget calculated by actual Link implementation
+  eirp_dbw: 54.63  # tx_power_dbw + tx_antenna_gain_db (10.0 + 44.63)
+  received_power_dbw: -163.95  # EIRP + rx_antenna_gain_db - path_loss_db - polarization_loss_db
+  system_noise_temperature_k: 40.0  # system_noise_temp_k + antenna_noise_temp_k
+  noise_power_dbw: -184.56  # Thermal noise in 20 kHz bandwidth
+  carrier_to_noise_ratio_db: 20.61  # received_power_dbw - noise_power_dbw
+  ebno_db: 20.61  # Same as C/N (simplified)
+  link_margin_db: 10.51  # ebno_db - required_ebno_db - implementation_loss_db
+  
+  # Additional reference values
+  data_rate_bps: 20000.0  # Maximum theoretical data rate
+  ground_station_g_over_t_db: 58.77  # G/T figure of merit

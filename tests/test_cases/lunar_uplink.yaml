@@ -1,0 +1,53 @@
+name: lunar_uplink
+description: >
+  Lunar uplink at 7.2 GHz (X-band) from a 10m Earth station to a lunar lander.
+  Typical configuration for command and control of robotic lunar missions.
+
+# Frequency and distance parameters
+frequency_ghz: 7.2  # X-band uplink
+distance_km: 384400.0  # Average Earth-Moon distance
+
+# Uplink parameters
+bandwidth_khz: 4.0  # Command uplink
+
+# Transmitter parameters (Earth station)
+tx_power_dbw: 23.0  # 200W transmitter
+tx_dish_diameter_m: 10.0
+tx_dish_efficiency: 0.65
+tx_antenna_gain_db: 55.84  # Pre-computed for 10m dish at 7.2 GHz
+
+# Receiver parameters (lunar lander)
+rx_dish_diameter_m: 0.5
+rx_dish_efficiency: 0.55
+rx_antenna_gain_db: 29.52  # Pre-computed for 0.5m dish at 7.2 GHz
+system_noise_temp_k: 290.0  # Standard temperature for lander
+antenna_noise_temp_k: 30.0  # Cold space background
+
+# Additional losses
+implementation_loss_db: 0.5  # Implementation loss of 0.5 dB
+polarization_loss_db: 0.3
+pointing_loss_db: 0.7
+atmospheric_loss_db: 0.6
+required_ebno_db: 9.6
+
+# Reference values for calculations
+ref_values:
+  # Physical parameters
+  wavelength_m: 0.04164  # Speed of light / frequency
+  
+  # Antenna parameters
+  tx_dish_3db_beamwidth_deg: 0.291  # Earth station dish beamwidth
+  rx_dish_3db_beamwidth_deg: 5.828  # Lunar lander antenna beamwidth
+  
+  # Path loss
+  free_space_path_loss_db: 221.29  # Without additional losses
+  path_loss_db: 222.59  # Free space + atmospheric + pointing losses
+  
+  # Link budget calculated by actual Link implementation
+  eirp_dbw: 78.84  # tx_power_dbw + tx_antenna_gain_db (23.0 + 55.84)
+  received_power_dbw: -114.58  # EIRP + rx_antenna_gain_db - path_loss_db - polarization_loss_db
+  system_noise_temperature_k: 320.0  # system_noise_temp_k + antenna_noise_temp_k
+  noise_power_dbw: -176.72  # thermal noise in 4 kHz bandwidth
+  carrier_to_noise_ratio_db: 62.14  # received_power_dbw - noise_power_dbw
+  ebno_db: 62.14  # Same as C/N since bandwidth = data rate
+  link_margin_db: 52.04  # ebno_db - required_ebno_db - implementation_loss_db (very large margin as expected for uplink)

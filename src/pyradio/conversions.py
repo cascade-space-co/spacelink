@@ -123,6 +123,25 @@ def mhz(frequency: float) -> float:
     return frequency * 1e6
 
 
+def khz(frequency: float) -> float:
+    """
+    Convert a frequency from kHz to Hz.
+    
+    Args:
+        frequency: The frequency in kHz
+        
+    Returns:
+        float: The frequency in Hz
+        
+    Examples:
+        >>> khz(1.0)
+        1000.0
+        >>> khz(455.0)  # AM radio IF frequency
+        455000.0
+    """
+    return frequency * 1e3
+
+
 def kilometers(distance: float) -> float:
     """
     Convert a distance from kilometers to meters.

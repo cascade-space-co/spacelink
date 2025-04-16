@@ -1,0 +1,50 @@
+name: leo_uplink
+description: >
+  LEO satellite uplink at 2.075 GHz from ground station to satellite.
+  Typical configuration for command and control of a small satellite.
+
+# Frequency and distance parameters
+frequency_ghz: 2.075  # Uplink frequency
+distance_km: 2000.0  # Typical LEO satellite distance
+
+# Uplink parameters
+bandwidth_khz: 2.0  # 2 kbps data rate
+
+# Transmitter parameters (ground station)
+tx_power_dbw: 20.0  # 100W ground transmitter
+tx_dish_diameter_m: 3.7
+tx_dish_efficiency: 0.65
+tx_antenna_gain_db: 36.24  # Pre-computed for 3.7m dish at 2.075 GHz
+
+# Receiver parameters (satellite)
+rx_antenna_gain_db: -3.0  # Low-gain satellite receive antenna
+system_noise_temp_k: 290.0  # Standard temperature
+antenna_noise_temp_k: 200.0  # Antenna picking up Earth
+
+# Additional losses
+implementation_loss_db: 2.0
+polarization_loss_db: 0.5
+pointing_loss_db: 1.0
+atmospheric_loss_db: 0.3
+required_ebno_db: 9.6
+
+# Reference values for calculations
+ref_values:
+  # Physical parameters
+  wavelength_m: 0.14448  # Speed of light / uplink frequency
+  
+  # Antenna parameters
+  tx_dish_3db_beamwidth_deg: 2.7328  # Ground station dish beamwidth at uplink frequency
+  
+  # Path loss
+  free_space_path_loss_db: 164.81  # Without additional losses
+  path_loss_db: 166.11  # Free space + atmospheric + pointing losses
+  
+  # Link budget calculated by actual Link implementation
+  eirp_dbw: 56.24  # tx_power_dbw + tx_gain_db (36.24 + 20)
+  received_power_dbw: -113.37  # EIRP + rx_antenna_gain_db - path_loss_db - polarization_loss_db
+  system_noise_temperature_k: 490.0  # system_noise_temp_k + antenna_noise_temp_k
+  noise_power_dbw: -168.69  # thermal noise in 2 kHz bandwidth
+  carrier_to_noise_ratio_db: 55.32  # received_power_dbw - noise_power_dbw
+  ebno_db: 55.32  # Same as C/N since bandwidth = data rate
+  link_margin_db: 45.22  # ebno_db - required_ebno_db - implementation_loss_db

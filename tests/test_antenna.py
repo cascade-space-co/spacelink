@@ -16,9 +16,10 @@ def test_fixed_gain_initializes_with_valid_gain():
     antenna = FixedGain(0.0)
     assert antenna.gain_db == pytest.approx(0.0, rel=0.01)
 
-def test_fixed_gain_raises_on_invalid_gain():
-    """Test FixedGain raises ValueError for invalid gain."""
-    with pytest.raises(ValueError, match="Gain cannot be negative"): FixedGain(-1.0)
+def test_fixed_gain_accepts_negative_gain():
+    """Test FixedGain accepts negative gain values."""
+    antenna = FixedGain(-3.0)
+    assert antenna.gain_db == pytest.approx(-3.0, abs=0.01)
 
 def test_fixed_gain_returns_constant_gain():
     """Test FixedGain returns constant gain regardless of frequency."""

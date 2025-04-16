@@ -8,7 +8,7 @@ import pytest
 import numpy as np
 from pyradio.conversions import (
     db, db2linear, wavelength,
-    ghz, mhz, kilometers
+    ghz, mhz, khz, kilometers
 )
 
 
@@ -84,27 +84,35 @@ def test_wavelength_invalid_values():
 
 def test_ghz():
     """Test GHz to Hz conversion."""
-    assert ghz(1.0) == 1e9
-    assert ghz(2.4) == 2.4e9
-    assert ghz(0.5) == 0.5e9
-    assert ghz(10) == 10e9
+    assert ghz(1.0) == pytest.approx(1e9)
+    assert ghz(2.4) == pytest.approx(2.4e9)
+    assert ghz(0.5) == pytest.approx(0.5e9)
+    assert ghz(10) == pytest.approx(10e9)
 
 
 def test_mhz():
     """Test MHz to Hz conversion."""
-    assert mhz(1.0) == 1e6
-    assert mhz(88.5) == 88.5e6
-    assert mhz(0.5) == 0.5e6
-    assert mhz(100) == 100e6
+    assert mhz(1.0) == pytest.approx(1e6)
+    assert mhz(88.5) == pytest.approx(88.5e6)
+    assert mhz(0.5) == pytest.approx(0.5e6)
+    assert mhz(100) == pytest.approx(100e6)
+
+
+def test_khz():
+    """Test kHz to Hz conversion."""
+    assert khz(1.0) == pytest.approx(1e3)
+    assert khz(455.0) == pytest.approx(455e3)
+    assert khz(0.5) == pytest.approx(0.5e3)
+    assert khz(100) == pytest.approx(100e3)
 
 
 def test_kilometers():
     """Test kilometers to meters conversion."""
-    assert kilometers(1.0) == 1000
-    assert kilometers(36e3) == 36e6
-    assert kilometers(0.5) == 500
-    assert kilometers(100) == 100000
+    assert kilometers(1.0) == pytest.approx(1000)
+    assert kilometers(36e3) == pytest.approx(36e6)
+    assert kilometers(0.5) == pytest.approx(500)
+    assert kilometers(100) == pytest.approx(100000)
     
     # Test with negative values
-    assert kilometers(-1.0) == -1000
-    assert kilometers(-0.5) == -500
+    assert kilometers(-1.0) == pytest.approx(-1000)
+    assert kilometers(-0.5) == pytest.approx(-500)

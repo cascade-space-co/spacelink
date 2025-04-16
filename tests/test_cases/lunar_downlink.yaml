@@ -1,0 +1,53 @@
+name: lunar_downlink
+description: >
+  Lunar downlink at 8.45 GHz (X-band) from a lunar lander to a 10m Earth station antenna.
+  Typical configuration for robotic lunar missions with higher data rates.
+
+# Frequency and distance parameters
+frequency_ghz: 8.45  # X-band downlink
+distance_km: 384400.0  # Average Earth-Moon distance
+
+# Downlink parameters
+bandwidth_mhz: 10.0  # Higher data rate from lunar surface
+
+# Transmitter parameters (lunar lander)
+tx_power_dbw: 10.0  # 10W transmitter
+tx_dish_diameter_m: 0.5  # Small high-gain antenna on lander
+tx_dish_efficiency: 0.55
+tx_antenna_gain_db: 31.69  # Pre-computed for 0.5m dish at 8.45 GHz
+
+# Receiver parameters (10m ground station)
+rx_dish_diameter_m: 10.0
+rx_dish_efficiency: 0.65
+rx_antenna_gain_db: 57.86  # Pre-computed for 10m dish at 8.45 GHz
+system_noise_temp_k: 45.0  # Cooled receivers
+antenna_noise_temp_k: 25.0  # Cold sky/moon noise
+
+# Additional losses
+implementation_loss_db: 0.5  # Implementation loss of 0.5 dB
+polarization_loss_db: 0.3
+pointing_loss_db: 1.0
+atmospheric_loss_db: 0.6
+required_ebno_db: 9.6
+
+# Reference values for calculations
+ref_values:
+  # Physical parameters
+  wavelength_m: 0.03549  # Speed of light / frequency
+  
+  # Antenna parameters
+  tx_dish_3db_beamwidth_deg: 4.964  # Lunar lander antenna beamwidth
+  rx_dish_3db_beamwidth_deg: 0.248  # 10m dish antenna beamwidth
+  
+  # Path loss
+  free_space_path_loss_db: 222.68  # Without additional losses
+  path_loss_db: 224.28  # Free space + atmospheric + pointing losses
+  
+  # Link budget calculated by actual Link implementation
+  eirp_dbw: 41.69  # tx_power_dbw + tx_antenna_gain_db (10.0 + 31.69)
+  received_power_dbw: -125.82  # EIRP + rx_antenna_gain_db - path_loss_db - polarization_loss_db
+  system_noise_temperature_k: 70.0  # system_noise_temp_k + antenna_noise_temp_k
+  noise_power_dbw: -140.15  # thermal noise in 10 MHz bandwidth
+  carrier_to_noise_ratio_db: 14.33  # received_power_dbw - noise_power_dbw
+  ebno_db: 14.33  # Same as C/N since bandwidth = data rate
+  link_margin_db: 4.23  # ebno_db - required_ebno_db - implementation_loss_db
