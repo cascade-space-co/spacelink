@@ -6,53 +6,56 @@ for a complete link budget calculation, including transmitter and receiver
 characteristics, path loss, and noise calculations.
 """
 
-from typing import Union, Optional, Callable
+from typing import Callable
 from .path import free_space_path_loss_db
-from .conversions import db, db2linear
+from .conversions import db
 from .antenna import Antenna
 from .noise import thermal_noise_power
+
 
 class Link:
     """
     A class representing a radio communication link.
-    
+
     This class encapsulates all parameters needed for a complete link budget
     calculation, including transmitter and receiver characteristics, path loss,
     and noise calculations.
-    
+
     Attributes:
-        tx_power_dbw: Transmitter power in dBW
+        tx_power: Transmitter power in dBW
         tx_antenna: Transmitter antenna
         rx_antenna: Receiver antenna
-        rx_system_noise_temp_k: Receiver system noise temperature in Kelvin
-        rx_antenna_noise_temp_k: Receiver antenna noise temperature in Kelvin
+        rx_system_noise_temp: Receiver system noise temperature in Kelvin
+        rx_antenna_noise_temp: Receiver antenna noise temperature in Kelvin
         distance_fn: Callable that returns the distance in meters
-        frequency_hz: Carrier frequency in Hz
-        bandwidth_hz: Signal bandwidth in Hz
-        required_ebno_db: Required Eb/N0 in dB for the desired BER
-        implementation_loss_db: Implementation loss in dB (default: 0)
-        polarization_loss_db: Polarization loss in dB (default: 0)
-        pointing_loss_db: Antenna pointing loss in dB (default: 0)
-        atmospheric_loss_db: Atmospheric loss in dB (default: 0)
+        frequency: Carrier frequency in Hz
+        bandwidth: Signal bandwidth in Hz
+        required_ebno: Required Eb/N0 in dB for the desired BER
+        implementation_loss: Implementation loss in dB (default: 0)
+        polarization_loss: Polarization loss in dB (default: 0)
+        pointing_loss: Antenna pointing loss in dB (default: 0)
+        atmospheric_loss: Atmospheric loss in dB (default: 0)
     """
-    
-    def __init__(self,
-                 tx_power_dbw: float,
-                 tx_antenna: Antenna,
-                 rx_antenna: Antenna,
-                 rx_system_noise_temp_k: float,
-                 rx_antenna_noise_temp_k: float,
-                 distance_fn: Callable[[], float],
-                 frequency_hz: float,
-                 bandwidth_hz: float,
-                 required_ebno_db: float,
-                 implementation_loss_db: float = 0.0,
-                 polarization_loss_db: float = 0.0,
-                 pointing_loss_db: float = 0.0,
-                 atmospheric_loss_db: float = 0.0):
+
+    def __init__(
+        self,
+        tx_power_dbw: float,
+        tx_antenna: Antenna,
+        rx_antenna: Antenna,
+        rx_system_noise_temp_k: float,
+        rx_antenna_noise_temp_k: float,
+        distance_fn: Callable[[], float],
+        frequency_hz: float,
+        bandwidth_hz: float,
+        required_ebno_db: float,
+        implementation_loss_db: float = 0.0,
+        polarization_loss_db: float = 0.0,
+        pointing_loss_db: float = 0.0,
+        atmospheric_loss_db: float = 0.0,
+    ):
         """
         Initialize a Link object with all necessary parameters.
-        
+
         Args:
             tx_power_dbw: Transmitter power in dBW
             tx_antenna: Transmitter antenna
@@ -67,7 +70,7 @@ class Link:
             polarization_loss_db: Polarization loss in dB (default: 0)
             pointing_loss_db: Antenna pointing loss in dB (default: 0)
             atmospheric_loss_db: Atmospheric loss in dB (default: 0)
-            
+
         Raises:
             ValueError: If any parameter is invalid
         """
@@ -98,30 +101,30 @@ class Link:
             raise ValueError("Atmospheric loss cannot be negative")
         if required_ebno_db < 0:
             raise ValueError("Required Eb/N0 cannot be negative")
-            
+
         # Store parameters
-        self.tx_power_dbw = tx_power_dbw
+        self.tx_power = tx_power_dbw
         self.tx_antenna = tx_antenna
         self.rx_antenna = rx_antenna
-        self.rx_system_noise_temp_k = rx_system_noise_temp_k
-        self.rx_antenna_noise_temp_k = rx_antenna_noise_temp_k
+        self.rx_system_noise_temp = rx_system_noise_temp_k
+        self.rx_antenna_noise_temp = rx_antenna_noise_temp_k
         self.distance_fn = distance_fn
-        self.frequency_hz = frequency_hz
-        self.bandwidth_hz = bandwidth_hz
-        self.implementation_loss_db = implementation_loss_db
-        self.polarization_loss_db = polarization_loss_db
-        self.pointing_loss_db = pointing_loss_db
-        self.atmospheric_loss_db = atmospheric_loss_db
-        self.required_ebno_db = required_ebno_db
-        
+        self.frequency = frequency_hz
+        self.bandwidth = bandwidth_hz
+        self.implementation_loss = implementation_loss_db
+        self.polarization_loss = polarization_loss_db
+        self.pointing_loss = pointing_loss_db
+        self.atmospheric_loss = atmospheric_loss_db
+        self.required_ebno = required_ebno_db
+
     @property
-    def distance_m(self) -> float:
+    def distance(self) -> float:
         """
         Get the current distance in meters.
-        
+
         Returns:
             float: Current distance in meters
-            
+
         Raises:
             ValueError: If the distance is not positive
         """
@@ -129,129 +132,134 @@ class Link:
         if distance <= 0:
             raise ValueError("Distance must be positive")
         return distance
-        
+
     @property
     def eirp(self) -> float:
         """
         Calculate the Effective Isotropic Radiated Power (EIRP) in dBW.
-        
+
         EIRP = Transmitter Power + Transmitter Antenna Gain
-        
+
         Note: Implementation loss is accounted for in the link margin calculation,
         not in the EIRP calculation.
-        
+
         Returns:
             float: EIRP in dBW
         """
-        return (self.tx_power_dbw + 
-                self.tx_antenna.gain(self.frequency_hz))
-                
+        return self.tx_power + self.tx_antenna.gain(self.frequency)
+
     @property
-    def path_loss_db(self) -> float:
+    def path_loss(self) -> float:
         """
         Calculate the total path loss in dB.
-        
+
         Path Loss = Free Space Path Loss + Atmospheric Loss + Pointing Loss
-        
+
         Returns:
             float: Total path loss in dB
         """
-        return (free_space_path_loss_db(self.distance_m, self.frequency_hz) +
-                self.atmospheric_loss_db +
-                self.pointing_loss_db)
-                
+        return (
+            free_space_path_loss_db(self.distance, self.frequency)
+            + self.atmospheric_loss
+            + self.pointing_loss
+        )
+
     @property
-    def received_power_dbw(self) -> float:
+    def received_power(self) -> float:
         """
         Calculate the received power in dBW.
-        
+
         Received Power = EIRP + Receiver Antenna Gain - Path Loss - Polarization Loss
-        
+
         Returns:
             float: Received power in dBW
         """
-        return (self.eirp +
-                self.rx_antenna.gain(self.frequency_hz) -
-                self.path_loss_db -
-                self.polarization_loss_db)
-                
+        return (
+            self.eirp
+            + self.rx_antenna.gain(self.frequency)
+            - self.path_loss
+            - self.polarization_loss
+        )
+
     @property
-    def system_noise_temperature_k(self) -> float:
+    def system_noise_temperature(self) -> float:
         """
         Calculate the total system noise temperature in Kelvin.
-        
+
         System Noise Temperature = Antenna Noise Temperature + System Noise Temperature
-        
+
         Returns:
             float: Total system noise temperature in Kelvin
         """
-        return self.rx_antenna_noise_temp_k + self.rx_system_noise_temp_k
-        
+        return self.rx_antenna_noise_temp + self.rx_system_noise_temp
+
     @property
-    def noise_power_dbw(self) -> float:
+    def noise_power(self) -> float:
         """
-        
+
         Returns:
             float: Noise power in dBW
         """
-        return db(thermal_noise_power(self.bandwidth_hz, self.system_noise_temperature_k))
-        
+        return db(thermal_noise_power(self.bandwidth, self.system_noise_temperature))
+
     @property
-    def carrier_to_noise_ratio_db(self) -> float:
+    def carrier_to_noise_ratio(self) -> float:
         """
         Calculate the carrier-to-noise ratio in dB.
-        
+
         C/N = Received Power - Noise Power
-        
+
         Returns:
             float: Carrier-to-noise ratio in dB
         """
-        return self.received_power_dbw - self.noise_power_dbw
-        
-    def ebno_db(self) -> float:
+        return self.received_power - self.noise_power
+
+    def ebno(self) -> float:
         """
         Calculate the energy per bit to noise power spectral density ratio (Eb/N0) in dB.
-        
+
         Eb/N0 = C/N + 10*log10(B/R)
         where:
         - C/N is the carrier-to-noise ratio in dB
         - B is the bandwidth in Hz
         - R is the data rate in bits per second
-            
+
         Returns:
             float: Eb/N0 in dB
-            
+
         Raises:
             ValueError: If data rate is not positive
         """
 
-        return self.carrier_to_noise_ratio_db
-                
-    def link_margin_db(self) -> float:
+        return self.carrier_to_noise_ratio
+
+    def link_margin(self) -> float:
         """
         Calculate the link margin in dB.
-        
+
         Link Margin = Eb/N0 - Required Eb/N0 - Implementation Loss
-        
+
         Implementation loss is subtracted here rather than in the EIRP calculation,
         as it represents losses in the communication system that degrade performance.
-        
+
         Returns:
             float: Link margin in dB
         """
-        return self.ebno_db() - self.required_ebno_db - self.implementation_loss_db
-        
+        return self.ebno() - self.required_ebno - self.implementation_loss
+
     def __str__(self) -> str:
         """
         Return a string representation of the link budget.
-        
+
         Returns:
             str: String representation of the link budget
         """
-        return (f"Link Budget:\n"
-                f"  EIRP: {self.eirp:.1f} dBW\n"
-                f"  Path Loss: {self.path_loss_db:.1f} dB\n"
-                f"  Received Power: {self.received_power_dbw:.1f} dBW\n"
-                f"  System Noise Temperature: {self.system_noise_temperature_k:.1f} K\n"
-                f"  Noise Power: {self.noise_power_dbw:.1f} dBW\n"
-                f"  C/N: {self.carrier_to_noise_ratio_db:.1f} dB") 
+        return (
+            f"Link Budget:\n"
+            f"  EIRP: {self.eirp:.1f} dBW\n"
+            f"  Path Loss: {self.path_loss:.1f} dB\n"
+            f"  Received Power: {self.received_power:.1f} dBW\n"
+            f"  System Noise Temperature: {self.system_noise_temperature:.1f} K\n"
+            f"  Noise Power: {self.noise_power:.1f} dBW\n"
+            f"  C/N: {self.carrier_to_noise_ratio:.1f} dB"
+        )

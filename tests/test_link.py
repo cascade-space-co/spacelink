@@ -28,19 +28,19 @@ def test_link_initialization():
                 required_ebno_db=10.0)
                 
     # Check parameters
-    assert link.tx_power_dbw == pytest.approx(10.0, rel=0.01)
+    assert link.tx_power == pytest.approx(10.0, rel=0.01)
     assert link.tx_antenna == tx_antenna
     assert link.rx_antenna == rx_antenna
-    assert link.rx_system_noise_temp_k == pytest.approx(290.0, rel=0.01)
-    assert link.rx_antenna_noise_temp_k == pytest.approx(100.0, rel=0.01)
-    assert link.distance_m == pytest.approx(1000000.0, rel=0.01)
-    assert link.frequency_hz == pytest.approx(ghz(2.4), rel=0.01)
-    assert link.bandwidth_hz == pytest.approx(mhz(1.0), rel=0.01)
-    assert link.implementation_loss_db == pytest.approx(0.0, rel=0.01)
-    assert link.polarization_loss_db == pytest.approx(0.0, rel=0.01)
-    assert link.pointing_loss_db == pytest.approx(0.0, rel=0.01)
-    assert link.atmospheric_loss_db == pytest.approx(0.0, rel=0.01)
-    assert link.required_ebno_db == pytest.approx(10.0, rel=0.01)
+    assert link.rx_system_noise_temp == pytest.approx(290.0, rel=0.01)
+    assert link.rx_antenna_noise_temp == pytest.approx(100.0, rel=0.01)
+    assert link.distance == pytest.approx(1000000.0, rel=0.01)
+    assert link.frequency == pytest.approx(ghz(2.4), rel=0.01)
+    assert link.bandwidth == pytest.approx(mhz(1.0), rel=0.01)
+    assert link.implementation_loss == pytest.approx(0.0, rel=0.01)
+    assert link.polarization_loss == pytest.approx(0.0, rel=0.01)
+    assert link.pointing_loss == pytest.approx(0.0, rel=0.01)
+    assert link.atmospheric_loss == pytest.approx(0.0, rel=0.01)
+    assert link.required_ebno == pytest.approx(10.0, rel=0.01)
 
 def test_link_initialization_invalid():
     """Test Link initialization with invalid parameters."""
@@ -221,25 +221,25 @@ def test_link_calculations():
     assert link.eirp == pytest.approx(62.16, abs=0.01)  # 10 dBW + 10 dB - 0 dB
     
     # Check path loss calculation
-    assert link.path_loss_db == pytest.approx(160.05, abs=0.01)  # Free space path loss + 0 dB
+    assert link.path_loss == pytest.approx(160.05, abs=0.01)  # Free space path loss + 0 dB
     
     # Check received power calculation
-    assert link.received_power_dbw == pytest.approx(-92.89, abs=0.01)  # 20 dBW - 122.58 dB + 20 dB - 0 dB
+    assert link.received_power == pytest.approx(-92.89, abs=0.01)  # 20 dBW - 122.58 dB + 20 dB - 0 dB
     
     # Check system noise temperature calculation
-    assert link.system_noise_temperature_k == pytest.approx(200.0, abs=0.01)  # 100 K + 290 K
+    assert link.system_noise_temperature == pytest.approx(200.0, abs=0.01)  # 100 K + 290 K
     
     # Check noise power calculation
-    assert link.noise_power_dbw == pytest.approx(-145.59, abs=0.01)  # k * T * B
+    assert link.noise_power == pytest.approx(-145.59, abs=0.01)  # k * T * B
     
     # Check carrier-to-noise ratio calculation
-    assert link.carrier_to_noise_ratio_db == pytest.approx(52.7, abs=0.01)  # -82.58 dBW - (-138.0 dBW)
+    assert link.carrier_to_noise_ratio == pytest.approx(52.7, abs=0.01)  # -82.58 dBW - (-138.0 dBW)
     
     # Check Eb/N0 calculation
-    assert link.ebno_db() == pytest.approx(52.7, abs=0.01)  # 55.42 dB + 30 dB
+    assert link.ebno() == pytest.approx(52.7, abs=0.01)  # 55.42 dB + 30 dB
     
     # Check link margin calculation
-    assert link.link_margin_db() == pytest.approx(42.7, abs=0.01)  
+    assert link.link_margin() == pytest.approx(42.7, abs=0.01)  
 
 def test_lunar_downlink():
     """Test link budget calculations using lunar downlink test case."""
@@ -276,11 +276,11 @@ def test_lunar_downlink():
     )
     
     # Check base parameters that don't depend on calculations
-    assert link.path_loss_db == pytest.approx(case.ref.path_loss_db, abs=0.01)
-    assert link.system_noise_temperature_k == pytest.approx(case.ref.system_noise_temperature_k, abs=0.01)
+    assert link.path_loss == pytest.approx(case.ref.path_loss_db, abs=0.01)
+    assert link.system_noise_temperature == pytest.approx(case.ref.system_noise_temperature_k, abs=0.01)
     
     # The link margin should incorporate implementation loss correctly
-    assert link.implementation_loss_db == case.implementation_loss_db
+    assert link.implementation_loss == case.implementation_loss_db
 
 def test_leo_downlink():
     """Test link budget calculations using LEO downlink test case."""
@@ -315,13 +315,13 @@ def test_leo_downlink():
     
     # Check calculations against reference values
     assert link.eirp == pytest.approx(case.ref.eirp_dbw, abs=0.01)
-    assert link.path_loss_db == pytest.approx(case.ref.path_loss_db, abs=0.01)
-    assert link.received_power_dbw == pytest.approx(case.ref.received_power_dbw, abs=0.01)
-    assert link.system_noise_temperature_k == pytest.approx(case.ref.system_noise_temperature_k, abs=0.01)
-    assert link.noise_power_dbw == pytest.approx(case.ref.noise_power_dbw, abs=0.01)
-    assert link.carrier_to_noise_ratio_db == pytest.approx(case.ref.carrier_to_noise_ratio_db, abs=0.01)
-    assert link.ebno_db() == pytest.approx(case.ref.ebno_db, abs=0.01)
-    assert link.link_margin_db() == pytest.approx(case.ref.link_margin_db, abs=0.01)
+    assert link.path_loss == pytest.approx(case.ref.path_loss_db, abs=0.01)
+    assert link.received_power == pytest.approx(case.ref.received_power_dbw, abs=0.01)
+    assert link.system_noise_temperature == pytest.approx(case.ref.system_noise_temperature_k, abs=0.01)
+    assert link.noise_power == pytest.approx(case.ref.noise_power_dbw, abs=0.01)
+    assert link.carrier_to_noise_ratio == pytest.approx(case.ref.carrier_to_noise_ratio_db, abs=0.01)
+    assert link.ebno() == pytest.approx(case.ref.ebno_db, abs=0.01)
+    assert link.link_margin() == pytest.approx(case.ref.link_margin_db, abs=0.01)
 
 def test_leo_uplink():
     """Test link budget calculations using LEO uplink test case."""
@@ -355,9 +355,9 @@ def test_leo_uplink():
     )
     
     # Check the core, reliable properties
-    assert link.path_loss_db == pytest.approx(case.ref.path_loss_db, abs=0.01)
-    assert link.system_noise_temperature_k == pytest.approx(case.ref.system_noise_temperature_k, abs=0.01)
-    assert link.implementation_loss_db == case.implementation_loss_db
+    assert link.path_loss == pytest.approx(case.ref.path_loss_db, abs=0.01)
+    assert link.system_noise_temperature == pytest.approx(case.ref.system_noise_temperature_k, abs=0.01)
+    assert link.implementation_loss == case.implementation_loss_db
     
 def test_lunar_uplink():
     """Test link budget calculations using lunar uplink test case."""
@@ -394,6 +394,6 @@ def test_lunar_uplink():
     )
     
     # Check the core, reliable properties
-    assert link.path_loss_db == pytest.approx(case.ref.path_loss_db, abs=0.01)
-    assert link.system_noise_temperature_k == pytest.approx(case.ref.system_noise_temperature_k, abs=0.01)
-    assert link.implementation_loss_db == case.implementation_loss_db
+    assert link.path_loss == pytest.approx(case.ref.path_loss_db, abs=0.01)
+    assert link.system_noise_temperature == pytest.approx(case.ref.system_noise_temperature_k, abs=0.01)
+    assert link.implementation_loss == case.implementation_loss_db
