@@ -9,7 +9,7 @@ characteristics, path loss, and noise calculations.
 from typing import Callable
 from .path import free_space_path_loss_db
 from .conversions import db
-from .antenna import Antenna
+from .antenna import Antenna, polarization_loss
 from .noise import thermal_noise_power
 
 
@@ -48,10 +48,9 @@ class Link:
         frequency_hz: float,
         bandwidth_hz: float,
         required_ebno_db: float,
-        implementation_loss_db: float = 0.0,
-        polarization_loss_db: float = 0.0,
-        pointing_loss_db: float = 0.0,
-        atmospheric_loss_db: float = 0.0,
+        implementation_loss: float = 0.0,
+        pointing_loss: float = 0.0,
+        atmospheric_loss: float = 0.0,
     ):
         """
         Initialize a Link object with all necessary parameters.
@@ -66,10 +65,9 @@ class Link:
             frequency_hz: Carrier frequency in Hz
             bandwidth_hz: Signal bandwidth in Hz
             required_ebno_db: Required Eb/N0 in dB for the desired BER
-            implementation_loss_db: Implementation loss in dB (default: 0)
-            polarization_loss_db: Polarization loss in dB (default: 0)
-            pointing_loss_db: Antenna pointing loss in dB (default: 0)
-            atmospheric_loss_db: Atmospheric loss in dB (default: 0)
+            implementation_loss: Implementation loss in dB (default: 0)
+            pointing_loss: Antenna pointing loss in dB (default: 0)
+            atmospheric_loss: Atmospheric loss in dB (default: 0)
 
         Raises:
             ValueError: If any parameter is invalid
@@ -91,13 +89,11 @@ class Link:
             raise ValueError("Frequency must be positive")
         if bandwidth_hz <= 0:
             raise ValueError("Bandwidth must be positive")
-        if implementation_loss_db < 0:
+        if implementation_loss < 0:
             raise ValueError("Implementation loss cannot be negative")
-        if polarization_loss_db < 0:
-            raise ValueError("Polarization loss cannot be negative")
-        if pointing_loss_db < 0:
+        if pointing_loss < 0:
             raise ValueError("Pointing loss cannot be negative")
-        if atmospheric_loss_db < 0:
+        if atmospheric_loss < 0:
             raise ValueError("Atmospheric loss cannot be negative")
         if required_ebno_db < 0:
             raise ValueError("Required Eb/N0 cannot be negative")
@@ -111,10 +107,9 @@ class Link:
         self.distance_fn = distance_fn
         self.frequency = frequency_hz
         self.bandwidth = bandwidth_hz
-        self.implementation_loss = implementation_loss_db
-        self.polarization_loss = polarization_loss_db
-        self.pointing_loss = pointing_loss_db
-        self.atmospheric_loss = atmospheric_loss_db
+        self.implementation_loss = implementation_loss
+        self.pointing_loss = pointing_loss
+        self.atmospheric_loss = atmospheric_loss
         self.required_ebno = required_ebno_db
 
     @property
@@ -164,6 +159,19 @@ class Link:
             + self.pointing_loss
         )
 
+    @property
+    def polarization_loss(self) -> float:
+        """
+        Calculate the polarization loss in dB based on the axial ratios of the antennas.
+        
+        The polarization loss is calculated using the standard formula for polarization
+        mismatch between two antennas with different axial ratios.
+        
+        Returns:
+            float: Polarization loss in dB
+        """
+        return polarization_loss(self.tx_antenna.axial_ratio, self.rx_antenna.axial_ratio)
+        
     @property
     def received_power(self) -> float:
         """

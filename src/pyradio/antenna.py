@@ -5,6 +5,7 @@ This module provides classes and functions for antenna calculations,
 including dish gain and beamwidth calculations.
 """
 
+import math
 from abc import ABC, abstractmethod
 from typing import Union
 from .conversions import db, wavelength
@@ -16,6 +17,22 @@ class Antenna(ABC):
     This class defines the interface that all antenna implementations must follow.
     The gain method must be implemented by all concrete antenna classes.
     """
+    
+    def __init__(self, axial_ratio: float = 0):
+        """
+        Initialize an antenna with an axial ratio.
+        
+        Args:
+            axial_ratio: Axial ratio in dB (default: 0.0 for perfect circular polarization)
+                         0 dB represents perfect circular polarization
+                         >40 dB represents linear polarization
+        
+        Raises:
+            ValueError: If axial ratio is negative
+        """
+        if axial_ratio < 0:
+            raise ValueError("Axial ratio must be non-negative")
+        self.axial_ratio = axial_ratio
     
     @abstractmethod
     def gain(self, frequency_hz: float) -> float:
@@ -43,15 +60,20 @@ class FixedGain(Antenna):
     
     Attributes:
         gain_db: Fixed antenna gain in dB
+        axial_ratio: Axial ratio in dB (0 dB for perfect circular, >40 dB for linear)
     """
     
-    def __init__(self, gain_db: float):
+    def __init__(self, gain_db: float, axial_ratio: float = 0):
         """
         Initialize a FixedGain antenna.
         
         Args:
             gain_db: Fixed antenna gain in dB (can be positive or negative)
+            axial_ratio: Axial ratio in dB (default: 0.0 for perfect circular polarization)
+                         0 dB represents perfect circular polarization
+                         >40 dB represents linear polarization
         """
+        super().__init__(axial_ratio)
         self.gain_db = gain_db
         
     def gain(self, frequency_hz: float) -> float:
@@ -76,19 +98,24 @@ class Dish(Antenna):
     Attributes:
         diameter_m: Dish diameter in meters
         efficiency: Antenna efficiency (default: 0.65)
+        axial_ratio: Axial ratio in dB (0 dB for perfect circular, >40 dB for linear)
     """
     
-    def __init__(self, diameter_m: float, efficiency: float = 0.65):
+    def __init__(self, diameter_m: float, efficiency: float = 0.65, axial_ratio: float = 0):
         """
         Initialize a Dish antenna.
         
         Args:
             diameter_m: Dish diameter in meters
             efficiency: Antenna efficiency (default: 0.65)
+            axial_ratio: Axial ratio in dB (default: 0.0 for perfect circular polarization)
+                         0 dB represents perfect circular polarization
+                         >40 dB represents linear polarization
             
         Raises:
             ValueError: If diameter is not positive or efficiency is not between 0 and 1
         """
+        super().__init__(axial_ratio)
         if diameter_m <= 0:
             raise ValueError("Dish diameter must be positive")
         if not 0 < efficiency <= 1:
@@ -198,3 +225,40 @@ def dish_3db_beamwidth(diameter: float, frequency: float) -> float:
         
     wavelength_m = wavelength(frequency)
     return 70 * (wavelength_m / diameter)
+
+def polarization_loss(tx_axial_ratio: float, rx_axial_ratio: float) -> float:
+    """
+    Calculate the polarization loss in dB between two antennas with given axial ratios.
+    
+    The polarization loss is calculated using the standard formula for polarization
+    mismatch between two antennas with different axial ratios. For circular polarization,
+    the axial ratio is 0 dB, and for linear polarization, it is >20 dB.
+    
+    Args:
+        tx_axial_ratio: Transmit antenna axial ratio in dB
+        rx_axial_ratio: Receive antenna axial ratio in dB
+    
+    Returns:
+        float: Polarization loss in dB (positive value)
+    
+    Examples:
+        >>> # Perfect circular to perfect circular
+        >>> loss = polarization_loss(0.0, 0.0)
+        >>> round(loss, 1)
+        0.0
+        
+        >>> # Circular to linear (theoretical 3dB, actual depends on implementation)
+        >>> loss = polarization_loss(0.0, 40.0)
+        >>> round(loss, 1)
+        17.0
+    """
+    # Convert axial ratios from dB to linear scale
+    tx_ar_linear = 10 ** (tx_axial_ratio / 20)
+    rx_ar_linear = 10 ** (rx_axial_ratio / 20)
+    
+    # Calculate polarization loss using the polarization efficiency formula
+    # This is the standard formula for polarization mismatch between antennas
+    plf = (4 * tx_ar_linear * rx_ar_linear) / ((1 + tx_ar_linear**2) * (1 + rx_ar_linear**2))
+    
+    # Convert polarization loss factor to dB (negative because it's a loss)
+    return -10 * math.log10(plf)

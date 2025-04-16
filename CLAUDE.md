@@ -11,6 +11,9 @@ this code
 - All gains and losses are reported in units of decibels. decibels, dB, and db are equivalent
 - All computations are to be done in fundamental units such as meters, Hz, dBW, etc.
 - Always do conversions with conversion functions, never convert engineering units in place eg meters = 1000 x kilometers
+- A loss in dB is always expressed as a positive value
+- Negative gain is the same as positive loss
+- Never use negative losses, although negative gain is fine and expected in many cases
 
 ## Commands
 - Build: `poetry build`
@@ -32,6 +35,8 @@ this code
 - Handle errors with appropriate exceptions and explicit messages
 - Meet 90% code coverage minimum requirement
 - Include doctests in function docstrings where possible
+- do not append units to variables
+- Use fundamental units wherever possible and explicit conversion functions for readability
 
 ## Testing
 - Use pytest.approx for float comparisons, always wrap the expected value
