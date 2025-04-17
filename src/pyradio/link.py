@@ -11,7 +11,7 @@ from typing import Callable
 from pint import Quantity
 from .antenna import Antenna, polarization_loss
 from .path import free_space_path_loss
-from .units import Q_, Hz, K, db
+from .units import Q_, Hz, K, db, m, km, W
 from . import noise
 
 
@@ -24,7 +24,7 @@ class Link:
     and noise calculations.
 
     Attributes:
-        tx_power: Transmitter power in dBW
+        tx_power: Transmitter power in W
         tx_antenna: Transmitter antenna
         rx_antenna: Receiver antenna
         rx_system_noise_temp: Receiver system noise temperature in Kelvin
@@ -34,7 +34,6 @@ class Link:
         bandwidth: Signal bandwidth in Hz
         required_ebno: Required Eb/N0 in dB for the desired BER
         implementation_loss: Implementation loss in dB (default: 0)
-        atmospheric_loss: Atmospheric loss callable in dB (default: lambda: Q_(0, 'dB'))
     """
 
     def __init__(
@@ -42,14 +41,13 @@ class Link:
         frequency: Quantity,
         tx_antenna: Antenna,
         rx_antenna: Antenna,
-        tx_power: float,
+        tx_power: Quantity,
         rx_system_noise_temp: Quantity,
         rx_antenna_noise_temp: Quantity,
         distance_fn: Callable[[], Quantity],
         bandwidth: Quantity,
         required_ebno: float,
         implementation_loss: float = 0.0,
-        atmospheric_loss: Callable[[], float] = lambda: 0.0,
     ):
         """
         Initialize a Link object with all necessary parameters.
@@ -58,41 +56,34 @@ class Link:
             frequency: Carrier frequency in Hz
             tx_antenna: Transmitter antenna
             rx_antenna: Receiver antenna
-            tx_power: Transmitter power in dBW
+            tx_power: Transmitter power in W
             rx_system_noise_temp: Receiver system noise temperature in Kelvin
             rx_antenna_noise_temp: Receiver antenna noise temperature in Kelvin
             distance_fn: Callable that returns the distance in meters
             bandwidth: Signal bandwidth in Hz
             required_ebno: Required Eb/N0 in dB for the desired BER
             implementation_loss: Implementation loss in dB (default: 0 dB)
-            atmospheric_loss: Callable that returns atmospheric loss in dB (default: 0 dB)
 
         Raises:
             ValueError: If any parameter is invalid
         """
         # Validate inputs
-        if tx_power <= 0:
+        if tx_power <= 0.0 * W:
             raise ValueError("Transmitter power must be positive")
         if not isinstance(tx_antenna, Antenna):
             raise ValueError("tx_antenna must be an Antenna instance")
         if not isinstance(rx_antenna, Antenna):
             raise ValueError("rx_antenna must be an Antenna instance")
-        if rx_system_noise_temp.magnitude <= 0:
+        if rx_system_noise_temp <= 0.0 * K:
             raise ValueError("System noise temperature must be positive")
-        if rx_antenna_noise_temp.magnitude < 0:
+        if rx_antenna_noise_temp < 0.0 * K:
             raise ValueError("Antenna noise temperature cannot be negative")
         if not callable(distance_fn):
             raise ValueError("distance_fn must be a callable")
-        if frequency.magnitude <= 0:
+        if frequency <= 0.0 * Hz:
             raise ValueError("Frequency must be positive")
-        if bandwidth.magnitude <= 0:
+        if bandwidth <= 0.0 * Hz:
             raise ValueError("Bandwidth must be positive")
-        if implementation_loss < 0:
-            raise ValueError("Implementation loss cannot be negative")
-        if not callable(atmospheric_loss):
-            raise ValueError("atmospheric_loss must be a callable")
-        if required_ebno < 0:
-            raise ValueError("Required Eb/N0 cannot be negative")
 
         # Store parameters
         self.tx_power = tx_power
@@ -104,7 +95,6 @@ class Link:
         self.frequency = frequency
         self.bandwidth = bandwidth
         self.implementation_loss = implementation_loss
-        self.atmospheric_loss = atmospheric_loss
         self.required_ebno = required_ebno
 
     @property
@@ -119,7 +109,7 @@ class Link:
             ValueError: If the distance is not positive
         """
         distance = self.distance_fn()
-        if distance.magnitude <= 0:
+        if distance <= 0 * m:
             raise ValueError("Distance must be positive")
         return distance
 
@@ -151,7 +141,7 @@ class Link:
             float: Noise power in dBW
         """
         power_quantity = noise.power(self.bandwidth, self.system_noise_temperature)
-        return db(power_quantity.magnitude)
+        return power_quantity.to('dBW').magnitude
 
     @property
     def eirp(self) -> float:
@@ -166,20 +156,20 @@ class Link:
         Returns:
             float: EIRP in dBW
         """
-        return self.tx_power + self.tx_antenna.gain(self.frequency)
+        return self.tx_power.to('dBW').magnitude + self.tx_antenna.gain(self.frequency)
 
     @property
     def path_loss(self) -> float:
         """
-        Calculate the total path loss in dB.
+        Calculate the free space path loss in dB.
 
-        Path Loss = Free Space Path Loss + Atmospheric Loss
+        Path Loss = Free Space Path Loss
 
         Returns:
-            float: Total path loss in dB (positive value)
+            float: Free space path loss in dB (positive value)
         """
         fspl = free_space_path_loss(self.distance, self.frequency).to('dB').magnitude
-        return fspl + self.atmospheric_loss()
+        return fspl
 
     @property
     def polarization_loss(self) -> float:

@@ -10,137 +10,122 @@ import os
 import yaml
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
+from pyradio.units import ureg, Q_, Quantity, dimensionless
 
 @dataclass
 class RefValues:
     """
     A dataclass representing pre-computed reference values for radio link calculations.
-    
+
     This class stores all the reference values for verification of calculations.
     All field names should match the corresponding calculation outputs from the library.
-    
+
     Attributes:
-        wavelength_m: Wavelength in meters
-        free_space_path_loss_db: Free space path loss in dB
-        path_loss_db: Total path loss (including atmospheric and pointing losses) in dB
-        eirp_dbw: Effective Isotropic Radiated Power in dBW
-        received_power_dbw: Received power in dBW
-        system_noise_temperature_k: System noise temperature in Kelvin
-        noise_power_dbw: Noise power in dBW
-        carrier_to_noise_ratio_db: Carrier to noise ratio in dB
-        ebno_db: Energy per bit to noise power spectral density ratio in dB
-        link_margin_db: Link margin in dB
+        wavelength: Wavelength as a Quantity
+        free_space_path_loss: Free space path loss as a Quantity
+        eirp: Effective Isotropic Radiated Power as a Quantity
+        received_power: Received power as a Quantity
+        system_noise_temperature: System noise temperature as a Quantity
+        noise_power: Noise power as a Quantity
+        carrier_to_noise_ratio: Carrier to noise ratio as a Quantity
+        ebno: Energy per bit to noise power spectral density ratio as a Quantity
+        link_margin: Link margin as a Quantity
     """
     # Physical parameters
-    wavelength_m: float = 0.0
-    
+    wavelength: Optional[Quantity] = None
+
     # Antenna parameters
-    tx_dish_3db_beamwidth_deg: Optional[float] = None
-    rx_dish_3db_beamwidth_deg: Optional[float] = None
-    
+    tx_dish_3db_beamwidth: Optional[Quantity] = None
+    rx_dish_3db_beamwidth: Optional[Quantity] = None
+
     # Path loss parameters
-    free_space_path_loss_db: float = 0.0
-    path_loss_db: float = 0.0
-    
+    free_space_path_loss: Optional[Quantity] = None
+
     # Link budget parameters
-    eirp_dbw: float = 0.0
-    received_power_dbw: float = 0.0
-    system_noise_temperature_k: float = 0.0
-    noise_power_dbw: float = 0.0
-    carrier_to_noise_ratio_db: float = 0.0
-    ebno_db: float = 0.0
-    link_margin_db: float = 0.0
-    
+    eirp: Optional[Quantity] = None
+    received_power: Optional[Quantity] = None
+    system_noise_temperature: Optional[Quantity] = None
+    noise_power: Optional[Quantity] = None
+    carrier_to_noise_ratio: Optional[Quantity] = None
+    ebno: Optional[Quantity] = None
+    link_margin: Optional[Quantity] = None
+
     # Additional parameters
-    data_rate_bps: Optional[float] = None
-    ground_station_g_over_t_db: Optional[float] = None
+    data_rate: Optional[Quantity] = None
+    ground_station_g_over_t: Optional[Quantity] = None
 
 @dataclass
 class RadioTestCase:
     """
     A dataclass representing a reference radio link test case.
-    
-    This class stores input parameters and pre-computed reference values for 
+
+    This class stores input parameters and pre-computed reference values for
     verification across different test modules. All values are pre-computed and
     stored, so that they can be used to verify the accuracy of calculations.
-    
+
     Attributes:
         name: Unique identifier for the test case
         description: Human-readable description of the test scenario
-        
+
         # Input parameters
-        frequency_ghz: Carrier frequency in GHz
-        distance_km: Distance in kilometers
-        
-        # Bandwidth parameters (one of these should be specified)
-        bandwidth_mhz: Signal bandwidth in MHz (optional)
-        bandwidth_khz: Signal bandwidth in kHz (optional)
-        bandwidth_gbps: Signal bandwidth in Gbps (optional)
-        
+        frequency: Carrier frequency as a Quantity
+        distance: Distance as a Quantity
+
+        # Bandwidth parameters
+        bandwidth: Signal bandwidth as a Quantity
+
         # Antenna parameters
-        tx_dish_diameter_m: Transmitter dish diameter in meters (if applicable)
-        tx_dish_efficiency: Transmitter dish efficiency (if applicable)
-        tx_antenna_gain_db: Transmitter antenna gain in dB
-        rx_dish_diameter_m: Receiver dish diameter in meters (if applicable)
-        rx_dish_efficiency: Receiver dish efficiency (if applicable)
-        rx_antenna_gain_db: Receiver antenna gain in dB
-        
+        tx_dish_diameter: Transmitter dish diameter as a Quantity (if applicable)
+        tx_dish_efficiency: Transmitter dish efficiency as a Quantity (if applicable)
+        tx_antenna_gain: Transmitter antenna gain as a Quantity
+        rx_dish_diameter: Receiver dish diameter as a Quantity (if applicable)
+        rx_dish_efficiency: Receiver dish efficiency as a Quantity (if applicable)
+        rx_antenna_gain: Receiver antenna gain as a Quantity
+
         # Link parameters
-        tx_power_dbw: Transmitter power in dBW
-        system_noise_temp_k: Receiver system noise temperature in Kelvin
-        antenna_noise_temp_k: Receiver antenna noise temperature in Kelvin
-        
+        tx_power: Transmitter power as a Quantity
+        system_noise_temp: Receiver system noise temperature as a Quantity
+        antenna_noise_temp: Receiver antenna noise temperature as a Quantity
+
         # Reference values for various calculations
         ref: Reference values object with pre-computed values
     """
-    
+
     # Case metadata
     name: str
     description: str
-    
+
     # Frequency and distance
-    frequency_ghz: float
-    distance_km: float
-    
-    # Bandwidth parameters (one of these should be specified)
-    bandwidth_mhz: Optional[float] = None
-    bandwidth_khz: Optional[float] = None
-    bandwidth_gbps: Optional[float] = None
-    
-    # Frequency parameters (for other bands/links)
-    frequency_thz: Optional[float] = None
-    uplink_frequency_mhz: Optional[float] = None
-    
+    frequency: Quantity
+    distance: Quantity
+
+    # Bandwidth parameters
+    bandwidth: Quantity
+
     # Antenna parameters
-    tx_dish_diameter_m: Optional[float] = None  
-    tx_dish_efficiency: Optional[float] = None
-    tx_telescope_diameter_cm: Optional[float] = None
-    tx_telescope_efficiency: Optional[float] = None
-    tx_antenna_gain_db: Optional[float] = None
-    rx_dish_diameter_m: Optional[float] = None
-    rx_dish_efficiency: Optional[float] = None
-    rx_telescope_diameter_cm: Optional[float] = None
-    rx_telescope_efficiency: Optional[float] = None
-    rx_antenna_gain_db: Optional[float] = None
-    
+    tx_dish_diameter: Optional[Quantity] = None
+    tx_dish_efficiency: Optional[Quantity] = None
+    tx_antenna_gain: Optional[Quantity] = None
+    tx_antenna_axial_ratio: Optional[Quantity] = None
+
+    rx_dish_diameter: Optional[Quantity] = None
+    rx_dish_efficiency: Optional[Quantity] = None
+    rx_antenna_gain: Optional[Quantity] = None
+    rx_antenna_axial_ratio: Optional[Quantity] = None
+
     # Link parameters
-    tx_power_dbw: Optional[float] = None
-    uplink_tx_power_dbw: Optional[float] = None
-    uplink_bandwidth_khz: Optional[float] = None
-    uplink_rx_antenna_gain_db: Optional[float] = None
-    system_noise_temp_k: Optional[float] = None
-    antenna_noise_temp_k: Optional[float] = None
-    
+    tx_power: Optional[Quantity] = None
+    system_noise_temp: Optional[Quantity] = None
+    antenna_noise_temp: Optional[Quantity] = None
+
     # Additional losses
-    implementation_loss_db: float = 0.0
-    polarization_loss_db: float = 0.0
-    pointing_loss_db: float = 0.0
-    atmospheric_loss_db: float = 0.0
-    required_ebno_db: float = 0.0
-    
-    # Reference values (kept for backward compatibility)
-    ref_values: Dict[str, float] = field(default_factory=dict)
-    
+    implementation_loss: Optional[Quantity] = None
+    polarization_loss: Optional[Quantity] = None
+    required_ebno: Optional[Quantity] = None
+
+    # Reference values
+    ref_values: Dict[str, Any] = field(default_factory=dict)
+
     # Structured reference values
     ref: RefValues = field(default_factory=RefValues)
 
@@ -148,42 +133,90 @@ class RadioTestCase:
 def load_test_case(case_name: str) -> RadioTestCase:
     """
     Load a test case from its YAML file.
-    
+
     Args:
         case_name: Name of the test case (without .yaml extension)
-        
+
     Returns:
         RadioTestCase object with the test case parameters and reference values
-        
+
     Raises:
         FileNotFoundError: If the test case file doesn't exist
     """
     base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, f"{case_name}.yaml")
-    
+
     with open(file_path, 'r') as f:
         case_data = yaml.safe_load(f)
-    
+
+    # Convert string values with units to Pint quantities
+    processed_data = {}
+    for key, value in case_data.items():
+        # Skip ref_values, will process separately
+        if key == 'ref_values':
+            continue
+
+        # Store name and description as is
+        if key == 'name' or key == 'description':
+            processed_data[key] = value
+            continue
+
+        # Convert strings to quantities or handle structured format
+        if isinstance(value, str):
+            try:
+                qty = Q_(value)
+                processed_data[key] = qty
+            except (ValueError, TypeError) as e:
+                processed_data[key] = value
+        elif isinstance(value, dict) and 'value' in value and 'unit' in value:
+            # Handle the new structured format
+            try:
+                unit_str = value['unit']
+                qty_value = value['value']
+                qty = Q_(qty_value, unit_str)
+                processed_data[key] = qty
+            except (ValueError, TypeError) as e:
+                processed_data[key] = value
+        else:
+            processed_data[key] = value
+
     # Extract ref_values to create a RefValues object
     ref_values_dict = case_data.get('ref_values', {})
-    
-    # Create a RefValues object
+
+    # Create a RefValues object and populate with Pint quantities
     ref_values = RefValues()
     for key, value in ref_values_dict.items():
         if hasattr(ref_values, key):
-            setattr(ref_values, key, value)
-    
-    # Add the RefValues object to the case data
-    case_data['ref'] = ref_values
-    
+            if isinstance(value, str):
+                try:
+                    qty = Q_(value)
+                    setattr(ref_values, key, qty)
+                except (ValueError, TypeError) as e:
+                    setattr(ref_values, key, value)
+            elif isinstance(value, dict) and 'value' in value and 'unit' in value:
+                # Handle the new structured format
+                try:
+                    unit_str = value['unit']
+                    qty_value = value['value']
+                    qty = Q_(qty_value, unit_str)
+                    setattr(ref_values, key, qty)
+                except (ValueError, TypeError) as e:
+                    setattr(ref_values, key, value)
+            else:
+                setattr(ref_values, key, value)
+
+    # Add the RefValues object to the processed data
+    processed_data['ref'] = ref_values
+    processed_data['ref_values'] = ref_values_dict  # for backward compatibility
+
     # Create and return the RadioTestCase
-    return RadioTestCase(**case_data)
+    return RadioTestCase(**processed_data)
 
 
 def list_test_cases() -> List[str]:
     """
     List all available test cases.
-    
+
     Returns:
         List of test case names (without .yaml extension)
     """

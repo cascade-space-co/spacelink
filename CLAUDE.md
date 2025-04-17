@@ -11,8 +11,8 @@ this code
 - All gains and losses are reported in units of decibels. decibels, dB, and db are equivalent
 - All computations are to be done in fundamental units such as meters, Hz, dBW, etc.
 - Always do conversions with conversion functions, never convert engineering units in place eg meters = 1000 x kilometers
-- A loss in dB is always expressed as a positive value
-- Negative gain is the same as positive loss
+- There is no difference between gain and loss in terms of representation
+- Total gain is computed by adding all the gains and losses (do not subtract losses)
 - Never use negative losses, although negative gain is fine and expected in many cases
 
 ## Commands
@@ -40,6 +40,10 @@ this code
 - Use pint for units except those in dB. variables should always be in fundamental units
 - Numerical values should be in human readable engineering units.
 - dB (decibels) shall be floats
+
+## How to work with dB + Pint
+In some special cases we need to work with dB values in Pint
+- path_loss is a unitless ratio, so you can convert using: `path_loss.to('dB').magnitude`
 
 ## Testing
 - Use pytest.approx for float comparisons, always wrap the expected value

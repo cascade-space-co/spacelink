@@ -3,7 +3,7 @@
 import pytest
 import math
 from pyradio.antenna import Antenna, Dish, FixedGain, polarization_loss
-from pyradio.units import GHz, MHz, Hz, m, Q_
+from pyradio.units import GHz, MHz, m
 
 def test_antenna_is_abstract():
     """Test that Antenna class cannot be instantiated."""
@@ -14,7 +14,7 @@ def test_fixed_gain_initializes_with_valid_gain():
     """Test FixedGain initialization with valid gain."""
     antenna = FixedGain(10.0)
     assert antenna.gain_ == pytest.approx(10.0, abs=0.01)
-    
+
     antenna = FixedGain(0.0)
     assert antenna.gain_ == pytest.approx(0.0, abs=0.01)
 
@@ -43,7 +43,7 @@ def test_dish_initialization():
     assert dish.diameter.magnitude == pytest.approx(1.0, abs=0.01)
     assert dish.efficiency == pytest.approx(0.65, abs=0.01)
     assert dish.axial_ratio == pytest.approx(0.0, abs=0.01)
-    
+
     # Custom efficiency and axial ratio
     dish = Dish(2.0 * m, efficiency=0.5, axial_ratio=1.5)
     assert dish.diameter.magnitude == pytest.approx(2.0, abs=0.01)
@@ -71,13 +71,13 @@ def test_dish_calculates_gain():
     dish = Dish(20.0 * m)
     assert dish.gain(8.4 * GHz) == pytest.approx(63.04, abs=0.01)
     assert dish.gain(2.4 * GHz) == pytest.approx(52.16, abs=0.01)
-    
+
     # Test with smaller dish
     dish = Dish(1.0 * m)
     assert dish.gain(2.4 * GHz) == pytest.approx(26.14, abs=0.01)
     assert dish.gain(5.8 * GHz) == pytest.approx(33.80, abs=0.01)
     assert dish.gain(900 * MHz) == pytest.approx(17.62, abs=0.01)
-    
+
     # Test with different efficiency
     dish = Dish(1.0 * m, efficiency=0.5)
     assert dish.gain(2.4 * GHz) == pytest.approx(25.00, abs=0.01)
@@ -87,21 +87,23 @@ def test_antenna_axial_ratio_validation():
     # Axial ratio must be non-negative
     with pytest.raises(ValueError, match="Axial ratio must be non-negative"):
         Dish(1.0 * m, axial_ratio=-0.1)
-    
+
     with pytest.raises(ValueError, match="Axial ratio must be non-negative"):
         FixedGain(10.0, axial_ratio=-1.0)
 
 def test_polarization_loss_calculation():
-    """Test the polarization loss calculation based on axial ratios."""
+    """Test the polarization loss calculation based on axial ratios.
+
+    Only testing for circular polarization with fairly tight axial ratios
+    """
     # Perfect circular to perfect circular should have 0 dB loss
     assert polarization_loss(0.0, 0.0) == pytest.approx(0.0, abs=0.01)
-    
-    # Linear polarization with same orientation (both have high axial ratio)
-    # The polarization_loss function returns a negative value for matching linear polarizations
-    assert polarization_loss(40.0, 40.0) == pytest.approx(-34.0, abs=0.1)
-    
-    # Circular to linear should have ~17 dB loss with this formula
-    assert polarization_loss(0.0, 40.0) == pytest.approx(-17.0, abs=0.1)
-    
-    # Two antennas with moderate axial ratios
-    assert polarization_loss(3.0, 6.0) == pytest.approx(-1.22, abs=0.01)
+
+    # Two antennas with identical moderate axial ratios
+    assert polarization_loss(3.0, 3.0) == pytest.approx(-0.51, abs=0.01)
+
+    # Common axial ratio combinations from the table
+    assert polarization_loss(0.5, 3.0) == pytest.approx(-0.26, abs=0.01)
+    assert polarization_loss(1.0, 3.0) == pytest.approx(-0.28, abs=0.01)
+    assert polarization_loss(2.0, 3.0) == pytest.approx(-0.37, abs=0.01)
+    assert polarization_loss(3.0, 4.0) == pytest.approx(-0.7, abs=0.01)

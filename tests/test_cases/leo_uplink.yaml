@@ -4,47 +4,74 @@ description: >
   Typical configuration for command and control of a small satellite.
 
 # Frequency and distance parameters
-frequency_ghz: 2.075  # Uplink frequency
-distance_km: 2000.0  # Typical LEO satellite distance
+frequency: "2.075 GHz" # Uplink frequency
+distance: "2000.0 km" # Typical LEO satellite distance
 
 # Uplink parameters
-bandwidth_khz: 2.0  # 2 kbps data rate
+bandwidth: "2.0 kHz" # 2 kbps data rate
 
 # Transmitter parameters (ground station)
-tx_power_dbw: 20.0  # 100W ground transmitter
-tx_dish_diameter_m: 3.7
-tx_dish_efficiency: 0.65
-tx_antenna_gain_db: 36.24  # Pre-computed for 3.7m dish at 2.075 GHz
+tx_power: "100 W"
+tx_dish_diameter: "3.7 m"
+tx_dish_efficiency: "0.65 dimensionless"
+tx_antenna_gain:
+  value: 36.24
+  unit: dB # Pre-computed for 3.7m dish at 2.075 GHz
+tx_antenna_axial_ratio:
+  value: 3.0
+  unit: dB
 
 # Receiver parameters (satellite)
-rx_antenna_gain_db: -3.0  # Low-gain satellite receive antenna
-system_noise_temp_k: 290.0  # Standard temperature
-antenna_noise_temp_k: 200.0  # Antenna picking up Earth
+rx_antenna_gain:
+  value: -3.0
+  unit: dB # Low-gain satellite receive antenna
+system_noise_temp: "290.0 K" # Standard temperature
+antenna_noise_temp: "200.0 K" # Antenna picking up Earth
+rx_antenna_axial_ratio:
+  value: 3.0
+  unit: dB
 
 # Additional losses
-implementation_loss_db: 2.0
-polarization_loss_db: 0.5
-pointing_loss_db: 1.0
-atmospheric_loss_db: 0.3
-required_ebno_db: 9.6
+implementation_loss:
+  value: -2.0
+  unit: dB
+polarization_loss:
+  value: -0.51
+  unit: dB
+required_ebno:
+  value: 9.6
+  unit: dB
 
 # Reference values for calculations
 ref_values:
   # Physical parameters
-  wavelength_m: 0.14448  # Speed of light / uplink frequency
-  
+  wavelength: "0.14448 m" # Speed of light / uplink frequency
+
   # Antenna parameters
-  tx_dish_3db_beamwidth_deg: 2.7328  # Ground station dish beamwidth at uplink frequency
-  
+  tx_dish_3db_beamwidth: "2.7328 deg" # Ground station dish beamwidth at uplink frequency
+
   # Path loss
-  free_space_path_loss_db: 164.81  # Without additional losses
-  path_loss_db: 166.11  # Free space + atmospheric + pointing losses
-  
+  free_space_path_loss:
+    value: 164.81
+    unit: dB # Without additional losses
+
   # Link budget calculated by actual Link implementation
-  eirp_dbw: 56.24  # tx_power_dbw + tx_gain_db (36.24 + 20)
-  received_power_dbw: -113.37  # EIRP + rx_antenna_gain_db - path_loss_db - polarization_loss_db
-  system_noise_temperature_k: 490.0  # system_noise_temp_k + antenna_noise_temp_k
-  noise_power_dbw: -168.69  # thermal noise in 2 kHz bandwidth
-  carrier_to_noise_ratio_db: 55.32  # received_power_dbw - noise_power_dbw
-  ebno_db: 55.32  # Same as C/N since bandwidth = data rate
-  link_margin_db: 45.22  # ebno_db - required_ebno_db - implementation_loss_db
+  eirp:
+    value: 56.24
+    unit: dBW # tx_power + tx_gain (36.24 + 20)
+  received_power:
+    value: -113.37
+    unit: dBW # EIRP + rx_antenna_gain - path_loss - polarization_loss
+  system_noise_temperature: "490.0 K" # system_noise_temp + antenna_noise_temp
+  noise_power:
+    value: -168.69
+    unit: dBW # thermal noise in 2 kHz bandwidth
+  carrier_to_noise_ratio:
+    value: 55.32
+    unit: dB # received_power - noise_power
+  ebno:
+    value: 55.32
+    unit: dB # Same as C/N since bandwidth = data rate
+  link_margin:
+    value: 45.22
+    unit: dB # ebno - required_ebno - implementation_loss
