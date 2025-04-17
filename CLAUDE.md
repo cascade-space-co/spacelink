@@ -21,9 +21,10 @@ this code
 - Run all tests: `poetry run pytest -v`
 - Run single test: `poetry run pytest test_conversions.py::test_db2linear_common_values -v`
 - Test with coverage: `poetry run pytest --cov-report term-missing`
-- Lint code: `flake8 .`
-- Format code: `black .`
+- Lint code: `poetry run flake8 .`
+- Format code: `poetry run black .`
 - Add dependencies by adding them to pyproject.toml and using `poetry lock & poetry install` to install them
+
 ## Code Style
 - Follow PEP 8 guidelines.
 - Use snake_case for variable and function names.
@@ -36,7 +37,8 @@ this code
 - Meet 90% code coverage minimum requirement
 - Include doctests in function docstrings where possible
 - do not append units to variables
-- Use fundamental units wherever possible and explicit conversion functions for readability
+- Use pint for units. variables should always be in fundamental units
+- Numerical values should be in human readable engineering units. Always use pint for units.
 
 ## Testing
 - Use pytest.approx for float comparisons, always wrap the expected value

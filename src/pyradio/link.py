@@ -7,10 +7,10 @@ characteristics, path loss, and noise calculations.
 """
 
 from typing import Callable
-from .path import free_space_path_loss_db
-from .conversions import db
+from .path import free_space_path_loss
+from .units import ureg, Quantity
 from .antenna import Antenna, polarization_loss
-from .noise import thermal_noise_power
+import .noise as noise
 
 
 class Link:
@@ -39,32 +39,31 @@ class Link:
 
     def __init__(
         self,
-        tx_power_dbw: float,
+        frequency: Quantity,
         tx_antenna: Antenna,
         rx_antenna: Antenna,
-        rx_system_noise_temp_k: float,
-        rx_antenna_noise_temp_k: float,
-        distance_fn: Callable[[], float],
-        frequency_hz: float,
-        bandwidth_hz: float,
-        required_ebno_db: float,
-        implementation_loss: float = 0.0,
-        pointing_loss: float = 0.0,
-        atmospheric_loss: float = 0.0,
+        tx_power: Quantity,
+        rx_system_noise_temp: Quantity,
+        rx_antenna_noise_temp: Quantity,
+        distance_fn: Callable[[], Quantity],
+        bandwidth: Quantity,
+        required_ebno: Quantity,
+        implementation_loss: Q_[float, 'dB'] = Q_(0.0, 'dB'),
+        atmospheric_loss: Callable[[], Quantity],
     ):
         """
         Initialize a Link object with all necessary parameters.
 
         Args:
-            tx_power_dbw: Transmitter power in dBW
+            tx_power: Transmitter power in dBW
             tx_antenna: Transmitter antenna
             rx_antenna: Receiver antenna
-            rx_system_noise_temp_k: Receiver system noise temperature in Kelvin
-            rx_antenna_noise_temp_k: Receiver antenna noise temperature in Kelvin
+            rx_system_noise_temp: Receiver system noise temperature in Kelvin
+            rx_antenna_noise_temp: Receiver antenna noise temperature in Kelvin
             distance_fn: Callable that returns the distance in meters
-            frequency_hz: Carrier frequency in Hz
-            bandwidth_hz: Signal bandwidth in Hz
-            required_ebno_db: Required Eb/N0 in dB for the desired BER
+            frequency: Carrier frequency in Hz
+            bandwidth: Signal bandwidth in Hz
+            required_ebno: Required Eb/N0 in dB for the desired BER
             implementation_loss: Implementation loss in dB (default: 0)
             pointing_loss: Antenna pointing loss in dB (default: 0)
             atmospheric_loss: Atmospheric loss in dB (default: 0)
@@ -73,58 +72,58 @@ class Link:
             ValueError: If any parameter is invalid
         """
         # Validate inputs
-        if tx_power_dbw <= 0:
+        if tx_power.magnitude <= 0:
             raise ValueError("Transmitter power must be positive")
         if not isinstance(tx_antenna, Antenna):
             raise ValueError("tx_antenna must be an Antenna instance")
         if not isinstance(rx_antenna, Antenna):
             raise ValueError("rx_antenna must be an Antenna instance")
-        if rx_system_noise_temp_k <= 0:
+        if rx_system_noise_temp.magnitude <= 0:
             raise ValueError("System noise temperature must be positive")
-        if rx_antenna_noise_temp_k < 0:
+        if rx_antenna_noise_temp.magnitude < 0:
             raise ValueError("Antenna noise temperature cannot be negative")
         if not callable(distance_fn):
             raise ValueError("distance_fn must be a callable")
-        if frequency_hz <= 0:
+        if frequency.magnitude <= 0:
             raise ValueError("Frequency must be positive")
-        if bandwidth_hz <= 0:
+        if bandwidth.magnitude <= 0:
             raise ValueError("Bandwidth must be positive")
-        if implementation_loss < 0:
+        if implementation_loss.magnitude < 0:
             raise ValueError("Implementation loss cannot be negative")
-        if pointing_loss < 0:
+        if pointing_loss.magnitude < 0:
             raise ValueError("Pointing loss cannot be negative")
-        if atmospheric_loss < 0:
+        if atmospheric_loss.magnitude < 0:
             raise ValueError("Atmospheric loss cannot be negative")
-        if required_ebno_db < 0:
+        if required_ebno.magnitude < 0:
             raise ValueError("Required Eb/N0 cannot be negative")
 
         # Store parameters
-        self.tx_power = tx_power_dbw
+        self.tx_power = tx_power
         self.tx_antenna = tx_antenna
         self.rx_antenna = rx_antenna
-        self.rx_system_noise_temp = rx_system_noise_temp_k
-        self.rx_antenna_noise_temp = rx_antenna_noise_temp_k
+        self.rx_system_noise_temp = rx_system_noise_temp
+        self.rx_antenna_noise_temp = rx_antenna_noise_temp
         self.distance_fn = distance_fn
-        self.frequency = frequency_hz
-        self.bandwidth = bandwidth_hz
+        self.frequency = frequency
+        self.bandwidth = bandwidth
         self.implementation_loss = implementation_loss
         self.pointing_loss = pointing_loss
         self.atmospheric_loss = atmospheric_loss
-        self.required_ebno = required_ebno_db
+        self.required_ebno = required_ebno
 
     @property
-    def distance(self) -> float:
+    def distance(self) -> Q_[float, 'm']:
         """
         Get the current distance in meters.
 
         Returns:
-            float: Current distance in meters
+            Q_[float, 'm']: Current distance in meters
 
         Raises:
             ValueError: If the distance is not positive
         """
         distance = self.distance_fn()
-        if distance <= 0:
+        if distance.magnitude <= 0:
             raise ValueError("Distance must be positive")
         return distance
 
@@ -141,7 +140,7 @@ class Link:
         Returns:
             float: EIRP in dBW
         """
-        return self.tx_power + self.tx_antenna.gain(self.frequency)
+        return self.tx_power + Q_(self.tx_antenna.gain(self.frequency), 'dB')
 
     @property
     def path_loss(self) -> float:
@@ -151,78 +150,56 @@ class Link:
         Path Loss = Free Space Path Loss + Atmospheric Loss + Pointing Loss
 
         Returns:
-            float: Total path loss in dB
+            Q_[float, 'dB']: Total path loss in dB
         """
         return (
-            free_space_path_loss_db(self.distance, self.frequency)
-            + self.atmospheric_loss
-            + self.pointing_loss
+            free_space_path_loss(self.distance.magnitude, self.frequency.magnitude)
+            + self.atmospheric_loss()
         )
 
     @property
     def polarization_loss(self) -> float:
         """
         Calculate the polarization loss in dB based on the axial ratios of the antennas.
-        
+
         The polarization loss is calculated using the standard formula for polarization
         mismatch between two antennas with different axial ratios.
-        
+
         Returns:
             float: Polarization loss in dB
         """
         return polarization_loss(self.tx_antenna.axial_ratio, self.rx_antenna.axial_ratio)
-        
+
     @property
-    def received_power(self) -> float:
+    def received_power(self) -> Q_[float, 'dBW']:
         """
         Calculate the received power in dBW.
 
         Received Power = EIRP + Receiver Antenna Gain - Path Loss - Polarization Loss
 
         Returns:
-            float: Received power in dBW
+            Q_[float, 'dBW']: Received power in dBW
         """
         return (
             self.eirp
-            + self.rx_antenna.gain(self.frequency)
+            + Q_(self.rx_antenna.gain(self.frequency), 'dB')
             - self.path_loss
             - self.polarization_loss
         )
 
     @property
-    def system_noise_temperature(self) -> float:
-        """
-        Calculate the total system noise temperature in Kelvin.
-
-        System Noise Temperature = Antenna Noise Temperature + System Noise Temperature
-
-        Returns:
-            float: Total system noise temperature in Kelvin
-        """
-        return self.rx_antenna_noise_temp + self.rx_system_noise_temp
-
-    @property
-    def noise_power(self) -> float:
-        """
-
-        Returns:
-            float: Noise power in dBW
-        """
-        return db(thermal_noise_power(self.bandwidth, self.system_noise_temperature))
-
-    @property
-    def carrier_to_noise_ratio(self) -> float:
+    def carrier_to_noise_ratio(self) -> Q_[float, 'dB']:
         """
         Calculate the carrier-to-noise ratio in dB.
 
         C/N = Received Power - Noise Power
 
         Returns:
-            float: Carrier-to-noise ratio in dB
+            Q_[float, 'dB']: Carrier-to-noise ratio in dB
         """
         return self.received_power - self.noise_power
 
-    def ebno(self) -> float:
+    def ebno(self) -> Q_[float, 'dB']:
         """
         Calculate the energy per bit to noise power spectral density ratio (Eb/N0) in dB.
 
@@ -233,15 +210,14 @@ class Link:
         - R is the data rate in bits per second
 
         Returns:
-            float: Eb/N0 in dB
+            Q_[float, 'dB']: Eb/N0 in dB
 
         Raises:
             ValueError: If data rate is not positive
         """
-
         return self.carrier_to_noise_ratio
 
-    def link_margin(self) -> float:
+    def margin(self) -> float:
         """
         Calculate the link margin in dB.
 
@@ -251,7 +227,7 @@ class Link:
         as it represents losses in the communication system that degrade performance.
 
         Returns:
-            float: Link margin in dB
+           float: Link margin in dB
         """
         return self.ebno() - self.required_ebno - self.implementation_loss
 
@@ -264,10 +240,10 @@ class Link:
         """
         return (
             f"Link Budget:\n"
-            f"  EIRP: {self.eirp:.1f} dBW\n"
-            f"  Path Loss: {self.path_loss:.1f} dB\n"
-            f"  Received Power: {self.received_power:.1f} dBW\n"
-            f"  System Noise Temperature: {self.system_noise_temperature:.1f} K\n"
-            f"  Noise Power: {self.noise_power:.1f} dBW\n"
-            f"  C/N: {self.carrier_to_noise_ratio:.1f} dB"
+            f"  EIRP: {self.eirp.magnitude:.1f} dBW\n"
+            f"  Path Loss: {self.path_loss.magnitude:.1f} dB\n"
+            f"  Received Power: {self.received_power.magnitude:.1f} dBW\n"
+            f"  System Noise Temperature: {self.system_noise_temperature.magnitude:.1f} K\n"
+            f"  Noise Power: {self.noise_power.magnitude:.1f} dBW\n"
+            f"  C/N: {self.carrier_to_noise_ratio.magnitude:.1f} dB"
         )
