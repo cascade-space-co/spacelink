@@ -37,8 +37,9 @@ this code
 - Meet 90% code coverage minimum requirement
 - Include doctests in function docstrings where possible
 - do not append units to variables
-- Use pint for units. variables should always be in fundamental units
-- Numerical values should be in human readable engineering units. Always use pint for units.
+- Use pint for units except those in dB. variables should always be in fundamental units
+- Numerical values should be in human readable engineering units.
+- dB (decibels) shall be floats
 
 ## Testing
 - Use pytest.approx for float comparisons, always wrap the expected value

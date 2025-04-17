@@ -60,4 +60,4 @@ def frequency(wavelength: Quantity) -> Quantity:
     return SPEED_OF_LIGHT / wavelength.to(m)
 
 def db(value: float) -> float:
-    return 10.0*np.log10(value)
+    return float(10.0*np.log10(value))
