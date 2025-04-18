@@ -17,10 +17,19 @@ def test_free_space_path_loss():
     assert path_loss.to('dB').magnitude == pytest.approx(-205.16, abs=0.01)
 
     # Test with LEO satellite parameters
-    distance = Q_(2000, km)  # 1,000 km
-    frequency = Q_(2.25, GHz)  # 2.4 GHz
+    distance = Q_(2000, km)  # 2,000 km
+    frequency = Q_(2.25, GHz)  # 2.25 GHz
     path_loss = free_space_path_loss(distance, frequency)
     assert path_loss.to('dB').magnitude == pytest.approx(-165.51, abs=0.01)
+    
+    # Test with very short distance and low frequency (to test the range condition)
+    distance = Q_(10, m) 
+    frequency = Q_(100, MHz)
+    path_loss = free_space_path_loss(distance, frequency)
+    # Expected value based on the implementation
+    # The formula is spreading_loss(distance) * aperture_loss(frequency)
+    # For 10m and 100MHz, this is approximately -32.45 dB
+    assert path_loss.to('dB').magnitude == pytest.approx(-32.45, abs=0.01)
 
 
 def test_spreading_loss():

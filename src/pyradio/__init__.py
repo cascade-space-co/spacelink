@@ -5,4 +5,5 @@ This package provides utilities for radio frequency calculations, including:
 - Antenna gain and beamwidth calculations
 - RF conversions between dB and linear scales
 - Noise calculations and conversions
+- Communication mode definitions for coding and modulation
 """

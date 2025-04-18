@@ -41,7 +41,7 @@ class Antenna(ABC):
         Calculate the antenna gain at a given frequency.
 
         Args:
-            frequency: Frequency in Hz
+            frequency: Frequency
 
         Returns:
             float: Antenna gain in dB

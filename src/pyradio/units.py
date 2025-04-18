@@ -5,7 +5,8 @@ Units and constants for radio communications calculations.
 from pint import UnitRegistry, Quantity
 import numpy as np
 # Create a unit registry
-ureg = UnitRegistry()
+# Autoconvert offset to base units is important for logarithmic operations
+ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
 
 # Define a Quantity type alias for better type hints
 Q_ = ureg.Quantity
@@ -19,6 +20,11 @@ GHz = ureg.GHz
 # Define power units
 W = ureg.W
 mW = ureg.mW
+
+# Define logarithmic units
+dB = ureg.dB
+dBW = ureg.dBW
+dBm = ureg.dBm
 
 # Define distance units
 m = ureg.m
@@ -60,4 +66,13 @@ def frequency(wavelength: Quantity) -> Quantity:
     return SPEED_OF_LIGHT / wavelength.to(m)
 
 def db(value: float) -> float:
+    """
+    Convert a linear value to decibels.
+
+    Args:
+        value: Linear value to convert
+
+    Returns:
+        Value in decibels
+    """
     return float(10.0*np.log10(value))

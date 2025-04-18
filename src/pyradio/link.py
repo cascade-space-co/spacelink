@@ -10,6 +10,7 @@ import math
 from typing import Callable
 from pint import Quantity
 from .antenna import Antenna, polarization_loss
+from .mode import Mode
 from .path import free_space_path_loss
 from .units import Q_, Hz, K, db, m, km, W
 from . import noise
@@ -24,16 +25,15 @@ class Link:
     and noise calculations.
 
     Attributes:
+        frequency: Carrier frequency in Hz
         tx_power: Transmitter power in W
         tx_antenna: Transmitter antenna
         rx_antenna: Receiver antenna
         rx_system_noise_temp: Receiver system noise temperature in Kelvin
         rx_antenna_noise_temp: Receiver antenna noise temperature in Kelvin
         distance_fn: Callable that returns the distance in meters
-        frequency: Carrier frequency in Hz
-        bandwidth: Signal bandwidth in Hz
-        required_ebno: Required Eb/N0 in dB for the desired BER
-        implementation_loss: Implementation loss in dB (default: 0)
+        symbol_rate: Symbol rate in Hz
+        mode: Mode object with modulation and channel coding settings
     """
 
     def __init__(
@@ -45,9 +45,7 @@ class Link:
         rx_system_noise_temp: Quantity,
         rx_antenna_noise_temp: Quantity,
         distance_fn: Callable[[], Quantity],
-        bandwidth: Quantity,
-        required_ebno: float,
-        implementation_loss: float = 0.0,
+        mode: Mode
     ):
         """
         Initialize a Link object with all necessary parameters.
@@ -60,9 +58,7 @@ class Link:
             rx_system_noise_temp: Receiver system noise temperature in Kelvin
             rx_antenna_noise_temp: Receiver antenna noise temperature in Kelvin
             distance_fn: Callable that returns the distance in meters
-            bandwidth: Signal bandwidth in Hz
-            required_ebno: Required Eb/N0 in dB for the desired BER
-            implementation_loss: Implementation loss in dB (default: 0 dB)
+            mode: Mode object with modulation and channel coding settings
 
         Raises:
             ValueError: If any parameter is invalid
@@ -82,8 +78,6 @@ class Link:
             raise ValueError("distance_fn must be a callable")
         if frequency <= 0.0 * Hz:
             raise ValueError("Frequency must be positive")
-        if bandwidth <= 0.0 * Hz:
-            raise ValueError("Bandwidth must be positive")
 
         # Store parameters
         self.tx_power = tx_power
@@ -93,9 +87,7 @@ class Link:
         self.rx_antenna_noise_temp = rx_antenna_noise_temp
         self.distance_fn = distance_fn
         self.frequency = frequency
-        self.bandwidth = bandwidth
-        self.implementation_loss = implementation_loss
-        self.required_ebno = required_ebno
+        self.mode = mode
 
     @property
     def distance(self) -> Quantity:
@@ -140,7 +132,7 @@ class Link:
         Returns:
             float: Noise power in dBW
         """
-        power_quantity = noise.power(self.bandwidth, self.system_noise_temperature)
+        power_quantity = noise.power(self.mode.bandwidth, self.system_noise_temperature)
         return power_quantity.to('dBW').magnitude
 
     @property
@@ -229,7 +221,7 @@ class Link:
         Returns:
             float: Eb/N0 in dB
         """
-        return self.carrier_to_noise_ratio
+        return self.mode.ebno(self.carrier_to_noise_ratio)
 
     @property
     def margin(self) -> float:
@@ -244,7 +236,7 @@ class Link:
         Returns:
             float: Link margin in dB
         """
-        return self.ebno - self.required_ebno - self.implementation_loss
+        return self.mode.margin(self.carrier_to_noise_ratio)
 
     def __str__(self) -> str:
         """
