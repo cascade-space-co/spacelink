@@ -1,0 +1,15 @@
+/* Custom styles for PyRadio documentation */
+
+/* Add any custom styles here */
+.highlight {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 1em;
+}
+
+/* Style for code blocks */
+pre {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 1em;
+} 

@@ -1,0 +1,80 @@
+name: lunar_downlink
+description: >
+  Lunar downlink at 8.45 GHz (X-band) from a lunar lander to a 10m Earth station antenna.
+  Typical configuration for robotic lunar missions with higher data rates.
+
+# Frequency and distance parameters
+frequency: "8.45 GHz" # X-band downlink
+distance: "384400.0 km" # Average Earth-Moon distance
+
+# Downlink parameters
+bandwidth: "10.0 MHz" # Higher data rate from lunar surface
+
+# Transmitter parameters (lunar lander)
+tx_power: "10.0 W"
+tx_dish_diameter: "0.5 m" # Small high-gain antenna on lander
+tx_dish_efficiency: "0.55 dimensionless"
+tx_antenna_gain:
+  value: 31.69
+  unit: dB # Pre-computed for 0.5m dish at 8.45 GHz
+tx_antenna_axial_ratio:
+  value: 3.0
+  unit: dB
+
+# Receiver parameters (10m ground station)
+rx_dish_diameter: "10.0 m"
+rx_dish_efficiency: "0.65 dimensionless"
+rx_antenna_gain:
+  value: 57.86
+  unit: dB # Pre-computed for 10m dish at 8.45 GHz
+system_noise_temp: "45.0 K" # Cooled receivers
+antenna_noise_temp: "25.0 K" # Cold sky/moon noise
+rx_antenna_axial_ratio:
+  value: 3.0
+  unit: dB
+
+# Additional losses
+implementation_loss:
+  value: -0.5
+  unit: dB # Implementation loss of 0.5 dB
+polarization_loss:
+  value: -0.51
+  unit: dB
+required_ebno:
+  value: 9.6
+  unit: dB
+
+# Reference values for calculations
+ref_values:
+  # Physical parameters
+  wavelength: "0.03549 m" # Speed of light / frequency
+
+  # Antenna parameters
+  tx_dish_3db_beamwidth: "4.964 deg" # Lunar lander antenna beamwidth
+  rx_dish_3db_beamwidth: "0.248 deg" # 10m dish antenna beamwidth
+
+  # Path loss
+  free_space_path_loss:
+    value: 222.68
+    unit: dB # Without additional losses
+
+  # Link budget calculated by actual Link implementation
+  eirp:
+    value: 41.69
+    unit: dBW # tx_power + tx_antenna_gain (10.0 + 31.69)
+  received_power:
+    value: -125.82
+    unit: dBW # EIRP + rx_antenna_gain - path_loss - polarization_loss
+  system_noise_temperature: "70.0 K" # system_noise_temp + antenna_noise_temp
+  noise_power:
+    value: -140.15
+    unit: dBW # thermal noise in 10 MHz bandwidth
+  carrier_to_noise_ratio:
+    value: 14.33
+    unit: dB # received_power - noise_power
+  ebno:
+    value: 14.33
+    unit: dB # Same as C/N since bandwidth = data rate
+  link_margin:
+    value: 4.23
+    unit: dB # ebno - required_ebno - implementation_loss
