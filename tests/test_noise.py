@@ -2,7 +2,8 @@
 
 import pytest
 import pyradio.noise as noise
-from pyradio.units import MHz, K, dBW
+from pyradio.units import Hz, MHz, K, dBW
+from pint.testing import assert_allclose
 
 
 def test_thermal_noise_power():
@@ -24,20 +25,19 @@ def test_thermal_noise_power():
 
 
 def test_noise_dBW_conversion():
-    """Test noise power in dBW."""
+    """Test noise power in dBW.
+
+    Temperature	 Bandwidth	    Noise Power	dBW	dBm	dBm/Hz
+    50	         10	6.90E-21	-201.61	-171.61	-181.61
+    100	         10	1.38E-20	-198.60	-168.60	-178.60
+    150	         10	2.07E-20	-196.84	-166.84	-176.84
+    200	         10	2.76E-20	-195.59	-165.59	-175.59
+    290	         10	4.00E-20	-193.98	-163.98	-173.98
+    """
     # Calculate noise power for 1 MHz bandwidth at 290K
-    noise_w = noise.power(1.0 * MHz)
-
-    # Convert to dBW
-    noise_dbw = noise_w.to(dBW)
-
-    # Expected value is approximately -114 dBW for 1 MHz at 290K
-    expected_dbw_mag = 1.380649e-23 * 290 * 1e6
-    import math
-    expected_dbw_log = 10 * math.log10(expected_dbw_mag)
-
-    # Verify the calculation directly
-    assert noise_w.magnitude == pytest.approx(expected_dbw_mag)
-
+    noise_w = noise.power(10.0 * Hz)
     # Check the dBW conversion
-    assert noise_dbw.magnitude == pytest.approx(expected_dbw_log, abs=0.1)
+    assert_allclose(noise_w.to(dBW), -193.98 * dBW, atol=0.01)
+
+
+# TODO: test cascaded noise values

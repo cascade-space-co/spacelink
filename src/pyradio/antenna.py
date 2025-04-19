@@ -103,7 +103,9 @@ class Dish(Antenna):
         axial_ratio: Axial ratio in dB (0 dB for perfect circular, >40 dB for linear)
     """
 
-    def __init__(self, diameter: Quantity, efficiency: float = 0.65, axial_ratio: float = 0):
+    def __init__(
+        self, diameter: Quantity, efficiency: float = 0.65, axial_ratio: float = 0
+    ):
         """
         Initialize a Dish antenna.
 
@@ -147,10 +149,12 @@ class Dish(Antenna):
             ValueError: If frequency is not positive
         """
         # Perform calculation with quantities
-        gain_linear = self.efficiency * (math.pi * self.diameter / wavelength(frequency)) ** 2
+        gain_linear = (
+            self.efficiency * (math.pi * self.diameter / wavelength(frequency)) ** 2
+        )
 
         # Convert result to scalar and return
-        return gain_linear.to('dB').magnitude
+        return gain_linear.to("dB").magnitude
 
 
 def polarization_loss(tx_axial_ratio: float, rx_axial_ratio: float) -> float:
@@ -185,7 +189,9 @@ def polarization_loss(tx_axial_ratio: float, rx_axial_ratio: float) -> float:
 
     # Calculate polarization loss using the polarization efficiency formula
     # This is the standard formula for polarization mismatch between antennas
-    plf = (4 * tx_ar_linear * rx_ar_linear) / ((1 + tx_ar_linear**2) * (1 + rx_ar_linear**2))
+    plf = (4 * tx_ar_linear * rx_ar_linear) / (
+        (1 + tx_ar_linear**2) * (1 + rx_ar_linear**2)
+    )
 
     # Convert the mismatch factor to a positive loss in dB
     # db(plf) is negative or zero since plf <= 1; negate to make loss positive

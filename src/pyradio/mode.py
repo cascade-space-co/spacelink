@@ -73,7 +73,7 @@ class Mode:
             raise ValueError("Modulation must not be empty")
         if spectral_efficiency <= 0.0:
             raise ValueError("Spectral efficiency must be positive")
-        if (code_rate <= 0.0 or code_rate > 1.0):
+        if code_rate <= 0.0 or code_rate > 1.0:
             raise ValueError("Code rate must be between 0 and 1")
         if implementation_loss < 0.0:
             raise ValueError("Implementation loss must be non-negative")
@@ -116,7 +116,7 @@ class Mode:
             ValueError: If data rate is not positive
         """
         # Calculate required bandwidth in Hz
-        return self.symbol_rate.to('Hz') / self.spectral_efficiency
+        return self.symbol_rate.to("Hz") / self.spectral_efficiency
 
     def ebno(self, c_over_n: float) -> float:
         """Eb/N0 for given carrier to noise ratio"""
@@ -146,7 +146,9 @@ class Mode:
         Returns:
             String representation of the mode
         """
-        code_rate_str = f", Code Rate: {self.code_rate:.3f}" if self.code_rate is not None else ""
+        code_rate_str = (
+            f", Code Rate: {self.code_rate:.3f}" if self.code_rate is not None else ""
+        )
         return (
             f"{self.name}: {self.modulation} with {self.coding_scheme}\n"
             f"  Spectral Efficiency: {self.spectral_efficiency:.3f} bits/symbol{code_rate_str}\n"

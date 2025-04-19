@@ -1,60 +1,71 @@
 """Tests for the units module."""
 
 import pytest
+from pint.testing import assert_allclose
 from pyradio.units import (
-    Q_, Hz, kHz, MHz, GHz,
-    W, mW,
-    m, km,
+    Q_,
+    Hz,
+    kHz,
+    MHz,
+    GHz,
+    W,
+    mW,
+    m,
+    km,
     SPEED_OF_LIGHT,
-    wavelength, frequency, db
+    return_loss_to_vswr,
+    vswr_to_return_loss,
+    wavelength,
+    frequency,
+    db,
 )
 
 
 def test_unit_conversion():
     """Test basic unit conversions."""
     # Frequency conversions
-    assert (1 * GHz).to(MHz).magnitude == pytest.approx(1000)
-    assert (1 * MHz).to(kHz).magnitude == pytest.approx(1000)
-    assert (1 * kHz).to(Hz).magnitude == pytest.approx(1000)
+    assert_allclose((1 * GHz).to(MHz), 1000 * MHz)
+    assert_allclose((1 * MHz).to(kHz), 1000 * kHz)
+    assert_allclose((1 * kHz).to(Hz), 1000 * Hz)
 
     # Power conversions
-    assert (1 * W).to(mW).magnitude == pytest.approx(1000)
+    assert_allclose((1 * W).to(mW), 1000 * mW)
 
-    assert Q_(0.0, 'dBW').to('W').magnitude == pytest.approx(1.0)
-    assert Q_(30, 'dBm').to('W').magnitude == pytest.approx(1.0)
+    assert_allclose(Q_(0.0, "dBW").to("W"), 1 * W)
+    assert_allclose(Q_(30, "dBm").to("W"), 1 * W)
 
     # Distance conversions
-    assert (1 * km).to(m).magnitude == pytest.approx(1000)
+    assert_allclose((1 * km).to(m), 1000 * m)
 
 
 def test_speed_of_light():
     """Test the speed of light constant."""
-    assert SPEED_OF_LIGHT.magnitude == pytest.approx(299792458.0)
-    assert str(SPEED_OF_LIGHT.units) == 'meter / second'
+    assert_allclose(SPEED_OF_LIGHT, Q_(299792458.0, "meter/second"))
+    assert str(SPEED_OF_LIGHT.units) == "meter / second"
 
 
 def test_wavelength_calculation():
     """Test wavelength calculation from frequency."""
     # Test at different frequencies
-    assert wavelength(1 * GHz).to(m).magnitude == pytest.approx(0.299792458)
-    assert wavelength(300 * MHz).to(m).magnitude == pytest.approx(0.999308193)
-    assert wavelength(30 * kHz).to(m).magnitude == pytest.approx(9993.08193)
+    assert_allclose(wavelength(1 * GHz).to(m), 0.299792458 * m)
+    assert_allclose(wavelength(300 * MHz).to(m), 0.999308193 * m)
+    assert_allclose(wavelength(30 * kHz).to(m), 9993.08193 * m)
 
     # Test unit conversion in result
     wavelength_result = wavelength(2.4 * GHz)
-    assert wavelength_result.to(m).magnitude == pytest.approx(0.12491352416667)
+    assert_allclose(wavelength_result.to(m), 0.12491352416667 * m)
 
 
 def test_frequency_calculation():
     """Test frequency calculation from wavelength."""
     # Test at different wavelengths
-    assert frequency(1 * m).to(MHz).magnitude == pytest.approx(299.792458)
-    assert frequency(10 * m).to(MHz).magnitude == pytest.approx(29.9792458)
-    assert frequency(0.1 * m).to(GHz).magnitude == pytest.approx(2.99792458)
+    assert_allclose(frequency(1 * m).to(MHz), 299.792458 * MHz)
+    assert_allclose(frequency(10 * m).to(MHz), 29.9792458 * MHz)
+    assert_allclose(frequency(0.1 * m).to(GHz), 2.99792458 * GHz)
 
     # Test unit conversion in result
     freq_result = frequency(0.125 * m)
-    assert freq_result.to(GHz).magnitude == pytest.approx(2.39833966)
+    assert_allclose(freq_result.to(GHz), 2.39833966 * GHz)
 
 
 def test_db_conversion():
@@ -77,3 +88,21 @@ def test_invalid_inputs():
     # Frequency with non-length input
     with pytest.raises(Exception):
         frequency(1 * Hz)
+
+
+def test_vswr():
+    test_data = [
+        (1.1, 0.0476, 26.44),
+        (1.2, 0.0909, 20.83),
+        (1.3, 0.1304, 17.69),
+        (1.4, 0.1667, 15.56),
+        (1.5, 0.2000, 13.98),
+        (1.6, 0.2308, 12.74),
+        (1.7, 0.2593, 11.73),
+        (1.8, 0.2857, 10.88),
+        (1.9, 0.3103, 10.16),
+        (2.0, 0.3333, 9.54),
+    ]
+    for vswr, gamma, return_loss in test_data:
+        assert return_loss_to_vswr(return_loss) == pytest.approx(vswr, abs=0.01)
+        assert vswr_to_return_loss(vswr) == pytest.approx(return_loss, abs=0.01)

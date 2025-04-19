@@ -174,7 +174,9 @@ def test_bandwidth_calculation():
     bandwidth = mode.bandwidth
     expected_bandwidth = Quantity(1.0 / 1.5, MHz)
 
-    assert bandwidth.to(Hz).magnitude == pytest.approx(expected_bandwidth.to(Hz).magnitude)
+    assert bandwidth.to(Hz).magnitude == pytest.approx(
+        expected_bandwidth.to(Hz).magnitude
+    )
 
 
 def test_ebno_calculation():

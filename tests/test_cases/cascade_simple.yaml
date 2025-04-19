@@ -1,0 +1,4 @@
+stages:
+  - label: simple_amp
+    gain_db: 10.0
+    nf_db: 3.0

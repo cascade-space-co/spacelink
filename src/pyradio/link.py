@@ -44,7 +44,7 @@ class Link:
         rx_system_noise_temp: Quantity,
         rx_antenna_noise_temp: Quantity,
         distance_fn: Callable[[], Quantity],
-        mode: Mode
+        mode: Mode,
     ):
         """
         Initialize a Link object with all necessary parameters.
@@ -132,7 +132,7 @@ class Link:
             float: Noise power in dBW
         """
         power_quantity = noise.power(self.mode.bandwidth, self.system_noise_temperature)
-        return power_quantity.to('dBW').magnitude
+        return power_quantity.to("dBW").magnitude
 
     @property
     def eirp(self) -> float:
@@ -147,7 +147,7 @@ class Link:
         Returns:
             float: EIRP in dBW
         """
-        return self.tx_power.to('dBW').magnitude + self.tx_antenna.gain(self.frequency)
+        return self.tx_power.to("dBW").magnitude + self.tx_antenna.gain(self.frequency)
 
     @property
     def path_loss(self) -> float:
@@ -169,7 +169,9 @@ class Link:
         Returns:
             float: Polarization loss in dB
         """
-        return polarization_loss(self.tx_antenna.axial_ratio, self.rx_antenna.axial_ratio)
+        return polarization_loss(
+            self.tx_antenna.axial_ratio, self.rx_antenna.axial_ratio
+        )
 
     @property
     def received_power(self) -> float:
