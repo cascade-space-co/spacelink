@@ -8,8 +8,9 @@ import pytest
 from pyradio.link import Link
 from pyradio.antenna import FixedGain, Dish
 from pyradio.mode import Mode
-from pyradio.units import Q_, GHz, MHz, kHz, km, dimensionless
+from pyradio.units import Q_, MHz, dimensionless
 from test_cases import load_test_case
+
 
 def test_link_initialization():
     """Test Link initialization with valid parameters."""
@@ -26,7 +27,7 @@ def test_link_initialization():
         rx_system_noise_temp=Q_(290.0, 'K'),
         rx_antenna_noise_temp=Q_(100.0, 'K'),
         distance_fn=lambda: Q_(1000.0, 'km'),
-        mode = Mode(
+        mode=Mode(
             name="BPSK",
             coding_scheme="uncoded",
             modulation="BPSK",
@@ -35,7 +36,7 @@ def test_link_initialization():
             code_rate=1.0,
             spectral_efficiency=0.5,
             required_ebno=10.0,
-            implementation_loss=-1.0,
+            implementation_loss=1.0,
         )
     )
 
@@ -49,6 +50,7 @@ def test_link_initialization():
     assert link.frequency.to('Hz').magnitude == pytest.approx(2.4e9, rel=0.01)
     # Now polarization loss is calculated from axial ratios
     assert link.polarization_loss > 0
+
 
 def test_link_initialization_invalid():
     """Test Link initialization with invalid parameters."""
@@ -66,7 +68,7 @@ def test_link_initialization_invalid():
             rx_system_noise_temp=Q_(290.0, 'K'),
             rx_antenna_noise_temp=Q_(100.0, 'K'),
             distance_fn=lambda: Q_(1000.0, 'km'),
-            mode = Mode(
+            mode=Mode(
                 name="BPSK",
                 coding_scheme="uncoded",
                 modulation="BPSK",
@@ -75,7 +77,7 @@ def test_link_initialization_invalid():
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
-                implementation_loss=-1.0,
+                implementation_loss=1.0,
             )
         )
 
@@ -89,7 +91,7 @@ def test_link_initialization_invalid():
             rx_system_noise_temp=Q_(290.0, 'K'),
             rx_antenna_noise_temp=Q_(100.0, 'K'),
             distance_fn=lambda: Q_(1000.0, 'km'),
-            mode = Mode(
+            mode=Mode(
                 name="BPSK",
                 coding_scheme="uncoded",
                 modulation="BPSK",
@@ -98,7 +100,7 @@ def test_link_initialization_invalid():
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
-                implementation_loss=-1.0,
+                implementation_loss=1.0,
             )
         )
 
@@ -111,7 +113,7 @@ def test_link_initialization_invalid():
             rx_system_noise_temp=Q_(290.0, 'K'),
             rx_antenna_noise_temp=Q_(100.0, 'K'),
             distance_fn=lambda: Q_(1000.0, 'km'),
-            mode = Mode(
+            mode=Mode(
                 name="BPSK",
                 coding_scheme="uncoded",
                 modulation="BPSK",
@@ -120,7 +122,7 @@ def test_link_initialization_invalid():
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
-                implementation_loss=-1.0,
+                implementation_loss=1.0,
             )
         )
 
@@ -134,7 +136,7 @@ def test_link_initialization_invalid():
             rx_system_noise_temp=Q_(0.0, 'K'),
             rx_antenna_noise_temp=Q_(100.0, 'K'),
             distance_fn=lambda: Q_(1000.0, 'km'),
-            mode = Mode(
+            mode=Mode(
                 name="BPSK",
                 coding_scheme="uncoded",
                 modulation="BPSK",
@@ -143,7 +145,7 @@ def test_link_initialization_invalid():
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
-                implementation_loss=-1.0,
+                implementation_loss=1.0,
             )
         )
 
@@ -157,7 +159,7 @@ def test_link_initialization_invalid():
             rx_system_noise_temp=Q_(290.0, 'K'),
             rx_antenna_noise_temp=Q_(-1.0, 'K'),
             distance_fn=lambda: Q_(1000.0, 'km'),
-            mode = Mode(
+            mode=Mode(
                 name="BPSK",
                 coding_scheme="uncoded",
                 modulation="BPSK",
@@ -166,7 +168,7 @@ def test_link_initialization_invalid():
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
-                implementation_loss=-1.0,
+                implementation_loss=1.0,
             )
         )
 
@@ -180,7 +182,7 @@ def test_link_initialization_invalid():
             rx_system_noise_temp=Q_(290.0, 'K'),
             rx_antenna_noise_temp=Q_(100.0, 'K'),
             distance_fn=1000.0,  # Not a callable
-            mode = Mode(
+            mode=Mode(
                 name="BPSK",
                 coding_scheme="uncoded",
                 modulation="BPSK",
@@ -189,7 +191,7 @@ def test_link_initialization_invalid():
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
-                implementation_loss=-1.0,
+                implementation_loss=1.0,
             )
         )
 
@@ -203,7 +205,7 @@ def test_link_initialization_invalid():
             rx_system_noise_temp=Q_(290.0, 'K'),
             rx_antenna_noise_temp=Q_(100.0, 'K'),
             distance_fn=lambda: Q_(1000.0, 'km'),
-            mode = Mode(
+            mode=Mode(
                 name="BPSK",
                 coding_scheme="uncoded",
                 modulation="BPSK",
@@ -212,7 +214,7 @@ def test_link_initialization_invalid():
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
-                implementation_loss=-1.0,
+                implementation_loss=1.0,
             )
         )
 
@@ -226,7 +228,7 @@ def test_link_initialization_invalid():
             rx_system_noise_temp=Q_(290.0, 'K'),
             rx_antenna_noise_temp=Q_(100.0, 'K'),
             distance_fn=lambda: Q_(1000.0, 'km'),
-            mode = Mode(
+            mode=Mode(
                 name="BPSK",
                 coding_scheme="uncoded",
                 modulation="BPSK",
@@ -235,9 +237,10 @@ def test_link_initialization_invalid():
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
-                implementation_loss=-1.0,
+                implementation_loss=1.0,
             )
         )
+
 
 def test_link_calculations():
     """Test link budget calculations."""
@@ -268,7 +271,7 @@ def test_link_calculations():
         rx_system_noise_temp=case.system_noise_temp,
         rx_antenna_noise_temp=case.antenna_noise_temp,
         distance_fn=lambda: case.distance,
-        mode = Mode(
+        mode=Mode(
             name="BPSK",
             coding_scheme="uncoded",
             modulation="BPSK",
@@ -284,17 +287,19 @@ def test_link_calculations():
     # Check EIRP calculation
     assert link.eirp == pytest.approx(case.ref.eirp.magnitude, abs=0.01)
 
-    # Check path loss calculation
-    assert abs(link.path_loss) == pytest.approx(abs(case.ref.free_space_path_loss.magnitude), abs=0.01)
+    # Check path loss calculation (positive dB value)
+    assert link.path_loss == pytest.approx(case.ref.free_space_path_loss.magnitude, abs=0.01)
 
     # Skip received power check as it includes atmospheric losses in the reference
 
     # Check system noise temperature calculation
-    assert link.system_noise_temperature.magnitude == pytest.approx(case.ref.system_noise_temperature.magnitude, abs=0.01)
+    assert link.system_noise_temperature.magnitude == pytest.approx(
+        case.ref.system_noise_temperature.magnitude, abs=0.01)
 
     # Skip noise power check
 
     # Skip C/N, Eb/N0 and margin checks as they depend on received power
+
 
 def test_lunar_downlink():
     """Test link budget calculations using lunar downlink test case."""
@@ -340,12 +345,14 @@ def test_lunar_downlink():
         mode=mode
     )
 
-    # Check base parameters that don't depend on calculations
-    assert abs(link.path_loss) == pytest.approx(abs(case.ref.free_space_path_loss.magnitude), abs=0.01)
-    assert link.system_noise_temperature.magnitude == pytest.approx(case.ref.system_noise_temperature.magnitude, abs=0.01)
+    # Check base parameters that don't depend on calculations (positive dB path loss)
+    assert link.path_loss == pytest.approx(case.ref.free_space_path_loss.magnitude, abs=0.01)
+    assert link.system_noise_temperature.magnitude == pytest.approx(
+        case.ref.system_noise_temperature.magnitude, abs=0.01)
 
     # The link margin should incorporate implementation loss correctly
     assert link.mode.implementation_loss == case.implementation_loss.magnitude
+
 
 def test_leo_downlink():
     """Test link budget calculations using LEO downlink test case."""
@@ -361,7 +368,7 @@ def test_leo_downlink():
         efficiency=case.rx_dish_efficiency,
         axial_ratio=case.rx_antenna_axial_ratio
     )
-    
+
     # Create mode object
     mode = Mode(
         name="BPSK",
@@ -389,11 +396,14 @@ def test_leo_downlink():
 
     # Check calculations against reference values
     assert link.eirp == pytest.approx(case.ref.eirp.magnitude, abs=0.01)
-    assert abs(link.path_loss) == pytest.approx(abs(case.ref.free_space_path_loss.magnitude), abs=0.01)
+    # Path loss should be a positive dB value
+    assert link.path_loss == pytest.approx(case.ref.free_space_path_loss.magnitude, abs=0.01)
     # Skip received power check as it includes atmospheric losses in the reference
-    assert link.system_noise_temperature.magnitude == pytest.approx(case.ref.system_noise_temperature.magnitude, abs=0.01)
+    assert link.system_noise_temperature.magnitude == pytest.approx(
+        case.ref.system_noise_temperature.magnitude, abs=0.01)
     # Skip noise power check as it now uses the bandwidth from the mode object
     # Skip C/N, Eb/N0 and margin checks as they depend on received power
+
 
 def test_leo_uplink():
     """Test link budget calculations using LEO uplink test case."""
@@ -435,10 +445,12 @@ def test_leo_uplink():
         mode=mode
     )
 
-    # Check the core, reliable properties
-    assert abs(link.path_loss) == pytest.approx(abs(case.ref.free_space_path_loss.magnitude), abs=0.01)
-    assert link.system_noise_temperature.magnitude == pytest.approx(case.ref.system_noise_temperature.magnitude, abs=0.01)
+    # Check the core, reliable properties (positive dB path loss)
+    assert link.path_loss == pytest.approx(case.ref.free_space_path_loss.magnitude, abs=0.01)
+    assert link.system_noise_temperature.magnitude == pytest.approx(
+        case.ref.system_noise_temperature.magnitude, abs=0.01)
     assert link.mode.implementation_loss == case.implementation_loss.magnitude
+
 
 def test_lunar_uplink():
     """Test link budget calculations using lunar uplink test case."""
@@ -484,7 +496,8 @@ def test_lunar_uplink():
         mode=mode
     )
 
-    # Check the core, reliable properties
-    assert abs(link.path_loss) == pytest.approx(abs(case.ref.free_space_path_loss.magnitude), abs=0.01)
-    assert link.system_noise_temperature.magnitude == pytest.approx(case.ref.system_noise_temperature.magnitude, abs=0.01)
+    # Check the core, reliable properties (positive dB path loss)
+    assert link.path_loss == pytest.approx(case.ref.free_space_path_loss.magnitude, abs=0.01)
+    assert link.system_noise_temperature.magnitude == pytest.approx(
+        case.ref.system_noise_temperature.magnitude, abs=0.01)
     assert link.mode.implementation_loss == case.implementation_loss.magnitude

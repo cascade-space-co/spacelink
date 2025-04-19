@@ -6,13 +6,12 @@ for a complete link budget calculation, including transmitter and receiver
 characteristics, path loss, and noise calculations.
 """
 
-import math
 from typing import Callable
 from pint import Quantity
 from .antenna import Antenna, polarization_loss
 from .mode import Mode
 from .path import free_space_path_loss
-from .units import Q_, Hz, K, db, m, km, W
+from .units import Hz, K, m, W
 from . import noise
 
 
@@ -153,37 +152,31 @@ class Link:
     @property
     def path_loss(self) -> float:
         """
-        Calculate the free space path loss in dB.
+        Calculate the free space path loss in dB (positive value).
 
-        Path Loss = Free Space Path Loss
+        Path Loss = Free Space Path Loss (positive dB loss)
 
         Returns:
-            float: Free space path loss in dB (positive value)
+            float: Free space path loss in dB
         """
-        fspl = free_space_path_loss(self.distance, self.frequency).to('dB').magnitude
-        return fspl
+        return free_space_path_loss(self.distance, self.frequency)
 
     @property
     def polarization_loss(self) -> float:
         """
-        Calculate the polarization loss in dB based on the axial ratios of the antennas.
-
-        The polarization loss is calculated using the standard formula for polarization
-        mismatch between two antennas with different axial ratios.
-        Note: Returns a negative value, as it's a loss
+        Calculate the polarization loss in dB (positive value) based on the antennas' axial ratios.
 
         Returns:
-            float: Polarization loss in dB (negative value)
+            float: Polarization loss in dB
         """
-        return -polarization_loss(self.tx_antenna.axial_ratio, self.rx_antenna.axial_ratio)
+        return polarization_loss(self.tx_antenna.axial_ratio, self.rx_antenna.axial_ratio)
 
     @property
     def received_power(self) -> float:
         """
         Calculate the received power in dBW.
 
-        Received Power = EIRP + Receiver Antenna Gain + Path Loss + Polarization Loss
-        Where Path Loss and Polarization Loss are negative values
+        Received Power = EIRP + Receiver Antenna Gain - Path Loss - Polarization Loss
 
         Returns:
             float: Received power in dBW
@@ -191,8 +184,8 @@ class Link:
         return (
             self.eirp
             + self.rx_antenna.gain(self.frequency)
-            + self.path_loss
-            + self.polarization_loss
+            - self.path_loss
+            - self.polarization_loss
         )
 
     @property

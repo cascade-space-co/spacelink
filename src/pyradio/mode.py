@@ -6,7 +6,6 @@ communication modes, including modulation schemes, channel coding, and required
 signal quality parameters.
 """
 
-from typing import Optional
 from pint import Quantity
 from .units import db
 
@@ -18,6 +17,8 @@ from .units import db
     This class should only have parameters that are fairly static, and that don't
     change during a mission
 """
+
+
 class Mode:
     """
     A class representing a communication mode with specific coding and modulation.
@@ -74,8 +75,8 @@ class Mode:
             raise ValueError("Spectral efficiency must be positive")
         if (code_rate <= 0.0 or code_rate > 1.0):
             raise ValueError("Code rate must be between 0 and 1")
-        if implementation_loss > 0.0:
-            raise ValueError("Implementation loss must be negative")
+        if implementation_loss < 0.0:
+            raise ValueError("Implementation loss must be non-negative")
 
         # Store parameters
         self.name = name
@@ -135,8 +136,8 @@ class Mode:
             Link margin in dB
         """
 
-        # Calculate margin
-        return self.ebno(c_over_n) - self.required_ebno + self.implementation_loss
+        # Calculate margin (subtract positive implementation loss)
+        return self.ebno(c_over_n) - self.required_ebno - self.implementation_loss
 
     def __str__(self) -> str:
         """

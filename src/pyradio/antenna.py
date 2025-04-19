@@ -8,8 +8,8 @@ including dish gain and beamwidth calculations.
 import math
 from abc import ABC, abstractmethod
 from pint import Quantity
-from typing import Union
 from .units import db, wavelength
+
 
 class Antenna(ABC):
     """
@@ -50,6 +50,7 @@ class Antenna(ABC):
             ValueError: If frequency is not positive
         """
 
+
 class FixedGain(Antenna):
     """
     A class representing an antenna with fixed gain.
@@ -87,6 +88,7 @@ class FixedGain(Antenna):
             float: Fixed antenna gain in dB
         """
         return self.gain_
+
 
 class Dish(Antenna):
     """
@@ -150,6 +152,7 @@ class Dish(Antenna):
         # Convert result to scalar and return
         return gain_linear.to('dB').magnitude
 
+
 def polarization_loss(tx_axial_ratio: float, rx_axial_ratio: float) -> float:
     """
     Calculate the polarization loss in dB between two antennas with given axial ratios.
@@ -184,4 +187,6 @@ def polarization_loss(tx_axial_ratio: float, rx_axial_ratio: float) -> float:
     # This is the standard formula for polarization mismatch between antennas
     plf = (4 * tx_ar_linear * rx_ar_linear) / ((1 + tx_ar_linear**2) * (1 + rx_ar_linear**2))
 
-    return db(plf)
+    # Convert the mismatch factor to a positive loss in dB
+    # db(plf) is negative or zero since plf <= 1; negate to make loss positive
+    return -db(plf)

@@ -4,8 +4,7 @@ import pytest
 from pyradio.units import (
     Q_, Hz, kHz, MHz, GHz,
     W, mW,
-    m, km, K,
-    dimensionless,
+    m, km,
     SPEED_OF_LIGHT,
     wavelength, frequency, db
 )
@@ -74,7 +73,7 @@ def test_invalid_inputs():
         wavelength(1 * m)
 
     with pytest.raises(Exception):
-        wavelength(1.0*m)
+        wavelength(1.0 * m)
     # Frequency with non-length input
     with pytest.raises(Exception):
         frequency(1 * Hz)

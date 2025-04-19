@@ -7,7 +7,7 @@ including free space path loss, spreading loss, and aperture loss.
 
 import math
 from pint import Quantity
-from pyradio.units import Q_, wavelength, m, Hz
+from pyradio.units import wavelength, m, Hz
 
 
 def spreading_loss(distance: Quantity) -> Quantity:
@@ -19,10 +19,19 @@ def spreading_loss(distance: Quantity) -> Quantity:
     Returns:
         Spreading loss
     """
-    if distance.magnitude <= 0:
-        raise ValueError("Distance must be positive")
+    """
+    Calculate the spreading loss in decibels (positive value).
 
-    return 1/(4 * math.pi * distance.to(m)**2)
+    Spreading loss (dB) = 10 * log10(4 * pi * r^2)
+    where r is the distance in meters.
+    """
+    # Validate input
+    if distance.to(m).magnitude <= 0:
+        raise ValueError("Distance must be positive")
+    # Compute loss
+    r = distance.to(m).magnitude
+    loss_db = 10.0 * math.log10(4.0 * math.pi * r**2)
+    return loss_db
 
 
 def aperture_loss(frequency: Quantity) -> Quantity:
@@ -37,20 +46,36 @@ def aperture_loss(frequency: Quantity) -> Quantity:
     Returns:
         Aperture loss
     """
-    if frequency.magnitude <= 0:
-        raise ValueError("Frequency must be positive")
+    """
+    Calculate the aperture loss in decibels (positive value).
 
-    return wavelength(frequency)**2 / (4 * math.pi)
+    Aperture loss (dB) = 10 * log10(4 * pi / lambda^2)
+    where lambda is the wavelength in meters.
+    """
+    # Validate input
+    if frequency.to(Hz).magnitude <= 0:
+        raise ValueError("Frequency must be positive")
+    # Compute loss
+    lam = wavelength(frequency).to(m).magnitude
+    loss_db = 10.0 * math.log10(4.0 * math.pi / (lam**2))
+    return loss_db
 
 
 def free_space_path_loss(distance: Quantity, frequency: Quantity) -> float:
-    """Calculate the free space path loss.
-    This is the basic Friis equation for free space path loss
+    """
+    Calculate the free space path loss in decibels (positive value).
+
+    Path loss (dB) = spreading_loss(d) + aperture_loss(f)
+    = 20*log10(4*pi*d/lambda)
+
     Args:
         distance: Distance between transmitter and receiver
         frequency: Carrier frequency
 
     Returns:
-        Free space path loss in dB
+        Path loss in dB (positive value)
     """
-    return spreading_loss(distance) * aperture_loss(frequency)
+    # The individual functions validate inputs
+    sl = spreading_loss(distance)
+    al = aperture_loss(frequency)
+    return sl + al
