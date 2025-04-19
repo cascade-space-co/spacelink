@@ -10,7 +10,8 @@ import os
 import yaml
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
-from pyradio.units import ureg, Q_, Quantity, dimensionless
+from pyradio.units import Q_, Quantity
+
 
 @dataclass
 class RefValues:
@@ -53,6 +54,7 @@ class RefValues:
     # Additional parameters
     data_rate: Optional[Quantity] = None
     ground_station_g_over_t: Optional[Quantity] = None
+
 
 @dataclass
 class RadioTestCase:
@@ -166,7 +168,7 @@ def load_test_case(case_name: str) -> RadioTestCase:
             try:
                 qty = Q_(value)
                 processed_data[key] = qty
-            except (ValueError, TypeError) as e:
+            except (ValueError, TypeError):
                 processed_data[key] = value
         elif isinstance(value, dict) and 'value' in value and 'unit' in value:
             # Handle the new structured format
@@ -175,7 +177,7 @@ def load_test_case(case_name: str) -> RadioTestCase:
                 qty_value = value['value']
                 qty = Q_(qty_value, unit_str)
                 processed_data[key] = qty
-            except (ValueError, TypeError) as e:
+            except (ValueError, TypeError):
                 processed_data[key] = value
         else:
             processed_data[key] = value
@@ -191,7 +193,7 @@ def load_test_case(case_name: str) -> RadioTestCase:
                 try:
                     qty = Q_(value)
                     setattr(ref_values, key, qty)
-                except (ValueError, TypeError) as e:
+                except (ValueError, TypeError):
                     setattr(ref_values, key, value)
             elif isinstance(value, dict) and 'value' in value and 'unit' in value:
                 # Handle the new structured format
@@ -200,7 +202,7 @@ def load_test_case(case_name: str) -> RadioTestCase:
                     qty_value = value['value']
                     qty = Q_(qty_value, unit_str)
                     setattr(ref_values, key, qty)
-                except (ValueError, TypeError) as e:
+                except (ValueError, TypeError):
                     setattr(ref_values, key, value)
             else:
                 setattr(ref_values, key, value)

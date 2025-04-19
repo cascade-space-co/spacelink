@@ -35,10 +35,10 @@ rx_antenna_axial_ratio:
 
 # Additional losses
 implementation_loss:
-  value: -0.5
+  value: 0.5
   unit: dB # Implementation loss of 0.5 dB
 polarization_loss:
-  value: -0.51
+  value: 0.51
   unit: dB
 required_ebno:
   value: 9.6

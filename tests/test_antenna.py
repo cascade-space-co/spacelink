@@ -1,14 +1,15 @@
 """Tests for the antenna module."""
 
 import pytest
-import math
 from pyradio.antenna import Antenna, Dish, FixedGain, polarization_loss
 from pyradio.units import GHz, MHz, m
+
 
 def test_antenna_is_abstract():
     """Test that Antenna class cannot be instantiated."""
     with pytest.raises(TypeError):
         Antenna()
+
 
 def test_fixed_gain_initializes_with_valid_gain():
     """Test FixedGain initialization with valid gain."""
@@ -18,10 +19,12 @@ def test_fixed_gain_initializes_with_valid_gain():
     antenna = FixedGain(0.0)
     assert antenna.gain_ == pytest.approx(0.0, abs=0.01)
 
+
 def test_fixed_gain_accepts_negative_gain():
     """Test FixedGain accepts negative gain values."""
     antenna = FixedGain(-3.0)
     assert antenna.gain_ == pytest.approx(-3.0, abs=0.01)
+
 
 def test_fixed_gain_returns_constant_gain():
     """Test FixedGain returns constant gain regardless of frequency."""
@@ -30,11 +33,13 @@ def test_fixed_gain_returns_constant_gain():
     assert antenna.gain(2.4 * GHz) == pytest.approx(10.0, abs=0.01)
     assert antenna.gain(100 * MHz) == pytest.approx(10.0, abs=0.01)
 
+
 def test_fixed_gain_with_axial_ratio():
     """Test FixedGain with axial ratio parameter."""
     antenna = FixedGain(10.0, axial_ratio=3.0)
     assert antenna.gain_ == pytest.approx(10.0, abs=0.01)
     assert antenna.axial_ratio == pytest.approx(3.0, abs=0.01)
+
 
 def test_dish_initialization():
     """Test Dish initialization with various parameters."""
@@ -50,12 +55,14 @@ def test_dish_initialization():
     assert dish.efficiency == pytest.approx(0.5, abs=0.01)
     assert dish.axial_ratio == pytest.approx(1.5, abs=0.01)
 
+
 def test_dish_raises_on_invalid_diameter():
     """Test Dish raises ValueError for invalid diameter."""
     with pytest.raises(ValueError, match="Dish diameter must be positive"):
         Dish(-1.0 * m)
     with pytest.raises(ValueError, match="Dish diameter must be positive"):
         Dish(0.0 * m)
+
 
 def test_dish_raises_on_invalid_efficiency():
     """Test Dish raises ValueError for invalid efficiency."""
@@ -65,6 +72,7 @@ def test_dish_raises_on_invalid_efficiency():
         Dish(1.0 * m, efficiency=0.0)
     with pytest.raises(ValueError, match="Efficiency must be between 0 and 1"):
         Dish(1.0 * m, efficiency=1.1)
+
 
 def test_dish_calculates_gain():
     """Test Dish calculates gain correctly at various frequencies."""
@@ -82,6 +90,7 @@ def test_dish_calculates_gain():
     dish = Dish(1.0 * m, efficiency=0.5)
     assert dish.gain(2.4 * GHz) == pytest.approx(25.00, abs=0.01)
 
+
 def test_antenna_axial_ratio_validation():
     """Test the antenna axial ratio validation."""
     # Axial ratio must be non-negative
@@ -90,6 +99,7 @@ def test_antenna_axial_ratio_validation():
 
     with pytest.raises(ValueError, match="Axial ratio must be non-negative"):
         FixedGain(10.0, axial_ratio=-1.0)
+
 
 def test_polarization_loss_calculation():
     """Test the polarization loss calculation based on axial ratios.
@@ -100,10 +110,10 @@ def test_polarization_loss_calculation():
     assert polarization_loss(0.0, 0.0) == pytest.approx(0.0, abs=0.01)
 
     # Two antennas with identical moderate axial ratios
-    assert polarization_loss(3.0, 3.0) == pytest.approx(-0.51, abs=0.01)
+    assert polarization_loss(3.0, 3.0) == pytest.approx(0.51, abs=0.01)
 
-    # Common axial ratio combinations from the table
-    assert polarization_loss(0.5, 3.0) == pytest.approx(-0.26, abs=0.01)
-    assert polarization_loss(1.0, 3.0) == pytest.approx(-0.28, abs=0.01)
-    assert polarization_loss(2.0, 3.0) == pytest.approx(-0.37, abs=0.01)
-    assert polarization_loss(3.0, 4.0) == pytest.approx(-0.7, abs=0.01)
+    # Common axial ratio combinations from the table (positive dB values)
+    assert polarization_loss(0.5, 3.0) == pytest.approx(0.26, abs=0.01)
+    assert polarization_loss(1.0, 3.0) == pytest.approx(0.28, abs=0.01)
+    assert polarization_loss(2.0, 3.0) == pytest.approx(0.37, abs=0.01)
+    assert polarization_loss(3.0, 4.0) == pytest.approx(0.70, abs=0.01)

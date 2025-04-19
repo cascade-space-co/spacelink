@@ -14,6 +14,7 @@ numpy = ">=1.24.0,<3.0.0"
 scipy = ">=1.10.0,<2.0.0"
 pint = "^0.24.4"
 pandas = "^2.0.0"
+autopep8 = "^2.3.2"
 
 [tool.poetry.group.dev.dependencies]
 sphinx = "^7.2.6"

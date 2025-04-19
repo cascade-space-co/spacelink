@@ -65,6 +65,7 @@ def frequency(wavelength: Quantity) -> Quantity:
     """
     return SPEED_OF_LIGHT / wavelength.to(m)
 
+
 def db(value: float) -> float:
     """
     Convert a linear value to decibels.
@@ -75,4 +76,4 @@ def db(value: float) -> float:
     Returns:
         Value in decibels
     """
-    return float(10.0*np.log10(value))
+    return float(10.0 * np.log10(value))

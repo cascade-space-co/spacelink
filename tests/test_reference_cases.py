@@ -6,7 +6,7 @@ verifying various functions across the codebase.
 """
 
 import pytest
-from pyradio.units import GHz, wavelength, m, dimensionless, K, Q_, ureg, W, Hz
+from pyradio.units import GHz, wavelength, m, dimensionless, Q_
 from pyradio.antenna import polarization_loss
 from test_cases import load_test_case, list_test_cases
 
@@ -20,7 +20,8 @@ def test_wavelength_reference():
     calc_wavelength = wavelength(case.frequency)
 
     # Verify against reference value using pytest.approx for comparing quantity magnitudes
-    assert calc_wavelength.to('m').magnitude == pytest.approx(case.ref.wavelength.to('m').magnitude, rel=0.001)
+    assert calc_wavelength.to('m').magnitude == pytest.approx(
+        case.ref.wavelength.to('m').magnitude, rel=0.001)
 
     # Load the lunar downlink case
     case = load_test_case("lunar_downlink")
@@ -29,7 +30,8 @@ def test_wavelength_reference():
     calc_wavelength = wavelength(case.frequency)
 
     # Verify against reference value using pytest.approx for comparing quantity magnitudes
-    assert calc_wavelength.to('m').magnitude == pytest.approx(case.ref.wavelength.to('m').magnitude, rel=0.001)
+    assert calc_wavelength.to('m').magnitude == pytest.approx(
+        case.ref.wavelength.to('m').magnitude, rel=0.001)
 
 
 def test_dish_parameters():
@@ -39,15 +41,17 @@ def test_dish_parameters():
 
     # Verify dish parameters are set correctly
     assert case.tx_dish_diameter > 0 * m
-    assert case.tx_dish_efficiency > 0 * dimensionless and case.tx_dish_efficiency <= 1 * dimensionless
-    
+    assert case.tx_dish_efficiency > 0 * dimensionless
+    assert case.tx_dish_efficiency <= 1 * dimensionless
+
     # For dB values, use Q_ to create dB quantities
     assert case.tx_antenna_gain > Q_(0, 'dB')
     assert case.tx_antenna_axial_ratio >= Q_(0, 'dB')
 
     # Same for receiver
     assert case.rx_dish_diameter > 0 * m
-    assert case.rx_dish_efficiency > 0 * dimensionless and case.rx_dish_efficiency <= 1 * dimensionless
+    assert case.rx_dish_efficiency > 0 * dimensionless
+    assert case.rx_dish_efficiency <= 1 * dimensionless
     assert case.rx_antenna_gain > Q_(0, 'dB')
     assert case.rx_antenna_axial_ratio >= Q_(0, 'dB')
 
@@ -65,9 +69,10 @@ def test_polarization_loss():
 
     # Convert result to a Quantity for comparison
     calc_loss_qty = Q_(calc_loss, 'dB')
-    
+
     # Compare with the test case value using pytest.approx
-    assert calc_loss_qty.to('dB').magnitude == pytest.approx(case.polarization_loss.to('dB').magnitude, abs=0.01)
+    assert calc_loss_qty.to('dB').magnitude == pytest.approx(
+        case.polarization_loss.to('dB').magnitude, abs=0.01)
 
     # Test with deep space case
     case = load_test_case("deep_space")
@@ -80,9 +85,10 @@ def test_polarization_loss():
 
     # Convert result to a Quantity for comparison
     calc_loss_qty = Q_(calc_loss, 'dB')
-    
+
     # Compare with the test case value using pytest.approx
-    assert calc_loss_qty.to('dB').magnitude == pytest.approx(case.polarization_loss.to('dB').magnitude, abs=0.01)
+    assert calc_loss_qty.to('dB').magnitude == pytest.approx(
+        case.polarization_loss.to('dB').magnitude, abs=0.01)
 
 
 def test_wavelength_calculation():
@@ -102,10 +108,12 @@ def test_link_budget_calculations():
     case = load_test_case("lunar_downlink")
 
     # For system noise temperature, add the magnitudes then compare
-    system_temp = case.system_noise_temp.to('K').magnitude + case.antenna_noise_temp.to('K').magnitude
+    system_temp = case.system_noise_temp.to(
+        'K').magnitude + case.antenna_noise_temp.to('K').magnitude
 
     # Verify system noise temperature calculation
-    assert system_temp == pytest.approx(case.ref.system_noise_temperature.to('K').magnitude, rel=0.01)
+    assert system_temp == pytest.approx(
+        case.ref.system_noise_temperature.to('K').magnitude, rel=0.01)
 
     # For EIRP calculation, add the magnitudes directly
     eirp_val = case.tx_power.to('dBW').magnitude + case.tx_antenna_gain.to('dB').magnitude
@@ -117,10 +125,12 @@ def test_link_budget_calculations():
     case = load_test_case("lunar_uplink")
 
     # For system noise temperature, add the magnitudes then compare
-    system_temp = case.system_noise_temp.to('K').magnitude + case.antenna_noise_temp.to('K').magnitude
+    system_temp = case.system_noise_temp.to(
+        'K').magnitude + case.antenna_noise_temp.to('K').magnitude
 
     # Verify system noise temperature calculation
-    assert system_temp == pytest.approx(case.ref.system_noise_temperature.to('K').magnitude, rel=0.01)
+    assert system_temp == pytest.approx(
+        case.ref.system_noise_temperature.to('K').magnitude, rel=0.01)
 
     # For EIRP calculation, add the magnitudes directly
     eirp_val = case.tx_power.to('dBW').magnitude + case.tx_antenna_gain.to('dB').magnitude
