@@ -1,8 +1,8 @@
 stages:
   - label: s1
-    gain_db: 10.0
+    gain: 10.0
   - label: s2
-    gain_db: 5.0
+    gain: 5.0
     input_vswr: !Quantity
       magnitude: 2.0
       units: dimensionless

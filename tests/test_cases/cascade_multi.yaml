@@ -1,10 +1,10 @@
 stages:
   - label: amp1
-    gain_db: 6.0
-    nf_db: 1.0
+    gain: !Quantity { magnitude: 6.0, units: dB }
+    noise_figure: !Quantity { magnitude: 1.0, units: dB }
   - label: att1
     loss_db: 2.0
-    nf_db: 0.5
+    noise_figure: !Quantity { magnitude: 0.5, units: dB }
   - label: amp2
-    gain_db: 4.0
-    nf_db: 2.0
+    gain: !Quantity { magnitude: 4.0, units: dB }
+    noise_figure: !Quantity { magnitude: 2.0, units: dB }

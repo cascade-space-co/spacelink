@@ -10,7 +10,6 @@ import math
 from typing import List, Optional, Dict, Any
 from pint import Quantity
 from pyradio.noise import (
-    T0,
     noise_figure_to_temperature,
     temperature_to_noise_figure,
     cascaded_noise_figure,
@@ -25,6 +24,7 @@ from pyradio.units import (
     dimensionless,
     vswr_to_return_loss,
     return_loss_to_vswr,
+    mismatch_loss,
 )
 
 
@@ -37,10 +37,10 @@ class Stage:
 
     Args:
         label: Descriptive label for the stage.
-        gain_db: Gain in decibels. Mutually exclusive with loss_db.
-        loss_db: Loss in decibels (positive value). Mutually exclusive with gain_db.
-        nf_db: Noise figure in decibels. Mutually exclusive with noise_temp.
-        noise_temp: Noise temperature in Kelvin. Mutually exclusive with nf_db.
+        gain: Gain in decibels. Mutually exclusive with loss_db.
+        loss_db: Loss in decibels (positive value). Mutually exclusive with gain.
+        noise_figure: Noise figure in decibels. Mutually exclusive with noise_temp.
+        noise_temp: Noise temperature in Kelvin. Mutually exclusive with noise_figure.
         p1db_dbm: Output 1dB compression point in dBm.
         input_rl_db: Input return loss in dB. Mutually exclusive with input_vswr.
         output_rl_db: Output return loss in dB. Mutually exclusive with output_vswr.
@@ -54,9 +54,9 @@ class Stage:
     def __init__(
         self,
         label: str,
-        gain_db: Optional[Quantity] = None,
+        gain: Optional[Quantity] = None,
         loss_db: Optional[Quantity] = None,
-        nf_db: Optional[Quantity] = None,
+        noise_figure: Optional[Quantity] = None,
         noise_temp: Optional[Quantity] = None,
         p1db_dbm: Optional[Quantity] = None,
         input_rl_db: Optional[Quantity] = None,
@@ -68,30 +68,30 @@ class Stage:
         self.label: str = label
 
         # --- Gain/Loss (store as Quantity in dB) ---
-        if gain_db is not None and loss_db is not None:
-            raise ValueError(
-                f"Stage '{label}': Cannot specify both gain_db and loss_db."
-            )
+        if gain is not None and loss_db is not None:
+            raise ValueError(f"Stage '{label}': Cannot specify both gain and loss_db.")
         if loss_db is not None:
             # Loss in dB is positive; stored as negative gain
             loss_q = (
                 loss_db.to(dB) if isinstance(loss_db, Quantity) else Q_(loss_db, dB)
             )
-            self._gain_db: Quantity = -loss_q
-        elif gain_db is not None:
-            gain_q = (
-                gain_db.to(dB) if isinstance(gain_db, Quantity) else Q_(gain_db, dB)
-            )
-            self._gain_db = gain_q
+            self._gain: Quantity = -loss_q
+        elif gain is not None:
+            gain_q = gain.to(dB) if isinstance(gain, Quantity) else Q_(gain, dB)
+            self._gain = gain_q
         else:
-            self._gain_db = Q_(0.0, dB)
+            self._gain = Q_(0.0, dB)
 
         # --- Noise Temperature (internal) ---
-        # Accept either nf_db or noise_temp, store only noise_temp
+        # Accept either noise_figure or noise_temp, store only noise_temp
         # Preserve original noise figure for to_dict if provided
-        self._orig_nf_db: Optional[Quantity] = None
-        if nf_db is not None and noise_temp is not None:
-            nf_q = nf_db.to(dB) if isinstance(nf_db, Quantity) else Q_(nf_db, dB)
+        self._orig_noise_figure: Optional[Quantity] = None
+        if noise_figure is not None and noise_temp is not None:
+            nf_q = (
+                noise_figure.to(dB)
+                if isinstance(noise_figure, Quantity)
+                else Q_(noise_figure, dB)
+            )
             nt_q = (
                 noise_temp.to(K)
                 if isinstance(noise_temp, Quantity)
@@ -100,14 +100,19 @@ class Stage:
             calc_nt = noise_figure_to_temperature(nf_q)
             if not math.isclose(calc_nt.magnitude, nt_q.magnitude, rel_tol=1e-6):
                 raise ValueError(
-                    f"Stage '{label}': nf_db ({nf_q}) and noise_temp ({nt_q}) are inconsistent."
+                    f"Stage '{label}': noise_figure ({nf_q}) and noise_temp ({nt_q}) "
+                    "are inconsistent."
                 )
             self._noise_temp = nt_q
-            self._orig_nf_db = nf_q
-        elif nf_db is not None:
-            nf_q = nf_db.to(dB) if isinstance(nf_db, Quantity) else Q_(nf_db, dB)
+            self._orig_noise_figure = nf_q
+        elif noise_figure is not None:
+            nf_q = (
+                noise_figure.to(dB)
+                if isinstance(noise_figure, Quantity)
+                else Q_(noise_figure, dB)
+            )
             self._noise_temp = noise_figure_to_temperature(nf_q)
-            self._orig_nf_db = nf_q
+            self._orig_noise_figure = nf_q
         elif noise_temp is not None:
             nt_q = (
                 noise_temp.to(K)
@@ -196,7 +201,8 @@ class Stage:
             calc_vswr = return_loss_to_vswr(rl_db)
             if not math.isclose(vswr, calc_vswr, rel_tol=1e-4):
                 raise ValueError(
-                    f"Stage '{self.label}': {side} rl_db ({rl_db}) and vswr ({vswr}) are inconsistent (calc {calc_vswr})."
+                    f"Stage '{self.label}': {side} rl_db ({rl_db}) and vswr ({vswr}) "
+                    f"are inconsistent (calc {calc_vswr})."
                 )
             out_rl = float(rl_db)
             out_vswr = float(vswr)
@@ -218,14 +224,14 @@ class Stage:
 
     # --- Properties ---
     @property
-    def gain_db(self) -> Quantity:
+    def gain(self) -> Quantity:
         """Gain in decibels (Quantity with dB unit)."""
-        return self._gain_db
+        return self._gain
 
     @property
     def gain_lin(self) -> Quantity:
         """Linear gain (ratio, dimensionless)."""
-        lin_q = self._gain_db.to(dimensionless)
+        lin_q = self._gain.to(dimensionless)
         mag = float(lin_q.magnitude)
         # Round to integer if very close to avoid floating-point artifacts
         if abs(mag - round(mag)) < 1e-9:
@@ -233,13 +239,13 @@ class Stage:
         return Q_(mag, dimensionless)
 
     @property
-    def nf_db(self) -> Optional[Quantity]:
+    def noise_figure(self) -> Optional[Quantity]:
         """Noise figure (Quantity with dB unit)."""
         if self._noise_temp is None:
             return None
         # If original NF was provided, return it to preserve exact value
-        if getattr(self, "_orig_nf_db", None) is not None:
-            return self._orig_nf_db
+        if getattr(self, "_orig_noise_figure", None) is not None:
+            return self._orig_noise_figure
         return temperature_to_noise_figure(self._noise_temp)
 
     @property
@@ -250,7 +256,7 @@ class Stage:
     @property
     def noise_factor(self) -> Optional[Quantity]:
         """Noise factor (linear, dimensionless)."""
-        nf = self.nf_db
+        nf = self.noise_figure
         return nf.to(dimensionless) if nf is not None else None
 
     @property
@@ -299,14 +305,14 @@ class Stage:
         """
         data: Dict[str, Any] = {"label": self.label}
         # Gain or loss (store magnitudes as floats)
-        if self._gain_db.magnitude >= 0:
-            data["gain_db"] = float(self._gain_db.magnitude)
+        if self._gain.magnitude >= 0:
+            data["gain"] = float(self._gain.magnitude)
         else:
             # loss is stored as negative gain
-            data["loss_db"] = float((-self._gain_db).magnitude)
+            data["loss_db"] = float((-self._gain).magnitude)
         # Noise figure
-        if self.nf_db is not None:
-            data["nf_db"] = float(self.nf_db.magnitude)
+        if self.noise_figure is not None:
+            data["noise_figure"] = float(self.noise_figure.magnitude)
         # P1dB
         if self._p1db_dbm is not None:
             data["p1db_dbm"] = float(self._p1db_dbm.magnitude)
@@ -357,12 +363,23 @@ class Cascade:
             raise TypeError("Can only add Stage objects to the cascade.")
         self.stages.append(stage)
 
-    def cascaded_gain_db(self) -> Quantity:
+    def cascaded_gain(self) -> Quantity:
         """Total cascaded gain in decibels."""
+        """Total cascaded gain in decibels, accounting for mismatch losses."""
+        # No stages: zero gain
         if not self.stages:
             return Q_(0.0, dB)
-        # Sum decibel magnitudes directly
-        total_db_mag = sum(stage.gain_db.to(dB).magnitude for stage in self.stages)
+        # Sum stage gains (in dB)
+        total_db_mag = sum(stage.gain.to(dB).magnitude for stage in self.stages)
+        # Subtract mismatch losses between stages: for each stage after the first,
+        # apply mismatch_loss using the stage input return loss (if specified).
+        mismatch_db = 0.0
+        for stage in self.stages[1:]:
+            rl = stage.input_rl_db
+            if rl is not None:
+                # rl is a float in dB
+                mismatch_db += mismatch_loss(rl)
+        total_db_mag -= mismatch_db
         return Q_(total_db_mag, dB)
 
     def cascaded_noise_figure_db(self) -> Quantity:
@@ -434,8 +451,8 @@ class Cascade:
         # Convert to dBm quantity
         out_p1_dbm_q: Quantity = Q_(out_p1_mw, mW).to(dBm)
         # Refer back to input (subtract total gain in dB)
-        total_gain_db = self.cascaded_gain_db().to(dB).magnitude
-        input_p1_dbm_mag: float = out_p1_dbm_q.to(dBm).magnitude - total_gain_db
+        total_gain = self.cascaded_gain().to(dB).magnitude
+        input_p1_dbm_mag: float = out_p1_dbm_q.to(dBm).magnitude - total_gain
         return Q_(input_p1_dbm_mag, dBm)
 
     def __len__(self) -> int:

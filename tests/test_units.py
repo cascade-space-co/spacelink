@@ -18,6 +18,7 @@ from pyradio.units import (
     wavelength,
     frequency,
     db,
+    mismatch_loss,
 )
 
 
@@ -106,3 +107,8 @@ def test_vswr():
     for vswr, gamma, return_loss in test_data:
         assert return_loss_to_vswr(return_loss) == pytest.approx(vswr, abs=0.01)
         assert vswr_to_return_loss(vswr) == pytest.approx(return_loss, abs=0.01)
+
+
+def test_mismatch_loss():
+    return_loss = vswr_to_return_loss(2.0)
+    assert mismatch_loss(return_loss) == pytest.approx(0.5115, abs=0.01)

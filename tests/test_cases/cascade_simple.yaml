@@ -1,4 +1,4 @@
 stages:
   - label: simple_amp
-    gain_db: 10.0
-    nf_db: 3.0
+    gain: !Quantity { magnitude: 10.0, units: dB }
+    noise_figure: !Quantity { magnitude: 3.0, units: dB }

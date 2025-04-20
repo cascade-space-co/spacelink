@@ -1,9 +1,18 @@
 """
 Units and constants for radio communications calculations.
+
+This module defines a Pint UnitRegistry and provides commonly used units and conversion
+functions for radio frequency applications, including:
+  - Wavelength and frequency conversions
+  - Decibel and linear scale conversions
+  - VSWR and return loss calculations
+  - Mismatch loss computation
+  - YAML serialization support for Pint quantities
 """
 
 from pint import UnitRegistry, Quantity
 import numpy as np
+import yaml
 
 # Create a unit registry
 # Autoconvert offset to base units is important for logarithmic operations
@@ -46,10 +55,18 @@ def wavelength(frequency: Quantity) -> Quantity:
     Convert frequency to wavelength.
 
     Args:
-        frequency: Frequency in Hz
+        frequency (pint.Quantity): Frequency quantity (e.g., in Hz).
 
     Returns:
-        Wavelength in meters
+        pint.Quantity: Wavelength in meters.
+
+    Raises:
+        Exception: If the input quantity has incompatible units.
+
+    Example:
+        >>> from pyradio.units import wavelength, GHz, m
+        >>> wavelength(1 * GHz).to(m)
+        <Quantity(0.299792458, 'meter')>
     """
     return SPEED_OF_LIGHT / frequency.to(Hz)
 
@@ -59,34 +76,78 @@ def frequency(wavelength: Quantity) -> Quantity:
     Convert wavelength to frequency.
 
     Args:
-        wavelength: Wavelength in meters
+        wavelength (pint.Quantity): Wavelength quantity (e.g., in meters).
 
     Returns:
-        Frequency in Hz
+        pint.Quantity: Frequency in hertz.
+
+    Raises:
+        Exception: If the input quantity has incompatible units.
+
+    Example:
+        >>> from pyradio.units import frequency, m, MHz
+        >>> frequency(1 * m).to(MHz)
+        <Quantity(299.792458, 'megahertz')>
     """
     return SPEED_OF_LIGHT / wavelength.to(m)
 
 
 def db(value: float) -> float:
     """
-    Convert a linear value to decibels.
+    Convert a linear scale value to decibels (10 * log10).
 
     Args:
-        value: Linear value to convert
+        value (float): Linear value to convert; must be positive.
 
     Returns:
-        Value in decibels
+        float: Value in decibels.
+
+    Raises:
+        ValueError: If value is not positive.
+
+    Example:
+        >>> db(10.0)
+        10.0
     """
+    # Ensure valid input
+    if value <= 0:
+        raise ValueError(f"value must be > 0 ({value}).")
     return float(10.0 * np.log10(value))
 
 
 def db_to_lin(value: float) -> float:
+    """
+    Convert a decibel value to a linear scale ratio.
+
+    Args:
+        value (float): Value in decibels.
+
+    Returns:
+        float: Linear scale value.
+
+    Example:
+        >>> db_to_lin(20.0)
+        100.0
+    """
     return float(np.pow(10, value / 10.0))
 
 
 def return_loss_to_vswr(return_loss: float) -> float:
     """
-    Convert a return loss in dB to VSWR
+    Convert a return loss in decibels to voltage standing wave ratio (VSWR).
+
+    Args:
+        return_loss (float): Return loss in decibels (>= 0). Use float('inf') for a perfect match.
+
+    Returns:
+        float: VSWR (>= 1).
+
+    Raises:
+        ValueError: If return_loss is negative.
+
+    Example:
+        >>> return_loss_to_vswr(20.0)
+        1.2
     """
     if return_loss < 0:
         raise ValueError(f"return loss must be >= 0 ({return_loss}).")
@@ -96,6 +157,22 @@ def return_loss_to_vswr(return_loss: float) -> float:
 
 
 def vswr_to_return_loss(vswr: float) -> float:
+    """
+    Convert voltage standing wave ratio (VSWR) to return loss in decibels.
+
+    Args:
+        vswr (float): VSWR value (> 1). Use 1 for a perfect match (infinite return loss).
+
+    Returns:
+        float: Return loss in decibels.
+
+    Raises:
+        ValueError: If vswr is less than or equal to 1.
+
+    Example:
+        >>> vswr_to_return_loss(1.2)
+        20.834...
+    """
     if vswr <= 1.0:
         raise ValueError(f"VSWR must be > 1 ({vswr}).")
     if np.isclose(vswr, 1.0):
@@ -104,8 +181,27 @@ def vswr_to_return_loss(vswr: float) -> float:
     return -2 * db(gamma)
 
 
+def mismatch_loss(return_loss: float) -> float:
+    """
+    Compute the mismatch loss due to non-ideal return loss.
+
+    Mismatch loss quantifies power lost from reflections at an interface.
+
+    Args:
+        return_loss (float): Return loss in decibels.
+
+    Returns:
+        float: Mismatch loss in decibels.
+
+    Example:
+        >>> mismatch_loss(9.54)
+        0.5115...
+    """
+    gamma = np.pow(10, -return_loss / 20.0)
+    return -db(1 - gamma**2)
+
+
 # YAML support for Pint Quantity
-import yaml
 
 
 def _quantity_representer(dumper, data: Quantity):
