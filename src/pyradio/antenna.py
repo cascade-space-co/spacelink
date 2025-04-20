@@ -8,7 +8,7 @@ including dish gain and beamwidth calculations.
 import math
 from abc import ABC, abstractmethod
 from pint import Quantity
-from .units import db, wavelength
+from .units import db, wavelength, K
 
 
 class Antenna(ABC):
@@ -19,21 +19,37 @@ class Antenna(ABC):
     The gain method must be implemented by all concrete antenna classes.
     """
 
-    def __init__(self, axial_ratio: float = 0):
+    def __init__(
+        self,
+        axial_ratio: float = 0,
+        noise_temperature: Quantity = 0.0 * K,
+        return_loss: float = float("inf"),
+    ):
         """
-        Initialize an antenna with an axial ratio.
+        Initialize an antenna with polarization, noise temperature, and return loss.
 
         Args:
             axial_ratio: Axial ratio in dB (default: 0.0 for perfect circular polarization)
                          0 dB represents perfect circular polarization
                          >40 dB represents linear polarization
+            noise_temperature: Antenna noise temperature in Kelvin (default: 0.0 K)
+            return_loss: Return loss in dB (>=0, float('inf') for perfect match)
 
         Raises:
-            ValueError: If axial ratio is negative
+            ValueError: If axial_ratio, noise_temperature, or return_loss is negative
         """
+        # Validate axial ratio
         if axial_ratio < 0:
             raise ValueError("Axial ratio must be non-negative")
+        # Validate noise temperature
+        if noise_temperature < 0.0 * K:
+            raise ValueError("Noise temperature must be non-negative")
+        # Validate return loss
+        if return_loss < 0.0:
+            raise ValueError("Return loss must be non-negative")
         self.axial_ratio = axial_ratio
+        self.noise_temperature = noise_temperature
+        self.return_loss = return_loss
 
     @abstractmethod
     def gain(self, frequency: Quantity) -> float:
@@ -64,7 +80,13 @@ class FixedGain(Antenna):
         axial_ratio: Axial ratio in dB (0 dB for perfect circular, >40 dB for linear)
     """
 
-    def __init__(self, gain_: float, axial_ratio: float = 0):
+    def __init__(
+        self,
+        gain_: float,
+        axial_ratio: float = 0,
+        noise_temperature: Quantity = 0.0 * K,
+        return_loss: float = float("inf"),
+    ):
         """
         Initialize a FixedGain antenna.
 
@@ -74,7 +96,7 @@ class FixedGain(Antenna):
                          0 dB represents perfect circular polarization
                          >40 dB represents linear polarization
         """
-        super().__init__(axial_ratio)
+        super().__init__(axial_ratio, noise_temperature, return_loss)
         self.gain_ = gain_
 
     def gain(self, frequency: Quantity) -> float:
@@ -103,7 +125,14 @@ class Dish(Antenna):
         axial_ratio: Axial ratio in dB (0 dB for perfect circular, >40 dB for linear)
     """
 
-    def __init__(self, diameter: Quantity, efficiency: float = 0.65, axial_ratio: float = 0):
+    def __init__(
+        self,
+        diameter: Quantity,
+        efficiency: float = 0.65,
+        axial_ratio: float = 0,
+        noise_temperature: Quantity = 0.0 * K,
+        return_loss: float = float("inf"),
+    ):
         """
         Initialize a Dish antenna.
 
@@ -117,7 +146,7 @@ class Dish(Antenna):
         Raises:
             ValueError: If diameter is not positive or efficiency is not between 0 and 1
         """
-        super().__init__(axial_ratio)
+        super().__init__(axial_ratio, noise_temperature, return_loss)
         if diameter <= 0:
             raise ValueError("Dish diameter must be positive")
         if not 0 < efficiency <= 1:
@@ -147,10 +176,12 @@ class Dish(Antenna):
             ValueError: If frequency is not positive
         """
         # Perform calculation with quantities
-        gain_linear = self.efficiency * (math.pi * self.diameter / wavelength(frequency)) ** 2
+        gain_linear = (
+            self.efficiency * (math.pi * self.diameter / wavelength(frequency)) ** 2
+        )
 
         # Convert result to scalar and return
-        return gain_linear.to('dB').magnitude
+        return gain_linear.to("dB").magnitude
 
 
 def polarization_loss(tx_axial_ratio: float, rx_axial_ratio: float) -> float:
@@ -185,7 +216,9 @@ def polarization_loss(tx_axial_ratio: float, rx_axial_ratio: float) -> float:
 
     # Calculate polarization loss using the polarization efficiency formula
     # This is the standard formula for polarization mismatch between antennas
-    plf = (4 * tx_ar_linear * rx_ar_linear) / ((1 + tx_ar_linear**2) * (1 + rx_ar_linear**2))
+    plf = (4 * tx_ar_linear * rx_ar_linear) / (
+        (1 + tx_ar_linear**2) * (1 + rx_ar_linear**2)
+    )
 
     # Convert the mismatch factor to a positive loss in dB
     # db(plf) is negative or zero since plf <= 1; negate to make loss positive

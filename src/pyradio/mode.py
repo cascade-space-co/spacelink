@@ -43,7 +43,6 @@ class Mode:
         coding_scheme: str,
         modulation: str,
         bits_per_symbol: Quantity,
-        symbol_rate: Quantity,
         code_rate: float,
         spectral_efficiency: float,
         required_ebno: float,
@@ -73,7 +72,7 @@ class Mode:
             raise ValueError("Modulation must not be empty")
         if spectral_efficiency <= 0.0:
             raise ValueError("Spectral efficiency must be positive")
-        if (code_rate <= 0.0 or code_rate > 1.0):
+        if code_rate <= 0.0 or code_rate > 1.0:
             raise ValueError("Code rate must be between 0 and 1")
         if implementation_loss < 0.0:
             raise ValueError("Implementation loss must be non-negative")
@@ -83,40 +82,10 @@ class Mode:
         self.coding_scheme = coding_scheme
         self.modulation = modulation
         self.bits_per_symbol = bits_per_symbol
-        self.symbol_rate = symbol_rate
+        self.code_rate = code_rate
         self.spectral_efficiency = spectral_efficiency
         self.required_ebno = required_ebno
         self.implementation_loss = implementation_loss
-        self.code_rate = code_rate
-
-    @property
-    def data_rate(self) -> Quantity:
-        """
-        Calculate the data rate for this mode given a bandwidth.
-
-        The data rate is calculated based on the spectral efficiency and bandwidth.
-        Returns:
-            Data rate in bits per second (bps)
-
-        Raises:
-            ValueError: If bandwidth is not positive
-        """
-        return self.symbol_rate * self.bits_per_symbol * self.code_rate
-
-    @property
-    def bandwidth(self) -> Quantity:
-        """
-        Calculate the required bandwidth for this mode given a symbol rate.
-
-        The bandwidth is calculated based on the spectral efficiency and data rate.
-        Returns:
-            Required bandwidth in Hz
-
-        Raises:
-            ValueError: If data rate is not positive
-        """
-        # Calculate required bandwidth in Hz
-        return self.symbol_rate.to('Hz') / self.spectral_efficiency
 
     def ebno(self, c_over_n: float) -> float:
         """Eb/N0 for given carrier to noise ratio"""
@@ -146,7 +115,9 @@ class Mode:
         Returns:
             String representation of the mode
         """
-        code_rate_str = f", Code Rate: {self.code_rate:.3f}" if self.code_rate is not None else ""
+        code_rate_str = (
+            f", Code Rate: {self.code_rate:.3f}" if self.code_rate is not None else ""
+        )
         return (
             f"{self.name}: {self.modulation} with {self.coding_scheme}\n"
             f"  Spectral Efficiency: {self.spectral_efficiency:.3f} bits/symbol{code_rate_str}\n"

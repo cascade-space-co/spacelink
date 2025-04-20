@@ -81,6 +81,16 @@ poetry run pytest tests/test_antenna.py
 poetry run pytest -v
 ```
 
+### Code Formatting and Linting
+
+```bash
+# Format code with Black
+poetry run black .
+
+# Lint code with Flake8
+poetry run flake8 .
+```
+
 ### Running Jupyter Notebooks
 
 The examples directory contains Jupyter notebooks demonstrating PyRadio's capabilities. To run these notebooks:

@@ -32,6 +32,7 @@ class RefValues:
         ebno: Energy per bit to noise power spectral density ratio as a Quantity
         link_margin: Link margin as a Quantity
     """
+
     # Physical parameters
     wavelength: Optional[Quantity] = None
 
@@ -148,18 +149,18 @@ def load_test_case(case_name: str) -> RadioTestCase:
     base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, f"{case_name}.yaml")
 
-    with open(file_path, 'r') as f:
+    with open(file_path, "r") as f:
         case_data = yaml.safe_load(f)
 
     # Convert string values with units to Pint quantities
     processed_data = {}
     for key, value in case_data.items():
         # Skip ref_values, will process separately
-        if key == 'ref_values':
+        if key == "ref_values":
             continue
 
         # Store name and description as is
-        if key == 'name' or key == 'description':
+        if key == "name" or key == "description":
             processed_data[key] = value
             continue
 
@@ -170,11 +171,11 @@ def load_test_case(case_name: str) -> RadioTestCase:
                 processed_data[key] = qty
             except (ValueError, TypeError):
                 processed_data[key] = value
-        elif isinstance(value, dict) and 'value' in value and 'unit' in value:
+        elif isinstance(value, dict) and "value" in value and "unit" in value:
             # Handle the new structured format
             try:
-                unit_str = value['unit']
-                qty_value = value['value']
+                unit_str = value["unit"]
+                qty_value = value["value"]
                 qty = Q_(qty_value, unit_str)
                 processed_data[key] = qty
             except (ValueError, TypeError):
@@ -183,7 +184,7 @@ def load_test_case(case_name: str) -> RadioTestCase:
             processed_data[key] = value
 
     # Extract ref_values to create a RefValues object
-    ref_values_dict = case_data.get('ref_values', {})
+    ref_values_dict = case_data.get("ref_values", {})
 
     # Create a RefValues object and populate with Pint quantities
     ref_values = RefValues()
@@ -195,11 +196,11 @@ def load_test_case(case_name: str) -> RadioTestCase:
                     setattr(ref_values, key, qty)
                 except (ValueError, TypeError):
                     setattr(ref_values, key, value)
-            elif isinstance(value, dict) and 'value' in value and 'unit' in value:
+            elif isinstance(value, dict) and "value" in value and "unit" in value:
                 # Handle the new structured format
                 try:
-                    unit_str = value['unit']
-                    qty_value = value['value']
+                    unit_str = value["unit"]
+                    qty_value = value["value"]
                     qty = Q_(qty_value, unit_str)
                     setattr(ref_values, key, qty)
                 except (ValueError, TypeError):
@@ -208,8 +209,8 @@ def load_test_case(case_name: str) -> RadioTestCase:
                 setattr(ref_values, key, value)
 
     # Add the RefValues object to the processed data
-    processed_data['ref'] = ref_values
-    processed_data['ref_values'] = ref_values_dict  # for backward compatibility
+    processed_data["ref"] = ref_values
+    processed_data["ref_values"] = ref_values_dict  # for backward compatibility
 
     # Create and return the RadioTestCase
     return RadioTestCase(**processed_data)
@@ -223,5 +224,10 @@ def list_test_cases() -> List[str]:
         List of test case names (without .yaml extension)
     """
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    files = [f for f in os.listdir(base_dir) if f.endswith('.yaml')]
+    # Exclude cascade fixture files from radio test cases
+    files = [
+        f
+        for f in os.listdir(base_dir)
+        if f.endswith(".yaml") and not f.startswith("cascade_")
+    ]
     return [os.path.splitext(f)[0] for f in files]

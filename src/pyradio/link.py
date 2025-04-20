@@ -11,8 +11,9 @@ from pint import Quantity
 from .antenna import Antenna, polarization_loss
 from .mode import Mode
 from .path import free_space_path_loss
-from .units import Hz, K, m, W
+from .units import Hz, K, m, W, mismatch_loss
 from . import noise
+from .cascade import Cascade
 
 
 class Link:
@@ -28,10 +29,10 @@ class Link:
         tx_power: Transmitter power in W
         tx_antenna: Transmitter antenna
         rx_antenna: Receiver antenna
-        rx_system_noise_temp: Receiver system noise temperature in Kelvin
+        tx_front_end: Cascade of transmit front end stages
+        rx_front_end: Cascade of receive front end stages
         rx_antenna_noise_temp: Receiver antenna noise temperature in Kelvin
         distance_fn: Callable that returns the distance in meters
-        symbol_rate: Symbol rate in Hz
         mode: Mode object with modulation and channel coding settings
     """
 
@@ -41,10 +42,12 @@ class Link:
         tx_antenna: Antenna,
         rx_antenna: Antenna,
         tx_power: Quantity,
-        rx_system_noise_temp: Quantity,
+        tx_front_end: Cascade,
+        rx_front_end: Cascade,
         rx_antenna_noise_temp: Quantity,
         distance_fn: Callable[[], Quantity],
-        mode: Mode
+        mode: Mode,
+        symbol_rate: Quantity,
     ):
         """
         Initialize a Link object with all necessary parameters.
@@ -54,7 +57,8 @@ class Link:
             tx_antenna: Transmitter antenna
             rx_antenna: Receiver antenna
             tx_power: Transmitter power in W
-            rx_system_noise_temp: Receiver system noise temperature in Kelvin
+            tx_front_end: Cascade of transmit front end stages
+            rx_front_end: Cascade of receive front end stages
             rx_antenna_noise_temp: Receiver antenna noise temperature in Kelvin
             distance_fn: Callable that returns the distance in meters
             mode: Mode object with modulation and channel coding settings
@@ -69,8 +73,10 @@ class Link:
             raise ValueError("tx_antenna must be an Antenna instance")
         if not isinstance(rx_antenna, Antenna):
             raise ValueError("rx_antenna must be an Antenna instance")
-        if rx_system_noise_temp <= 0.0 * K:
-            raise ValueError("System noise temperature must be positive")
+        if not isinstance(tx_front_end, Cascade):
+            raise ValueError("tx_front_end must be a Cascade instance")
+        if not isinstance(rx_front_end, Cascade):
+            raise ValueError("rx_front_end must be a Cascade instance")
         if rx_antenna_noise_temp < 0.0 * K:
             raise ValueError("Antenna noise temperature cannot be negative")
         if not callable(distance_fn):
@@ -82,11 +88,16 @@ class Link:
         self.tx_power = tx_power
         self.tx_antenna = tx_antenna
         self.rx_antenna = rx_antenna
-        self.rx_system_noise_temp = rx_system_noise_temp
+        self.tx_front_end = tx_front_end
+        self.rx_front_end = rx_front_end
         self.rx_antenna_noise_temp = rx_antenna_noise_temp
         self.distance_fn = distance_fn
         self.frequency = frequency
         self.mode = mode
+        # Validate and store symbol rate
+        if symbol_rate <= 0.0 * Hz:
+            raise ValueError("Symbol rate must be positive")
+        self.symbol_rate = symbol_rate
 
     @property
     def distance(self) -> Quantity:
@@ -115,7 +126,38 @@ class Link:
         Returns:
             Quantity: Total system noise temperature in Kelvin
         """
-        return self.rx_system_noise_temp + self.rx_antenna_noise_temp
+        # Total system noise temperature = antenna noise temp +
+        # input-referred noise of receive front end
+        # If no stages in front end, treat front end noise as 0
+        try:
+            fe_noise_temp = (
+                self.rx_front_end.cascaded_noise_temperature_k()
+                if len(self.rx_front_end) > 0
+                else 0.0 * K
+            )
+        except ValueError:
+            fe_noise_temp = 0.0 * K
+        return self.rx_antenna_noise_temp + fe_noise_temp
+
+    @property
+    def bandwidth(self) -> Quantity:
+        """
+        Signal bandwidth for this link based on symbol rate and spectral efficiency.
+
+        Returns:
+            Bandwidth in Hz
+        """
+        return self.symbol_rate.to("Hz") / self.mode.spectral_efficiency
+
+    @property
+    def data_rate(self) -> Quantity:
+        """
+        Data rate for this link based on symbol rate, bits per symbol, and code rate.
+
+        Returns:
+            Data rate in bits per second (bps)
+        """
+        return self.symbol_rate * self.mode.bits_per_symbol * self.mode.code_rate
 
     @property
     def noise_power(self) -> float:
@@ -131,23 +173,25 @@ class Link:
         Returns:
             float: Noise power in dBW
         """
-        power_quantity = noise.power(self.mode.bandwidth, self.system_noise_temperature)
-        return power_quantity.to('dBW').magnitude
+        power_quantity = noise.power(self.bandwidth, self.system_noise_temperature)
+        return power_quantity.to("dBW").magnitude
 
     @property
     def eirp(self) -> float:
         """
         Calculate the Effective Isotropic Radiated Power (EIRP) in dBW.
 
-        EIRP = Transmitter Power + Transmitter Antenna Gain
-
-        Note: Implementation loss is accounted for in the link margin calculation,
-        not in the EIRP calculation.
+        EIRP = Transmitter Power + Cascaded gain of transmit front end + Transmitter Antenna Gain
 
         Returns:
             float: EIRP in dBW
         """
-        return self.tx_power.to('dBW').magnitude + self.tx_antenna.gain(self.frequency)
+        tx_power_dbw = self.tx_power.to("dBW").magnitude
+        fe_gain_db = self.tx_front_end.cascaded_gain().to("dB").magnitude
+        ant_gain_db = self.tx_antenna.gain(self.frequency)
+        # Account for antenna return loss (mismatch loss)
+        rl_loss_db = mismatch_loss(self.tx_antenna.return_loss)
+        return tx_power_dbw + fe_gain_db + ant_gain_db - rl_loss_db
 
     @property
     def path_loss(self) -> float:
@@ -169,7 +213,9 @@ class Link:
         Returns:
             float: Polarization loss in dB
         """
-        return polarization_loss(self.tx_antenna.axial_ratio, self.rx_antenna.axial_ratio)
+        return polarization_loss(
+            self.tx_antenna.axial_ratio, self.rx_antenna.axial_ratio
+        )
 
     @property
     def received_power(self) -> float:

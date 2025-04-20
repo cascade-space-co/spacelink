@@ -37,7 +37,7 @@ max-line-length = 100
 exclude = [".git", "__pycache__", "build", "dist"]
 
 [tool.pytest.ini_options]
-addopts = "-ra -q --cov=src --cov-report=term-missing"
+addopts = "-ra -q"
 testpaths = [
     "tests"
 ]

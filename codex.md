@@ -17,6 +17,7 @@ this code
 - Any loss parameter must be positive. Throw errors if a negative loss is specified
 
 ## Commands
+Always run commands using poetry
 - Build: `poetry build`
 - Install: `poetry install --with test`
 - Run all tests: `poetry run pytest -v`
@@ -37,7 +38,7 @@ this code
 - Handle errors with appropriate exceptions and explicit messages
 - Meet 90% code coverage minimum requirement
 - Include doctests in function docstrings where possible
-- do not append units to variables
+- do not append units to variables (i.e. do not do _k, _db, etc.)
 - Use pint for units except those in dB. variables should always be in fundamental units
 - Numerical values should be in human readable engineering units.
 - dB (decibels) shall be floats

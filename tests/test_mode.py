@@ -4,7 +4,7 @@ import pytest
 from pint import Quantity
 
 from pyradio.mode import Mode
-from pyradio.units import Hz, MHz, db, dimensionless
+from pyradio.units import db, dimensionless
 
 
 def test_mode_initialization():
@@ -16,7 +16,6 @@ def test_mode_initialization():
         coding_scheme="Convolutional",
         modulation="BPSK",
         bits_per_symbol=Quantity(1, dimensionless),
-        symbol_rate=Quantity(1, MHz),
         code_rate=0.5,
         spectral_efficiency=0.5,
         required_ebno=4.0,
@@ -28,7 +27,6 @@ def test_mode_initialization():
     assert mode.coding_scheme == "Convolutional"
     assert mode.modulation == "BPSK"
     assert mode.bits_per_symbol.magnitude == pytest.approx(1.0)
-    assert mode.symbol_rate == Quantity(1, MHz)
     assert mode.spectral_efficiency == pytest.approx(0.5)
     assert mode.required_ebno == pytest.approx(4.0)
     assert mode.implementation_loss == pytest.approx(2.0)
@@ -44,7 +42,6 @@ def test_invalid_parameters():
             coding_scheme="LDPC",
             modulation="QPSK",
             bits_per_symbol=Quantity(2, dimensionless),
-            symbol_rate=Quantity(1, MHz),
             code_rate=0.5,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -57,7 +54,6 @@ def test_invalid_parameters():
             coding_scheme="",
             modulation="QPSK",
             bits_per_symbol=Quantity(2, dimensionless),
-            symbol_rate=Quantity(1, MHz),
             code_rate=0.5,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -70,7 +66,6 @@ def test_invalid_parameters():
             coding_scheme="LDPC",
             modulation="",
             bits_per_symbol=Quantity(2, dimensionless),
-            symbol_rate=Quantity(1, MHz),
             code_rate=0.5,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -83,7 +78,6 @@ def test_invalid_parameters():
             coding_scheme="LDPC",
             modulation="QPSK",
             bits_per_symbol=Quantity(2, dimensionless),
-            symbol_rate=Quantity(1, MHz),
             code_rate=0.5,
             spectral_efficiency=0.0,
             required_ebno=3.0,
@@ -96,7 +90,6 @@ def test_invalid_parameters():
             coding_scheme="LDPC",
             modulation="QPSK",
             bits_per_symbol=Quantity(2, dimensionless),
-            symbol_rate=Quantity(1, MHz),
             code_rate=0.0,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -109,7 +102,6 @@ def test_invalid_parameters():
             coding_scheme="LDPC",
             modulation="QPSK",
             bits_per_symbol=Quantity(2, dimensionless),
-            symbol_rate=Quantity(1, MHz),
             code_rate=1.1,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -122,59 +114,11 @@ def test_invalid_parameters():
             coding_scheme="LDPC",
             modulation="QPSK",
             bits_per_symbol=Quantity(2, dimensionless),
-            symbol_rate=Quantity(1, MHz),
             code_rate=0.5,
             spectral_efficiency=1.0,
             required_ebno=3.0,
             implementation_loss=-1.0,  # Negative loss is invalid
         )
-
-
-def test_data_rate_calculation():
-    """Test data rate calculation."""
-    # Create a test mode
-    mode = Mode(
-        name="BPSK 1/2",
-        coding_scheme="Convolutional",
-        modulation="BPSK",
-        bits_per_symbol=Quantity(1, dimensionless),
-        symbol_rate=Quantity(1, MHz),
-        code_rate=0.5,
-        spectral_efficiency=0.5,
-        required_ebno=4.0,
-        implementation_loss=2.0,
-    )
-
-    # Calculate expected data rate: symbol_rate * bits_per_symbol * code_rate
-    # 1 MHz * 1 * 0.5 = 0.5 MHz
-    data_rate = mode.data_rate
-    expected_value = 0.5 * 1e6  # 500 kHz
-
-    # Convert to Hz for comparison
-    assert data_rate.to(Hz).magnitude == pytest.approx(expected_value)
-
-
-def test_bandwidth_calculation():
-    """Test bandwidth calculation."""
-    # Create a test mode
-    mode = Mode(
-        name="QPSK 3/4",
-        coding_scheme="LDPC",
-        modulation="QPSK",
-        bits_per_symbol=Quantity(2, dimensionless),
-        symbol_rate=Quantity(1, MHz),
-        code_rate=0.75,
-        spectral_efficiency=1.5,
-        required_ebno=3.0,
-        implementation_loss=1.0,
-    )
-
-    # Calculate expected bandwidth: symbol_rate / spectral_efficiency
-    # 1 MHz / 1.5 = 0.667 MHz
-    bandwidth = mode.bandwidth
-    expected_bandwidth = Quantity(1.0 / 1.5, MHz)
-
-    assert bandwidth.to(Hz).magnitude == pytest.approx(expected_bandwidth.to(Hz).magnitude)
 
 
 def test_ebno_calculation():
@@ -185,7 +129,6 @@ def test_ebno_calculation():
         coding_scheme="Convolutional",
         modulation="QPSK",
         bits_per_symbol=Quantity(2, dimensionless),
-        symbol_rate=Quantity(1, MHz),
         code_rate=0.5,
         spectral_efficiency=1.0,
         required_ebno=4.0,
@@ -208,7 +151,6 @@ def test_margin_calculation():
         coding_scheme="Convolutional",
         modulation="BPSK",
         bits_per_symbol=Quantity(1, dimensionless),
-        symbol_rate=Quantity(1, MHz),
         code_rate=0.5,
         spectral_efficiency=0.5,
         required_ebno=4.0,
@@ -250,7 +192,6 @@ def test_str_representation():
         coding_scheme="Convolutional",
         modulation="BPSK",
         bits_per_symbol=Quantity(1, dimensionless),
-        symbol_rate=Quantity(1, MHz),
         code_rate=0.5,
         spectral_efficiency=0.5,
         required_ebno=4.0,
