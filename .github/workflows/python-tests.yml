@@ -2,7 +2,7 @@ name: Python package
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -10,24 +10,30 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Quote version numbers to prevent YAML float parsing (3.10 -> 3.1)
-        python-version: ['3.10', '3.11']
+        python-version: ["3.10", "3.11"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: latest
+          version: 1.8.2
+          installer-parallel: false
+        timeout-minutes: 5
       - name: Install dependencies
         run: |
           poetry install --with test
+        timeout-minutes: 5
+
       - name: Lint with flake8
         run: poetry run flake8 .
+
       - name: Run tests
         run: |
           poetry run pytest --maxfail=1 --disable-warnings -v
