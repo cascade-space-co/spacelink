@@ -2,16 +2,18 @@
 Test that example Jupyter notebooks execute without errors.
 """
 import json
-import pytest
 import matplotlib
+from pathlib import Path
+import pytest
+
 
 # Use non-interactive backend for plotting
 matplotlib.use('Agg')
 
-from pathlib import Path
 
 # Directory containing example notebooks
 EXAMPLES_DIR = Path(__file__).parent.parent / 'examples'
+
 
 @pytest.mark.parametrize('nb_path', EXAMPLES_DIR.glob('*.ipynb'))
 def test_notebook_execution(nb_path):
