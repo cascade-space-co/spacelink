@@ -2,12 +2,16 @@ import os
 import sys
 import sphinx_rtd_theme
 
-sys.path.insert(0,
+sys.path.insert(
+    0,
     os.path.abspath(
         os.path.join(
-            os.path.dirname(__file__), '..', '..', 'src'
+            os.path.dirname(__file__),
+            '..',
+            '..',
+            'src',
         )
-    )
+    ),
 )
 
 # -- Project information -----------------------------------------------------
