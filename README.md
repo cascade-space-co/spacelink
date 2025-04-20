@@ -2,6 +2,10 @@
 
 A Python library for radio frequency calculations, including antenna modeling, RF conversions, and noise calculations.
 
+Created and maintained by the Heliosphere Network Corporation
+
+https://www.heliospherenetwork.com
+
 ## Installation
 
 ```bash
@@ -94,37 +98,12 @@ When running a notebook for the first time, make sure to select the correct kern
    poetry run python -m ipykernel install --user --name spacelink --display-name "Python (SpaceLink)"
    ```
 
-Alternatively, you can directly open a specific notebook:
-
-```bash
-# Start Jupyter with a specific notebook
-poetry run jupyter notebook examples/leo_satellite_analysis.ipynb
-```
-
 ### Building Documentation
 
 ```bash
 # Build HTML documentation
 poetry run sphinx-build -b html docs/source docs/build
 ```
-
-## Features
-
-- **Antenna Calculations**
-  - Dish antenna gain calculation
-  - 3dB beamwidth calculation
-  - Support for different frequencies and dish sizes
-
-- **RF Conversions**
-  - Convert between dB and linear scales
-  - Wavelength calculations
-  - Power ratio conversions
-
-- **Noise Calculations**
-  - Thermal noise power
-  - Noise figure to temperature conversion
-  - Temperature to noise figure conversion
-  - Cascaded noise temperature calculation
 
 ## License
 
