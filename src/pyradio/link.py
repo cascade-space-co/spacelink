@@ -11,7 +11,7 @@ from pint import Quantity
 from .antenna import Antenna, polarization_loss
 from .mode import Mode
 from .path import free_space_path_loss
-from .units import Hz, K, m, W
+from .units import Hz, K, m, W, mismatch_loss
 from . import noise
 from .cascade import Cascade
 
@@ -163,7 +163,9 @@ class Link:
         tx_power_dbw = self.tx_power.to("dBW").magnitude
         fe_gain_db = self.tx_front_end.cascaded_gain().to("dB").magnitude
         ant_gain_db = self.tx_antenna.gain(self.frequency)
-        return tx_power_dbw + fe_gain_db + ant_gain_db
+        # Account for antenna return loss (mismatch loss)
+        rl_loss_db = mismatch_loss(self.tx_antenna.return_loss)
+        return tx_power_dbw + fe_gain_db + ant_gain_db - rl_loss_db
 
     @property
     def path_loss(self) -> float:
