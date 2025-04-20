@@ -20,10 +20,6 @@ autopep8 = "^2.3.2"
 sphinx = "^7.2.6"
 sphinx-rtd-theme = "^2.0.0"
 sphinx-autodoc-typehints = "^1.25.2"
-notebook = "^7.0.0"
-ipykernel = "^6.29.0"
-matplotlib = "^3.8.0"
-jupytext = "^1.16.0"
 
 [tool.poetry.group.test.dependencies]
  pytest = ">=7.4.0"
@@ -32,7 +28,6 @@ jupytext = "^1.16.0"
  black = "^24.2.0"
  flake8 = "^7.0.0"
  nbconvert = "^7.16.6"
- ipykernel = "^6.29.5"
 
 [tool.flake8]
 max-line-length = 100
