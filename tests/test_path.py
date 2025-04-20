@@ -3,8 +3,8 @@ Tests for path loss calculations.
 """
 
 import pytest
-from pyradio.path import free_space_path_loss, spreading_loss, aperture_loss
-from pyradio.units import Q_, m, km, GHz, MHz
+from spacelink.path import free_space_path_loss, spreading_loss, aperture_loss
+from spacelink.units import Q_, m, km, GHz, MHz
 
 
 def test_free_space_path_loss():

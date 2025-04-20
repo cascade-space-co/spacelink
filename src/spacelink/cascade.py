@@ -9,13 +9,13 @@ overall gain, noise figure, noise temperature, and input-referred P1dB.
 import math
 from typing import List, Optional, Dict, Any
 from pint import Quantity
-from pyradio.noise import (
+from spacelink.noise import (
     noise_figure_to_temperature,
     temperature_to_noise_figure,
     cascaded_noise_figure,
     cascaded_noise_temperature,
 )
-from pyradio.units import (
+from spacelink.units import (
     Q_,
     dB,
     dBm,

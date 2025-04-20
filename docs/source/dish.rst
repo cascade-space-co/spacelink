@@ -1,7 +1,7 @@
 Dish Module
 ===========
 
-.. automodule:: pyradio.dish
+.. automodule:: spacelink.dish
    :members:
    :undoc-members:
    :show-inheritance:

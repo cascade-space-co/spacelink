@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "pyradio"
+name = "spacelink"
 version = "0.1.0"
 description = "Python module for radio computation"
 authors = ["Heliosphere Network"]
 readme = "README.md"
 packages = [
-    { include = "pyradio", from = "src" }
+    { include = "spacelink", from = "src" }
 ]
 
 [tool.poetry.dependencies]
@@ -26,11 +26,13 @@ matplotlib = "^3.8.0"
 jupytext = "^1.16.0"
 
 [tool.poetry.group.test.dependencies]
-pytest = ">=7.4.0"
-pytest-cov = ">=4.1.0"
-pyyaml = "^6.0.2"
-black = "^24.2.0"
-flake8 = "^7.0.0"
+ pytest = ">=7.4.0"
+ pytest-cov = ">=4.1.0"
+ pyyaml = "^6.0.2"
+ black = "^24.2.0"
+ flake8 = "^7.0.0"
+ nbconvert = "^7.16.6"
+ ipykernel = "^6.29.5"
 
 [tool.flake8]
 max-line-length = 100

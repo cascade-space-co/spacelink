@@ -64,7 +64,7 @@ def wavelength(frequency: Quantity) -> Quantity:
         Exception: If the input quantity has incompatible units.
 
     Example:
-        >>> from pyradio.units import wavelength, GHz, m
+        >>> from spacelink.units import wavelength, GHz, m
         >>> wavelength(1 * GHz).to(m)
         <Quantity(0.299792458, 'meter')>
     """
@@ -85,7 +85,7 @@ def frequency(wavelength: Quantity) -> Quantity:
         Exception: If the input quantity has incompatible units.
 
     Example:
-        >>> from pyradio.units import frequency, m, MHz
+        >>> from spacelink.units import frequency, m, MHz
         >>> frequency(1 * m).to(MHz)
         <Quantity(299.792458, 'megahertz')>
     """

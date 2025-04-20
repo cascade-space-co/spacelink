@@ -1,8 +1,8 @@
 """Tests for the antenna module."""
 
 import pytest
-from pyradio.antenna import Antenna, Dish, FixedGain, polarization_loss
-from pyradio.units import GHz, MHz, m
+from spacelink.antenna import Antenna, Dish, FixedGain, polarization_loss
+from spacelink.units import GHz, MHz, m
 
 
 def test_antenna_is_abstract():

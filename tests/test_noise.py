@@ -1,8 +1,8 @@
 """Tests for the noise module."""
 
 import pytest
-import pyradio.noise as noise
-from pyradio.units import Hz, MHz, K, dBW
+import spacelink.noise as noise
+from spacelink.units import Hz, MHz, K, dBW
 from pint.testing import assert_allclose
 
 

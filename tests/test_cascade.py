@@ -3,8 +3,8 @@ import pytest
 from pint.testing import assert_allclose
 import yaml
 
-from pyradio.units import Q_, dB, dimensionless, K, dBm
-from pyradio.cascade import Stage, Cascade
+from spacelink.units import Q_, dB, dimensionless, K, dBm
+from spacelink.cascade import Stage, Cascade
 import os
 
 

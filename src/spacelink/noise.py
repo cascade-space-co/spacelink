@@ -6,7 +6,7 @@ in radio systems, including thermal noise, noise figure, and noise temperature.
 """
 
 from pint import Quantity
-from pyradio.units import Hz, Q_
+from spacelink.units import Hz, Q_
 from typing import List
 
 # Define constants with units

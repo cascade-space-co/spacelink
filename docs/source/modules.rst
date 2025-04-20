@@ -1,7 +1,7 @@
-PyRadio Modules
+SpaceLink Modules
 ===============
 
-.. automodule:: pyradio
+.. automodule:: spacelink
    :members:
    :undoc-members:
    :show-inheritance:
@@ -14,4 +14,10 @@ Module Documentation
    :maxdepth: 4
 
    units
-   dish 
+   dish
+   antenna
+   cascade
+   link
+   mode
+   noise
+   path

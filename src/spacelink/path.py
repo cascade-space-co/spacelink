@@ -7,7 +7,7 @@ including free space path loss, spreading loss, and aperture loss.
 
 import math
 from pint import Quantity
-from pyradio.units import wavelength, m, Hz
+from spacelink.units import wavelength, m, Hz
 
 
 def spreading_loss(distance: Quantity) -> Quantity:

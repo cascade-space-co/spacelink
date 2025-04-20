@@ -7,7 +7,7 @@ signal quality parameters.
 """
 
 from pint import Quantity
-from .units import db
+from spacelink.units import db
 
 """TODO: change this to an abstract base class
 

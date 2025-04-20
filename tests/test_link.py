@@ -5,12 +5,12 @@ This module contains pytest-style tests for link budget calculations.
 """
 
 import pytest
-from pyradio.link import Link
-from pyradio.antenna import FixedGain, Dish
-from pyradio.mode import Mode
-from pyradio.units import Q_, MHz, dimensionless
+from spacelink.link import Link
+from spacelink.antenna import FixedGain, Dish
+from spacelink.mode import Mode
+from spacelink.units import Q_, MHz, dimensionless
 from test_cases import load_test_case
-from pyradio.cascade import Cascade, Stage
+from spacelink.cascade import Cascade, Stage
 
 
 def test_link_initialization():
