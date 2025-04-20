@@ -6,22 +6,45 @@ Created and maintained by the Heliosphere Network Corporation
 
 https://www.heliospherenetwork.com
 
-## Installation
+### Setup
 
+#### Installing Poetry
+
+##### macOS
 ```bash
-# Install using poetry
-poetry install
+# Using Homebrew
+brew install poetry
 
-# Or install directly with pip
-pip install .
+# Or using the official installer
+curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-## Usage
+##### Linux
+```bash
+# Using pipx (recommended)
+pip install pipx
+pipx ensurepath
+pipx install poetry
 
-## Development
+# Debian/Ubuntu using apt
+sudo apt install python3-poetry
 
-### Setup
-#### Mac OS X
+# Or using the official installer
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+##### Windows
+```powershell
+# Using the official installer
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+
+# Or using pipx
+pip install pipx
+pipx ensurepath
+pipx install poetry
+```
+
+#### Installing Dependencies
 ```bash
 # Install dependencies and the package in development mode
 poetry install
