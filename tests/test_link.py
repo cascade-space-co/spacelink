@@ -10,6 +10,7 @@ from pyradio.antenna import FixedGain, Dish
 from pyradio.mode import Mode
 from pyradio.units import Q_, MHz, dimensionless
 from test_cases import load_test_case
+from pyradio.cascade import Cascade, Stage
 
 
 def test_link_initialization():
@@ -24,7 +25,8 @@ def test_link_initialization():
         tx_antenna=tx_antenna,
         rx_antenna=rx_antenna,
         tx_power=Q_(10.0, "W"),
-        rx_system_noise_temp=Q_(290.0, "K"),
+        tx_front_end=Cascade(),
+        rx_front_end=Cascade(),
         rx_antenna_noise_temp=Q_(100.0, "K"),
         distance_fn=lambda: Q_(1000.0, "km"),
         mode=Mode(
@@ -44,8 +46,9 @@ def test_link_initialization():
     assert link.tx_power.magnitude == pytest.approx(10.0, rel=0.01)
     assert link.tx_antenna == tx_antenna
     assert link.rx_antenna == rx_antenna
-    assert link.rx_system_noise_temp.magnitude == pytest.approx(290.0, rel=0.01)
+    # With empty receive front end, system noise temperature equals antenna noise temp
     assert link.rx_antenna_noise_temp.magnitude == pytest.approx(100.0, rel=0.01)
+    assert link.system_noise_temperature.magnitude == pytest.approx(100.0, rel=0.01)
     assert link.distance.to("m").magnitude == pytest.approx(1000000.0, rel=0.01)
     assert link.frequency.to("Hz").magnitude == pytest.approx(2.4e9, rel=0.01)
     # Now polarization loss is calculated from axial ratios
@@ -65,7 +68,8 @@ def test_link_initialization_invalid():
             tx_antenna=tx_antenna,
             rx_antenna=rx_antenna,
             tx_power=Q_(-1.0, "W"),
-            rx_system_noise_temp=Q_(290.0, "K"),
+            tx_front_end=Cascade(),
+            rx_front_end=Cascade(),
             rx_antenna_noise_temp=Q_(100.0, "K"),
             distance_fn=lambda: Q_(1000.0, "km"),
             mode=Mode(
@@ -88,7 +92,8 @@ def test_link_initialization_invalid():
             tx_antenna=10.0,  # Not an Antenna instance
             rx_antenna=rx_antenna,
             tx_power=Q_(10.0, "W"),
-            rx_system_noise_temp=Q_(290.0, "K"),
+            tx_front_end=Cascade(),
+            rx_front_end=Cascade(),
             rx_antenna_noise_temp=Q_(100.0, "K"),
             distance_fn=lambda: Q_(1000.0, "km"),
             mode=Mode(
@@ -110,7 +115,8 @@ def test_link_initialization_invalid():
             tx_antenna=tx_antenna,
             rx_antenna=20.0,  # Not an Antenna instance
             tx_power=Q_(10.0, "W"),
-            rx_system_noise_temp=Q_(290.0, "K"),
+            tx_front_end=Cascade(),
+            rx_front_end=Cascade(),
             rx_antenna_noise_temp=Q_(100.0, "K"),
             distance_fn=lambda: Q_(1000.0, "km"),
             mode=Mode(
@@ -126,28 +132,6 @@ def test_link_initialization_invalid():
             ),
         )
 
-    # Test invalid system noise temperature
-    with pytest.raises(ValueError, match="System noise temperature must be positive"):
-        Link(
-            frequency=Q_(2.4, "GHz"),
-            tx_antenna=tx_antenna,
-            rx_antenna=rx_antenna,
-            tx_power=Q_(10.0, "W"),
-            rx_system_noise_temp=Q_(0.0, "K"),
-            rx_antenna_noise_temp=Q_(100.0, "K"),
-            distance_fn=lambda: Q_(1000.0, "km"),
-            mode=Mode(
-                name="BPSK",
-                coding_scheme="uncoded",
-                modulation="BPSK",
-                bits_per_symbol=Q_(1, dimensionless),
-                symbol_rate=Q_(1, MHz),
-                code_rate=1.0,
-                spectral_efficiency=0.5,
-                required_ebno=10.0,
-                implementation_loss=1.0,
-            ),
-        )
 
     # Test invalid antenna noise temperature
     with pytest.raises(
@@ -158,7 +142,8 @@ def test_link_initialization_invalid():
             tx_antenna=tx_antenna,
             rx_antenna=rx_antenna,
             tx_power=Q_(10.0, "W"),
-            rx_system_noise_temp=Q_(290.0, "K"),
+            tx_front_end=Cascade(),
+            rx_front_end=Cascade(),
             rx_antenna_noise_temp=Q_(-1.0, "K"),
             distance_fn=lambda: Q_(1000.0, "km"),
             mode=Mode(
@@ -181,7 +166,8 @@ def test_link_initialization_invalid():
             tx_antenna=tx_antenna,
             rx_antenna=rx_antenna,
             tx_power=Q_(10.0, "W"),
-            rx_system_noise_temp=Q_(290.0, "K"),
+            tx_front_end=Cascade(),
+            rx_front_end=Cascade(),
             rx_antenna_noise_temp=Q_(100.0, "K"),
             distance_fn=1000.0,  # Not a callable
             mode=Mode(
@@ -204,7 +190,8 @@ def test_link_initialization_invalid():
             tx_antenna=tx_antenna,
             rx_antenna=rx_antenna,
             tx_power=Q_(10.0, "W"),
-            rx_system_noise_temp=Q_(290.0, "K"),
+            tx_front_end=Cascade(),
+            rx_front_end=Cascade(),
             rx_antenna_noise_temp=Q_(100.0, "K"),
             distance_fn=lambda: Q_(1000.0, "km"),
             mode=Mode(
@@ -227,7 +214,8 @@ def test_link_initialization_invalid():
             tx_antenna=FixedGain(10.0, axial_ratio=-1.0),
             rx_antenna=rx_antenna,
             tx_power=Q_(10.0, "W"),
-            rx_system_noise_temp=Q_(290.0, "K"),
+            tx_front_end=Cascade(),
+            rx_front_end=Cascade(),
             rx_antenna_noise_temp=Q_(100.0, "K"),
             distance_fn=lambda: Q_(1000.0, "km"),
             mode=Mode(
@@ -270,7 +258,8 @@ def test_link_calculations():
         tx_antenna=tx_antenna,
         rx_antenna=rx_antenna,
         tx_power=case.tx_power,
-        rx_system_noise_temp=case.system_noise_temp,
+        tx_front_end=Cascade(),
+        rx_front_end=Cascade([Stage(label="rx_fe", noise_temp=case.system_noise_temp)]),
         rx_antenna_noise_temp=case.antenna_noise_temp,
         distance_fn=lambda: case.distance,
         mode=Mode(
@@ -344,7 +333,8 @@ def test_lunar_downlink():
         tx_antenna=tx_antenna,
         rx_antenna=rx_antenna,
         tx_power=case.tx_power,
-        rx_system_noise_temp=case.system_noise_temp,
+        tx_front_end=Cascade(),
+        rx_front_end=Cascade([Stage(label="rx_fe", noise_temp=case.system_noise_temp)]),
         rx_antenna_noise_temp=case.antenna_noise_temp,
         distance_fn=lambda: case.distance,
         mode=mode,
@@ -396,7 +386,8 @@ def test_leo_downlink():
         tx_antenna=tx_antenna,
         rx_antenna=rx_antenna,
         tx_power=case.tx_power,
-        rx_system_noise_temp=case.system_noise_temp,
+        tx_front_end=Cascade(),
+        rx_front_end=Cascade([Stage(label="rx_fe", noise_temp=case.system_noise_temp)]),
         rx_antenna_noise_temp=case.antenna_noise_temp,
         distance_fn=lambda: case.distance,
         mode=mode,
@@ -452,7 +443,8 @@ def test_leo_uplink():
         tx_antenna=tx_antenna,
         rx_antenna=rx_antenna,
         tx_power=case.tx_power,
-        rx_system_noise_temp=case.system_noise_temp,
+        tx_front_end=Cascade(),
+        rx_front_end=Cascade([Stage(label="rx_fe", noise_temp=case.system_noise_temp)]),
         rx_antenna_noise_temp=case.antenna_noise_temp,
         distance_fn=lambda: case.distance,
         mode=mode,
@@ -506,7 +498,8 @@ def test_lunar_uplink():
         tx_antenna=tx_antenna,
         rx_antenna=rx_antenna,
         tx_power=case.tx_power,
-        rx_system_noise_temp=case.system_noise_temp,
+        tx_front_end=Cascade(),
+        rx_front_end=Cascade([Stage(label="rx_fe", noise_temp=case.system_noise_temp)]),
         rx_antenna_noise_temp=case.antenna_noise_temp,
         distance_fn=lambda: case.distance,
         mode=mode,

@@ -3,7 +3,7 @@ stages:
     gain: !Quantity { magnitude: 6.0, units: dB }
     noise_figure: !Quantity { magnitude: 1.0, units: dB }
   - label: att1
-    loss_db: 2.0
+    loss: 2.0
     noise_figure: !Quantity { magnitude: 0.5, units: dB }
   - label: amp2
     gain: !Quantity { magnitude: 4.0, units: dB }

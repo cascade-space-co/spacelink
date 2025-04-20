@@ -10,7 +10,7 @@ import os
 
 def test_stage_gain_and_loss_exclusive():
     with pytest.raises(ValueError):
-        Stage(label="bad", gain=Q_(10, dB), loss_db=Q_(3, dB))
+        Stage(label="bad", gain=Q_(10, dB), loss=Q_(3, dB))
 
 
 def test_stage_gain_linear_and_loss_linear():
@@ -18,7 +18,7 @@ def test_stage_gain_linear_and_loss_linear():
     assert_allclose(s_gain.gain, Q_(10, dB))
     # Linear gain is dimensionless
     assert_allclose(s_gain.gain_lin, Q_(10, dimensionless))
-    s_loss = Stage(label="l", loss_db=Q_(3, dB))
+    s_loss = Stage(label="l", loss=Q_(3, dB))
     assert_allclose(s_loss.gain, Q_(-3, dB))
     assert_allclose(s_loss.gain_lin, 10 ** (-3 / 10) * dimensionless, rtol=1e-6)
 
@@ -109,7 +109,7 @@ def test_cascade_len_and_getitem():
 
 def test_cascade_to_from_dict_and_yaml():
     s1 = Stage(label="a", gain=Q_(4, dB), noise_figure=Q_(1, dB))
-    s2 = Stage(label="b", loss_db=Q_(2, dB), noise_figure=Q_(2, dB))
+    s2 = Stage(label="b", loss=Q_(2, dB), noise_figure=Q_(2, dB))
     c = Cascade([s1, s2])
     d = c.to_dict()
     # Round-trip dict
@@ -162,7 +162,7 @@ def test_cascade_from_yaml_file_multiple():
     expected = Cascade(
         [
             Stage(label="amp1", gain=Q_(6, dB), noise_figure=Q_(1, dB)),
-            Stage(label="att1", loss_db=Q_(2, dB), noise_figure=Q_(0.5, dB)),
+            Stage(label="att1", loss=Q_(2, dB), noise_figure=Q_(0.5, dB)),
             Stage(label="amp2", gain=Q_(4, dB), noise_figure=Q_(2, dB)),
         ]
     )

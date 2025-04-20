@@ -37,8 +37,8 @@ class Stage:
 
     Args:
         label: Descriptive label for the stage.
-        gain: Gain in decibels. Mutually exclusive with loss_db.
-        loss_db: Loss in decibels (positive value). Mutually exclusive with gain.
+        gain: Gain in decibels. Mutually exclusive with loss.
+        loss: Loss in decibels (positive value). Mutually exclusive with gain.
         noise_figure: Noise figure in decibels. Mutually exclusive with noise_temp.
         noise_temp: Noise temperature in Kelvin. Mutually exclusive with noise_figure.
         p1db_dbm: Output 1dB compression point in dBm.
@@ -55,7 +55,7 @@ class Stage:
         self,
         label: str,
         gain: Optional[Quantity] = None,
-        loss_db: Optional[Quantity] = None,
+        loss: Optional[Quantity] = None,
         noise_figure: Optional[Quantity] = None,
         noise_temp: Optional[Quantity] = None,
         p1db_dbm: Optional[Quantity] = None,
@@ -68,12 +68,12 @@ class Stage:
         self.label: str = label
 
         # --- Gain/Loss (store as Quantity in dB) ---
-        if gain is not None and loss_db is not None:
-            raise ValueError(f"Stage '{label}': Cannot specify both gain and loss_db.")
-        if loss_db is not None:
+        if gain is not None and loss is not None:
+            raise ValueError(f"Stage '{label}': Cannot specify both gain and loss.")
+        if loss is not None:
             # Loss in dB is positive; stored as negative gain
             loss_q = (
-                loss_db.to(dB) if isinstance(loss_db, Quantity) else Q_(loss_db, dB)
+                loss.to(dB) if isinstance(loss, Quantity) else Q_(loss, dB)
             )
             self._gain: Quantity = -loss_q
         elif gain is not None:
@@ -309,7 +309,7 @@ class Stage:
             data["gain"] = float(self._gain.magnitude)
         else:
             # loss is stored as negative gain
-            data["loss_db"] = float((-self._gain).magnitude)
+            data["loss"] = float((-self._gain).magnitude)
         # Noise figure
         if self.noise_figure is not None:
             data["noise_figure"] = float(self.noise_figure.magnitude)
