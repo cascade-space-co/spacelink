@@ -1,21 +1,9 @@
-[project]
+[tool.poetry]
 name = "spacelink"
 version = "0.1.0"
 description = "Python module for radio computation"
-authors = [
-    {name = "Heliosphere Network"}
-]
+authors = ["Heliosphere Network"]
 readme = "README.md"
-requires-python = ">=3.10"
-dependencies = [
-    "numpy>=1.24.0,<3.0.0",
-    "scipy>=1.10.0,<2.0.0",
-    "pint>=0.24.4",
-    "pandas>=2.0.0",
-    "autopep8>=2.3.2"
-]
-
-[tool.poetry]
 packages = [
     { include = "spacelink", from = "src" }
 ]
