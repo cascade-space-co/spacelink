@@ -1,13 +1,22 @@
 import os
 import sys
+import sphinx_rtd_theme
 
-sys.path.insert(0, os.path.abspath("../../src"))
+sys.path.insert(0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__), '..', '..', 'src'
+        )
+    )
+)
 
 # -- Project information -----------------------------------------------------
-project = "PyRadio"
-copyright = "2024, Heliosphere Network"
+project = "SpaceLink"
+copyright = "2025, Heliosphere Network"
 author = "Heliosphere Network"
 release = "0.1.0"
+version = release
+root_doc = "index"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -23,6 +32,7 @@ exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "sphinx_rtd_theme"
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
