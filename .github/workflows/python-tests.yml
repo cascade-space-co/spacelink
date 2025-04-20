@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.10, 3.11]
+        # Quote version numbers to prevent YAML float parsing (3.10 -> 3.1)
+        python-version: ['3.10', '3.11']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
