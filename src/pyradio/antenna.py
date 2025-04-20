@@ -19,10 +19,12 @@ class Antenna(ABC):
     The gain method must be implemented by all concrete antenna classes.
     """
 
-    def __init__(self,
-                 axial_ratio: float = 0,
-                 noise_temperature: Quantity = 0.0 * K,
-                 return_loss: float = float('inf')):
+    def __init__(
+        self,
+        axial_ratio: float = 0,
+        noise_temperature: Quantity = 0.0 * K,
+        return_loss: float = float("inf"),
+    ):
         """
         Initialize an antenna with polarization, noise temperature, and return loss.
 
@@ -78,9 +80,13 @@ class FixedGain(Antenna):
         axial_ratio: Axial ratio in dB (0 dB for perfect circular, >40 dB for linear)
     """
 
-    def __init__(self, gain_: float, axial_ratio: float = 0,
-                 noise_temperature: Quantity = 0.0 * K,
-                 return_loss: float = float('inf')):
+    def __init__(
+        self,
+        gain_: float,
+        axial_ratio: float = 0,
+        noise_temperature: Quantity = 0.0 * K,
+        return_loss: float = float("inf"),
+    ):
         """
         Initialize a FixedGain antenna.
 
@@ -119,11 +125,14 @@ class Dish(Antenna):
         axial_ratio: Axial ratio in dB (0 dB for perfect circular, >40 dB for linear)
     """
 
-    def __init__(self, diameter: Quantity,
-                 efficiency: float = 0.65,
-                 axial_ratio: float = 0,
-                 noise_temperature: Quantity = 0.0 * K,
-                 return_loss: float = float('inf')):
+    def __init__(
+        self,
+        diameter: Quantity,
+        efficiency: float = 0.65,
+        axial_ratio: float = 0,
+        noise_temperature: Quantity = 0.0 * K,
+        return_loss: float = float("inf"),
+    ):
         """
         Initialize a Dish antenna.
 

@@ -47,6 +47,7 @@ class Link:
         rx_antenna_noise_temp: Quantity,
         distance_fn: Callable[[], Quantity],
         mode: Mode,
+        symbol_rate: Quantity,
     ):
         """
         Initialize a Link object with all necessary parameters.
@@ -93,6 +94,10 @@ class Link:
         self.distance_fn = distance_fn
         self.frequency = frequency
         self.mode = mode
+        # Validate and store symbol rate
+        if symbol_rate <= 0.0 * Hz:
+            raise ValueError("Symbol rate must be positive")
+        self.symbol_rate = symbol_rate
 
     @property
     def distance(self) -> Quantity:
@@ -121,7 +126,8 @@ class Link:
         Returns:
             Quantity: Total system noise temperature in Kelvin
         """
-        # Total system noise temperature = antenna noise temp + input-referred noise of receive front end
+        # Total system noise temperature = antenna noise temp +
+        # input-referred noise of receive front end
         # If no stages in front end, treat front end noise as 0
         try:
             fe_noise_temp = (
@@ -132,6 +138,26 @@ class Link:
         except ValueError:
             fe_noise_temp = 0.0 * K
         return self.rx_antenna_noise_temp + fe_noise_temp
+
+    @property
+    def bandwidth(self) -> Quantity:
+        """
+        Signal bandwidth for this link based on symbol rate and spectral efficiency.
+
+        Returns:
+            Bandwidth in Hz
+        """
+        return self.symbol_rate.to("Hz") / self.mode.spectral_efficiency
+
+    @property
+    def data_rate(self) -> Quantity:
+        """
+        Data rate for this link based on symbol rate, bits per symbol, and code rate.
+
+        Returns:
+            Data rate in bits per second (bps)
+        """
+        return self.symbol_rate * self.mode.bits_per_symbol * self.mode.code_rate
 
     @property
     def noise_power(self) -> float:
@@ -147,7 +173,7 @@ class Link:
         Returns:
             float: Noise power in dBW
         """
-        power_quantity = noise.power(self.mode.bandwidth, self.system_noise_temperature)
+        power_quantity = noise.power(self.bandwidth, self.system_noise_temperature)
         return power_quantity.to("dBW").magnitude
 
     @property

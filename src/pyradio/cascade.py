@@ -72,9 +72,7 @@ class Stage:
             raise ValueError(f"Stage '{label}': Cannot specify both gain and loss.")
         if loss is not None:
             # Loss in dB is positive; stored as negative gain
-            loss_q = (
-                loss.to(dB) if isinstance(loss, Quantity) else Q_(loss, dB)
-            )
+            loss_q = loss.to(dB) if isinstance(loss, Quantity) else Q_(loss, dB)
             self._gain: Quantity = -loss_q
         elif gain is not None:
             gain_q = gain.to(dB) if isinstance(gain, Quantity) else Q_(gain, dB)

@@ -34,12 +34,12 @@ def test_link_initialization():
             coding_scheme="uncoded",
             modulation="BPSK",
             bits_per_symbol=Q_(1, dimensionless),
-            symbol_rate=Q_(1, MHz),
             code_rate=1.0,
             spectral_efficiency=0.5,
             required_ebno=10.0,
             implementation_loss=1.0,
         ),
+        symbol_rate=Q_(1, MHz),
     )
 
     # Check parameters
@@ -77,12 +77,12 @@ def test_link_initialization_invalid():
                 coding_scheme="uncoded",
                 modulation="BPSK",
                 bits_per_symbol=Q_(1, dimensionless),
-                symbol_rate=Q_(1, MHz),
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
                 implementation_loss=1.0,
             ),
+            symbol_rate=Q_(1, MHz),
         )
 
     # Test invalid antenna types
@@ -101,12 +101,12 @@ def test_link_initialization_invalid():
                 coding_scheme="uncoded",
                 modulation="BPSK",
                 bits_per_symbol=Q_(1, dimensionless),
-                symbol_rate=Q_(1, MHz),
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
                 implementation_loss=1.0,
             ),
+            symbol_rate=Q_(1, MHz),
         )
 
     with pytest.raises(ValueError, match="rx_antenna must be an Antenna instance"):
@@ -124,14 +124,13 @@ def test_link_initialization_invalid():
                 coding_scheme="uncoded",
                 modulation="BPSK",
                 bits_per_symbol=Q_(1, dimensionless),
-                symbol_rate=Q_(1, MHz),
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
                 implementation_loss=1.0,
             ),
+            symbol_rate=Q_(1, MHz),
         )
-
 
     # Test invalid antenna noise temperature
     with pytest.raises(
@@ -151,12 +150,12 @@ def test_link_initialization_invalid():
                 coding_scheme="uncoded",
                 modulation="BPSK",
                 bits_per_symbol=Q_(1, dimensionless),
-                symbol_rate=Q_(1, MHz),
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
                 implementation_loss=1.0,
             ),
+            symbol_rate=Q_(1, MHz),
         )
 
     # Test invalid distance function
@@ -175,12 +174,12 @@ def test_link_initialization_invalid():
                 coding_scheme="uncoded",
                 modulation="BPSK",
                 bits_per_symbol=Q_(1, dimensionless),
-                symbol_rate=Q_(1, MHz),
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
                 implementation_loss=1.0,
             ),
+            symbol_rate=Q_(1, MHz),
         )
 
     # Test invalid frequency
@@ -199,12 +198,12 @@ def test_link_initialization_invalid():
                 coding_scheme="uncoded",
                 modulation="BPSK",
                 bits_per_symbol=Q_(1, dimensionless),
-                symbol_rate=Q_(1, MHz),
                 code_rate=1.0,
                 spectral_efficiency=0.5,
                 required_ebno=10.0,
                 implementation_loss=1.0,
             ),
+            symbol_rate=Q_(1, MHz),
         )
 
     # Test invalid axial ratio
@@ -267,12 +266,12 @@ def test_link_calculations():
             coding_scheme="uncoded",
             modulation="BPSK",
             bits_per_symbol=Q_(1, dimensionless),
-            symbol_rate=case.bandwidth,
             code_rate=1.0,
             spectral_efficiency=0.5,
             required_ebno=case.required_ebno.magnitude,
             implementation_loss=case.implementation_loss.magnitude,
         ),
+        symbol_rate=case.bandwidth,
     )
 
     # Check EIRP calculation
@@ -320,7 +319,6 @@ def test_lunar_downlink():
         coding_scheme="uncoded",
         modulation="BPSK",
         bits_per_symbol=Q_(1, dimensionless),
-        symbol_rate=case.bandwidth,
         code_rate=1.0,
         spectral_efficiency=0.5,
         required_ebno=case.required_ebno.magnitude,
@@ -338,6 +336,7 @@ def test_lunar_downlink():
         rx_antenna_noise_temp=case.antenna_noise_temp,
         distance_fn=lambda: case.distance,
         mode=mode,
+        symbol_rate=case.bandwidth,
     )
 
     # Check base parameters that don't depend on calculations (positive dB path loss)
@@ -373,7 +372,6 @@ def test_leo_downlink():
         coding_scheme="uncoded",
         modulation="BPSK",
         bits_per_symbol=Q_(1, dimensionless),
-        symbol_rate=case.bandwidth,
         code_rate=1.0,
         spectral_efficiency=0.5,
         required_ebno=case.required_ebno.magnitude,
@@ -391,6 +389,7 @@ def test_leo_downlink():
         rx_antenna_noise_temp=case.antenna_noise_temp,
         distance_fn=lambda: case.distance,
         mode=mode,
+        symbol_rate=case.bandwidth,
     )
 
     # Check calculations against reference values
@@ -430,7 +429,6 @@ def test_leo_uplink():
         coding_scheme="uncoded",
         modulation="BPSK",
         bits_per_symbol=Q_(1, dimensionless),
-        symbol_rate=case.bandwidth,
         code_rate=1.0,
         spectral_efficiency=0.5,
         required_ebno=case.required_ebno.magnitude,
@@ -448,6 +446,7 @@ def test_leo_uplink():
         rx_antenna_noise_temp=case.antenna_noise_temp,
         distance_fn=lambda: case.distance,
         mode=mode,
+        symbol_rate=case.bandwidth,
     )
 
     # Check the core, reliable properties (positive dB path loss)
@@ -485,7 +484,6 @@ def test_lunar_uplink():
         coding_scheme="uncoded",
         modulation="BPSK",
         bits_per_symbol=Q_(1, dimensionless),
-        symbol_rate=case.bandwidth,
         code_rate=1.0,
         spectral_efficiency=0.5,
         required_ebno=case.required_ebno.magnitude,
@@ -503,6 +501,7 @@ def test_lunar_uplink():
         rx_antenna_noise_temp=case.antenna_noise_temp,
         distance_fn=lambda: case.distance,
         mode=mode,
+        symbol_rate=case.bandwidth,
     )
 
     # Check the core, reliable properties (positive dB path loss)
