@@ -1,0 +1,65 @@
+[tool.poetry]
+name = "spacelink"
+version = "0.1.0"
+description = "Python module for radio computation"
+authors = ["Heliosphere Network"]
+readme = "README.md"
+packages = [
+    { include = "spacelink", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+numpy = ">=1.24.0,<3.0.0"
+scipy = ">=1.10.0,<2.0.0"
+pint = "^0.24.4"
+pandas = "^2.0.0"
+autopep8 = "^2.3.2"
+
+[tool.poetry.group.dev.dependencies]
+sphinx = "^7.2.6"
+sphinx-rtd-theme = "^2.0.0"
+sphinx-autodoc-typehints = "^1.25.2"
+notebook = "^7.0.0"
+ipykernel = "^6.29.0"
+matplotlib = "^3.8.0"
+jupytext = "^1.16.0"
+
+[tool.poetry.group.test.dependencies]
+ pytest = ">=7.4.0"
+ pytest-cov = ">=4.1.0"
+ pyyaml = "^6.0.2"
+ black = "^24.2.0"
+ flake8 = "^7.0.0"
+ nbconvert = "^7.16.6"
+ ipykernel = "^6.29.5"
+
+[tool.flake8]
+max-line-length = 100
+exclude = [".git", "__pycache__", "build", "dist"]
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = [
+    "tests"
+]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+show_missing = true
+fail_under = 90
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
