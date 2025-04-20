@@ -8,7 +8,7 @@ including dish gain and beamwidth calculations.
 import math
 from abc import ABC, abstractmethod
 from pint import Quantity
-from .units import db, wavelength, K
+from spacelink.units import db, wavelength, K
 
 
 class Antenna(ABC):

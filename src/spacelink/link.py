@@ -8,12 +8,12 @@ characteristics, path loss, and noise calculations.
 
 from typing import Callable
 from pint import Quantity
-from .antenna import Antenna, polarization_loss
-from .mode import Mode
-from .path import free_space_path_loss
-from .units import Hz, K, m, W, mismatch_loss
+from spacelink.antenna import Antenna, polarization_loss
+from spacelink.mode import Mode
+from spacelink.path import free_space_path_loss
+from spacelink.units import Hz, K, m, W, mismatch_loss
 from . import noise
-from .cascade import Cascade
+from spacelink.cascade import Cascade
 
 
 class Link:

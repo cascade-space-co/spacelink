@@ -1,5 +1,5 @@
 """
-Test case definitions for PyRadio.
+Test case definitions for SpaceLink.
 
 This module provides utilities for loading and working with predefined test cases
 that are shared across different test modules. Each test case contains input parameters
@@ -10,7 +10,7 @@ import os
 import yaml
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
-from pyradio.units import Q_, Quantity
+from spacelink.units import Q_, Quantity
 
 
 @dataclass

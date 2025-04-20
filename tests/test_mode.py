@@ -3,8 +3,8 @@
 import pytest
 from pint import Quantity
 
-from pyradio.mode import Mode
-from pyradio.units import db, dimensionless
+from spacelink.mode import Mode
+from spacelink.units import db, dimensionless
 
 
 def test_mode_initialization():

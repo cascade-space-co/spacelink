@@ -1,7 +1,7 @@
-Welcome to PyRadio's documentation!
+Welcome to SpaceLink's documentation!
 ===================================
 
-PyRadio is a Python library for radio frequency calculations, including satellite dish modeling and RF conversions.
+SpaceLink is a Python library for radio frequency calculations, including satellite dish modeling and RF conversions.
 
 .. toctree::
    :maxdepth: 2

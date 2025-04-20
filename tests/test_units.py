@@ -2,7 +2,7 @@
 
 import pytest
 from pint.testing import assert_allclose
-from pyradio.units import (
+from spacelink.units import (
     Q_,
     Hz,
     kHz,

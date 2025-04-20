@@ -6,8 +6,8 @@ verifying various functions across the codebase.
 """
 
 import pytest
-from pyradio.units import GHz, wavelength, m, dimensionless, Q_
-from pyradio.antenna import polarization_loss
+from spacelink.units import GHz, wavelength, m, dimensionless, Q_
+from spacelink.antenna import polarization_loss
 from test_cases import load_test_case, list_test_cases
 
 

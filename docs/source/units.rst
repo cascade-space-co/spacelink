@@ -1,7 +1,7 @@
 Units Module
 ===========
 
-.. automodule:: pyradio.units
+.. automodule:: spacelink.units
    :members:
    :undoc-members:
    :show-inheritance: 
