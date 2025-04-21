@@ -21,7 +21,9 @@ pip install .
 ## Development
 
 ### Setup
+
 #### Mac OS X
+
 ```bash
 # Install dependencies and the package in development mode
 poetry install
@@ -91,9 +93,9 @@ poetry run jupyter notebook
 When running a notebook for the first time, make sure to select the correct kernel:
 
 1. After opening the notebook, look for the kernel indicator in the top-right corner
-2. Click on it and select "Python (spacelink-*)" from the dropdown menu
+1. Click on it and select "Python (spacelink-\*)" from the dropdown menu
    - This is the Poetry-managed virtual environment with all dependencies installed
-3. If you don't see the spacelink kernel, run:
+1. If you don't see the spacelink kernel, run:
    ```bash
    poetry run python -m ipykernel install --user --name spacelink --display-name "Python (SpaceLink)"
    ```
@@ -107,4 +109,10 @@ poetry run sphinx-build -b html docs/source docs/build
 
 ## License
 
-MIT License
+Copyright 2025 Heliosphere Network Corp
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
