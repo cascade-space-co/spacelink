@@ -1,5 +1,5 @@
 SpaceLink Modules
-===============
+=================
 
 .. automodule:: spacelink
    :members:
@@ -14,7 +14,6 @@ Module Documentation
    :maxdepth: 4
 
    units
-   dish
    antenna
    cascade
    link
