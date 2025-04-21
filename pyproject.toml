@@ -8,6 +8,10 @@ version = "0.1.0"
 description = "Space link budget calculation package"
 readme = "README.md"
 requires-python = ">=3.10"
+authors = [
+    {name = "Jacob Portukalian", email = "jacob@heliospherenetwork.com"},
+    {name = "Arlen Abraham", email = "arlen@heliospherenetwork.com"}
+]
 dependencies = [
     "numpy>=1.24.0,<3.0.0",
     "scipy>=1.10.0,<2.0.0",
@@ -15,8 +19,19 @@ dependencies = [
     "pandas>=2.0.0",
     "autopep8>=2.3.2"
 ]
-authors = [
-    {name = "Jacob Smith", email = "jacob@spacelink.com"}
+
+[project.optional-dependencies]
+dev = [
+    "sphinx>=7.2.6",
+    "sphinx-rtd-theme>=2.0.0",
+    "sphinx-autodoc-typehints>=1.25.2"
+]
+test = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pyyaml>=6.0.2",
+    "black>=24.2.0",
+    "flake8>=7.0.0"
 ]
 
 [tool.poetry.group.dev.dependencies]
