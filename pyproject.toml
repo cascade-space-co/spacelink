@@ -1,20 +1,23 @@
-[tool.poetry]
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
 name = "spacelink"
 version = "0.1.0"
-description = "Python module for radio computation"
-authors = ["Heliosphere Network"]
+description = "Space link budget calculation package"
 readme = "README.md"
-packages = [
-    { include = "spacelink", from = "src" }
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24.0,<3.0.0",
+    "scipy>=1.10.0,<2.0.0",
+    "pint>=0.24.4",
+    "pandas>=2.0.0",
+    "autopep8>=2.3.2"
 ]
-
-[tool.poetry.dependencies]
-python = ">=3.10"
-numpy = ">=1.24.0,<3.0.0"
-scipy = ">=1.10.0,<2.0.0"
-pint = "^0.24.4"
-pandas = "^2.0.0"
-autopep8 = "^2.3.2"
+authors = [
+    {name = "Jacob Smith", email = "jacob@spacelink.com"}
+]
 
 [tool.poetry.group.dev.dependencies]
 sphinx = "^7.2.6"
@@ -22,12 +25,11 @@ sphinx-rtd-theme = "^2.0.0"
 sphinx-autodoc-typehints = "^1.25.2"
 
 [tool.poetry.group.test.dependencies]
- pytest = ">=7.4.0"
- pytest-cov = ">=4.1.0"
- pyyaml = "^6.0.2"
- black = "^24.2.0"
- flake8 = "^7.0.0"
- nbconvert = "^7.16.6"
+pytest = ">=7.4.0"
+pytest-cov = ">=4.1.0"
+pyyaml = "^6.0.2"
+black = "^24.2.0"
+flake8 = "^7.0.0"
 
 [tool.flake8]
 max-line-length = 100
@@ -54,7 +56,3 @@ exclude_lines = [
 ]
 show_missing = true
 fail_under = 90
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"

@@ -2,107 +2,106 @@
 
 A Python library for radio frequency calculations, including antenna modeling, RF conversions, and noise calculations.
 
-Created and maintained by the Heliosphere Network Corporation
+Created and maintained by the [Heliosphere Network Corporation](https://www.heliospherenetwork.com)
 
-https://www.heliospherenetwork.com
+## Features
 
-### Setup
+- **Antenna Modeling**: Calculate antenna gain, beamwidth, and polarization effects
+- **RF System Analysis**: Model complete RF chains with cascaded components
+- **Link Budget Calculations**: Comprehensive analysis of radio communication links
+- **Noise Calculations**: System noise temperature and related parameters
+- **Space Communications**: Built-in support for satellite link analysis
+- **Unit-Aware Calculations**: Integrated unit handling for RF parameters
 
-#### Installing Poetry
+## Installation
 
-##### macOS
-```bash
-# Using Homebrew
-brew install poetry
+### Quick Install
 
-# Or using the official installer
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-##### Linux
-```bash
-# Using pipx (recommended)
-pip install pipx
-pipx ensurepath
-pipx install poetry
-
-# Debian/Ubuntu using apt
-sudo apt install python3-poetry
-
-# Or using the official installer
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-##### Windows
-```powershell
-# Using the official installer
-(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
-
-# Or using pipx
-pip install pipx
-pipx ensurepath
-pipx install poetry
-```
-
-#### Installing Dependencies
-```bash
-# Install dependencies and the package in development mode
-poetry install
-```
-
-### Project Structure
-
-```
-spacelink/
-├── src/
-│   └── spacelink/
-│       ├── __init__.py
-│       ├── antenna.py     # Antenna gain and beamwidth calculations
-│       ├── conversions.py # dB/linear conversions
-│       └── noise.py      # Noise calculations
-├── tests/
-│   ├── __init__.py
-│   ├── test_antenna.py
-│   ├── test_conversions.py
-│   └── test_noise.py
-├── pyproject.toml
-├── poetry.lock
-└── README.md
-```
-
-### Running Tests
+For users who want to use the package:
 
 ```bash
-# Run all tests
-poetry run pytest
-
-# Run tests with coverage
-poetry run pytest --cov=spacelink --cov-report=term-missing
-
-# Run a specific test file
-poetry run pytest tests/test_antenna.py
-
-# Run tests with verbose output
-poetry run pytest -v
+pip install spacelink
 ```
 
-### Code Formatting and Linting
+### Development Setup
 
+#### Prerequisites
+
+1. Python 3.10 or higher
+2. Poetry package manager ([Install Poetry](https://python-poetry.org/docs/))
+
+#### Getting Started
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Heliosphere-Network/spacelink.git
+   cd spacelink
+   ```
+
+2. Install dependencies:
+   ```bash
+   poetry install
+   ```
+
+For production use without development tools:
+   ```bash
+   poetry install --without dev
+   ```
+
+## Documentation
+
+The documentation includes API references and technical guides.
+
+To build the documentation locally:
 ```bash
-# Format code with Black
-poetry run black .
-
-# Lint code with Flake8
-poetry run flake8 .
-```
-
-
-### Building Documentation
-
-```bash
-# Build HTML documentation
 poetry run sphinx-build -b html docs/source docs/build
 ```
+
+## Contributing
+
+We welcome contributions to the SpaceLink project! To get started, please follow these steps:
+
+1. **Read the Guidelines**: Review the [CONTRIBUTING.md](../CONTRIBUTING.md) file for detailed instructions on coding style, testing, and project conventions.
+
+2. **Set Up Your Environment**:
+   - Install dependencies using Poetry:
+     ```bash
+     poetry install
+     ```
+
+3. **Run Tests**:
+   - Ensure all tests pass before submitting your changes:
+     ```bash
+     poetry run pytest
+     ```
+   - Run tests with coverage:
+     ```bash
+     poetry run pytest --cov=spacelink --cov-report=term-missing
+     ```
+   - Run a specific test file:
+     ```bash
+     poetry run pytest tests/test_antenna.py
+     ```
+   - Run tests with verbose output:
+     ```bash
+     poetry run pytest -v
+     ```
+
+4. **Follow Code Style**:
+   - Format your code with Black:
+     ```bash
+     poetry run black .
+     ```
+   - Lint your code with Flake8:
+     ```bash
+     poetry run flake8 .
+     ```
+
+5. **Submit a Pull Request**:
+   - Push your changes to a feature branch and open a pull request on GitHub.
+   - Provide a clear description of your changes and link any related issues.
+
+Thank you for contributing to SpaceLink!
 
 ## License
 
