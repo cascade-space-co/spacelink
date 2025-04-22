@@ -23,7 +23,7 @@ class Antenna(ABC):
         self,
         axial_ratio: Quantity = Q_(0, dB),
         noise_temperature: Quantity = Q_(0, K),
-        return_loss: float = float("inf"),
+        return_loss: Quantity = Q_(float("inf"), dB),
     ):
         """
         Initialize an antenna with polarization, noise temperature, and return loss.
@@ -45,7 +45,7 @@ class Antenna(ABC):
         if noise_temperature < Q_(0.0, K):
             raise ValueError("Noise temperature must be non-negative")
         # Validate return loss
-        if return_loss < 0.0:
+        if return_loss < Q_(0.0, dB):
             raise ValueError("Return loss must be non-negative")
         self.axial_ratio = axial_ratio
         self.noise_temperature = noise_temperature
@@ -85,7 +85,7 @@ class FixedGain(Antenna):
         gain: Quantity,
         axial_ratio: Quantity = Q_(0, dB),
         noise_temperature: Quantity = Q_(0, K),
-        return_loss: float = float("inf"),
+        return_loss: Quantity = Q_(float("inf"), dB),
     ):
         """
         Initialize a FixedGain antenna.
@@ -128,17 +128,17 @@ class Dish(Antenna):
     def __init__(
         self,
         diameter: Quantity,
-        efficiency: float = 0.65,
+        efficiency: Quantity = Q_(0.65, ""),
         axial_ratio: Quantity = Q_(0, dB),
         noise_temperature: Quantity = Q_(0, K),
-        return_loss: float = float("inf"),
+        return_loss: Quantity = Q_(float("inf"), dB),
     ):
         """
         Initialize a Dish antenna.
 
         Args:
             diameter: Dish diameter in meters
-            efficiency: Antenna efficiency (default: 0.65)
+            efficiency: Antenna efficiency as a dimensionless quantity (default: 0.65)
             axial_ratio: Axial ratio in dB (default: 0.0 dB for perfect circular polarization)
                          0 dB represents perfect circular polarization
                          >40 dB represents linear polarization
@@ -149,7 +149,7 @@ class Dish(Antenna):
         super().__init__(axial_ratio, noise_temperature, return_loss)
         if diameter <= 0:
             raise ValueError("Dish diameter must be positive")
-        if not 0 < efficiency <= 1:
+        if not 0 < efficiency.magnitude <= 1:
             raise ValueError("Efficiency must be between 0 and 1")
 
         self.diameter = diameter
