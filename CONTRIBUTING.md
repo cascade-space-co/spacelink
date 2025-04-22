@@ -63,6 +63,8 @@ poetry run flake8 .      # Lint code
 - Use PascalCase for classes
 - Use 4 spaces for indentation
 - Apply type hints for all functions
+- Always use Use f-strings with double quotes
+- Always use precision formatting
 
 ### Documentation
 - Use Google-style docstrings
