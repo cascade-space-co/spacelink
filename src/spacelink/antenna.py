@@ -39,10 +39,10 @@ class Antenna(ABC):
             ValueError: If axial_ratio, noise_temperature, or return_loss is negative
         """
         # Validate axial ratio
-        if axial_ratio < 0.0 * dB:
+        if axial_ratio < Q_(0.0, dB):
             raise ValueError("Axial ratio must be non-negative")
         # Validate noise temperature
-        if noise_temperature < 0.0 * K:
+        if noise_temperature < Q_(0.0, K):
             raise ValueError("Noise temperature must be non-negative")
         # Validate return loss
         if return_loss < 0.0:
