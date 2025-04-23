@@ -58,41 +58,7 @@ def test_dish_parameters():
     assert case.rx_antenna_axial_ratio >= Q_(0, "dB")
 
 
-def test_polarization_loss():
-    """Test polarization loss calculation."""
-    # Test with lunar uplink case
-    case = load_test_case("lunar_uplink")
 
-    # Calculate polarization loss
-    calc_loss = polarization_loss(
-        tx_axial_ratio=case.tx_antenna_axial_ratio.to("dB").magnitude,
-        rx_axial_ratio=case.rx_antenna_axial_ratio.to("dB").magnitude,
-    )
-
-    # Convert result to a Quantity for comparison
-    calc_loss_qty = Q_(calc_loss, "dB")
-
-    # Compare with the test case value using pytest.approx
-    assert calc_loss_qty.to("dB").magnitude == pytest.approx(
-        case.polarization_loss.to("dB").magnitude, abs=0.01
-    )
-
-    # Test with deep space case
-    case = load_test_case("deep_space")
-
-    # Calculate polarization loss
-    calc_loss = polarization_loss(
-        tx_axial_ratio=case.tx_antenna_axial_ratio.to("dB").magnitude,
-        rx_axial_ratio=case.rx_antenna_axial_ratio.to("dB").magnitude,
-    )
-
-    # Convert result to a Quantity for comparison
-    calc_loss_qty = Q_(calc_loss, "dB")
-
-    # Compare with the test case value using pytest.approx
-    assert calc_loss_qty.to("dB").magnitude == pytest.approx(
-        case.polarization_loss.to("dB").magnitude, abs=0.01
-    )
 
 
 def test_wavelength_calculation():

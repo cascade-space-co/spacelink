@@ -21,8 +21,8 @@ class Antenna(ABC):
 
     def __init__(
         self,
-        axial_ratio: Quantity = Q_(0, dB),
-        noise_temperature: Quantity = Q_(0, K),
+        axial_ratio: Quantity = Q_(0.0, dB),
+        noise_temperature: Quantity = Q_(0.0, K),
         return_loss: Quantity = Q_(float("inf"), dB),
     ):
         """
@@ -109,7 +109,7 @@ class FixedGain(Antenna):
         Returns:
             float: Fixed antenna gain in dB
         """
-        return self.gain_
+        return self.gain_.to("dB")
 
 
 class Dish(Antenna):

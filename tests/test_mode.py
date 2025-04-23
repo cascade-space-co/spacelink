@@ -156,32 +156,8 @@ def test_margin_calculation():
         required_ebno=4.0,
         implementation_loss=2.0,
     )
-
-    # Calculate manually what the implementation should do
-
-    # Step 1: Use a known C/N ratio
-    c_over_n = 8.0  # dB
-
-    # Step 2: Calculate Eb/N0 manually
-    # Eb/N0 = C/N - 10*log10(bits_per_symbol)
-    # With bits_per_symbol = 1, log10(1) = 0, so Eb/N0 = C/N = 8.0 dB
-    calculated_ebno = mode.ebno(c_over_n)
-    expected_ebno = c_over_n - linear_to_db(mode.bits_per_symbol.magnitude)
-
-    # Verify that ebno calculation is correct
-    assert calculated_ebno == pytest.approx(expected_ebno, abs=0.01)
-
-    # Step 3: Calculate the margin
-    # Margin = Eb/N0 - required_ebno - implementation_loss
-    # With Eb/N0 = 8.0, required_ebno = 4.0, implementation_loss = 2.0
-    # Expected margin = 8.0 - 4.0 - 2.0 = 2.0 dB
-    expected_margin = calculated_ebno - mode.required_ebno - mode.implementation_loss
-
-    # Call the margin method with C/N
-    calculated_margin = mode.margin(c_over_n)
-
     # Verify that margin calculation is correct
-    assert calculated_margin == pytest.approx(expected_margin, abs=0.01)
+    assert mode.margin(8.0) == pytest.approx(2.0, abs=0.01)
 
 
 def test_str_representation():

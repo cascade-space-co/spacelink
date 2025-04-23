@@ -31,7 +31,7 @@ def test_stage_noise_figure_and_temperature():
     # From noise_temp to noise_figure
     s_temp = Stage(label="nt", gain=Q_(0, dB), noise_temp=Q_(200, K))
     expected_nf = 10 * math.log10(1 + 200 / 290.0)
-    assert_allclose(s_temp.noise_figure.to(dB), expected_nf * dB, rtol=1e-6)
+    assert_allclose(s_temp.noise_figure.to(dB), Q_(expected_nf, dB), rtol=1e-6)
 
 
 def test_stage_return_loss_vswr_conversion():
@@ -44,7 +44,7 @@ def test_stage_return_loss_vswr_conversion():
     s_vswr = Stage(label="vs", gain=Q_(0, dB), input_vswr=Q_(2.5, dimensionless))
     rho2 = abs((2.5 - 1) / (2.5 + 1))
     expected_rl = -20 * math.log10(rho2)
-    assert_allclose(Q_(s_vswr.input_rl_db, dB), expected_rl * dB, rtol=1e-6)
+    assert_allclose(Q_(s_vswr.input_rl_db, dB), Q_(expected_rl, dB), rtol=1e-6)
 
 
 def test_stage_to_from_dict():
@@ -61,11 +61,11 @@ def test_stage_to_from_dict():
     assert s == s2
     # Dict should contain expected keys
     assert d["label"] == "t"
-    assert_allclose(Q_(d["gain"], dB), 5 * dB)
-    assert_allclose(Q_(d["noise_figure"], dB), 3 * dB)
-    assert_allclose(Q_(d["p1db_dbm"], dBm), 15 * dBm)
-    assert_allclose(Q_(d["input_rl_db"], dB), 12 * dB)
-    assert_allclose(Q_(d["output_rl_db"], dB), 14 * dB)
+    assert_allclose(Q_(d["gain"], dB), Q_(5, dB))
+    assert_allclose(Q_(d["noise_figure"], dB), Q_(3, dB))
+    assert_allclose(Q_(d["p1db_dbm"], dBm), Q_(15, dBm))
+    assert_allclose(Q_(d["input_rl_db"], dB), Q_(12, dB))
+    assert_allclose(Q_(d["output_rl_db"], dB), Q_(14, dB))
 
 
 def test_cascade_gain():
@@ -82,7 +82,7 @@ def test_cascade_noise_figure_and_temperature():
     s3 = Stage(label="c", gain=Q_(10, dB), noise_figure=Q_(4, dB))
     c = Cascade([s1, s2, s3])
     # Compare cascaded noise figure in dB
-    assert_allclose(c.cascaded_noise_figure_db().to(dB), 2.43 * dB, atol=0.01)
+    assert_allclose(c.cascaded_noise_figure_db().to(dB), Q_(2.43, dB), atol=0.01)
     # Temperature
     assert_allclose(c.cascaded_noise_temperature_k(), Q_(217.85, K), atol=0.01)
     assert_allclose(c.cascaded_gain(), Q_(30, dB))

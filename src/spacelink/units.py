@@ -16,7 +16,7 @@ import yaml
 
 # Create a unit registry
 # Autoconvert offset to base units is important for logarithmic operations
-ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
+ureg = UnitRegistry(autoconvert_offset_to_baseunit=False)
 
 # Define a Quantity type alias for better type hints
 Q_ = ureg.Quantity

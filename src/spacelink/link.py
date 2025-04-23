@@ -11,7 +11,7 @@ from pint import Quantity
 from spacelink.antenna import Antenna, polarization_loss
 from spacelink.mode import Mode
 from spacelink.path import free_space_path_loss
-from spacelink.units import Hz, K, m, W, mismatch_loss
+from spacelink.units import Hz, K, m, W, mismatch_loss, Q_
 from . import noise
 from spacelink.cascade import Cascade
 
@@ -186,12 +186,12 @@ class Link:
         Returns:
             float: EIRP in dBW
         """
-        tx_power_dbw = self.tx_power.to("dBW").magnitude
-        fe_gain_db = self.tx_front_end.cascaded_gain().to("dB").magnitude
-        ant_gain_db = self.tx_antenna.gain(self.frequency)
+        tx_power = self.tx_power.to("dBW").magnitude
+        fe_gain = self.tx_front_end.cascaded_gain().to("dB").magnitude
+        ant_gain = self.tx_antenna.gain(self.frequency).to("dB").magnitude
         # Account for antenna return loss (mismatch loss)
-        rl_loss_db = mismatch_loss(self.tx_antenna.return_loss)
-        return tx_power_dbw + fe_gain_db + ant_gain_db - rl_loss_db
+        mm_loss = mismatch_loss(self.tx_antenna.return_loss.to("dB").magnitude)
+        return Q_(tx_power + fe_gain + ant_gain - mm_loss, "dBW")
 
     @property
     def path_loss(self) -> float:
