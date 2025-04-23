@@ -114,7 +114,8 @@ def test_antenna_axial_ratio_validation():
         (0 * u.dB, 0 * u.dB, 0.0 * u.dB, 0.01 * u.dB),  # matchy matchy
         (0 * u.dB, 60 * u.dB, 3.002 * u.dB, 0.01 * u.dB),  # also matchy
         (60 * u.dB, 0 * u.dB, 3.002 * u.dB, 0.01 * u.dB),  # Big mismatch
-        (10 * u.dB, 30 * u.dB, 0.332 * u.dB, 0.01 * u.dB),  # Small mismatch
+        (1 * u.dB, 1 * u.dB, 0.057 * u.dB, 0.01 * u.dB),  # Small mismatch
+        (3 * u.dB, 3 * u.dB, 0.508 * u.dB, 0.01 * u.dB),  # Small mismatch
     ],
 )
 def test_polarization_loss_calculation(ar_tx_db, ar_rx_db, expected_loss_db, tol):

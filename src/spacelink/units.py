@@ -167,10 +167,7 @@ def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
     Returns:
         A dimensionless quantity (e.g., gain or ratio).
     """
-    if factor == 10:  # Power ratio
-        linear_value = np.power(10, x.value / factor)
-    else:  # Field ratio (factor=20)
-        linear_value = np.power(10, x.value / factor)
+    linear_value = np.power(10, x.value / factor)
     return linear_value * u.dimensionless
 
 
