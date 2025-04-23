@@ -17,7 +17,7 @@ from spacelink.units import (
     vswr_to_return_loss,
     wavelength,
     frequency,
-    db,
+    linear_to_db,
     mismatch_loss,
 )
 
@@ -71,11 +71,11 @@ def test_frequency_calculation():
 
 def test_db_conversion():
     """Test dB conversion function."""
-    assert db(1.0) == pytest.approx(0.0)
-    assert db(10.0) == pytest.approx(10.0)
-    assert db(100.0) == pytest.approx(20.0)
-    assert db(0.1) == pytest.approx(-10.0)
-    assert db(0.01) == pytest.approx(-20.0)
+    assert linear_to_db(1.0) == pytest.approx(0.0)
+    assert linear_to_db(10.0) == pytest.approx(10.0)
+    assert linear_to_db(100.0) == pytest.approx(20.0)
+    assert linear_to_db(0.1) == pytest.approx(-10.0)
+    assert linear_to_db(0.01) == pytest.approx(-20.0)
 
 
 def test_invalid_inputs():

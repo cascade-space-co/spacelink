@@ -7,7 +7,7 @@ signal quality parameters.
 """
 
 from pint import Quantity
-from spacelink.units import db
+from spacelink.units import db_to_linear
 
 """TODO: change this to an abstract base class
 
@@ -89,7 +89,7 @@ class Mode:
 
     def ebno(self, c_over_n: float) -> float:
         """Eb/N0 for given carrier to noise ratio"""
-        return c_over_n - db(self.bits_per_symbol.magnitude)
+        return c_over_n - db_to_linear(self.bits_per_symbol.magnitude)
 
     def margin(self, c_over_n: float) -> float:
         """

@@ -16,7 +16,7 @@ import yaml
 
 # Create a unit registry
 # Autoconvert offset to base units is important for logarithmic operations
-ureg = UnitRegistry(autoconvert_offset_to_baseunit=False)
+ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
 
 # Define a Quantity type alias for better type hints
 Q_ = ureg.Quantity
@@ -106,7 +106,7 @@ def linear_to_db(value: float) -> float:
         ValueError: If value is not positive.
 
     Example:
-        >>> db(10.0)
+        >>> linear_to_db(10.0)
         10.0
     """
     # Ensure valid input
@@ -178,7 +178,7 @@ def vswr_to_return_loss(vswr: float) -> float:
     if np.isclose(vswr, 1.0):
         return float("inf")
     gamma = (vswr - 1) / (vswr + 1)
-    return -2 * db(gamma)
+    return -2 * linear_to_db(gamma)
 
 
 def mismatch_loss(return_loss: float) -> float:
@@ -198,7 +198,7 @@ def mismatch_loss(return_loss: float) -> float:
         0.5115...
     """
     gamma = np.pow(10, -return_loss / 20.0)
-    return -db(1 - gamma**2)
+    return -linear_to_db(1 - gamma**2)
 
 
 # YAML support for Pint Quantity

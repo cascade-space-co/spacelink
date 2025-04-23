@@ -4,7 +4,7 @@ import pytest
 from pint import Quantity
 
 from spacelink.mode import Mode
-from spacelink.units import db, dimensionless
+from spacelink.units import linear_to_db, dimensionless
 
 
 def test_mode_initialization():
@@ -138,7 +138,7 @@ def test_ebno_calculation():
     # With C/N of 10 dB and 2 bits per symbol, Eb/N0 should be 7 dB
     # Eb/N0 = C/N - 10*log10(bits_per_symbol)
     c_over_n = 10.0
-    expected_ebno = c_over_n - db(2)  # 10 - 3.01 = 6.99 dB
+    expected_ebno = c_over_n - linear_to_db(2)  # 10 - 3.01 = 6.99 dB
 
     assert mode.ebno(c_over_n) == pytest.approx(expected_ebno, abs=0.01)
 
@@ -166,7 +166,7 @@ def test_margin_calculation():
     # Eb/N0 = C/N - 10*log10(bits_per_symbol)
     # With bits_per_symbol = 1, log10(1) = 0, so Eb/N0 = C/N = 8.0 dB
     calculated_ebno = mode.ebno(c_over_n)
-    expected_ebno = c_over_n - db(mode.bits_per_symbol.magnitude)
+    expected_ebno = c_over_n - linear_to_db(mode.bits_per_symbol.magnitude)
 
     # Verify that ebno calculation is correct
     assert calculated_ebno == pytest.approx(expected_ebno, abs=0.01)
