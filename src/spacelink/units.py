@@ -9,48 +9,63 @@ functions for radio frequency applications, including:
   - Mismatch loss computation
   - YAML serialization support for Pint quantities
 """
+from functools import wraps
+from inspect import signature, Parameter
+from typing import get_type_hints, get_args, Annotated
+import astropy.units as u
+import astropy.constants as constants
+from astropy.units import Quantity
+from typing import Annotated
 
-from pint import UnitRegistry, Quantity
 import numpy as np
 import yaml
 
-# Create a unit registry
-# Autoconvert offset to base units is important for logarithmic operations
-ureg = UnitRegistry(autoconvert_offset_to_baseunit=False)
+# Define dBW if missing
+if not hasattr(u, 'dBW'):
+    u.dBW = u.dB(u.W)
+# Define linear unit if missing
+if not hasattr(u, 'linear'):
+    u.linear = u.dimensionless_unscaled
 
-# Define a Quantity type alias for better type hints
-Q_ = ureg.Quantity
-
-# Define frequency units
-Hz = ureg.Hz
-kHz = ureg.kHz
-MHz = ureg.MHz
-GHz = ureg.GHz
-
-# Define power units
-W = ureg.W
-mW = ureg.mW
-
-# Define logarithmic units
-dB = ureg.dB
-dBW = ureg.dBW
-dBm = ureg.dBm
-
-# Define distance units
-m = ureg.m
-km = ureg.km
-
-# Define temperature units
-K = ureg.K
-
-# Define dimensionless units
-dimensionless = ureg.dimensionless
-
-# Speed of light in m/s
-SPEED_OF_LIGHT = Q_(299792458.0, "m/s")
+# Add dB to linear equivalencies for unit conversion
+db_equivalencies = [(u.dB, u.dimensionless_unscaled, 
+                    lambda x: 10**(x/10), 
+                    lambda x: 10 * np.log10(x))]
 
 
-def wavelength(frequency: Quantity) -> Quantity:
+Decibels = Annotated[Quantity, u.dB]
+DecibelWatts = Annotated[Quantity, u.dB(u.W)]
+Frequency = Annotated[Quantity, u.Hz]
+Wavelength = Annotated[Quantity, u.m]
+Linear = Annotated[Quantity, u.dimensionless_unscaled]
+
+
+def enforce_units(func):
+    sig = signature(func)
+    hints = get_type_hints(func, include_extras=True)
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        bound = sig.bind(*args, **kwargs)
+        bound.apply_defaults()
+
+        for name, value in bound.arguments.items():
+            hint = hints.get(name)
+            if hint and getattr(hint, '__origin__', None) is Annotated:
+                quantity_type, unit = get_args(hint)
+                if isinstance(value, Quantity):
+                    # Convert to expected unit
+                    bound.arguments[name] = value.to(unit)
+                else:
+                    # Convert raw numeric value to Quantity
+                    bound.arguments[name] = quantity_type(value, unit)
+
+        return func(*bound.args, **bound.kwargs)
+
+    return wrapper
+
+@enforce_units
+def wavelength(frequency: Frequency) -> Wavelength:
     """
     Convert frequency to wavelength.
 
@@ -68,10 +83,10 @@ def wavelength(frequency: Quantity) -> Quantity:
         >>> wavelength(1 * GHz).to(m)
         <Quantity(0.299792458, 'meter')>
     """
-    return SPEED_OF_LIGHT / frequency.to(Hz)
+    return constants.c / frequency.to(u.Hz)
 
-
-def frequency(wavelength: Quantity) -> Quantity:
+@enforce_units
+def frequency(wavelength: Wavelength) -> Frequency:
     """
     Convert wavelength to frequency.
 
@@ -89,50 +104,43 @@ def frequency(wavelength: Quantity) -> Quantity:
         >>> frequency(1 * m).to(MHz)
         <Quantity(299.792458, 'megahertz')>
     """
-    return SPEED_OF_LIGHT / wavelength.to(m)
+    return constants.c / wavelength.to(u.m)
 
 
-def linear_to_db(value: float) -> float:
+@enforce_units
+def to_dB(x: Linear, *, factor=10) -> Decibels:
     """
-    Convert a linear scale value to decibels (10 * log10).
+    Convert a dimensionless quantity to decibels.
 
     Args:
-        value (float): Linear value to convert; must be positive.
+        x: A dimensionless Quantity (e.g., power ratio).
+        factor: 10 for power, 20 for field (voltage, current, etc.)
 
     Returns:
-        float: Value in decibels.
-
-    Raises:
-        ValueError: If value is not positive.
-
-    Example:
-        >>> linear_to_db(10.0)
-        10.0
+        Quantity in decibels (unit = u.dB)
     """
-    # Ensure valid input
-    if value <= 0:
-        raise ValueError(f"value must be > 0 ({value}).")
-    return float(10.0 * np.log10(value))
+    return factor * u.dB * np.log10(x.to_value(u.dimensionless_unscaled))
 
-
-def db_to_linear(value: Quantity) -> float:
+@enforce_units
+def to_linear(x: Decibels, *, factor: float = 10) -> Linear:
     """
-    Convert a decibel value to a linear scale ratio.
+    Convert decibels to a linear (dimensionless) ratio.
 
     Args:
-        value (Quantity): Value in decibels.
+        x: A quantity in decibels.
+        factor: 10 for power quantities, 20 for field quantities.
 
     Returns:
-        float: Linear scale value.
-
-    Example:
-        >>> db_to_lin(20.0)
-        100.0
+        A dimensionless quantity (e.g., gain or ratio).
     """
-    return float(10 ** (value / 10.0))
+    if factor == 10:  # Power ratio
+        linear_value = np.power(10, x.value / factor)
+    else:  # Field ratio (factor=20)
+        linear_value = np.power(10, x.value / factor)
+    return linear_value * u.linear
 
-
-def return_loss_to_vswr(return_loss: float) -> float:
+@enforce_units
+def return_loss_to_vswr(return_loss: Decibels) -> Linear:
     """
     Convert a return loss in decibels to voltage standing wave ratio (VSWR).
 
@@ -149,14 +157,16 @@ def return_loss_to_vswr(return_loss: float) -> float:
         >>> return_loss_to_vswr(20.0)
         1.2
     """
-    if return_loss < 0:
+    if return_loss.value < 0:
         raise ValueError(f"return loss must be >= 0 ({return_loss}).")
-    if return_loss == float("inf"):
-        return 1.0
-    return (1 + np.pow(10, -return_loss / 20)) / (1 - np.pow(10, -return_loss / 20))
+    if return_loss.value == float("inf"):
+        return 1.0 * u.linear
+    gamma = to_linear(-return_loss, factor=20)
+    return ((1 + gamma) / (1 - gamma)) * u.linear
 
 
-def vswr_to_return_loss(vswr: float) -> float:
+@enforce_units
+def vswr_to_return_loss(vswr: Linear) -> Decibels:
     """
     Convert voltage standing wave ratio (VSWR) to return loss in decibels.
 
@@ -177,11 +187,12 @@ def vswr_to_return_loss(vswr: float) -> float:
         raise ValueError(f"VSWR must be > 1 ({vswr}).")
     if np.isclose(vswr, 1.0):
         return float("inf")
-    gamma = (vswr - 1) / (vswr + 1)
-    return -2 * linear_to_db(gamma)
+    gamma = ((vswr - 1) / (vswr + 1))
+    return -to_dB(gamma, factor=20)
 
 
-def mismatch_loss(return_loss: float) -> float:
+@enforce_units
+def mismatch_loss(return_loss: Decibels) -> Decibels:
     """
     Compute the mismatch loss due to non-ideal return loss.
 
@@ -197,26 +208,8 @@ def mismatch_loss(return_loss: float) -> float:
         >>> mismatch_loss(9.54)
         0.5115...
     """
-    gamma = np.pow(10, -return_loss / 20.0)
-    return -linear_to_db(1 - gamma**2)
+    # Note that we want |Γ|² so we use factor=10 instead of factor=20
+    gamma_2 = to_linear(-return_loss, factor=10)
+    # Power loss is 1 - |Γ|²
+    return -to_dB(1 - gamma_2)
 
-
-# YAML support for Pint Quantity
-
-
-def _quantity_representer(dumper, data: Quantity):
-    """YAML representer for Pint Quantity objects."""
-    return dumper.represent_mapping(
-        "!Quantity", {"magnitude": data.magnitude, "units": str(data.units)}
-    )
-
-
-def _quantity_constructor(loader, node):
-    """YAML constructor for Pint Quantity objects."""
-    mapping = loader.construct_mapping(node)
-    return Q_(mapping["magnitude"], mapping["units"])
-
-
-# Register representer and constructor with PyYAML safe dumper/loader
-yaml.SafeDumper.add_representer(Quantity, _quantity_representer)
-yaml.SafeLoader.add_constructor("!Quantity", _quantity_constructor)
