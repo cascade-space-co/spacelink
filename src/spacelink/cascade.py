@@ -23,7 +23,6 @@ from spacelink.units import (
     return_loss_to_vswr,
     mismatch_loss,
     to_linear,
-    to_dB,
 )
 
 
@@ -84,7 +83,11 @@ class Stage:
         # Preserve original noise figure for to_dict if provided
         self._orig_noise_figure: Optional[Quantity] = None
         if noise_figure is not None and noise_temp is not None:
-            nf_q = noise_figure if isinstance(noise_figure, Quantity) else noise_figure * u.dB
+            nf_q = (
+                noise_figure
+                if isinstance(noise_figure, Quantity)
+                else noise_figure * u.dB
+            )
             nt_q = noise_temp if isinstance(noise_temp, Quantity) else noise_temp * u.K
             calc_nt = noise_figure_to_temperature(nf_q)
             if not math.isclose(calc_nt.value, nt_q.value, rel_tol=1e-6):
@@ -95,7 +98,11 @@ class Stage:
             self._noise_temp = nt_q
             self._orig_noise_figure = nf_q
         elif noise_figure is not None:
-            nf_q = noise_figure if isinstance(noise_figure, Quantity) else noise_figure * u.dB
+            nf_q = (
+                noise_figure
+                if isinstance(noise_figure, Quantity)
+                else noise_figure * u.dB
+            )
             self._noise_temp = noise_figure_to_temperature(nf_q)
             self._orig_noise_figure = nf_q
         elif noise_temp is not None:
@@ -110,7 +117,9 @@ class Stage:
 
         # --- P1dB (store as Quantity in dBm) ---
         if p1db_dbm is not None:
-            self._p1db_dbm: Quantity = p1db_dbm if isinstance(p1db_dbm, Quantity) else p1db_dbm * u.dBm
+            self._p1db_dbm: Quantity = (
+                p1db_dbm if isinstance(p1db_dbm, Quantity) else p1db_dbm * u.dBm
+            )
         else:
             self._p1db_dbm = None  # type: ignore
 
@@ -142,7 +151,7 @@ class Stage:
         if rl_db is not None and vswr is not None:
             rl_q = rl_db if isinstance(rl_db, Quantity) else rl_db * u.dB
             vswr_q = vswr if isinstance(vswr, Quantity) else vswr * u.dimensionless
-           
+
             if rl_q < 0 * u.dB:
                 raise ValueError(
                     f"Stage '{self.label}': {side} return loss cannot be negative ({rl_q})."
@@ -151,7 +160,7 @@ class Stage:
                 raise ValueError(
                     f"Stage '{self.label}': {side} VSWR must be >= 1 ({vswr_q})."
                 )
-               
+
             calc_vswr = return_loss_to_vswr(rl_q)
             if not math.isclose(vswr_q.value, calc_vswr.value, rel_tol=1e-4):
                 raise ValueError(

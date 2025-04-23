@@ -9,6 +9,7 @@ functions for radio frequency applications, including:
   - Mismatch loss computation
   - YAML serialization support for Pint quantities
 """
+
 from functools import wraps
 from inspect import signature
 from typing import get_type_hints, get_args, Annotated
@@ -19,19 +20,24 @@ from astropy.units import Quantity
 import numpy as np
 
 # Define dBW if missing
-if not hasattr(u, 'dBW'):
+if not hasattr(u, "dBW"):
     u.dBW = u.dB(u.W)
 # Define dBW if missing
-if not hasattr(u, 'dBm'):
+if not hasattr(u, "dBm"):
     u.dBm = u.dB(u.mW)
 # Define dimensionless unit if missing
-if not hasattr(u, 'dimensionless'):
+if not hasattr(u, "dimensionless"):
     u.dimensionless = u.dimensionless_unscaled
 
 # Add dB to linear equivalencies for unit conversion
-db_equivalencies = [(u.dB, u.dimensionless_unscaled,
-                    lambda x: 10**(x/10),
-                    lambda x: 10 * np.log10(x))]
+db_equivalencies = [
+    (
+        u.dB,
+        u.dimensionless_unscaled,
+        lambda x: 10 ** (x / 10),
+        lambda x: 10 * np.log10(x),
+    )
+]
 
 
 Decibels = Annotated[Quantity, u.dB]
@@ -56,7 +62,7 @@ def enforce_units(func):
 
         for name, value in bound.arguments.items():
             hint = hints.get(name)
-            if hint and getattr(hint, '__origin__', None) is Annotated:
+            if hint and getattr(hint, "__origin__", None) is Annotated:
                 quantity_type, unit = get_args(hint)
                 if isinstance(value, Quantity):
                     # Convert to expected unit
@@ -90,7 +96,6 @@ def enforce_units(func):
     return wrapper
 
 
-
 @enforce_units
 def wavelength(frequency: Frequency) -> Wavelength:
     """
@@ -111,7 +116,6 @@ def wavelength(frequency: Frequency) -> Wavelength:
         <Quantity(0.299792458, 'meter')>
     """
     return constants.c / frequency.to(u.Hz)
-
 
 
 @enforce_units
@@ -136,8 +140,6 @@ def frequency(wavelength: Wavelength) -> Frequency:
     return constants.c / wavelength.to(u.m)
 
 
-
-
 @enforce_units
 def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
     """
@@ -151,7 +153,6 @@ def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
         Quantity in decibels (unit = u.dB)
     """
     return factor * u.dB * np.log10(x.to_value(u.dimensionless_unscaled))
-
 
 
 @enforce_units
@@ -171,7 +172,6 @@ def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
     else:  # Field ratio (factor=20)
         linear_value = np.power(10, x.value / factor)
     return linear_value * u.dimensionless
-
 
 
 @enforce_units
@@ -200,8 +200,6 @@ def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
     return ((1 + gamma) / (1 - gamma)) * u.dimensionless
 
 
-
-
 @enforce_units
 def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     """
@@ -224,10 +222,8 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
         raise ValueError(f"VSWR must be > 1 ({vswr}).")
     if np.isclose(vswr, 1.0):
         return float("inf")
-    gamma = ((vswr - 1) / (vswr + 1))
+    gamma = (vswr - 1) / (vswr + 1)
     return -to_dB(gamma, factor=20)
-
-
 
 
 @enforce_units

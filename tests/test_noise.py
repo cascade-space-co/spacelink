@@ -37,7 +37,9 @@ def test_noise_dBW_conversion():
     # Calculate noise power for 10 Hz bandwidth at 290K
     noise_w = noise.power(10.0 * u.Hz)
     # Check the dBW conversion
-    assert_quantity_allclose(noise_w.to(u.dB(u.W)), -193.98 * u.dB(u.W), atol=0.01 * u.dB(u.W))
+    assert_quantity_allclose(
+        noise_w.to(u.dB(u.W)), -193.98 * u.dB(u.W), atol=0.01 * u.dB(u.W)
+    )
 
 
 # TODO: test cascaded noise values

@@ -76,8 +76,7 @@ def test_link_budget_calculations():
 
     # For system noise temperature, add the magnitudes then compare
     system_temp = (
-        case.system_noise_temp.to("K").value
-        + case.antenna_noise_temp.to("K").value
+        case.system_noise_temp.to("K").value + case.antenna_noise_temp.to("K").value
     )
 
     # Verify system noise temperature calculation
@@ -87,6 +86,7 @@ def test_link_budget_calculations():
 
     # For EIRP calculation, convert tx_power to W and then to dB, then add gain
     import numpy as np
+
     tx_power_db = 10 * u.dB * np.log10(case.tx_power.to(u.W).value)
     eirp_val = tx_power_db.value + case.tx_antenna_gain.to("dB").value
 
@@ -98,8 +98,7 @@ def test_link_budget_calculations():
 
     # For system noise temperature, add the magnitudes then compare
     system_temp = (
-        case.system_noise_temp.to("K").value
-        + case.antenna_noise_temp.to("K").value
+        case.system_noise_temp.to("K").value + case.antenna_noise_temp.to("K").value
     )
 
     # Verify system noise temperature calculation

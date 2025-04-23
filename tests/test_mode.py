@@ -1,7 +1,6 @@
 """Tests for the mode module."""
 
 import pytest
-from astropy.units import Quantity
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 

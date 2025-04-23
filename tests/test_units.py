@@ -1,7 +1,5 @@
 """Tests for the units module."""
 
-# Always import from spacelink.units first to ensure custom units are available
-from spacelink import units
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 import pytest
@@ -12,8 +10,8 @@ from spacelink.units import (
     wavelength,
     frequency,
     mismatch_loss,
-    enforce_units,
 )
+
 
 def test_wavelength_calculation():
     """Test wavelength calculation from frequency."""
@@ -41,7 +39,7 @@ def test_db_conversion():
     gain_db = 30.0 * u.dB
     assert_quantity_allclose(power_db.to(u.W), 100 * u.W)
     # For dB to linear conversion, we need to use the proper conversion
-    assert_quantity_allclose(10**(gain_db.value/10), 1000.0)
+    assert_quantity_allclose(10 ** (gain_db.value / 10), 1000.0)
     assert_quantity_allclose(power_db + gain_db, 50 * u.dBW)
 
 
@@ -78,36 +76,31 @@ def test_vswr(vswr, gamma, return_loss):
     # Test return loss to VSWR conversion
     vswr_result = return_loss_to_vswr(return_loss * u.dB)
     assert_quantity_allclose(
-        vswr_result,
-        vswr * u.dimensionless,
-        atol=0.01 * u.dimensionless
+        vswr_result, vswr * u.dimensionless, atol=0.01 * u.dimensionless
     )
-   
+
     # Test VSWR to return loss conversion
     return_loss_result = vswr_to_return_loss(vswr * u.dimensionless)
-    assert_quantity_allclose(
-        return_loss_result,
-        return_loss * u.dB,
-        atol=0.01 * u.dB
-    )
-
-
+    assert_quantity_allclose(return_loss_result, return_loss * u.dB, atol=0.01 * u.dB)
 
 
 def test_mismatch_loss():
     """Test mismatch loss calculation."""
     vswr = 2.0 * u.dimensionless
     return_loss = vswr_to_return_loss(vswr)
-    assert_quantity_allclose(mismatch_loss(return_loss), 0.5115 * u.dB, atol=0.01 * u.dB)
+    assert_quantity_allclose(
+        mismatch_loss(return_loss), 0.5115 * u.dB, atol=0.01 * u.dB
+    )
 
 
 def test_enforce_units_decorator():
-    """Test that enforce_units decorator raises the correct astropy exception with incompatible units."""
+    """Test that enforce_units decorator raises the correct astropy exception
+    with incompatible units."""
     # Test that wavelength() raises UnitConversionError with incorrect units
     with pytest.raises(u.UnitConversionError):
         # Passing length units to a function expecting frequency
         wavelength(1.0 * u.m)
-       
+
     # Test that frequency() raises UnitConversionError with incorrect units
     with pytest.raises(u.UnitConversionError):
         # Passing frequency units to a function expecting length

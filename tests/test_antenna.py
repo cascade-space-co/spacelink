@@ -51,13 +51,17 @@ def test_dish_initialization():
     # Default efficiency
     dish = Dish(1.0 * u.m)
     assert_quantity_allclose(dish.diameter, 1.0 * u.m, atol=0.01 * u.m)
-    assert_quantity_allclose(dish.efficiency, 0.65 * u.dimensionless, atol=0.01 * u.dimensionless)
+    assert_quantity_allclose(
+        dish.efficiency, 0.65 * u.dimensionless, atol=0.01 * u.dimensionless
+    )
     assert_quantity_allclose(dish.axial_ratio, 0.0 * u.dB, atol=0.01 * u.dB)
 
     # Custom efficiency and axial ratio
     dish = Dish(2.0 * u.m, efficiency=0.5 * u.dimensionless, axial_ratio=1.5 * u.dB)
     assert_quantity_allclose(dish.diameter, 2.0 * u.m, atol=0.01 * u.m)
-    assert_quantity_allclose(dish.efficiency, 0.5 * u.dimensionless, atol=0.01 * u.dimensionless)
+    assert_quantity_allclose(
+        dish.efficiency, 0.5 * u.dimensionless, atol=0.01 * u.dimensionless
+    )
     assert_quantity_allclose(dish.axial_ratio, 1.5 * u.dB, atol=0.01 * u.dB)
 
 
@@ -107,13 +111,14 @@ def test_antenna_axial_ratio_validation():
 @pytest.mark.parametrize(
     "ar_tx_db, ar_rx_db, expected_loss_db, tol",
     [
-        (0 * u.dB,   0 * u.dB,   0.0 * u.dB,        0.01 * u.dB),  # matchy matchy
-        (0 * u.dB,   60 * u.dB,  3.002 * u.dB,      0.01 * u.dB),  # also matchy
-        (60 * u.dB,  0 * u.dB,   3.002 * u.dB,      0.01 * u.dB),  # Big mismatch
-        (10 * u.dB,  30 * u.dB,  0.332 * u.dB,      0.01 * u.dB),  # Small mismatch
-    ]
+        (0 * u.dB, 0 * u.dB, 0.0 * u.dB, 0.01 * u.dB),  # matchy matchy
+        (0 * u.dB, 60 * u.dB, 3.002 * u.dB, 0.01 * u.dB),  # also matchy
+        (60 * u.dB, 0 * u.dB, 3.002 * u.dB, 0.01 * u.dB),  # Big mismatch
+        (10 * u.dB, 30 * u.dB, 0.332 * u.dB, 0.01 * u.dB),  # Small mismatch
+    ],
 )
 def test_polarization_loss_calculation(ar_tx_db, ar_rx_db, expected_loss_db, tol):
-
     """Test the polarization loss calculation based on axial ratios."""
-    assert_quantity_allclose(polarization_loss(ar_tx_db, ar_rx_db), expected_loss_db, atol=tol)
+    assert_quantity_allclose(
+        polarization_loss(ar_tx_db, ar_rx_db), expected_loss_db, atol=tol
+    )

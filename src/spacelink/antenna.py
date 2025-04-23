@@ -9,8 +9,17 @@ from abc import ABC, abstractmethod
 import astropy.units as u
 import numpy as np
 
-from spacelink.units import (wavelength, Decibels, Dimensionless, Temperature, Frequency,
-                             Length, enforce_units, to_dB, to_linear)
+from spacelink.units import (
+    wavelength,
+    Decibels,
+    Dimensionless,
+    Temperature,
+    Frequency,
+    Length,
+    enforce_units,
+    to_dB,
+    to_linear,
+)
 
 
 class Antenna(ABC):

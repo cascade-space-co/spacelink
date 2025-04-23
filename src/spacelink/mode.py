@@ -6,9 +6,8 @@ communication modes, including modulation schemes, channel coding, and required
 signal quality parameters.
 """
 
-from astropy.units import Quantity
 import astropy.units as u
-from spacelink.units import to_dB, Decibels
+from spacelink.units import to_dB, Decibels, Dimensionless
 
 """TODO: change this to an abstract base class
 
@@ -43,7 +42,7 @@ class Mode:
         name: str,
         coding_scheme: str,
         modulation: str,
-        bits_per_symbol: Quantity,
+        bits_per_symbol: Dimensionless,
         code_rate: float,
         spectral_efficiency: float,
         required_ebno: float,
@@ -107,7 +106,11 @@ class Mode:
         """
 
         # Calculate margin (subtract positive implementation loss)
-        return self.ebno(c_over_n) - self.required_ebno * u.dB - self.implementation_loss * u.dB
+        return (
+            self.ebno(c_over_n)
+            - self.required_ebno * u.dB
+            - self.implementation_loss * u.dB
+        )
 
     def __str__(self) -> str:
         """

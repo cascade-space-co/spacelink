@@ -8,32 +8,34 @@ from astropy.tests.helper import assert_quantity_allclose
 
 from spacelink.cascade import Stage, Cascade
 
+
 # Register YAML constructor for Quantity objects
 def quantity_constructor(loader, node):
     """Constructor for !Quantity tags in YAML files."""
     mapping = loader.construct_mapping(node)
-    value = mapping.get('value')
-   
+    value = mapping.get("value")
+
     # Check for different key names that could contain the unit
-    unit_str = mapping.get('unit')
+    unit_str = mapping.get("unit")
     if unit_str is None:
-        unit_str = mapping.get('units')
-   
+        unit_str = mapping.get("units")
+
     if unit_str is None:
         raise ValueError("Quantity must have 'unit' or 'units' key")
-       
+
     # Handle special cases
-    if unit_str == 'linear':
+    if unit_str == "linear":
         return float(value) * u.dimensionless_unscaled
-    elif unit_str == 'dB/K':
+    elif unit_str == "dB/K":
         return float(value) * u.dB / u.K
-    elif unit_str == 'dBW':
+    elif unit_str == "dBW":
         # Handle dBW unit differently since u.dB(u.W) syntax may not be supported in some versions
         return float(value) * u.dBW
     else:
         return float(value) * getattr(u, unit_str)
 
-yaml.SafeLoader.add_constructor('!Quantity', quantity_constructor)
+
+yaml.SafeLoader.add_constructor("!Quantity", quantity_constructor)
 
 
 def test_stage_gain_and_loss_exclusive():
@@ -48,7 +50,9 @@ def test_stage_gain_linear_and_loss_linear():
     assert_quantity_allclose(s_gain.gain_lin, 10 * u.dimensionless)
     s_loss = Stage(label="l", loss=3 * u.dB)
     assert_quantity_allclose(s_loss.gain, -3 * u.dB)
-    assert_quantity_allclose(s_loss.gain_lin, 10 ** (-3 / 10) * u.dimensionless, rtol=1e-6)
+    assert_quantity_allclose(
+        s_loss.gain_lin, 10 ** (-3 / 10) * u.dimensionless, rtol=1e-6
+    )
 
 
 def test_stage_noise_figure_and_temperature():
@@ -67,7 +71,9 @@ def test_stage_return_loss_vswr_conversion():
     # compute vswr from rl=10 dB
     rho = 10 ** (-10 / 20)
     expected_vswr = (1 + rho) / (1 - rho)
-    assert_quantity_allclose(s_rl.input_vswr, expected_vswr * u.dimensionless, rtol=1e-6)
+    assert_quantity_allclose(
+        s_rl.input_vswr, expected_vswr * u.dimensionless, rtol=1e-6
+    )
     # reverse: vswr to rl
     s_vswr = Stage(label="vs", gain=0 * u.dB, input_vswr=2.5 * u.dimensionless)
     rho2 = abs((2.5 - 1) / (2.5 + 1))
@@ -110,9 +116,13 @@ def test_cascade_noise_figure_and_temperature():
     s3 = Stage(label="c", gain=10 * u.dB, noise_figure=4 * u.dB)
     c = Cascade([s1, s2, s3])
     # Compare cascaded noise figure in dB
-    assert_quantity_allclose(c.cascaded_noise_figure_db(), 2.43 * u.dB, atol=0.01 * u.dB)
+    assert_quantity_allclose(
+        c.cascaded_noise_figure_db(), 2.43 * u.dB, atol=0.01 * u.dB
+    )
     # Temperature
-    assert_quantity_allclose(c.cascaded_noise_temperature_k(), 217.85 * u.K, atol=0.01 * u.K)
+    assert_quantity_allclose(
+        c.cascaded_noise_temperature_k(), 217.85 * u.K, atol=0.01 * u.K
+    )
     assert_quantity_allclose(c.cascaded_gain(), 30 * u.dB)
 
 

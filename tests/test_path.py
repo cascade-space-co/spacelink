@@ -34,15 +34,21 @@ def test_free_space_path_loss():
 def test_spreading_loss():
     """Test spreading loss calculations."""
     # Spreading loss in positive dB
-    assert_quantity_allclose(spreading_loss(36000 * u.km), 162.12 * u.dB, atol=0.01 * u.dB)
-    assert_quantity_allclose(spreading_loss(2000 * u.km), 137.01 * u.dB, atol=0.01 * u.dB)
+    assert_quantity_allclose(
+        spreading_loss(36000 * u.km), 162.12 * u.dB, atol=0.01 * u.dB
+    )
+    assert_quantity_allclose(
+        spreading_loss(2000 * u.km), 137.01 * u.dB, atol=0.01 * u.dB
+    )
 
 
 def test_aperture_loss():
     """Test aperture loss calculations."""
     # Aperture loss in positive dB
     assert_quantity_allclose(aperture_loss(12 * u.GHz), 43.04 * u.dB, atol=0.01 * u.dB)
-    assert_quantity_allclose(aperture_loss(2.25 * u.GHz), 28.50 * u.dB, atol=0.01 * u.dB)
+    assert_quantity_allclose(
+        aperture_loss(2.25 * u.GHz), 28.50 * u.dB, atol=0.01 * u.dB
+    )
 
 
 def test_invalid_parameters():

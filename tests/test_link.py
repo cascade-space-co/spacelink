@@ -3,14 +3,15 @@ Tests for the link budget module.
 
 This module contains pytest-style tests for link budget calculations.
 """
+
 import pytest
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 import yaml
 
 # Register dBW as a proper unit if needed
-if not hasattr(u, 'dBW'):
-    u.add_enabled_units([u.def_unit('dBW', u.W)])
+if not hasattr(u, "dBW"):
+    u.add_enabled_units([u.def_unit("dBW", u.W)])
 
 from spacelink.link import Link
 from spacelink.antenna import FixedGain, Dish
@@ -18,32 +19,34 @@ from spacelink.mode import Mode
 from test_cases import load_test_case
 from spacelink.cascade import Cascade, Stage
 
+
 # Register YAML constructor for Quantity objects
 def quantity_constructor(loader, node):
     """Constructor for !Quantity tags in YAML files."""
     mapping = loader.construct_mapping(node)
-    value = mapping.get('value')
-   
+    value = mapping.get("value")
+
     # Check for different key names that could contain the unit
-    unit_str = mapping.get('unit')
+    unit_str = mapping.get("unit")
     if unit_str is None:
-        unit_str = mapping.get('units')
-   
+        unit_str = mapping.get("units")
+
     if unit_str is None:
         raise ValueError("Quantity must have 'unit' or 'units' key")
-       
+
     # Handle special cases
-    if unit_str == 'linear':
+    if unit_str == "linear":
         return float(value) * u.dimensionless_unscaled
-    elif unit_str == 'dB/K':
+    elif unit_str == "dB/K":
         return float(value) * u.dB / u.K
-    elif unit_str == 'dBW':
+    elif unit_str == "dBW":
         # Handle dBW unit differently since u.dB(u.W) syntax may not be supported in some versions
         return float(value) * u.dBW
     else:
         return float(value) * getattr(u, unit_str)
 
-yaml.SafeLoader.add_constructor('!Quantity', quantity_constructor)
+
+yaml.SafeLoader.add_constructor("!Quantity", quantity_constructor)
 
 
 def test_link_initialization():
@@ -311,13 +314,18 @@ def test_link_calculations():
     assert_quantity_allclose(link.eirp.value, case.ref.eirp.value, atol=0.01)
 
     # Check path loss calculation (positive dB value)
-    assert_quantity_allclose(link.path_loss, case.ref.free_space_path_loss, atol=0.01*u.dB)
+    assert_quantity_allclose(
+        link.path_loss, case.ref.free_space_path_loss, atol=0.01 * u.dB
+    )
 
     # Skip received power check as it includes atmospheric losses in the reference
 
     # Check system noise temperature calculation
-    assert_quantity_allclose(link.system_noise_temperature,
-        case.ref.system_noise_temperature, atol=0.01*u.K)
+    assert_quantity_allclose(
+        link.system_noise_temperature,
+        case.ref.system_noise_temperature,
+        atol=0.01 * u.K,
+    )
 
     # Skip noise power check
 
@@ -370,9 +378,14 @@ def test_lunar_downlink():
     )
 
     # Check base parameters that don't depend on calculations (positive dB path loss)
-    assert_quantity_allclose(link.path_loss, case.ref.free_space_path_loss, atol=0.01*u.dB)
-    assert_quantity_allclose(link.system_noise_temperature,
-        case.ref.system_noise_temperature, atol=0.01*u.K)
+    assert_quantity_allclose(
+        link.path_loss, case.ref.free_space_path_loss, atol=0.01 * u.dB
+    )
+    assert_quantity_allclose(
+        link.system_noise_temperature,
+        case.ref.system_noise_temperature,
+        atol=0.01 * u.K,
+    )
 
     # The link margin should incorporate implementation loss correctly
     assert link.mode.implementation_loss == case.implementation_loss.value
@@ -419,10 +432,14 @@ def test_leo_downlink():
         symbol_rate=case.bandwidth,
     )
 
-    # Check calculations against reference values with a larger tolerance (since we disabled mismatch loss)
+    # Check calculations against reference values with a larger tolerance
+    # (since we disabled mismatch loss)
+    # todo: figure out what bullshit claude did here
     assert_quantity_allclose(link.eirp.value, case.ref.eirp.value, atol=2.0)
     # Path loss should be a positive dB value
-    assert_quantity_allclose(link.path_loss, case.ref.free_space_path_loss, atol=0.01*u.dB)
+    assert_quantity_allclose(
+        link.path_loss, case.ref.free_space_path_loss, atol=0.01 * u.dB
+    )
     # Skip received power check as it includes atmospheric losses in the reference
     # assert link.system_noise_temperature == pytest.approx(
     #     case.ref.system_noise_temperature, abs=0.01
@@ -475,9 +492,14 @@ def test_leo_uplink():
     )
 
     # Check the core, reliable properties (positive dB path loss)
-    assert_quantity_allclose(link.path_loss, case.ref.free_space_path_loss, atol=0.01*u.dB)
-    assert_quantity_allclose(link.system_noise_temperature,
-        case.ref.system_noise_temperature, atol=0.01*u.K)
+    assert_quantity_allclose(
+        link.path_loss, case.ref.free_space_path_loss, atol=0.01 * u.dB
+    )
+    assert_quantity_allclose(
+        link.system_noise_temperature,
+        case.ref.system_noise_temperature,
+        atol=0.01 * u.K,
+    )
     assert link.mode.implementation_loss == case.implementation_loss.value
 
 
@@ -527,7 +549,12 @@ def test_lunar_uplink():
     )
 
     # Check the core, reliable properties (positive dB path loss)
-    assert_quantity_allclose(link.path_loss, case.ref.free_space_path_loss, atol=0.01*u.dB)
-    assert_quantity_allclose(link.system_noise_temperature,
-        case.ref.system_noise_temperature, atol=0.01*u.K)
+    assert_quantity_allclose(
+        link.path_loss, case.ref.free_space_path_loss, atol=0.01 * u.dB
+    )
+    assert_quantity_allclose(
+        link.system_noise_temperature,
+        case.ref.system_noise_temperature,
+        atol=0.01 * u.K,
+    )
     assert link.mode.implementation_loss == case.implementation_loss.value
