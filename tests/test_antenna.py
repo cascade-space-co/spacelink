@@ -2,7 +2,7 @@
 
 import pytest
 from spacelink.antenna import Antenna, Dish, FixedGain, polarization_loss
-from spacelink.units import GHz, MHz, m, dB, Q_, K
+from spacelink.units import GHz, MHz, m, dB, Q_
 from pint.testing import assert_allclose
 
 
@@ -106,10 +106,10 @@ def test_antenna_axial_ratio_validation():
 @pytest.mark.parametrize(
     "ar_tx_db, ar_rx_db, expected_loss_db, tol",
     [
-        (Q_(0, dB),   Q_(0, dB),   0.0,        0.01), # mathcy matchy
-        (Q_(0, dB),   Q_(60, dB),  3.002,      0.01), # also matchy
-        (Q_(60, dB),  Q_(0, dB),   3.002,      0.01), # Big mismatch
-        (Q_(10, dB),  Q_(30, dB),  0.332,      0.01), # Small mismatch
+        (Q_(0, dB),   Q_(0, dB),   0.0,        0.01),  # mathcy matchy
+        (Q_(0, dB),   Q_(60, dB),  3.002,      0.01),  # also matchy
+        (Q_(60, dB),  Q_(0, dB),   3.002,      0.01),  # Big mismatch
+        (Q_(10, dB),  Q_(30, dB),  0.332,      0.01),  # Small mismatch
     ]
 )
 def test_polarization_loss_calculation(ar_tx_db, ar_rx_db, expected_loss_db, tol):

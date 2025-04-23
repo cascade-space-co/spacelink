@@ -7,7 +7,6 @@ verifying various functions across the codebase.
 
 import pytest
 from spacelink.units import GHz, wavelength, m, dimensionless, Q_
-from spacelink.antenna import polarization_loss
 from test_cases import load_test_case, list_test_cases
 
 
@@ -56,9 +55,6 @@ def test_dish_parameters():
     assert case.rx_dish_efficiency <= 1 * dimensionless
     assert case.rx_antenna_gain > Q_(0, "dB")
     assert case.rx_antenna_axial_ratio >= Q_(0, "dB")
-
-
-
 
 
 def test_wavelength_calculation():
