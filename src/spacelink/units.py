@@ -38,7 +38,7 @@ DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 Frequency = Annotated[Quantity, u.Hz]
 Wavelength = Annotated[Quantity, u.m]
 Linear = Annotated[Quantity, u.dimensionless_unscaled]
-
+Distance = Annotated[Quantity, u.m]
 
 def enforce_units(func):
     sig = signature(func)
@@ -57,10 +57,29 @@ def enforce_units(func):
                     # Convert to expected unit
                     bound.arguments[name] = value.to(unit)
                 else:
+                    # Missing unit - check if this is a numeric type
+                    if np.isscalar(value) and not isinstance(value, str):
+                        param_desc = f"'{name}' in function '{func.__name__}'"
+                        expected_type = f"'{unit}'"
+                        raise TypeError(
+                            f"Parameter {param_desc} expected to be a Quantity with unit {expected_type}, "
+                            f"but got a numeric value without units. Try adding '* u.{unit}' to your value."
+                        )
                     # Convert raw numeric value to Quantity
                     bound.arguments[name] = quantity_type(value, unit)
 
-        return func(*bound.args, **bound.kwargs)
+        try:
+            return func(*bound.args, **bound.kwargs)
+        except AttributeError as e:
+            if "'numpy.float64' object has no attribute 'to_value'" in str(e):
+                # Common error when forgetting to add units to computed values
+                func_name = func.__name__
+                raise TypeError(
+                    f"In function '{func_name}': A numeric value is missing units. "
+                    f"You might have forgotten to add '* u.linear' to a calculation result. "
+                    f"Original error: {str(e)}"
+                ) from None
+            raise
 
     return wrapper
 
