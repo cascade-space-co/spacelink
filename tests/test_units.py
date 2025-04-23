@@ -13,7 +13,7 @@ from spacelink.units import (
     DecibelWatts,
     Frequency,
     Wavelength,
-    Linear,
+    Dimensionless,
     return_loss_to_vswr,
     vswr_to_return_loss,
     wavelength,
@@ -86,12 +86,12 @@ def test_vswr(vswr, gamma, return_loss):
     vswr_result = return_loss_to_vswr(return_loss * u.dB)
     assert_quantity_allclose(
         vswr_result,
-        vswr * u.linear,
-        atol=0.01 * u.linear
+        vswr * u.dimensionless,
+        atol=0.01 * u.dimensionless
     )
     
     # Test VSWR to return loss conversion
-    return_loss_result = vswr_to_return_loss(vswr * u.linear)
+    return_loss_result = vswr_to_return_loss(vswr * u.dimensionless)
     assert_quantity_allclose(
         return_loss_result,
         return_loss * u.dB,
@@ -101,7 +101,7 @@ def test_vswr(vswr, gamma, return_loss):
 
 def test_mismatch_loss():
     """Test mismatch loss calculation."""
-    vswr = 2.0 * u.linear
+    vswr = 2.0 * u.dimensionless
     return_loss = vswr_to_return_loss(vswr)
     assert_quantity_allclose(mismatch_loss(return_loss), 0.5115 * u.dB, atol=0.01 * u.dB)
 

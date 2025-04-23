@@ -9,4 +9,4 @@ stages:
       unit: dB
     input_vswr: !Quantity
       value: 2.0
-      units: linear
+      units: dimensionless

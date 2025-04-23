@@ -10,7 +10,7 @@ import numpy as np
 from astropy.units import Quantity
 from typing import List
 
-from spacelink.units import Decibels, Linear, Temperature, Frequency, enforce_units, to_dB, to_linear
+from spacelink.units import Decibels, Dimensionless, Temperature, Frequency, enforce_units, to_dB, to_linear
 
 # Define constants with units
 BOLTZMANN = 1.380649e-23 * u.J / u.K
@@ -76,13 +76,13 @@ def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
     if temperature < 0 * u.K:
         raise ValueError(f"temperature must be >= 0 ({temperature})")
     factor = 1.0 + (temperature / T0)
-    return to_dB(factor * u.linear)
+    return to_dB(factor * u.dimensionless)
 
 
 @enforce_units
 def cascaded_noise_factor(
-    noise_factors: List[Linear], gains_lin: List[Linear]
-) -> Linear:
+    noise_factors: List[Dimensionless], gains_lin: List[Dimensionless]
+) -> Dimensionless:
     """
     Calculate total cascaded noise factor (linear) using Friis formula.
 
@@ -107,7 +107,7 @@ def cascaded_noise_factor(
 
 @enforce_units
 def cascaded_noise_figure(
-    noise_factors: List[Linear], gains_lin: List[Linear]
+    noise_factors: List[Dimensionless], gains_lin: List[Dimensionless]
 ) -> Decibels:
     """
     Calculate total cascaded noise figure in dB.
@@ -125,7 +125,7 @@ def cascaded_noise_figure(
 
 @enforce_units
 def cascaded_noise_temperature(
-    noise_temps: List[Temperature], gains_lin: List[Linear]
+    noise_temps: List[Temperature], gains_lin: List[Dimensionless]
 ) -> Temperature:
     """
     Calculate total cascaded noise temperature in Kelvin.
@@ -145,7 +145,7 @@ def cascaded_noise_temperature(
     if len(noise_temps) != len(gains_lin):
         raise ValueError("noise_temps and gains_lin must have the same length.")
     # Convert noise temperatures to noise factors: F = 1 + T/T0
-    noise_factors = [1.0 + (temp / T0) * u.linear for temp in noise_temps]
+    noise_factors = [1.0 + (temp / T0) * u.dimensionless for temp in noise_temps]
     # Compute total noise factor
     total_nf = cascaded_noise_factor(noise_factors, gains_lin)
     # Convert back to noise temperature: T = (F - 1) * T0

@@ -45,10 +45,10 @@ def test_stage_gain_linear_and_loss_linear():
     s_gain = Stage(label="g", gain=10 * u.dB)
     assert_quantity_allclose(s_gain.gain, 10 * u.dB)
     # Linear gain is dimensionless
-    assert_quantity_allclose(s_gain.gain_lin, 10 * u.linear)
+    assert_quantity_allclose(s_gain.gain_lin, 10 * u.dimensionless)
     s_loss = Stage(label="l", loss=3 * u.dB)
     assert_quantity_allclose(s_loss.gain, -3 * u.dB)
-    assert_quantity_allclose(s_loss.gain_lin, 10 ** (-3 / 10) * u.linear, rtol=1e-6)
+    assert_quantity_allclose(s_loss.gain_lin, 10 ** (-3 / 10) * u.dimensionless, rtol=1e-6)
 
 
 def test_stage_noise_figure_and_temperature():
@@ -67,9 +67,9 @@ def test_stage_return_loss_vswr_conversion():
     # compute vswr from rl=10 dB
     rho = 10 ** (-10 / 20)
     expected_vswr = (1 + rho) / (1 - rho)
-    assert_quantity_allclose(s_rl.input_vswr, expected_vswr * u.linear, rtol=1e-6)
+    assert_quantity_allclose(s_rl.input_vswr, expected_vswr * u.dimensionless, rtol=1e-6)
     # reverse: vswr to rl
-    s_vswr = Stage(label="vs", gain=0 * u.dB, input_vswr=2.5 * u.linear)
+    s_vswr = Stage(label="vs", gain=0 * u.dB, input_vswr=2.5 * u.dimensionless)
     rho2 = abs((2.5 - 1) / (2.5 + 1))
     expected_rl = -20 * math.log10(rho2)
     assert_quantity_allclose(s_vswr.input_rl_db, expected_rl * u.dB, rtol=1e-6)
@@ -211,7 +211,7 @@ def test_cascade_vswr_fixture_file():
     # Stage 2 properties: gain and VSWR
     assert c[1].label == "s2"
     assert pytest.approx(c[1].gain.to(u.dB).value, abs=1e-6) == 5.0
-    assert_quantity_allclose(c[1].input_vswr, 2 * u.linear)
+    assert_quantity_allclose(c[1].input_vswr, 2 * u.dimensionless)
     # From VSWR, input return loss should be ~9.542 dB
     rho = (2.0 - 1.0) / (2.0 + 1.0)
     expected_rl = -20.0 * math.log10(abs(rho))

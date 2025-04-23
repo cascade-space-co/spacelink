@@ -6,7 +6,7 @@ from astropy.units import Quantity
 from astropy.tests.helper import assert_quantity_allclose
 
 from spacelink.antenna import Antenna, Dish, FixedGain, polarization_loss
-from spacelink.units import Decibels, Linear
+from spacelink.units import Decibels, Dimensionless
 
 
 # TODO: parameterize tests
@@ -53,13 +53,13 @@ def test_dish_initialization():
     # Default efficiency
     dish = Dish(1.0 * u.m)
     assert_quantity_allclose(dish.diameter, 1.0 * u.m, atol=0.01 * u.m)
-    assert_quantity_allclose(dish.efficiency, 0.65 * u.linear, atol=0.01 * u.linear)
+    assert_quantity_allclose(dish.efficiency, 0.65 * u.dimensionless, atol=0.01 * u.dimensionless)
     assert_quantity_allclose(dish.axial_ratio, 0.0 * u.dB, atol=0.01 * u.dB)
 
     # Custom efficiency and axial ratio
-    dish = Dish(2.0 * u.m, efficiency=0.5 * u.linear, axial_ratio=1.5 * u.dB)
+    dish = Dish(2.0 * u.m, efficiency=0.5 * u.dimensionless, axial_ratio=1.5 * u.dB)
     assert_quantity_allclose(dish.diameter, 2.0 * u.m, atol=0.01 * u.m)
-    assert_quantity_allclose(dish.efficiency, 0.5 * u.linear, atol=0.01 * u.linear)
+    assert_quantity_allclose(dish.efficiency, 0.5 * u.dimensionless, atol=0.01 * u.dimensionless)
     assert_quantity_allclose(dish.axial_ratio, 1.5 * u.dB, atol=0.01 * u.dB)
 
 
@@ -74,9 +74,9 @@ def test_dish_raises_on_invalid_diameter():
 def test_dish_raises_on_invalid_efficiency():
     """Test Dish raises ValueError for invalid efficiency."""
     with pytest.raises(ValueError, match="Efficiency must be between 0 and 1"):
-        Dish(1.0 * u.m, efficiency=-0.1 * u.linear)
+        Dish(1.0 * u.m, efficiency=-0.1 * u.dimensionless)
     with pytest.raises(ValueError, match="Efficiency must be between 0 and 1"):
-        Dish(1.0 * u.m, efficiency=1.1 * u.linear)
+        Dish(1.0 * u.m, efficiency=1.1 * u.dimensionless)
 
 
 def test_dish_calculates_gain():
@@ -92,7 +92,7 @@ def test_dish_calculates_gain():
     assert_quantity_allclose(dish.gain(900 * u.MHz), 17.62 * u.dB, atol=0.01 * u.dB)
 
     # Test with different efficiency
-    dish = Dish(1.0 * u.m, efficiency=0.5 * u.linear)
+    dish = Dish(1.0 * u.m, efficiency=0.5 * u.dimensionless)
     assert_quantity_allclose(dish.gain(2.4 * u.GHz), 25.00 * u.dB, atol=0.01 * u.dB)
 
 

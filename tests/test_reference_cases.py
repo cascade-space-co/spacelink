@@ -43,8 +43,8 @@ def test_dish_parameters():
 
     # Verify dish parameters are set correctly
     assert case.tx_dish_diameter > 0 * u.m
-    assert case.tx_dish_efficiency > 0 * u.linear
-    assert case.tx_dish_efficiency <= 1 * u.linear
+    assert case.tx_dish_efficiency > 0 * u.dimensionless
+    assert case.tx_dish_efficiency <= 1 * u.dimensionless
 
     # For dB values
     assert case.tx_antenna_gain > 0 * u.dB
@@ -52,8 +52,8 @@ def test_dish_parameters():
 
     # Same for receiver
     assert case.rx_dish_diameter > 0 * u.m
-    assert case.rx_dish_efficiency > 0 * u.linear
-    assert case.rx_dish_efficiency <= 1 * u.linear
+    assert case.rx_dish_efficiency > 0 * u.dimensionless
+    assert case.rx_dish_efficiency <= 1 * u.dimensionless
     assert case.rx_antenna_gain > 0 * u.dB
     assert case.rx_antenna_axial_ratio >= 0 * u.dB
 

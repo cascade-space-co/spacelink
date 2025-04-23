@@ -21,7 +21,7 @@ tx_power: !Quantity
   value: 100.0
   unit: W
 tx_dish_diameter: "3.7 m"
-tx_dish_efficiency: "0.65 linear"
+tx_dish_efficiency: "0.65 dimensionless"
 tx_antenna_gain: !Quantity
   value: 36.24
   unit: dB # Pre-computed for 3.7m dish at 2.075 GHz

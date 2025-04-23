@@ -25,7 +25,7 @@ from spacelink.units import (
     mismatch_loss,
     to_dB,
     to_linear,
-    Linear,
+    Dimensionless,
     Decibels,
     DecibelWatts,
     DecibelMilliwatts,
@@ -148,13 +148,13 @@ class Stage:
         # Both provided: check consistency
         if rl_db is not None and vswr is not None:
             rl_q = rl_db if isinstance(rl_db, Quantity) else rl_db * u.dB
-            vswr_q = vswr if isinstance(vswr, Quantity) else vswr * u.linear
+            vswr_q = vswr if isinstance(vswr, Quantity) else vswr * u.dimensionless
             
             if rl_q < 0 * u.dB:
                 raise ValueError(
                     f"Stage '{self.label}': {side} return loss cannot be negative ({rl_q})."
                 )
-            if vswr_q < 1.0 * u.linear:
+            if vswr_q < 1.0 * u.dimensionless:
                 raise ValueError(
                     f"Stage '{self.label}': {side} VSWR must be >= 1 ({vswr_q})."
                 )
@@ -178,8 +178,8 @@ class Stage:
             out_vswr = return_loss_to_vswr(out_rl)
             
         elif vswr is not None:
-            vswr_q = vswr if isinstance(vswr, Quantity) else vswr * u.linear
-            if vswr_q < 1.0 * u.linear:
+            vswr_q = vswr if isinstance(vswr, Quantity) else vswr * u.dimensionless
+            if vswr_q < 1.0 * u.dimensionless:
                 raise ValueError(
                     f"Stage '{self.label}': {side} VSWR must be >= 1 ({vswr_q})."
                 )
@@ -202,7 +202,7 @@ class Stage:
         lin_gain = to_linear(self._gain)
         # Round to integer if very close to avoid floating-point artifacts
         if abs(lin_gain.value - round(lin_gain.value)) < 1e-9:
-            lin_gain = round(lin_gain.value) * u.linear
+            lin_gain = round(lin_gain.value) * u.dimensionless
         return lin_gain
 
     @property
@@ -393,7 +393,7 @@ class Cascade:
             raise ValueError("Cannot calculate P1dB for empty cascade.")
         # Sum reciprocal of output P1dB powers referred to chain output
         total_recip = 0.0
-        gain_after = 1.0 * u.linear
+        gain_after = 1.0 * u.dimensionless
         for stage in reversed(self.stages):
             p1_q = stage.p1db_mw
             if p1_q is None:

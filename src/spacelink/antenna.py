@@ -10,7 +10,7 @@ from spacelink import units
 import astropy.units as u
 import numpy as np
 
-from spacelink.units import wavelength, Decibels, Linear, Temperature, Frequency, Length, enforce_units, to_dB, to_linear
+from spacelink.units import wavelength, Decibels, Dimensionless, Temperature, Frequency, Length, enforce_units, to_dB, to_linear
 
 class Antenna(ABC):
     """
@@ -130,7 +130,7 @@ class Dish(Antenna):
     def __init__(
         self,
         diameter: Length,
-        efficiency: Linear = 0.65 * u.linear,
+        efficiency: Dimensionless = 0.65 * u.dimensionless,
         axial_ratio: Decibels = 0.0 * u.dB,
         noise_temperature: Temperature = 0.0 * u.K,
         return_loss: Decibels = float("inf") * u.dB,
@@ -151,7 +151,7 @@ class Dish(Antenna):
         super().__init__(axial_ratio, noise_temperature, return_loss)
         if diameter <= 0 * u.m:
             raise ValueError("Dish diameter must be positive")
-        if not 0 < efficiency.to_value(u.linear) <= 1:
+        if not 0 < efficiency.to_value(u.dimensionless) <= 1:
             raise ValueError("Efficiency must be between 0 and 1")
 
         self.diameter = diameter
@@ -221,4 +221,4 @@ def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
     plf = 0.5 + 0.5 * (numerator / denominator)
     
     # Convert to decibels and make positive (loss)
-    return -to_dB(plf * u.linear)
+    return -to_dB(plf * u.dimensionless)

@@ -29,7 +29,7 @@ tx_antenna_axial_ratio: !Quantity
 
 # Receiver parameters (ground station)
 rx_dish_diameter: "3.7 m"
-rx_dish_efficiency: "0.65 linear"
+rx_dish_efficiency: "0.65 dimensionless"
 rx_antenna_gain: !Quantity
   value: 36.94
   unit: dB # Pre-computed for 3.7m dish at 2.25 GHz

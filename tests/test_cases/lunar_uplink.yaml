@@ -21,7 +21,7 @@ tx_power: !Quantity
   value: 200.0
   unit: W
 tx_dish_diameter: "10.0 m"
-tx_dish_efficiency: "0.65 linear"
+tx_dish_efficiency: "0.65 dimensionless"
 tx_antenna_gain: !Quantity
   value: 55.84
   unit: dB # Pre-computed for 10m dish at 7.2 GHz
@@ -31,7 +31,7 @@ tx_antenna_axial_ratio: !Quantity
 
 # Receiver parameters (lunar lander)
 rx_dish_diameter: "0.5 m"
-rx_dish_efficiency: "0.55 linear"
+rx_dish_efficiency: "0.55 dimensionless"
 rx_antenna_gain: !Quantity
   value: 29.52
   unit: dB # Pre-computed for 0.5m dish at 7.2 GHz

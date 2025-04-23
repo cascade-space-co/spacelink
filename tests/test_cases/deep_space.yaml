@@ -14,7 +14,7 @@ tx_power: !Quantity
   value: 10.0
   unit: W
 tx_dish_diameter: "2.5 m"
-tx_dish_efficiency: "0.60 linear" # linear
+tx_dish_efficiency: "0.60 dimensionless" # dimensionless
 tx_antenna_gain: !Quantity
   value: 44.63
   unit: dB
@@ -24,7 +24,7 @@ tx_antenna_axial_ratio: !Quantity
 
 # Receiver parameters (DSN 70m ground station)
 rx_dish_diameter: "70.0 m"
-rx_dish_efficiency: "0.70 linear"
+rx_dish_efficiency: "0.70 dimensionless"
 rx_antenna_gain: !Quantity
   value: 74.25
   unit: dB # Pre-computed for 70m dish at 8.4 GHz

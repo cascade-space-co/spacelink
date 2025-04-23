@@ -29,7 +29,7 @@ def spreading_loss(distance: Distance) -> Decibels:
     
     # We have to strip the unit here
     r = distance.to(u.m).value
-    return to_dB(4.0 * np.pi * r**2 * u.linear)
+    return to_dB(4.0 * np.pi * r**2 * u.dimensionless)
 
 
 @enforce_units
@@ -52,7 +52,7 @@ def aperture_loss(frequency: Frequency) -> Decibels:
     
     # Again stripping the unit here
     lam = wavelength(frequency).to(u.m).value
-    return to_dB(4.0 * np.pi / (lam**2) * u.linear)
+    return to_dB(4.0 * np.pi / (lam**2) * u.dimensionless)
 
 
 @enforce_units

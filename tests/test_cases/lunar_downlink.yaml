@@ -21,7 +21,7 @@ tx_power: !Quantity
   value: 10.0
   unit: W
 tx_dish_diameter: "0.5 m" # Small high-gain antenna on lander
-tx_dish_efficiency: "0.55 linear"
+tx_dish_efficiency: "0.55 dimensionless"
 tx_antenna_gain: !Quantity
   value: 31.69
   unit: dB # Pre-computed for 0.5m dish at 8.45 GHz
@@ -31,7 +31,7 @@ tx_antenna_axial_ratio: !Quantity
 
 # Receiver parameters (10m ground station)
 rx_dish_diameter: "10.0 m"
-rx_dish_efficiency: "0.65 linear"
+rx_dish_efficiency: "0.65 dimensionless"
 rx_antenna_gain: !Quantity
   value: 57.86
   unit: dB # Pre-computed for 10m dish at 8.45 GHz

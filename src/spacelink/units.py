@@ -26,9 +26,9 @@ if not hasattr(u, 'dBW'):
 # Define dBW if missing
 if not hasattr(u, 'dBm'):
     u.dBm = u.dB(u.mW)
-# Define linear unit if missing
-if not hasattr(u, 'linear'):
-    u.linear = u.dimensionless_unscaled
+# Define dimensionless unit if missing
+if not hasattr(u, 'dimensionless'):
+    u.dimensionless = u.dimensionless_unscaled
 
 # Add dB to linear equivalencies for unit conversion
 db_equivalencies = [(u.dB, u.dimensionless_unscaled, 
@@ -41,7 +41,7 @@ DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
 Frequency = Annotated[Quantity, u.Hz]
 Wavelength = Annotated[Quantity, u.m]
-Linear = Annotated[Quantity, u.dimensionless_unscaled]
+Dimensionless = Annotated[Quantity, u.dimensionless_unscaled]
 Distance = Annotated[Quantity, u.m]
 Temperature = Annotated[Quantity, u.K]
 Length = Annotated[Quantity, u.m]
@@ -82,7 +82,7 @@ def enforce_units(func):
                 func_name = func.__name__
                 raise TypeError(
                     f"In function '{func_name}': A numeric value is missing units. "
-                    f"You might have forgotten to add '* u.linear' to a calculation result. "
+                    f"You might have forgotten to add '* u.dimensionless' to a calculation result. "
                     f"Original error: {str(e)}"
                 ) from None
             raise
@@ -133,7 +133,7 @@ def frequency(wavelength: Wavelength) -> Frequency:
 
 
 @enforce_units
-def to_dB(x: Linear, *, factor=10) -> Decibels:
+def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
     """
     Convert a dimensionless quantity to decibels.
 
@@ -147,7 +147,7 @@ def to_dB(x: Linear, *, factor=10) -> Decibels:
     return factor * u.dB * np.log10(x.to_value(u.dimensionless_unscaled))
 
 @enforce_units
-def to_linear(x: Decibels, *, factor: float = 10) -> Linear:
+def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
     """
     Convert decibels to a linear (dimensionless) ratio.
 
@@ -162,10 +162,10 @@ def to_linear(x: Decibels, *, factor: float = 10) -> Linear:
         linear_value = np.power(10, x.value / factor)
     else:  # Field ratio (factor=20)
         linear_value = np.power(10, x.value / factor)
-    return linear_value * u.linear
+    return linear_value * u.dimensionless
 
 @enforce_units
-def return_loss_to_vswr(return_loss: Decibels) -> Linear:
+def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
     """
     Convert a return loss in decibels to voltage standing wave ratio (VSWR).
 
@@ -185,13 +185,13 @@ def return_loss_to_vswr(return_loss: Decibels) -> Linear:
     if return_loss.value < 0:
         raise ValueError(f"return loss must be >= 0 ({return_loss}).")
     if return_loss.value == float("inf"):
-        return 1.0 * u.linear
+        return 1.0 * u.dimensionless
     gamma = to_linear(-return_loss, factor=20)
-    return ((1 + gamma) / (1 - gamma)) * u.linear
+    return ((1 + gamma) / (1 - gamma)) * u.dimensionless
 
 
 @enforce_units
-def vswr_to_return_loss(vswr: Linear) -> Decibels:
+def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     """
     Convert voltage standing wave ratio (VSWR) to return loss in decibels.
 

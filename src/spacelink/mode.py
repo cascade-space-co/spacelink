@@ -8,7 +8,7 @@ signal quality parameters.
 
 from astropy.units import Quantity
 import astropy.units as u
-from spacelink.units import to_dB, Decibels, Linear
+from spacelink.units import to_dB, Decibels, Dimensionless
 
 """TODO: change this to an abstract base class
 
@@ -90,7 +90,7 @@ class Mode:
 
     def ebno(self, c_over_n: Decibels) -> Decibels:
         """Eb/N0 for given carrier to noise ratio"""
-        return c_over_n - to_dB(self.bits_per_symbol * u.linear)
+        return c_over_n - to_dB(self.bits_per_symbol * u.dimensionless)
 
     def margin(self, c_over_n: Decibels) -> Decibels:
         """
