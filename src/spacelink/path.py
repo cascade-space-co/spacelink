@@ -5,69 +5,70 @@ This module provides functions for calculating various types of path loss,
 including free space path loss, spreading loss, and aperture loss.
 """
 
-import math
-from pint import Quantity
-from spacelink.units import wavelength, m, Hz
+import astropy.units as u
+from spacelink.units import (
+    wavelength,
+    Frequency,
+    Decibels,
+    Distance,
+    enforce_units,
+    to_dB,
+)
+import numpy as np
 
 
-def spreading_loss(distance: Quantity) -> Quantity:
-    """Calculate the spreading loss.
-        The spreading loss is loss simply due to spherical spreading of the wave
-    Args:
-        distance: Distance between transmitter and receiver
-
-    Returns:
-        Spreading loss
-    """
+@enforce_units
+def spreading_loss(distance: Distance) -> Decibels:
     """
     Calculate the spreading loss in decibels (positive value).
 
     Spreading loss (dB) = 10 * log10(4 * pi * r^2)
     where r is the distance in meters.
-    """
-    # Validate input
-    if distance.to(m).magnitude <= 0:
-        raise ValueError("Distance must be positive")
-    # Compute loss
-    r = distance.to(m).magnitude
-    loss_db = 10.0 * math.log10(4.0 * math.pi * r**2)
-    return loss_db
-
-
-def aperture_loss(frequency: Quantity) -> Quantity:
-    """Calculate the aperture loss.
-
-    The aperture loss is the loss due to the effective area of the antenna
-    being less than the physical area.
 
     Args:
-        frequency: Carrier frequency
+        distance: Distance between transmitter and receiver
 
     Returns:
-        Aperture loss
+        Spreading loss in dB (positive value)
     """
+    # Validate input
+    if distance <= 0 * u.m:
+        raise ValueError("Distance must be positive")
+
+    # We have to strip the unit here
+    r = distance.to(u.m).value
+    return to_dB(4.0 * np.pi * r**2 * u.dimensionless)
+
+
+@enforce_units
+def aperture_loss(frequency: Frequency) -> Decibels:
     """
     Calculate the aperture loss in decibels (positive value).
 
     Aperture loss (dB) = 10 * log10(4 * pi / lambda^2)
     where lambda is the wavelength in meters.
+
+    Args:
+        frequency: Carrier frequency
+
+    Returns:
+        Aperture loss in dB (positive value)
     """
     # Validate input
-    if frequency.to(Hz).magnitude <= 0:
+    if frequency <= 0 * u.Hz:
         raise ValueError("Frequency must be positive")
-    # Compute loss
-    lam = wavelength(frequency).to(m).magnitude
-    loss_db = 10.0 * math.log10(4.0 * math.pi / (lam**2))
-    return loss_db
+
+    # Again stripping the unit here
+    lam = wavelength(frequency).to(u.m).value
+    return to_dB(4.0 * np.pi / (lam**2) * u.dimensionless)
 
 
-def free_space_path_loss(distance: Quantity, frequency: Quantity) -> float:
+@enforce_units
+def free_space_path_loss(distance: Distance, frequency: Frequency) -> Decibels:
     """
-    Calculate the free space path loss in decibels (positive value).
+    Calculate the free space path loss
 
-    Path loss (dB) = spreading_loss(d) + aperture_loss(f)
-    = 20*log10(4*pi*d/lambda)
-
+    Sum of spreading loss and aperture loss
     Args:
         distance: Distance between transmitter and receiver
         frequency: Carrier frequency
@@ -75,7 +76,4 @@ def free_space_path_loss(distance: Quantity, frequency: Quantity) -> float:
     Returns:
         Path loss in dB (positive value)
     """
-    # The individual functions validate inputs
-    sl = spreading_loss(distance)
-    al = aperture_loss(frequency)
-    return sl + al
+    return spreading_loss(distance) + aperture_loss(frequency)

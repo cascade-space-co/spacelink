@@ -1,8 +1,12 @@
 stages:
   - label: s1
-    gain: 10.0
+    gain: !Quantity
+      value: 10.0
+      unit: dB
   - label: s2
-    gain: 5.0
+    gain: !Quantity
+      value: 5.0
+      unit: dB
     input_vswr: !Quantity
-      magnitude: 2.0
+      value: 2.0
       units: dimensionless

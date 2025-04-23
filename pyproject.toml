@@ -7,7 +7,7 @@ name = "spacelink"
 version = "0.1.0"
 description = "Space link budget calculation package"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     {name = "Jacob Portukalian", email = "jacob@heliospherenetwork.com"},
     {name = "Arlen Abraham", email = "arlen@heliospherenetwork.com"}
@@ -15,9 +15,9 @@ authors = [
 dependencies = [
     "numpy>=1.24.0,<3.0.0",
     "scipy>=1.10.0,<2.0.0",
-    "pint>=0.24.4",
     "pandas>=2.0.0",
-    "autopep8>=2.3.2"
+    "autopep8>=2.3.2",
+    "astropy (>=7.0.1,<8.0.0)"
 ]
 
 [project.optional-dependencies]

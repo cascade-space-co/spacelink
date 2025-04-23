@@ -7,11 +7,12 @@ characteristics, path loss, and noise calculations.
 """
 
 from typing import Callable
-from pint import Quantity
+import numpy as np
+from astropy.units import Quantity
+import astropy.units as u
 from spacelink.antenna import Antenna, polarization_loss
 from spacelink.mode import Mode
 from spacelink.path import free_space_path_loss
-from spacelink.units import Hz, K, m, W, mismatch_loss, Q_
 from . import noise
 from spacelink.cascade import Cascade
 
@@ -67,7 +68,7 @@ class Link:
             ValueError: If any parameter is invalid
         """
         # Validate inputs
-        if tx_power <= 0.0 * W:
+        if tx_power <= 0.0 * u.W:
             raise ValueError("Transmitter power must be positive")
         if not isinstance(tx_antenna, Antenna):
             raise ValueError("tx_antenna must be an Antenna instance")
@@ -77,11 +78,11 @@ class Link:
             raise ValueError("tx_front_end must be a Cascade instance")
         if not isinstance(rx_front_end, Cascade):
             raise ValueError("rx_front_end must be a Cascade instance")
-        if rx_antenna_noise_temp < 0.0 * K:
+        if rx_antenna_noise_temp < 0.0 * u.K:
             raise ValueError("Antenna noise temperature cannot be negative")
         if not callable(distance_fn):
             raise ValueError("distance_fn must be a callable")
-        if frequency <= 0.0 * Hz:
+        if frequency <= 0.0 * u.Hz:
             raise ValueError("Frequency must be positive")
 
         # Store parameters
@@ -95,7 +96,7 @@ class Link:
         self.frequency = frequency
         self.mode = mode
         # Validate and store symbol rate
-        if symbol_rate <= 0.0 * Hz:
+        if symbol_rate <= 0.0 * u.Hz:
             raise ValueError("Symbol rate must be positive")
         self.symbol_rate = symbol_rate
 
@@ -111,7 +112,7 @@ class Link:
             ValueError: If the distance is not positive
         """
         distance = self.distance_fn()
-        if distance <= 0 * m:
+        if distance <= 0 * u.m:
             raise ValueError("Distance must be positive")
         return distance
 
@@ -133,10 +134,10 @@ class Link:
             fe_noise_temp = (
                 self.rx_front_end.cascaded_noise_temperature_k()
                 if len(self.rx_front_end) > 0
-                else 0.0 * K
+                else 0.0 * u.K
             )
         except ValueError:
-            fe_noise_temp = 0.0 * K
+            fe_noise_temp = 0.0 * u.K
         return self.rx_antenna_noise_temp + fe_noise_temp
 
     @property
@@ -160,7 +161,7 @@ class Link:
         return self.symbol_rate * self.mode.bits_per_symbol * self.mode.code_rate
 
     @property
-    def noise_power(self) -> float:
+    def noise_power(self) -> Quantity:
         """
         Calculate the noise power in dBW.
 
@@ -171,61 +172,67 @@ class Link:
         - B is the bandwidth in Hz
 
         Returns:
-            float: Noise power in dBW
+            Quantity: Noise power in dBW
         """
-        power_quantity = noise.power(self.bandwidth, self.system_noise_temperature)
-        return power_quantity.to("dBW").magnitude
+        return noise.power(self.bandwidth, self.system_noise_temperature).to("dBW")
 
     @property
-    def eirp(self) -> float:
+    def eirp(self) -> Quantity:
         """
         Calculate the Effective Isotropic Radiated Power (EIRP) in dBW.
 
         EIRP = Transmitter Power + Cascaded gain of transmit front end + Transmitter Antenna Gain
 
         Returns:
-            float: EIRP in dBW
+            Quantity: EIRP in dBW
         """
-        tx_power = self.tx_power.to("dBW").magnitude
-        fe_gain = self.tx_front_end.cascaded_gain().to("dB").magnitude
-        ant_gain = self.tx_antenna.gain(self.frequency).to("dB").magnitude
-        # Account for antenna return loss (mismatch loss)
-        mm_loss = mismatch_loss(self.tx_antenna.return_loss.to("dB").magnitude)
-        return Q_(tx_power + fe_gain + ant_gain - mm_loss, "dBW")
+        # Convert to Watts (linear), then to dB
+        tx_power_linear = self.tx_power.to("W")
+        # Get gain in dB
+        fe_gain = self.tx_front_end.cascaded_gain().to("dB").value
+        ant_gain = self.tx_antenna.gain(self.frequency).to("dB").value
+        # Convert tx_power to dB
+        tx_power_db = 10 * np.log10(tx_power_linear.value)
+
+        # Sum the dB values (all unitless at this point)
+        total_db = tx_power_db + fe_gain + ant_gain
+
+        # Return with proper units
+        return total_db * u.dB
 
     @property
-    def path_loss(self) -> float:
+    def path_loss(self) -> Quantity:
         """
         Calculate the free space path loss in dB (positive value).
 
         Path Loss = Free Space Path Loss (positive dB loss)
 
         Returns:
-            float: Free space path loss in dB
+            Quantity: Free space path loss in dB
         """
         return free_space_path_loss(self.distance, self.frequency)
 
     @property
-    def polarization_loss(self) -> float:
+    def polarization_loss(self) -> Quantity:
         """
         Calculate the polarization loss in dB (positive value) based on the antennas' axial ratios.
 
         Returns:
-            float: Polarization loss in dB
+            Quantity: Polarization loss in dB
         """
         return polarization_loss(
             self.tx_antenna.axial_ratio, self.rx_antenna.axial_ratio
         )
 
     @property
-    def received_power(self) -> float:
+    def received_power(self) -> Quantity:
         """
         Calculate the received power in dBW.
 
         Received Power = EIRP + Receiver Antenna Gain - Path Loss - Polarization Loss
 
         Returns:
-            float: Received power in dBW
+            Quantity: Received power in dBW
         """
         return (
             self.eirp
@@ -235,19 +242,19 @@ class Link:
         )
 
     @property
-    def carrier_to_noise_ratio(self) -> float:
+    def carrier_to_noise_ratio(self) -> Quantity:
         """
         Calculate the carrier-to-noise ratio in dB.
 
         C/N = Received Power - Noise Power
 
         Returns:
-            float: Carrier-to-noise ratio in dB
+            Quantity: Carrier-to-noise ratio in dB
         """
         return self.received_power - self.noise_power
 
     @property
-    def ebno(self) -> float:
+    def ebno(self) -> Quantity:
         """
         Calculate the energy per bit to noise power spectral density ratio (Eb/N0) in dB.
 
@@ -258,12 +265,12 @@ class Link:
         - R is the data rate in bits per second
 
         Returns:
-            float: Eb/N0 in dB
+            Quantity: Eb/N0 in dB
         """
         return self.mode.ebno(self.carrier_to_noise_ratio)
 
     @property
-    def margin(self) -> float:
+    def margin(self) -> Quantity:
         """
         Calculate the link margin in dB.
 
@@ -273,7 +280,7 @@ class Link:
         as it represents losses in the communication system that degrade performance.
 
         Returns:
-            float: Link margin in dB
+            Quantity: Link margin in dB
         """
         return self.mode.margin(self.carrier_to_noise_ratio)
 
@@ -286,12 +293,12 @@ class Link:
         """
         return (
             f"Link Budget:\n"
-            f"  EIRP: {self.eirp:.1f} dBW\n"
-            f"  Path Loss: {self.path_loss:.1f} dB\n"
-            f"  Polarization Loss: {self.polarization_loss:.1f} dB\n"
-            f"  Received Power: {self.received_power:.1f} dBW\n"
-            f"  System Noise Temperature: {self.system_noise_temperature.magnitude:.1f} K\n"
-            f"  Noise Power: {self.noise_power:.1f} dBW\n"
-            f"  C/N: {self.carrier_to_noise_ratio:.1f} dB\n"
-            f"  Margin: {self.margin:.1f} dB"
+            f"  EIRP: {self.eirp.value:.1f} dBW\n"
+            f"  Path Loss: {self.path_loss.value:.1f} dB\n"
+            f"  Polarization Loss: {self.polarization_loss.value:.1f} dB\n"
+            f"  Received Power: {self.received_power.value:.1f} dBW\n"
+            f"  System Noise Temperature: {self.system_noise_temperature.value:.1f} K\n"
+            f"  Noise Power: {self.noise_power.value:.1f} dBW\n"
+            f"  C/N: {self.carrier_to_noise_ratio.value:.1f} dB\n"
+            f"  Margin: {self.margin.value:.1f} dB"
         )

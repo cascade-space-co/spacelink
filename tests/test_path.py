@@ -3,61 +3,68 @@ Tests for path loss calculations.
 """
 
 import pytest
+import astropy.units as u
+from astropy.tests.helper import assert_quantity_allclose
 from spacelink.path import free_space_path_loss, spreading_loss, aperture_loss
-from spacelink.units import Q_, m, km, GHz, MHz
 
 
 def test_free_space_path_loss():
     """Test free space path loss calculations."""
     # Test with GEO satellite parameters
-    distance = Q_(36000, km)
-    frequency = Q_(12, GHz)  # 12 GHz
+    distance = 36000 * u.km
+    frequency = 12 * u.GHz  # 12 GHz
     path_loss = free_space_path_loss(distance, frequency)
     # Expect positive dB loss
-    assert path_loss == pytest.approx(205.16, abs=0.01)
+    assert_quantity_allclose(path_loss, 205.16 * u.dB, atol=0.01 * u.dB)
 
     # Test with LEO satellite parameters
-    distance = Q_(2000, km)  # 2,000 km
-    frequency = Q_(2.25, GHz)  # 2.25 GHz
+    distance = 2000 * u.km  # 2,000 km
+    frequency = 2.25 * u.GHz  # 2.25 GHz
     path_loss = free_space_path_loss(distance, frequency)
-    assert path_loss == pytest.approx(165.51, abs=0.01)
+    assert_quantity_allclose(path_loss, 165.51 * u.dB, atol=0.01 * u.dB)
 
     # Test with very short distance and low frequency (to test the range condition)
-    distance = Q_(10, m)
-    frequency = Q_(100, MHz)
+    distance = 10 * u.m
+    frequency = 100 * u.MHz
     path_loss = free_space_path_loss(distance, frequency)
     # Expect positive dB loss
-    assert path_loss == pytest.approx(32.45, abs=0.01)
+    assert_quantity_allclose(path_loss, 32.45 * u.dB, atol=0.01 * u.dB)
 
 
 def test_spreading_loss():
     """Test spreading loss calculations."""
     # Spreading loss in positive dB
-    assert spreading_loss(Q_(36000, km)) == pytest.approx(162.12, abs=0.01)
-    assert spreading_loss(Q_(2000, km)) == pytest.approx(137.01, abs=0.01)
+    assert_quantity_allclose(
+        spreading_loss(36000 * u.km), 162.12 * u.dB, atol=0.01 * u.dB
+    )
+    assert_quantity_allclose(
+        spreading_loss(2000 * u.km), 137.01 * u.dB, atol=0.01 * u.dB
+    )
 
 
 def test_aperture_loss():
     """Test aperture loss calculations."""
     # Aperture loss in positive dB
-    assert aperture_loss(Q_(12, GHz)) == pytest.approx(43.04, abs=0.01)
-    assert aperture_loss(Q_(2.25, GHz)) == pytest.approx(28.50, abs=0.01)
+    assert_quantity_allclose(aperture_loss(12 * u.GHz), 43.04 * u.dB, atol=0.01 * u.dB)
+    assert_quantity_allclose(
+        aperture_loss(2.25 * u.GHz), 28.50 * u.dB, atol=0.01 * u.dB
+    )
 
 
 def test_invalid_parameters():
     """Test that invalid parameters raise appropriate errors."""
     # Test with negative distance
     with pytest.raises(ValueError):
-        free_space_path_loss(Q_(-1000, m), Q_(1, GHz))
+        free_space_path_loss(-1000 * u.m, 1 * u.GHz)
 
     # Test with negative frequency
     with pytest.raises(ValueError):
-        free_space_path_loss(Q_(1000, m), Q_(-1, GHz))
+        free_space_path_loss(1000 * u.m, -1 * u.GHz)
 
     # Test with zero distance
     with pytest.raises(ValueError):
-        free_space_path_loss(Q_(0, m), Q_(1, GHz))
+        free_space_path_loss(0 * u.m, 1 * u.GHz)
 
     # Test with zero frequency
     with pytest.raises(ValueError):
-        free_space_path_loss(Q_(1000, m), Q_(0, GHz))
+        free_space_path_loss(1000 * u.m, 0 * u.GHz)

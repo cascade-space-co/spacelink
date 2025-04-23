@@ -5,10 +5,21 @@ This module provides classes and functions for antenna calculations,
 including dish gain and beamwidth calculations.
 """
 
-import math
 from abc import ABC, abstractmethod
-from pint import Quantity
-from spacelink.units import wavelength, K, dB, Q_, linear_to_db
+import astropy.units as u
+import numpy as np
+
+from spacelink.units import (
+    wavelength,
+    Decibels,
+    Dimensionless,
+    Temperature,
+    Frequency,
+    Length,
+    enforce_units,
+    to_dB,
+    to_linear,
+)
 
 
 class Antenna(ABC):
@@ -21,9 +32,9 @@ class Antenna(ABC):
 
     def __init__(
         self,
-        axial_ratio: Quantity = Q_(0.0, dB),
-        noise_temperature: Quantity = Q_(0.0, K),
-        return_loss: Quantity = Q_(float("inf"), dB),
+        axial_ratio: Decibels = 0.0 * u.dB,
+        noise_temperature: Temperature = 0.0 * u.K,
+        return_loss: Decibels = float("inf") * u.dB,
     ):
         """
         Initialize an antenna with polarization, noise temperature, and return loss.
@@ -39,20 +50,20 @@ class Antenna(ABC):
             ValueError: If axial_ratio, noise_temperature, or return_loss is negative
         """
         # Validate axial ratio
-        if axial_ratio < Q_(0.0, dB):
+        if axial_ratio < 0.0 * u.dB:
             raise ValueError("Axial ratio must be non-negative")
         # Validate noise temperature
-        if noise_temperature < Q_(0.0, K):
+        if noise_temperature < 0.0 * u.K:
             raise ValueError("Noise temperature must be non-negative")
         # Validate return loss
-        if return_loss < Q_(0.0, dB):
+        if return_loss < 0.0 * u.dB:
             raise ValueError("Return loss must be non-negative")
         self.axial_ratio = axial_ratio
         self.noise_temperature = noise_temperature
         self.return_loss = return_loss
 
     @abstractmethod
-    def gain(self, frequency: Quantity) -> Quantity:
+    def gain(self, frequency: Frequency) -> Decibels:
         """
         Calculate the antenna gain at a given frequency.
 
@@ -60,7 +71,7 @@ class Antenna(ABC):
             frequency: Frequency
 
         Returns:
-            float: Antenna gain in dB
+            Antenna gain in dB
 
         Raises:
             ValueError: If frequency is not positive
@@ -82,10 +93,10 @@ class FixedGain(Antenna):
 
     def __init__(
         self,
-        gain: Quantity,
-        axial_ratio: Quantity = Q_(0, dB),
-        noise_temperature: Quantity = Q_(0, K),
-        return_loss: Quantity = Q_(float("inf"), dB),
+        gain: Decibels,
+        axial_ratio: Decibels = 0.0 * u.dB,
+        noise_temperature: Temperature = 0.0 * u.K,
+        return_loss: Decibels = float("inf") * u.dB,
     ):
         """
         Initialize a FixedGain antenna.
@@ -99,7 +110,7 @@ class FixedGain(Antenna):
         super().__init__(axial_ratio, noise_temperature, return_loss)
         self.gain_ = gain
 
-    def gain(self, frequency: Quantity) -> Quantity:
+    def gain(self, frequency: Frequency) -> Decibels:
         """
         Return the fixed antenna gain.
 
@@ -107,9 +118,9 @@ class FixedGain(Antenna):
             frequency: Frequency in Hz (ignored)
 
         Returns:
-            float: Fixed antenna gain in dB
+            Fixed antenna gain in dB
         """
-        return self.gain_.to("dB")
+        return self.gain_
 
 
 class Dish(Antenna):
@@ -125,13 +136,14 @@ class Dish(Antenna):
         axial_ratio: Axial ratio in dB (0 dB for perfect circular, >40 dB for linear)
     """
 
+    @enforce_units
     def __init__(
         self,
-        diameter: Quantity,
-        efficiency: Quantity = Q_(0.65, ""),
-        axial_ratio: Quantity = Q_(0, dB),
-        noise_temperature: Quantity = Q_(0, K),
-        return_loss: Quantity = Q_(float("inf"), dB),
+        diameter: Length,
+        efficiency: Dimensionless = 0.65 * u.dimensionless,
+        axial_ratio: Decibels = 0.0 * u.dB,
+        noise_temperature: Temperature = 0.0 * u.K,
+        return_loss: Decibels = float("inf") * u.dB,
     ):
         """
         Initialize a Dish antenna.
@@ -147,15 +159,16 @@ class Dish(Antenna):
             ValueError: If diameter is not positive or efficiency is not between 0 and 1
         """
         super().__init__(axial_ratio, noise_temperature, return_loss)
-        if diameter <= 0:
+        if diameter <= 0 * u.m:
             raise ValueError("Dish diameter must be positive")
-        if not 0 < efficiency.magnitude <= 1:
+        if not 0 < efficiency.to_value(u.dimensionless) <= 1:
             raise ValueError("Efficiency must be between 0 and 1")
 
         self.diameter = diameter
         self.efficiency = efficiency
 
-    def gain(self, frequency: Quantity) -> Quantity:
+    @enforce_units
+    def gain(self, frequency: Frequency) -> Decibels:
         """
         Calculate the dish antenna gain at a given frequency.
 
@@ -170,21 +183,24 @@ class Dish(Antenna):
             frequency: Frequency in Hz
 
         Returns:
-            Quantity: Antenna gain in dB
+            Antenna gain in dB
 
         Raises:
             ValueError: If frequency is not positive
         """
+        if frequency <= 0 * u.Hz:
+            raise ValueError("Frequency must be positive")
+
         # Perform calculation with quantities
-        gain_linear = (
-            self.efficiency * (math.pi * self.diameter / wavelength(frequency)) ** 2
-        )
+        wl = wavelength(frequency)
+        gain_linear = self.efficiency * (np.pi * self.diameter / wl) ** 2
 
         # Convert result to dB and return
-        return gain_linear.to("dB")
+        return to_dB(gain_linear)
 
 
-def polarization_loss(tx_axial_ratio: Quantity, rx_axial_ratio: Quantity) -> float:
+@enforce_units
+def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
     """
     Calculate the polarization loss in dB between two antennas with given axial ratios.
 
@@ -193,32 +209,31 @@ def polarization_loss(tx_axial_ratio: Quantity, rx_axial_ratio: Quantity) -> flo
     the axial ratio is 0 dB, and for linear polarization, it is >40 dB.
 
     Args:
-        tx_axial_ratio: Transmit antenna axial ratio in dB (amplitude ratio)
-        rx_axial_ratio: Receive antenna axial ratio in dB (amplitude ratio)
+        ar1: First antenna axial ratio in dB (amplitude ratio)
+        ar2: Second antenna axial ratio in dB (amplitude ratio)
 
     Returns:
-        float: Polarization loss in dB (positive value)
+        Polarization loss in dB (positive value)
 
     Examples:
-        TODO: Add examples
+        >>> polarization_loss(0 * u.dB, 0 * u.dB)  # Both circular
+        <Quantity(0., 'dB')>
+        >>> polarization_loss(0 * u.dB, 60 * u.dB)  # Circular to linear
+        <Quantity(3.01, 'dB')>
+        >>> polarization_loss(3 * u.dB, 3 * u.dB)  # Same elliptical polarization
+        <Quantity(0.51, 'dB')>
 
     """
-    # Convert axial ratios from dB (magnitude) to linear scale
-    tx_ar_linear = 10 ** (tx_axial_ratio.magnitude / 20)
-    rx_ar_linear = 10 ** (rx_axial_ratio.magnitude / 20)
-
-    # Calculate polarization loss using the polarization efficiency formula
-    # This is the standard formula for polarization mismatch between antennas
     # Polarization mismatch angle is omitted (assumed to be 0 degrees)
     # https://www.microwaves101.com/encyclopedias/polarization-mismatch-between-antennas
-    gamma_t = 1 / tx_ar_linear
-    gamma_r = 1 / rx_ar_linear
+    gamma1 = to_linear(ar1, factor=20)
+    gamma2 = to_linear(ar2, factor=20)
 
-    numerator = 4 * gamma_t * gamma_r + (1 - gamma_t**2) * (1 - gamma_r**2)
-    denominator = (1 + gamma_t**2) * (1 + gamma_r**2)
+    numerator = 4 * gamma1 * gamma2 - (1 - gamma1**2) * (1 - gamma2**2)
+    denominator = (1 + gamma1**2) * (1 + gamma2**2)
 
-    plf = linear_to_db(0.5 + 0.5 * (numerator / denominator))
+    # Calculate polarization loss factor
+    plf = 0.5 + 0.5 * (numerator / denominator)
 
-    # Convert the mismatch factor to a positive loss in dB
-    # db(plf) is negative or zero since plf <= 1; negate to make loss positive
-    return -plf
+    # Convert to decibels and make positive (loss)
+    return -to_dB(plf)

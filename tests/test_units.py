@@ -1,98 +1,64 @@
 """Tests for the units module."""
 
+import astropy.units as u
+from astropy.tests.helper import assert_quantity_allclose
 import pytest
-from pint.testing import assert_allclose
+
 from spacelink.units import (
-    Q_,
-    Hz,
-    kHz,
-    MHz,
-    GHz,
-    W,
-    mW,
-    m,
-    km,
-    SPEED_OF_LIGHT,
     return_loss_to_vswr,
     vswr_to_return_loss,
     wavelength,
     frequency,
-    linear_to_db,
     mismatch_loss,
 )
-
-
-def test_unit_conversion():
-    """Test basic unit conversions."""
-    # Frequency conversions
-    assert_allclose((1 * GHz).to(MHz), 1000 * MHz)
-    assert_allclose((1 * MHz).to(kHz), 1000 * kHz)
-    assert_allclose((1 * kHz).to(Hz), 1000 * Hz)
-
-    # Power conversions
-    assert_allclose((1 * W).to(mW), 1000 * mW)
-
-    assert_allclose(Q_(0.0, "dBW").to("W"), 1 * W)
-    assert_allclose(Q_(30, "dBm").to("W"), 1 * W)
-
-    # Distance conversions
-    assert_allclose((1 * km).to(m), 1000 * m)
-
-
-def test_speed_of_light():
-    """Test the speed of light constant."""
-    assert_allclose(SPEED_OF_LIGHT, Q_(299792458.0, "meter/second"))
-    assert str(SPEED_OF_LIGHT.units) == "meter / second"
 
 
 def test_wavelength_calculation():
     """Test wavelength calculation from frequency."""
     # Test at different frequencies
-    assert_allclose(wavelength(1 * GHz).to(m), 0.299792458 * m)
-    assert_allclose(wavelength(300 * MHz).to(m), 0.999308193 * m)
-    assert_allclose(wavelength(30 * kHz).to(m), 9993.08193 * m)
+    assert_quantity_allclose(wavelength(1 * u.GHz).to(u.m), 0.299792458 * u.m)
+    assert_quantity_allclose(wavelength(300 * u.MHz).to(u.m), 0.999308193 * u.m)
+    assert_quantity_allclose(wavelength(30 * u.kHz).to(u.m), 9993.08193 * u.m)
 
     # Test unit conversion in result
-    wavelength_result = wavelength(2.4 * GHz)
-    assert_allclose(wavelength_result.to(m), 0.12491352416667 * m)
+    wavelength_result = wavelength(2.4 * u.GHz)
+    assert_quantity_allclose(wavelength_result.to(u.m), 0.12491352416667 * u.m)
 
 
 def test_frequency_calculation():
     """Test frequency calculation from wavelength."""
     # Test at different wavelengths
-    assert_allclose(frequency(1 * m).to(MHz), 299.792458 * MHz)
-    assert_allclose(frequency(10 * m).to(MHz), 29.9792458 * MHz)
-    assert_allclose(frequency(0.1 * m).to(GHz), 2.99792458 * GHz)
-
-    # Test unit conversion in result
-    freq_result = frequency(0.125 * m)
-    assert_allclose(freq_result.to(GHz), 2.39833966 * GHz)
+    assert_quantity_allclose(frequency(1 * u.m).to(u.MHz), 299.792458 * u.MHz)
+    assert_quantity_allclose(frequency(10 * u.m).to(u.MHz), 29.9792458 * u.MHz)
+    assert_quantity_allclose(frequency(0.1 * u.m).to(u.GHz), 2.99792458 * u.GHz)
 
 
 def test_db_conversion():
     """Test dB conversion function."""
-    assert linear_to_db(1.0) == pytest.approx(0.0)
-    assert linear_to_db(10.0) == pytest.approx(10.0)
-    assert linear_to_db(100.0) == pytest.approx(20.0)
-    assert linear_to_db(0.1) == pytest.approx(-10.0)
-    assert linear_to_db(0.01) == pytest.approx(-20.0)
+    power_db = 20 * u.dBW
+    gain_db = 30.0 * u.dB
+    assert_quantity_allclose(power_db.to(u.W), 100 * u.W)
+    # For dB to linear conversion, we need to use the proper conversion
+    assert_quantity_allclose(10 ** (gain_db.value / 10), 1000.0)
+    assert_quantity_allclose(power_db + gain_db, 50 * u.dBW)
 
 
 def test_invalid_inputs():
     """Test the functions raise errors with invalid inputs."""
     # Wavelength with non-frequency input
     with pytest.raises(Exception):
-        wavelength(1 * m)
+        wavelength(1 * u.m)
 
     with pytest.raises(Exception):
-        wavelength(1.0 * m)
+        wavelength(1.0 * u.m)
     # Frequency with non-length input
     with pytest.raises(Exception):
-        frequency(1 * Hz)
+        frequency(1 * u.Hz)
 
 
-def test_vswr():
-    test_data = [
+@pytest.mark.parametrize(
+    "vswr,gamma,return_loss",
+    [
         (1.1, 0.0476, 26.44),
         (1.2, 0.0909, 20.83),
         (1.3, 0.1304, 17.69),
@@ -103,12 +69,39 @@ def test_vswr():
         (1.8, 0.2857, 10.88),
         (1.9, 0.3103, 10.16),
         (2.0, 0.3333, 9.54),
-    ]
-    for vswr, gamma, return_loss in test_data:
-        assert return_loss_to_vswr(return_loss) == pytest.approx(vswr, abs=0.01)
-        assert vswr_to_return_loss(vswr) == pytest.approx(return_loss, abs=0.01)
+    ],
+)
+def test_vswr(vswr, gamma, return_loss):
+    """Test VSWR and return loss conversions."""
+    # Test return loss to VSWR conversion
+    vswr_result = return_loss_to_vswr(return_loss * u.dB)
+    assert_quantity_allclose(
+        vswr_result, vswr * u.dimensionless, atol=0.01 * u.dimensionless
+    )
+
+    # Test VSWR to return loss conversion
+    return_loss_result = vswr_to_return_loss(vswr * u.dimensionless)
+    assert_quantity_allclose(return_loss_result, return_loss * u.dB, atol=0.01 * u.dB)
 
 
 def test_mismatch_loss():
-    return_loss = vswr_to_return_loss(2.0)
-    assert mismatch_loss(return_loss) == pytest.approx(0.5115, abs=0.01)
+    """Test mismatch loss calculation."""
+    vswr = 2.0 * u.dimensionless
+    return_loss = vswr_to_return_loss(vswr)
+    assert_quantity_allclose(
+        mismatch_loss(return_loss), 0.5115 * u.dB, atol=0.01 * u.dB
+    )
+
+
+def test_enforce_units_decorator():
+    """Test that enforce_units decorator raises the correct astropy exception
+    with incompatible units."""
+    # Test that wavelength() raises UnitConversionError with incorrect units
+    with pytest.raises(u.UnitConversionError):
+        # Passing length units to a function expecting frequency
+        wavelength(1.0 * u.m)
+
+    # Test that frequency() raises UnitConversionError with incorrect units
+    with pytest.raises(u.UnitConversionError):
+        # Passing frequency units to a function expecting length
+        frequency(1.0 * u.Hz)
