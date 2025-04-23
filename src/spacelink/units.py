@@ -16,7 +16,7 @@ import yaml
 
 # Create a unit registry
 # Autoconvert offset to base units is important for logarithmic operations
-ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
+ureg = UnitRegistry(autoconvert_offset_to_baseunit=False)
 
 # Define a Quantity type alias for better type hints
 Q_ = ureg.Quantity
@@ -92,7 +92,7 @@ def frequency(wavelength: Quantity) -> Quantity:
     return SPEED_OF_LIGHT / wavelength.to(m)
 
 
-def db(value: float) -> float:
+def linear_to_db(value: float) -> float:
     """
     Convert a linear scale value to decibels (10 * log10).
 
@@ -106,7 +106,7 @@ def db(value: float) -> float:
         ValueError: If value is not positive.
 
     Example:
-        >>> db(10.0)
+        >>> linear_to_db(10.0)
         10.0
     """
     # Ensure valid input
@@ -115,12 +115,12 @@ def db(value: float) -> float:
     return float(10.0 * np.log10(value))
 
 
-def db_to_lin(value: float) -> float:
+def db_to_linear(value: Quantity) -> float:
     """
     Convert a decibel value to a linear scale ratio.
 
     Args:
-        value (float): Value in decibels.
+        value (Quantity): Value in decibels.
 
     Returns:
         float: Linear scale value.
@@ -129,7 +129,7 @@ def db_to_lin(value: float) -> float:
         >>> db_to_lin(20.0)
         100.0
     """
-    return float(np.pow(10, value / 10.0))
+    return float(10 ** (value / 10.0))
 
 
 def return_loss_to_vswr(return_loss: float) -> float:
@@ -178,7 +178,7 @@ def vswr_to_return_loss(vswr: float) -> float:
     if np.isclose(vswr, 1.0):
         return float("inf")
     gamma = (vswr - 1) / (vswr + 1)
-    return -2 * db(gamma)
+    return -2 * linear_to_db(gamma)
 
 
 def mismatch_loss(return_loss: float) -> float:
@@ -198,7 +198,7 @@ def mismatch_loss(return_loss: float) -> float:
         0.5115...
     """
     gamma = np.pow(10, -return_loss / 20.0)
-    return -db(1 - gamma**2)
+    return -linear_to_db(1 - gamma**2)
 
 
 # YAML support for Pint Quantity

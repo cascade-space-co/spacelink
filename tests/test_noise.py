@@ -2,7 +2,7 @@
 
 import pytest
 import spacelink.noise as noise
-from spacelink.units import Hz, MHz, K, dBW
+from spacelink.units import Hz, MHz, K, dBW, Q_
 from pint.testing import assert_allclose
 
 
@@ -37,7 +37,7 @@ def test_noise_dBW_conversion():
     # Calculate noise power for 1 MHz bandwidth at 290K
     noise_w = noise.power(10.0 * Hz)
     # Check the dBW conversion
-    assert_allclose(noise_w.to(dBW), -193.98 * dBW, atol=0.01)
+    assert_allclose(noise_w.to(dBW), Q_(-193.98, dBW), atol=0.01)
 
 
 # TODO: test cascaded noise values
