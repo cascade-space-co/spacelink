@@ -1,10 +1,12 @@
 """Tests for the mode module."""
 
 import pytest
-from pint import Quantity
+from astropy.units import Quantity
+import astropy.units as u
+from astropy.tests.helper import assert_quantity_allclose
 
 from spacelink.mode import Mode
-from spacelink.units import linear_to_db, dimensionless
+from spacelink.units import to_dB
 
 
 def test_mode_initialization():
@@ -15,7 +17,7 @@ def test_mode_initialization():
         name="BPSK 1/2",
         coding_scheme="Convolutional",
         modulation="BPSK",
-        bits_per_symbol=Quantity(1, dimensionless),
+        bits_per_symbol=1 * u.linear,
         code_rate=0.5,
         spectral_efficiency=0.5,
         required_ebno=4.0,
@@ -26,7 +28,7 @@ def test_mode_initialization():
     assert mode.name == "BPSK 1/2"
     assert mode.coding_scheme == "Convolutional"
     assert mode.modulation == "BPSK"
-    assert mode.bits_per_symbol.magnitude == pytest.approx(1.0)
+    assert mode.bits_per_symbol.value == pytest.approx(1.0)
     assert mode.spectral_efficiency == pytest.approx(0.5)
     assert mode.required_ebno == pytest.approx(4.0)
     assert mode.implementation_loss == pytest.approx(2.0)
@@ -41,7 +43,7 @@ def test_invalid_parameters():
             name="",
             coding_scheme="LDPC",
             modulation="QPSK",
-            bits_per_symbol=Quantity(2, dimensionless),
+            bits_per_symbol=2 * u.linear,
             code_rate=0.5,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -53,7 +55,7 @@ def test_invalid_parameters():
             name="Test",
             coding_scheme="",
             modulation="QPSK",
-            bits_per_symbol=Quantity(2, dimensionless),
+            bits_per_symbol=2 * u.linear,
             code_rate=0.5,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -65,7 +67,7 @@ def test_invalid_parameters():
             name="Test",
             coding_scheme="LDPC",
             modulation="",
-            bits_per_symbol=Quantity(2, dimensionless),
+            bits_per_symbol=2 * u.linear,
             code_rate=0.5,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -77,7 +79,7 @@ def test_invalid_parameters():
             name="Test",
             coding_scheme="LDPC",
             modulation="QPSK",
-            bits_per_symbol=Quantity(2, dimensionless),
+            bits_per_symbol=2 * u.linear,
             code_rate=0.5,
             spectral_efficiency=0.0,
             required_ebno=3.0,
@@ -89,7 +91,7 @@ def test_invalid_parameters():
             name="Test",
             coding_scheme="LDPC",
             modulation="QPSK",
-            bits_per_symbol=Quantity(2, dimensionless),
+            bits_per_symbol=2 * u.linear,
             code_rate=0.0,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -101,7 +103,7 @@ def test_invalid_parameters():
             name="Test",
             coding_scheme="LDPC",
             modulation="QPSK",
-            bits_per_symbol=Quantity(2, dimensionless),
+            bits_per_symbol=2 * u.linear,
             code_rate=1.1,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -113,7 +115,7 @@ def test_invalid_parameters():
             name="Test",
             coding_scheme="LDPC",
             modulation="QPSK",
-            bits_per_symbol=Quantity(2, dimensionless),
+            bits_per_symbol=2 * u.linear,
             code_rate=0.5,
             spectral_efficiency=1.0,
             required_ebno=3.0,
@@ -128,7 +130,7 @@ def test_ebno_calculation():
         name="QPSK 1/2",
         coding_scheme="Convolutional",
         modulation="QPSK",
-        bits_per_symbol=Quantity(2, dimensionless),
+        bits_per_symbol=2 * u.linear,
         code_rate=0.5,
         spectral_efficiency=1.0,
         required_ebno=4.0,
@@ -138,9 +140,9 @@ def test_ebno_calculation():
     # With C/N of 10 dB and 2 bits per symbol, Eb/N0 should be 7 dB
     # Eb/N0 = C/N - 10*log10(bits_per_symbol)
     c_over_n = 10.0
-    expected_ebno = c_over_n - linear_to_db(2)  # 10 - 3.01 = 6.99 dB
+    expected_ebno = c_over_n * u.dB - to_dB(2 * u.linear)  # 10 - 3.01 = 6.99 dB
 
-    assert mode.ebno(c_over_n) == pytest.approx(expected_ebno, abs=0.01)
+    assert_quantity_allclose(mode.ebno(c_over_n * u.dB), expected_ebno, rtol=1e-2)
 
 
 def test_margin_calculation():
@@ -150,14 +152,14 @@ def test_margin_calculation():
         name="BPSK 1/2",
         coding_scheme="Convolutional",
         modulation="BPSK",
-        bits_per_symbol=Quantity(1, dimensionless),
+        bits_per_symbol=1 * u.linear,
         code_rate=0.5,
         spectral_efficiency=0.5,
         required_ebno=4.0,
         implementation_loss=2.0,
     )
     # Verify that margin calculation is correct
-    assert mode.margin(8.0) == pytest.approx(2.0, abs=0.01)
+    assert_quantity_allclose(mode.margin(8.0 * u.dB), 2.0 * u.dB, rtol=1e-2)
 
 
 def test_str_representation():
@@ -167,7 +169,7 @@ def test_str_representation():
         name="BPSK 1/2",
         coding_scheme="Convolutional",
         modulation="BPSK",
-        bits_per_symbol=Quantity(1, dimensionless),
+        bits_per_symbol=1 * u.linear,
         code_rate=0.5,
         spectral_efficiency=0.5,
         required_ebno=4.0,

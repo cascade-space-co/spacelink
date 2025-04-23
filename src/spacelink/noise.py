@@ -5,16 +5,20 @@ This module provides utilities for calculating various noise-related parameters
 in radio systems, including thermal noise, noise figure, and noise temperature.
 """
 
-from pint import Quantity
-from spacelink.units import Hz, Q_
+import astropy.units as u
+import numpy as np
+from astropy.units import Quantity
 from typing import List
 
+from spacelink.units import Decibels, Linear, Temperature, Frequency, enforce_units, to_dB, to_linear
+
 # Define constants with units
-BOLTZMANN = Q_(1.380649e-23, "J/K")
-T0 = Q_(290.0, "K")
+BOLTZMANN = 1.380649e-23 * u.J / u.K
+T0 = 290.0 * u.K
 
 
-def power(bandwidth: Quantity, temperature: Quantity = T0) -> Quantity:
+@enforce_units
+def power(bandwidth: Frequency, temperature: Temperature = T0) -> Quantity:
     """
     Calculate the thermal noise power in a given bandwidth.
 
@@ -30,52 +34,55 @@ def power(bandwidth: Quantity, temperature: Quantity = T0) -> Quantity:
         temperature: Temperature in Kelvin (default: 290K, standard room temperature)
 
     Returns:
-        float: Thermal noise power in watts
+        Thermal noise power in watts
 
     Examples:
         >>> import math
-        >>> math.isclose(thermal_noise_power(1e6), 4.003e-15, rel_tol=1e-3)
+        >>> math.isclose(power(1e6 * u.Hz).value, 4.003e-15, rel_tol=1e-3)
         True
     """
-    if bandwidth < 0:
+    if bandwidth < 0 * u.Hz:
         raise ValueError("Bandwidth cannot be negative")
 
-    return BOLTZMANN * temperature * bandwidth.to(Hz)
+    return BOLTZMANN * temperature * bandwidth.to(u.Hz)
 
 
-def noise_figure_to_temperature(noise_figure: Quantity) -> Quantity:
+@enforce_units
+def noise_figure_to_temperature(noise_figure: Decibels) -> Temperature:
     """
     Convert noise figure in dB to noise temperature in Kelvin.
 
     Args:
-        nf_db: Noise figure in dB (Quantity)
+        noise_figure: Noise figure in dB
 
     Returns:
-        Noise temperature in Kelvin (Quantity)
+        Noise temperature in Kelvin
     """
-    factor = noise_figure.to("dimensionless")
+    factor = to_linear(noise_figure)
     return (factor - 1.0) * T0
 
 
-def temperature_to_noise_figure(temperature: Quantity) -> Quantity:
+@enforce_units
+def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
     """
     Convert noise temperature in Kelvin to noise figure in dB.
 
     Args:
-        temp_k: Noise temperature in Kelvin (Quantity)
+        temperature: Noise temperature in Kelvin
 
     Returns:
-        Noise figure in dB (Quantity)
+        Noise figure in dB
     """
-    if temperature < 0 * T0.u:
+    if temperature < 0 * u.K:
         raise ValueError(f"temperature must be >= 0 ({temperature})")
     factor = 1.0 + (temperature / T0)
-    return factor.to("dB")
+    return to_dB(factor * u.linear)
 
 
+@enforce_units
 def cascaded_noise_factor(
-    noise_factors: List[Quantity], gains_lin: List[Quantity]
-) -> Quantity:
+    noise_factors: List[Linear], gains_lin: List[Linear]
+) -> Linear:
     """
     Calculate total cascaded noise factor (linear) using Friis formula.
 
@@ -98,9 +105,10 @@ def cascaded_noise_factor(
     return total_nf
 
 
+@enforce_units
 def cascaded_noise_figure(
-    noise_factors: List[Quantity], gains_lin: List[Quantity]
-) -> Quantity:
+    noise_factors: List[Linear], gains_lin: List[Linear]
+) -> Decibels:
     """
     Calculate total cascaded noise figure in dB.
 
@@ -112,12 +120,13 @@ def cascaded_noise_figure(
         Total noise figure (dB) as a Quantity.
     """
     total_nf = cascaded_noise_factor(noise_factors, gains_lin)
-    return total_nf.to("dB")
+    return to_dB(total_nf)
 
 
+@enforce_units
 def cascaded_noise_temperature(
-    noise_temps: List[Quantity], gains_lin: List[Quantity]
-) -> Quantity:
+    noise_temps: List[Temperature], gains_lin: List[Linear]
+) -> Temperature:
     """
     Calculate total cascaded noise temperature in Kelvin.
 
@@ -136,7 +145,7 @@ def cascaded_noise_temperature(
     if len(noise_temps) != len(gains_lin):
         raise ValueError("noise_temps and gains_lin must have the same length.")
     # Convert noise temperatures to noise factors: F = 1 + T/T0
-    noise_factors: List[Quantity] = [1.0 + (temp / T0) for temp in noise_temps]
+    noise_factors = [1.0 + (temp / T0) * u.linear for temp in noise_temps]
     # Compute total noise factor
     total_nf = cascaded_noise_factor(noise_factors, gains_lin)
     # Convert back to noise temperature: T = (F - 1) * T0

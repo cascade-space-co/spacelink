@@ -1,106 +1,134 @@
 import math
 import pytest
-from pint.testing import assert_allclose
+import numpy as np
 import yaml
-
-from spacelink.units import Q_, dB, dimensionless, K, dBm
-from spacelink.cascade import Stage, Cascade
 import os
+import astropy.units as u
+from astropy.tests.helper import assert_quantity_allclose
+
+from spacelink.cascade import Stage, Cascade
+
+# Register YAML constructor for Quantity objects
+def quantity_constructor(loader, node):
+    """Constructor for !Quantity tags in YAML files."""
+    mapping = loader.construct_mapping(node)
+    value = mapping.get('value')
+    
+    # Check for different key names that could contain the unit
+    unit_str = mapping.get('unit')
+    if unit_str is None:
+        unit_str = mapping.get('units')
+    
+    if unit_str is None:
+        raise ValueError("Quantity must have 'unit' or 'units' key")
+        
+    # Handle special cases
+    if unit_str == 'linear':
+        return float(value) * u.dimensionless_unscaled
+    elif unit_str == 'dB/K':
+        return float(value) * u.dB / u.K
+    elif unit_str == 'dBW':
+        # Handle dBW unit differently since u.dB(u.W) syntax may not be supported in some versions
+        return float(value) * u.dBW
+    else:
+        return float(value) * getattr(u, unit_str)
+
+yaml.SafeLoader.add_constructor('!Quantity', quantity_constructor)
 
 
 def test_stage_gain_and_loss_exclusive():
     with pytest.raises(ValueError):
-        Stage(label="bad", gain=Q_(10, dB), loss=Q_(3, dB))
+        Stage(label="bad", gain=10 * u.dB, loss=3 * u.dB)
 
 
 def test_stage_gain_linear_and_loss_linear():
-    s_gain = Stage(label="g", gain=Q_(10, dB))
-    assert_allclose(s_gain.gain, Q_(10, dB))
+    s_gain = Stage(label="g", gain=10 * u.dB)
+    assert_quantity_allclose(s_gain.gain, 10 * u.dB)
     # Linear gain is dimensionless
-    assert_allclose(s_gain.gain_lin, Q_(10, dimensionless))
-    s_loss = Stage(label="l", loss=Q_(3, dB))
-    assert_allclose(s_loss.gain, Q_(-3, dB))
-    assert_allclose(s_loss.gain_lin, 10 ** (-3 / 10) * dimensionless, rtol=1e-6)
+    assert_quantity_allclose(s_gain.gain_lin, 10 * u.linear)
+    s_loss = Stage(label="l", loss=3 * u.dB)
+    assert_quantity_allclose(s_loss.gain, -3 * u.dB)
+    assert_quantity_allclose(s_loss.gain_lin, 10 ** (-3 / 10) * u.linear, rtol=1e-6)
 
 
 def test_stage_noise_figure_and_temperature():
     # From noise_figure to noise_temp
-    s_nf = Stage(label="nf", gain=Q_(0, dB), noise_figure=Q_(2, dB))
+    s_nf = Stage(label="nf", gain=0 * u.dB, noise_figure=2 * u.dB)
     expected_temp = 290.0 * (10 ** (2 / 10) - 1)
-    assert_allclose(s_nf.noise_temp, Q_(expected_temp, K))
+    assert_quantity_allclose(s_nf.noise_temp, expected_temp * u.K)
     # From noise_temp to noise_figure
-    s_temp = Stage(label="nt", gain=Q_(0, dB), noise_temp=Q_(200, K))
+    s_temp = Stage(label="nt", gain=0 * u.dB, noise_temp=200 * u.K)
     expected_nf = 10 * math.log10(1 + 200 / 290.0)
-    assert_allclose(s_temp.noise_figure.to(dB), Q_(expected_nf, dB), rtol=1e-6)
+    assert_quantity_allclose(s_temp.noise_figure, expected_nf * u.dB, rtol=1e-6)
 
 
 def test_stage_return_loss_vswr_conversion():
-    s_rl = Stage(label="rl", gain=Q_(0, dB), input_rl_db=Q_(10, dB))
+    s_rl = Stage(label="rl", gain=0 * u.dB, input_rl_db=10 * u.dB)
     # compute vswr from rl=10 dB
     rho = 10 ** (-10 / 20)
     expected_vswr = (1 + rho) / (1 - rho)
-    assert_allclose(s_rl.input_vswr, expected_vswr * dimensionless, rtol=1e-6)
+    assert_quantity_allclose(s_rl.input_vswr, expected_vswr * u.linear, rtol=1e-6)
     # reverse: vswr to rl
-    s_vswr = Stage(label="vs", gain=Q_(0, dB), input_vswr=Q_(2.5, dimensionless))
+    s_vswr = Stage(label="vs", gain=0 * u.dB, input_vswr=2.5 * u.linear)
     rho2 = abs((2.5 - 1) / (2.5 + 1))
     expected_rl = -20 * math.log10(rho2)
-    assert_allclose(Q_(s_vswr.input_rl_db, dB), Q_(expected_rl, dB), rtol=1e-6)
+    assert_quantity_allclose(s_vswr.input_rl_db, expected_rl * u.dB, rtol=1e-6)
 
 
 def test_stage_to_from_dict():
     s = Stage(
         label="t",
-        gain=Q_(5, dB),
-        noise_figure=Q_(3, dB),
-        p1db_dbm=Q_(15, dBm),
-        input_rl_db=Q_(12, dB),
-        output_rl_db=Q_(14, dB),
+        gain=5 * u.dB,
+        noise_figure=3 * u.dB,
+        p1db_dbm=15 * u.dBm,
+        input_rl_db=12 * u.dB,
+        output_rl_db=14 * u.dB,
     )
     d = s.to_dict()
     s2 = Stage.from_dict(d)
     assert s == s2
     # Dict should contain expected keys
     assert d["label"] == "t"
-    assert_allclose(Q_(d["gain"], dB), Q_(5, dB))
-    assert_allclose(Q_(d["noise_figure"], dB), Q_(3, dB))
-    assert_allclose(Q_(d["p1db_dbm"], dBm), Q_(15, dBm))
-    assert_allclose(Q_(d["input_rl_db"], dB), Q_(12, dB))
-    assert_allclose(Q_(d["output_rl_db"], dB), Q_(14, dB))
+    assert np.isclose(d["gain"], 5.0)
+    assert np.isclose(d["noise_figure"], 3.0)
+    assert np.isclose(d["p1db_dbm"], 15.0)
+    assert np.isclose(d["input_rl_db"], 12.0)
+    assert np.isclose(d["output_rl_db"], 14.0)
 
 
 def test_cascade_gain():
-    s1 = Stage(label="a", gain=Q_(10, dB))
-    s2 = Stage(label="b", gain=Q_(3, dB))
+    s1 = Stage(label="a", gain=10 * u.dB)
+    s2 = Stage(label="b", gain=3 * u.dB)
     c = Cascade([s1, s2])
-    assert_allclose(c.cascaded_gain(), Q_(13, dB))
+    assert_quantity_allclose(c.cascaded_gain(), 13 * u.dB)
 
 
 def test_cascade_noise_figure_and_temperature():
     # Stage1: gf=10db nf=2db, Stage2: gf=3db nf=3db
-    s1 = Stage(label="a", gain=Q_(10, dB), noise_figure=Q_(2, dB))
-    s2 = Stage(label="b", gain=Q_(10, dB), noise_figure=Q_(4, dB))
-    s3 = Stage(label="c", gain=Q_(10, dB), noise_figure=Q_(4, dB))
+    s1 = Stage(label="a", gain=10 * u.dB, noise_figure=2 * u.dB)
+    s2 = Stage(label="b", gain=10 * u.dB, noise_figure=4 * u.dB)
+    s3 = Stage(label="c", gain=10 * u.dB, noise_figure=4 * u.dB)
     c = Cascade([s1, s2, s3])
     # Compare cascaded noise figure in dB
-    assert_allclose(c.cascaded_noise_figure_db().to(dB), Q_(2.43, dB), atol=0.01)
+    assert_quantity_allclose(c.cascaded_noise_figure_db(), 2.43 * u.dB, atol=0.01 * u.dB)
     # Temperature
-    assert_allclose(c.cascaded_noise_temperature_k(), Q_(217.85, K), atol=0.01)
-    assert_allclose(c.cascaded_gain(), Q_(30, dB))
+    assert_quantity_allclose(c.cascaded_noise_temperature_k(), 217.85 * u.K, atol=0.01 * u.K)
+    assert_quantity_allclose(c.cascaded_gain(), 30 * u.dB)
 
 
 def test_cascade_input_referred_p1db_single_stage():
-    s = Stage(label="x", gain=Q_(5, dB), p1db_dbm=Q_(20, dBm))
+    s = Stage(label="x", gain=5 * u.dB, p1db_dbm=20 * u.dBm)
     c = Cascade([s])
     # input-referred = output - gain
     # input-referred = output P1dB minus total gain
     # input-referred = output P1dB minus total gain (in dB)
-    expected = Q_(20 - 5, dBm)
-    assert_allclose(c.input_referred_p1db_dbm(), expected)
+    expected = 15 * u.dBm
+    assert_quantity_allclose(c.input_referred_p1db_dbm(), expected)
 
 
 def test_cascade_len_and_getitem():
-    s1 = Stage(label="a", gain=Q_(1, dB))
-    s2 = Stage(label="b", gain=Q_(2, dB))
+    s1 = Stage(label="a", gain=1 * u.dB)
+    s2 = Stage(label="b", gain=2 * u.dB)
     c = Cascade([s1, s2])
     assert len(c) == 2
     assert c[0] is s1
@@ -108,8 +136,8 @@ def test_cascade_len_and_getitem():
 
 
 def test_cascade_to_from_dict_and_yaml():
-    s1 = Stage(label="a", gain=Q_(4, dB), noise_figure=Q_(1, dB))
-    s2 = Stage(label="b", loss=Q_(2, dB), noise_figure=Q_(2, dB))
+    s1 = Stage(label="a", gain=4 * u.dB, noise_figure=1 * u.dB)
+    s2 = Stage(label="b", loss=2 * u.dB, noise_figure=2 * u.dB)
     c = Cascade([s1, s2])
     d = c.to_dict()
     # Round-trip dict
@@ -137,7 +165,7 @@ def test_cascade_from_yaml_single_stage():
     )
     data = yaml.safe_load(yaml_str)
     c = Cascade.from_dict(data)
-    expected = Cascade([Stage(label="amp1", gain=Q_(10, dB), noise_figure=Q_(1.5, dB))])
+    expected = Cascade([Stage(label="amp1", gain=10 * u.dB, noise_figure=1.5 * u.dB)])
     assert c == expected
 
 
@@ -148,7 +176,7 @@ def test_cascade_from_yaml_file_simple():
         data = yaml.safe_load(f)
     c = Cascade.from_dict(data)
     expected = Cascade(
-        [Stage(label="simple_amp", gain=Q_(10, dB), noise_figure=Q_(3, dB))]
+        [Stage(label="simple_amp", gain=10 * u.dB, noise_figure=3 * u.dB)]
     )
     assert c == expected
 
@@ -161,9 +189,9 @@ def test_cascade_from_yaml_file_multiple():
     c = Cascade.from_dict(data)
     expected = Cascade(
         [
-            Stage(label="amp1", gain=Q_(6, dB), noise_figure=Q_(1, dB)),
-            Stage(label="att1", loss=Q_(2, dB), noise_figure=Q_(0.5, dB)),
-            Stage(label="amp2", gain=Q_(4, dB), noise_figure=Q_(2, dB)),
+            Stage(label="amp1", gain=6 * u.dB, noise_figure=1 * u.dB),
+            Stage(label="att1", loss=2 * u.dB, noise_figure=0.5 * u.dB),
+            Stage(label="amp2", gain=4 * u.dB, noise_figure=2 * u.dB),
         ]
     )
     assert c == expected
@@ -179,15 +207,15 @@ def test_cascade_vswr_fixture_file():
     assert len(c) == 2
     # Stage 1 properties
     assert c[0].label == "s1"
-    assert pytest.approx(c[0].gain.to(dB).magnitude, abs=1e-6) == 10.0
+    assert pytest.approx(c[0].gain.to(u.dB).value, abs=1e-6) == 10.0
     # Stage 2 properties: gain and VSWR
     assert c[1].label == "s2"
-    assert pytest.approx(c[1].gain.to(dB).magnitude, abs=1e-6) == 5.0
-    assert c[1].input_vswr == Q_(2, dimensionless)
+    assert pytest.approx(c[1].gain.to(u.dB).value, abs=1e-6) == 5.0
+    assert_quantity_allclose(c[1].input_vswr, 2 * u.linear)
     # From VSWR, input return loss should be ~9.542 dB
     rho = (2.0 - 1.0) / (2.0 + 1.0)
     expected_rl = -20.0 * math.log10(abs(rho))
-    assert pytest.approx(c[1].input_rl_db, abs=1e-6) == expected_rl
+    assert_quantity_allclose(c[1].input_rl_db, expected_rl * u.dB, rtol=1e-6)
 
     # Total gain minus mismatch loss (~0.512 dB)
-    assert_allclose(c.cascaded_gain(), Q_(15.0 - 0.512, dB), atol=0.01)
+    assert_quantity_allclose(c.cascaded_gain(), (15.0 - 0.512) * u.dB, atol=0.01 * u.dB)

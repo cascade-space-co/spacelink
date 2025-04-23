@@ -2,26 +2,27 @@
 
 import pytest
 import spacelink.noise as noise
-from spacelink.units import Hz, MHz, K, dBW, Q_
-from pint.testing import assert_allclose
+import astropy.units as u
+import numpy as np
+from astropy.tests.helper import assert_quantity_allclose
 
 
 def test_thermal_noise_power():
     """Test thermal noise power calculation."""
     # Test with standard room temperature (290K)
     expected = 1.380649e-23 * 290.0 * 1e6
-    assert noise.power(1.0 * MHz).magnitude == pytest.approx(expected)
+    assert_quantity_allclose(noise.power(1.0 * u.MHz), expected * u.W)
 
     # Test with different temperature
     expected = 1.380649e-23 * 100.0 * 1e6
-    assert noise.power(1.0 * MHz, 100 * K).magnitude == pytest.approx(expected)
+    assert_quantity_allclose(noise.power(1.0 * u.MHz, 100 * u.K), expected * u.W)
 
     # Test with zero bandwidth
-    assert noise.power(0.0 * MHz).magnitude == 0.0
+    assert_quantity_allclose(noise.power(0.0 * u.MHz), 0.0 * u.W)
 
     # Test with negative bandwidth
     with pytest.raises(ValueError):
-        noise.power(-1.0 * MHz)
+        noise.power(-1.0 * u.MHz)
 
 
 def test_noise_dBW_conversion():
@@ -34,10 +35,10 @@ def test_noise_dBW_conversion():
     200	         10	2.76E-20	-195.59	-165.59	-175.59
     290	         10	4.00E-20	-193.98	-163.98	-173.98
     """
-    # Calculate noise power for 1 MHz bandwidth at 290K
-    noise_w = noise.power(10.0 * Hz)
+    # Calculate noise power for 10 Hz bandwidth at 290K
+    noise_w = noise.power(10.0 * u.Hz)
     # Check the dBW conversion
-    assert_allclose(noise_w.to(dBW), Q_(-193.98, dBW), atol=0.01)
+    assert_quantity_allclose(noise_w.to(u.dB(u.W)), -193.98 * u.dB(u.W), atol=0.01 * u.dB(u.W))
 
 
 # TODO: test cascaded noise values

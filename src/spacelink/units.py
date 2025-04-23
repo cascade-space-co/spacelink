@@ -23,6 +23,9 @@ import yaml
 # Define dBW if missing
 if not hasattr(u, 'dBW'):
     u.dBW = u.dB(u.W)
+# Define dBW if missing
+if not hasattr(u, 'dBm'):
+    u.dBm = u.dB(u.mW)
 # Define linear unit if missing
 if not hasattr(u, 'linear'):
     u.linear = u.dimensionless_unscaled
@@ -35,10 +38,13 @@ db_equivalencies = [(u.dB, u.dimensionless_unscaled,
 
 Decibels = Annotated[Quantity, u.dB]
 DecibelWatts = Annotated[Quantity, u.dB(u.W)]
+DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
 Frequency = Annotated[Quantity, u.Hz]
 Wavelength = Annotated[Quantity, u.m]
 Linear = Annotated[Quantity, u.dimensionless_unscaled]
 Distance = Annotated[Quantity, u.m]
+Temperature = Annotated[Quantity, u.K]
+Length = Annotated[Quantity, u.m]
 
 def enforce_units(func):
     sig = signature(func)

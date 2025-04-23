@@ -10,47 +10,55 @@ distance: "600000000.0 km" # ~4 AU (typical distance to outer planets)
 bandwidth: "20.0 kHz" # Narrow bandwidth for deep space
 
 # Transmitter parameters (spacecraft)
-tx_power: "10.0 W" # 10W spacecraft transmitter
+tx_power: !Quantity
+  value: 10.0
+  unit: W
 tx_dish_diameter: "2.5 m"
-tx_dish_efficiency: "0.60 dimensionless" # dimensionless
-tx_antenna_gain:
+tx_dish_efficiency: "0.60 linear" # linear
+tx_antenna_gain: !Quantity
   value: 44.63
   unit: dB
-tx_antenna_axial_ratio:
+tx_antenna_axial_ratio: !Quantity
   value: 3.0
   unit: dB
 
 # Receiver parameters (DSN 70m ground station)
 rx_dish_diameter: "70.0 m"
-rx_dish_efficiency: "0.70 dimensionless"
-rx_antenna_gain:
+rx_dish_efficiency: "0.70 linear"
+rx_antenna_gain: !Quantity
   value: 74.25
   unit: dB # Pre-computed for 70m dish at 8.4 GHz
 system_noise_temp: "25.0 K" # Cryogenically cooled receivers
 antenna_noise_temp: "15.0 K" # Cold sky background
-rx_antenna_axial_ratio:
+rx_antenna_axial_ratio: !Quantity 
   value: 3.0
   unit: dB
 
 # Additional losses
-implementation_loss:
+implementation_loss: !Quantity
   value: 0.5
   unit: dB
-polarization_loss:
+polarization_loss: !Quantity
   value: 0.51
   unit: dB
-required_ebno:
+required_ebno: !Quantity
   value: 9.6
   unit: dB
 
 # Reference values for calculations
 ref_values:
   # Physical parameters
-  wavelength: "0.03569 m" # Speed of light / frequency
+  wavelength: !Quantity
+    value: 0.03569
+    unit: m
 
   # Antenna parameters
-  tx_dish_3db_beamwidth: "0.9993 deg" # Spacecraft antenna beamwidth
-  rx_dish_3db_beamwidth: "0.0357 deg" # DSN antenna beamwidth
+  tx_dish_3db_beamwidth: !Quantity
+    value: 0.9993
+    unit: deg
+  rx_dish_3db_beamwidth: !Quantity
+    value: 0.0357
+    unit: deg
 
   # Path loss
   free_space_path_loss:
@@ -58,28 +66,32 @@ ref_values:
     unit: dB # Without additional losses
 
   # Link budget calculated by actual Link implementation
-  eirp:
+  eirp: !Quantity
     value: 54.63
     unit: dBW # tx_power + tx_antenna_gain (10.0 + 44.63)
-  received_power:
+  received_power: !Quantity
     value: -163.95
     unit: dBW # EIRP + rx_antenna_gain - path_loss - polarization_loss
-  system_noise_temperature: "40.0 K" # system_noise_temp + antenna_noise_temp
-  noise_power:
+  system_noise_temperature: !Quantity
+    value: 40.0
+    unit: K # system_noise_temp + antenna_noise_temp
+  noise_power: !Quantity
     value: -184.56
     unit: dBW # Thermal noise in 20 kHz bandwidth
-  carrier_to_noise_ratio:
+  carrier_to_noise_ratio: !Quantity
     value: 20.61
     unit: dB # received_power - noise_power
-  ebno:
+  ebno: !Quantity
     value: 20.61
     unit: dB # Same as C/N (simplified)
-  link_margin:
+  link_margin: !Quantity
     value: 10.51
     unit: dB # ebno - required_ebno - implementation_loss
 
   # Additional reference values
-  data_rate: "20000.0 bps" # Maximum theoretical data rate
-  ground_station_g_over_t:
+  data_rate: !Quantity
+    value: 20000.0
+    unit: bps # Maximum theoretical data rate
+  ground_station_g_over_t: !Quantity
     value: 58.77
     unit: dB/K # G/T figure of merit

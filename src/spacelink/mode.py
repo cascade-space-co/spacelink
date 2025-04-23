@@ -6,8 +6,9 @@ communication modes, including modulation schemes, channel coding, and required
 signal quality parameters.
 """
 
-from pint import Quantity
-from spacelink.units import linear_to_db
+from astropy.units import Quantity
+import astropy.units as u
+from spacelink.units import to_dB, Decibels, Linear
 
 """TODO: change this to an abstract base class
 
@@ -87,11 +88,11 @@ class Mode:
         self.required_ebno = required_ebno
         self.implementation_loss = implementation_loss
 
-    def ebno(self, c_over_n: float) -> float:
+    def ebno(self, c_over_n: Decibels) -> Decibels:
         """Eb/N0 for given carrier to noise ratio"""
-        return c_over_n - linear_to_db(self.bits_per_symbol.magnitude)
+        return c_over_n - to_dB(self.bits_per_symbol * u.linear)
 
-    def margin(self, c_over_n: float) -> float:
+    def margin(self, c_over_n: Decibels) -> Decibels:
         """
         Calculate the link margin in dB for a given carrier-to-noise ratio.
 
@@ -106,7 +107,7 @@ class Mode:
         """
 
         # Calculate margin (subtract positive implementation loss)
-        return self.ebno(c_over_n) - self.required_ebno - self.implementation_loss
+        return self.ebno(c_over_n) - self.required_ebno * u.dB - self.implementation_loss * u.dB
 
     def __str__(self) -> str:
         """

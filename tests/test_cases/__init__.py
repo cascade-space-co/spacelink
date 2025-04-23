@@ -10,7 +10,43 @@ import os
 import yaml
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
-from spacelink.units import Q_, Quantity
+from astropy.units import Quantity
+import astropy.units as u
+
+# Add custom units if needed
+if not hasattr(u, 'bps'):
+    u.bps = u.def_unit('bps', doc="Bits per second")
+    
+# Define dBW if not already defined
+if not hasattr(u, 'dBW'):
+    u.dBW = u.def_unit('dBW', u.dB(u.W))
+
+# Register YAML constructor for Quantity objects
+def quantity_constructor(loader, node):
+    """Constructor for !Quantity tags in YAML files."""
+    mapping = loader.construct_mapping(node)
+    value = mapping.get('value')
+    
+    # Check for different key names that could contain the unit
+    unit_str = mapping.get('unit')
+    if unit_str is None:
+        unit_str = mapping.get('units')
+    
+    if unit_str is None:
+        raise ValueError("Quantity must have 'unit' or 'units' key")
+        
+    # Handle special cases
+    if unit_str == 'linear':
+        return float(value) * u.dimensionless_unscaled
+    elif unit_str == 'dB/K':
+        return float(value) * u.dB / u.K
+    elif unit_str == 'dBW':
+        # Handle dBW unit differently since u.dB(u.W) syntax may not be supported in some versions
+        return float(value) * u.dBW
+    else:
+        return float(value) * getattr(u, unit_str)
+
+yaml.SafeLoader.add_constructor('!Quantity', quantity_constructor)
 
 
 @dataclass
@@ -167,7 +203,17 @@ def load_test_case(case_name: str) -> RadioTestCase:
         # Convert strings to quantities or handle structured format
         if isinstance(value, str):
             try:
-                qty = Q_(value)
+                # Parse string like "5 dB" into a Quantity
+                val, unit_str = value.split(" ", 1)
+                # Handle special cases
+                if unit_str == 'linear':
+                    qty = float(val) * u.dimensionless_unscaled
+                elif unit_str == 'dB/K':
+                    qty = float(val) * u.dB / u.K
+                elif unit_str == 'dBW':
+                    qty = float(val) * u.dB(u.W)
+                else:
+                    qty = float(val) * getattr(u, unit_str)
                 processed_data[key] = qty
             except (ValueError, TypeError):
                 processed_data[key] = value
@@ -176,7 +222,13 @@ def load_test_case(case_name: str) -> RadioTestCase:
             try:
                 unit_str = value["unit"]
                 qty_value = value["value"]
-                qty = Q_(qty_value, unit_str)
+                # Handle special cases
+                if unit_str == 'linear':
+                    qty = float(qty_value) * u.dimensionless_unscaled
+                elif unit_str == 'dB/K':
+                    qty = float(qty_value) * u.dB / u.K
+                else:
+                    qty = float(qty_value) * getattr(u, unit_str)
                 processed_data[key] = qty
             except (ValueError, TypeError):
                 processed_data[key] = value
@@ -192,7 +244,17 @@ def load_test_case(case_name: str) -> RadioTestCase:
         if hasattr(ref_values, key):
             if isinstance(value, str):
                 try:
-                    qty = Q_(value)
+                    # Parse string like "5 dB" into a Quantity
+                    val, unit_str = value.split(" ", 1)
+                    # Handle special cases
+                    if unit_str == 'linear':
+                        qty = float(val) * u.dimensionless_unscaled
+                    elif unit_str == 'dB/K':
+                        qty = float(val) * u.dB / u.K
+                    elif unit_str == 'dBW':
+                        qty = float(val) * u.dBW
+                    else:
+                        qty = float(val) * getattr(u, unit_str)
                     setattr(ref_values, key, qty)
                 except (ValueError, TypeError):
                     setattr(ref_values, key, value)
@@ -201,7 +263,15 @@ def load_test_case(case_name: str) -> RadioTestCase:
                 try:
                     unit_str = value["unit"]
                     qty_value = value["value"]
-                    qty = Q_(qty_value, unit_str)
+                    # Handle special cases
+                    if unit_str == 'linear':
+                        qty = float(qty_value) * u.dimensionless_unscaled
+                    elif unit_str == 'dB/K':
+                        qty = float(qty_value) * u.dB / u.K
+                    elif unit_str == 'dBW':
+                        qty = float(qty_value) * u.dBW
+                    else:
+                        qty = float(qty_value) * getattr(u, unit_str)
                     setattr(ref_values, key, qty)
                 except (ValueError, TypeError):
                     setattr(ref_values, key, value)
