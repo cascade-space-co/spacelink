@@ -2,11 +2,9 @@
 
 import pytest
 import astropy.units as u
-from astropy.units import Quantity
 from astropy.tests.helper import assert_quantity_allclose
 
 from spacelink.antenna import Antenna, Dish, FixedGain, polarization_loss
-from spacelink.units import Decibels, Dimensionless
 
 
 # TODO: parameterize tests
@@ -116,5 +114,6 @@ def test_antenna_axial_ratio_validation():
     ]
 )
 def test_polarization_loss_calculation(ar_tx_db, ar_rx_db, expected_loss_db, tol):
+
     """Test the polarization loss calculation based on axial ratios."""
     assert_quantity_allclose(polarization_loss(ar_tx_db, ar_rx_db), expected_loss_db, atol=tol)

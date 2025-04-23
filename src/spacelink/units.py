@@ -10,15 +10,13 @@ functions for radio frequency applications, including:
   - YAML serialization support for Pint quantities
 """
 from functools import wraps
-from inspect import signature, Parameter
+from inspect import signature
 from typing import get_type_hints, get_args, Annotated
 import astropy.units as u
 import astropy.constants as constants
 from astropy.units import Quantity
-from typing import Annotated
 
 import numpy as np
-import yaml
 
 # Define dBW if missing
 if not hasattr(u, 'dBW'):
@@ -31,8 +29,8 @@ if not hasattr(u, 'dimensionless'):
     u.dimensionless = u.dimensionless_unscaled
 
 # Add dB to linear equivalencies for unit conversion
-db_equivalencies = [(u.dB, u.dimensionless_unscaled, 
-                    lambda x: 10**(x/10), 
+db_equivalencies = [(u.dB, u.dimensionless_unscaled,
+                    lambda x: 10**(x/10),
                     lambda x: 10 * np.log10(x))]
 
 
@@ -45,6 +43,7 @@ Dimensionless = Annotated[Quantity, u.dimensionless_unscaled]
 Distance = Annotated[Quantity, u.m]
 Temperature = Annotated[Quantity, u.K]
 Length = Annotated[Quantity, u.m]
+
 
 def enforce_units(func):
     sig = signature(func)
@@ -68,8 +67,9 @@ def enforce_units(func):
                         param_desc = f"'{name}' in function '{func.__name__}'"
                         expected_type = f"'{unit}'"
                         raise TypeError(
-                            f"Parameter {param_desc} expected to be a Quantity with unit {expected_type}, "
-                            f"but got a numeric value without units. Try adding '* u.{unit}' to your value."
+                            f"Parameter {param_desc} expected to be a Quantity with "
+                            f"unit {expected_type}, but got a numeric value without units. "
+                            f"Try adding '* u.{unit}' to your value."
                         )
                     # Convert raw numeric value to Quantity
                     bound.arguments[name] = quantity_type(value, unit)
@@ -82,12 +82,14 @@ def enforce_units(func):
                 func_name = func.__name__
                 raise TypeError(
                     f"In function '{func_name}': A numeric value is missing units. "
-                    f"You might have forgotten to add '* u.dimensionless' to a calculation result. "
-                    f"Original error: {str(e)}"
+                    f"You might have forgotten to add '* u.dimensionless' to a calculation "
+                    f"result. Original error: {str(e)}"
                 ) from None
             raise
 
     return wrapper
+
+
 
 @enforce_units
 def wavelength(frequency: Frequency) -> Wavelength:
@@ -109,6 +111,8 @@ def wavelength(frequency: Frequency) -> Wavelength:
         <Quantity(0.299792458, 'meter')>
     """
     return constants.c / frequency.to(u.Hz)
+
+
 
 @enforce_units
 def frequency(wavelength: Wavelength) -> Frequency:
@@ -132,6 +136,8 @@ def frequency(wavelength: Wavelength) -> Frequency:
     return constants.c / wavelength.to(u.m)
 
 
+
+
 @enforce_units
 def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
     """
@@ -145,6 +151,8 @@ def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
         Quantity in decibels (unit = u.dB)
     """
     return factor * u.dB * np.log10(x.to_value(u.dimensionless_unscaled))
+
+
 
 @enforce_units
 def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
@@ -163,6 +171,8 @@ def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
     else:  # Field ratio (factor=20)
         linear_value = np.power(10, x.value / factor)
     return linear_value * u.dimensionless
+
+
 
 @enforce_units
 def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
@@ -188,6 +198,8 @@ def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
         return 1.0 * u.dimensionless
     gamma = to_linear(-return_loss, factor=20)
     return ((1 + gamma) / (1 - gamma)) * u.dimensionless
+
+
 
 
 @enforce_units
@@ -216,6 +228,8 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     return -to_dB(gamma, factor=20)
 
 
+
+
 @enforce_units
 def mismatch_loss(return_loss: Decibels) -> Decibels:
     """
@@ -237,4 +251,3 @@ def mismatch_loss(return_loss: Decibels) -> Decibels:
     gamma_2 = to_linear(-return_loss, factor=10)
     # Power loss is 1 - |Γ|²
     return -to_dB(1 - gamma_2)
-

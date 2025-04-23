@@ -13,15 +13,15 @@ def quantity_constructor(loader, node):
     """Constructor for !Quantity tags in YAML files."""
     mapping = loader.construct_mapping(node)
     value = mapping.get('value')
-    
+   
     # Check for different key names that could contain the unit
     unit_str = mapping.get('unit')
     if unit_str is None:
         unit_str = mapping.get('units')
-    
+   
     if unit_str is None:
         raise ValueError("Quantity must have 'unit' or 'units' key")
-        
+       
     # Handle special cases
     if unit_str == 'linear':
         return float(value) * u.dimensionless_unscaled

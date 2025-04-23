@@ -16,7 +16,7 @@ import astropy.units as u
 # Add custom units if needed
 if not hasattr(u, 'bps'):
     u.bps = u.def_unit('bps', doc="Bits per second")
-    
+   
 # Define dBW if not already defined
 if not hasattr(u, 'dBW'):
     u.dBW = u.def_unit('dBW', u.dB(u.W))
@@ -26,15 +26,15 @@ def quantity_constructor(loader, node):
     """Constructor for !Quantity tags in YAML files."""
     mapping = loader.construct_mapping(node)
     value = mapping.get('value')
-    
+   
     # Check for different key names that could contain the unit
     unit_str = mapping.get('unit')
     if unit_str is None:
         unit_str = mapping.get('units')
-    
+   
     if unit_str is None:
         raise ValueError("Quantity must have 'unit' or 'units' key")
-        
+       
     # Handle special cases
     if unit_str == 'linear':
         return float(value) * u.dimensionless_unscaled

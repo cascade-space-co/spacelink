@@ -8,7 +8,7 @@ signal quality parameters.
 
 from astropy.units import Quantity
 import astropy.units as u
-from spacelink.units import to_dB, Decibels, Dimensionless
+from spacelink.units import to_dB, Decibels
 
 """TODO: change this to an abstract base class
 

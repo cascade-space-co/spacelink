@@ -5,15 +5,8 @@ from spacelink import units
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 import pytest
-from functools import wraps
-from inspect import signature
 
 from spacelink.units import (
-    Decibels,
-    DecibelWatts,
-    Frequency,
-    Wavelength,
-    Dimensionless,
     return_loss_to_vswr,
     vswr_to_return_loss,
     wavelength,
@@ -89,7 +82,7 @@ def test_vswr(vswr, gamma, return_loss):
         vswr * u.dimensionless,
         atol=0.01 * u.dimensionless
     )
-    
+   
     # Test VSWR to return loss conversion
     return_loss_result = vswr_to_return_loss(vswr * u.dimensionless)
     assert_quantity_allclose(
@@ -97,6 +90,8 @@ def test_vswr(vswr, gamma, return_loss):
         return_loss * u.dB,
         atol=0.01 * u.dB
     )
+
+
 
 
 def test_mismatch_loss():
@@ -112,7 +107,7 @@ def test_enforce_units_decorator():
     with pytest.raises(u.UnitConversionError):
         # Passing length units to a function expecting frequency
         wavelength(1.0 * u.m)
-        
+       
     # Test that frequency() raises UnitConversionError with incorrect units
     with pytest.raises(u.UnitConversionError):
         # Passing frequency units to a function expecting length

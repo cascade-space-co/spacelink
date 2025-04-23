@@ -6,11 +6,12 @@ in radio systems, including thermal noise, noise figure, and noise temperature.
 """
 
 import astropy.units as u
-import numpy as np
 from astropy.units import Quantity
 from typing import List
 
-from spacelink.units import Decibels, Dimensionless, Temperature, Frequency, enforce_units, to_dB, to_linear
+from spacelink.units import (Decibels, Dimensionless, Temperature, Frequency,
+                             enforce_units, to_dB, to_linear)
+
 
 # Define constants with units
 BOLTZMANN = 1.380649e-23 * u.J / u.K

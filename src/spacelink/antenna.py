@@ -6,11 +6,12 @@ including dish gain and beamwidth calculations.
 """
 
 from abc import ABC, abstractmethod
-from spacelink import units
 import astropy.units as u
 import numpy as np
 
-from spacelink.units import wavelength, Decibels, Dimensionless, Temperature, Frequency, Length, enforce_units, to_dB, to_linear
+from spacelink.units import (wavelength, Decibels, Dimensionless, Temperature, Frequency,
+                             Length, enforce_units, to_dB, to_linear)
+
 
 class Antenna(ABC):
     """
@@ -180,11 +181,11 @@ class Dish(Antenna):
         """
         if frequency <= 0 * u.Hz:
             raise ValueError("Frequency must be positive")
-            
+
         # Perform calculation with quantities
         wl = wavelength(frequency)
         gain_linear = self.efficiency * (np.pi * self.diameter / wl) ** 2
-        
+
         # Convert result to dB and return
         return to_dB(gain_linear)
 
@@ -219,6 +220,6 @@ def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
 
     # Calculate polarization loss factor
     plf = 0.5 + 0.5 * (numerator / denominator)
-    
+
     # Convert to decibels and make positive (loss)
     return -to_dB(plf * u.dimensionless)

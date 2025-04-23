@@ -19,17 +19,11 @@ from spacelink.noise import (
     cascaded_noise_temperature,
 )
 from spacelink.units import (
-    enforce_units,
     vswr_to_return_loss,
     return_loss_to_vswr,
     mismatch_loss,
-    to_dB,
     to_linear,
-    Dimensionless,
-    Decibels,
-    DecibelWatts,
-    DecibelMilliwatts,
-    Temperature,
+    to_dB,
 )
 
 
@@ -95,8 +89,8 @@ class Stage:
             calc_nt = noise_figure_to_temperature(nf_q)
             if not math.isclose(calc_nt.value, nt_q.value, rel_tol=1e-6):
                 raise ValueError(
-                    f"Stage '{label}': noise_figure ({nf_q}) and noise_temp ({nt_q}) "
-                    "are inconsistent."
+                    f"Stage '{label}': noise_figure ({nf_q}) and "
+                    f"noise_temp ({nt_q}) are inconsistent."
                 )
             self._noise_temp = nt_q
             self._orig_noise_figure = nf_q
@@ -125,7 +119,7 @@ class Stage:
         self._input_rl_db, self._input_vswr = self._process_rl_vswr(
             input_rl_db, input_vswr, side="input"
         )
-        
+
         # Output side
         self._output_rl_db, self._output_vswr = self._process_rl_vswr(
             output_rl_db, output_vswr, side="output"
@@ -144,12 +138,11 @@ class Stage:
         """
         out_rl: Optional[Quantity] = None
         out_vswr: Optional[Quantity] = None
-        
         # Both provided: check consistency
         if rl_db is not None and vswr is not None:
             rl_q = rl_db if isinstance(rl_db, Quantity) else rl_db * u.dB
             vswr_q = vswr if isinstance(vswr, Quantity) else vswr * u.dimensionless
-            
+           
             if rl_q < 0 * u.dB:
                 raise ValueError(
                     f"Stage '{self.label}': {side} return loss cannot be negative ({rl_q})."
@@ -158,7 +151,7 @@ class Stage:
                 raise ValueError(
                     f"Stage '{self.label}': {side} VSWR must be >= 1 ({vswr_q})."
                 )
-                
+               
             calc_vswr = return_loss_to_vswr(rl_q)
             if not math.isclose(vswr_q.value, calc_vswr.value, rel_tol=1e-4):
                 raise ValueError(
@@ -167,7 +160,7 @@ class Stage:
                 )
             out_rl = rl_q
             out_vswr = vswr_q
-            
+
         elif rl_db is not None:
             rl_q = rl_db if isinstance(rl_db, Quantity) else rl_db * u.dB
             if rl_q < 0 * u.dB:
@@ -176,7 +169,7 @@ class Stage:
                 )
             out_rl = rl_q
             out_vswr = return_loss_to_vswr(out_rl)
-            
+
         elif vswr is not None:
             vswr_q = vswr if isinstance(vswr, Quantity) else vswr * u.dimensionless
             if vswr_q < 1.0 * u.dimensionless:
@@ -185,7 +178,6 @@ class Stage:
                 )
             out_vswr = vswr_q
             out_rl = vswr_to_return_loss(out_vswr)
-            
         return out_rl, out_vswr
 
     # --- Properties ---
@@ -198,7 +190,6 @@ class Stage:
     def gain_lin(self) -> Quantity:
         """Linear gain (ratio, dimensionless)."""
         # Convert from dB to linear using to_linear function
-        from spacelink.units import to_linear
         lin_gain = to_linear(self._gain)
         # Round to integer if very close to avoid floating-point artifacts
         if abs(lin_gain.value - round(lin_gain.value)) < 1e-9:
@@ -407,7 +398,7 @@ class Cascade:
         out_p1_mw = 1.0 / total_recip
         # Convert to dBm quantity - manually calculate 10*log10(mW)
         out_p1_dbm = (10 * np.log10(out_p1_mw)) * u.dBm
-        
+
         # Refer back to input (subtract total gain in dB)
         total_gain = self.cascaded_gain()
         input_p1_dbm = out_p1_dbm - total_gain

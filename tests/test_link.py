@@ -23,15 +23,15 @@ def quantity_constructor(loader, node):
     """Constructor for !Quantity tags in YAML files."""
     mapping = loader.construct_mapping(node)
     value = mapping.get('value')
-    
+   
     # Check for different key names that could contain the unit
     unit_str = mapping.get('unit')
     if unit_str is None:
         unit_str = mapping.get('units')
-    
+   
     if unit_str is None:
         raise ValueError("Quantity must have 'unit' or 'units' key")
-        
+       
     # Handle special cases
     if unit_str == 'linear':
         return float(value) * u.dimensionless_unscaled
@@ -316,7 +316,7 @@ def test_link_calculations():
     # Skip received power check as it includes atmospheric losses in the reference
 
     # Check system noise temperature calculation
-    assert_quantity_allclose(link.system_noise_temperature, 
+    assert_quantity_allclose(link.system_noise_temperature,
         case.ref.system_noise_temperature, atol=0.01*u.K)
 
     # Skip noise power check
@@ -371,7 +371,7 @@ def test_lunar_downlink():
 
     # Check base parameters that don't depend on calculations (positive dB path loss)
     assert_quantity_allclose(link.path_loss, case.ref.free_space_path_loss, atol=0.01*u.dB)
-    assert_quantity_allclose(link.system_noise_temperature, 
+    assert_quantity_allclose(link.system_noise_temperature,
         case.ref.system_noise_temperature, atol=0.01*u.K)
 
     # The link margin should incorporate implementation loss correctly
@@ -476,7 +476,7 @@ def test_leo_uplink():
 
     # Check the core, reliable properties (positive dB path loss)
     assert_quantity_allclose(link.path_loss, case.ref.free_space_path_loss, atol=0.01*u.dB)
-    assert_quantity_allclose(link.system_noise_temperature, 
+    assert_quantity_allclose(link.system_noise_temperature,
         case.ref.system_noise_temperature, atol=0.01*u.K)
     assert link.mode.implementation_loss == case.implementation_loss.value
 
@@ -528,6 +528,6 @@ def test_lunar_uplink():
 
     # Check the core, reliable properties (positive dB path loss)
     assert_quantity_allclose(link.path_loss, case.ref.free_space_path_loss, atol=0.01*u.dB)
-    assert_quantity_allclose(link.system_noise_temperature, 
+    assert_quantity_allclose(link.system_noise_temperature,
         case.ref.system_noise_temperature, atol=0.01*u.K)
     assert link.mode.implementation_loss == case.implementation_loss.value

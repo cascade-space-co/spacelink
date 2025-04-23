@@ -10,11 +10,9 @@ from typing import Callable
 import numpy as np
 from astropy.units import Quantity
 import astropy.units as u
-from spacelink.units import Decibels
 from spacelink.antenna import Antenna, polarization_loss
 from spacelink.mode import Mode
 from spacelink.path import free_space_path_loss
-from spacelink.units import mismatch_loss
 from . import noise
 from spacelink.cascade import Cascade
 
@@ -193,13 +191,12 @@ class Link:
         # Get gain in dB
         fe_gain = self.tx_front_end.cascaded_gain().to("dB").value
         ant_gain = self.tx_antenna.gain(self.frequency).to("dB").value
-        
         # Convert tx_power to dB
         tx_power_db = 10 * np.log10(tx_power_linear.value)
-        
+
         # Sum the dB values (all unitless at this point)
         total_db = tx_power_db + fe_gain + ant_gain
-        
+
         # Return with proper units
         return total_db * u.dB
 

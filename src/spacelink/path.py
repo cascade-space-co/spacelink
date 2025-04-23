@@ -4,10 +4,10 @@ Path loss calculations for radio communications.
 This module provides functions for calculating various types of path loss,
 including free space path loss, spreading loss, and aperture loss.
 """
-from spacelink import units
 import astropy.units as u
-from spacelink.units import wavelength, Frequency, Wavelength, Decibels, Distance, enforce_units, to_dB
+from spacelink.units import wavelength, Frequency, Decibels, Distance, enforce_units, to_dB
 import numpy as np
+
 
 @enforce_units
 def spreading_loss(distance: Distance) -> Decibels:
@@ -26,7 +26,7 @@ def spreading_loss(distance: Distance) -> Decibels:
     # Validate input
     if distance <= 0 * u.m:
         raise ValueError("Distance must be positive")
-    
+
     # We have to strip the unit here
     r = distance.to(u.m).value
     return to_dB(4.0 * np.pi * r**2 * u.dimensionless)
@@ -49,7 +49,7 @@ def aperture_loss(frequency: Frequency) -> Decibels:
     # Validate input
     if frequency <= 0 * u.Hz:
         raise ValueError("Frequency must be positive")
-    
+
     # Again stripping the unit here
     lam = wavelength(frequency).to(u.m).value
     return to_dB(4.0 * np.pi / (lam**2) * u.dimensionless)
@@ -57,6 +57,7 @@ def aperture_loss(frequency: Frequency) -> Decibels:
 
 @enforce_units
 def free_space_path_loss(distance: Distance, frequency: Frequency) -> Decibels:
+
     """
     Calculate the free space path loss
 

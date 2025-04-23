@@ -3,7 +3,6 @@
 import pytest
 import spacelink.noise as noise
 import astropy.units as u
-import numpy as np
 from astropy.tests.helper import assert_quantity_allclose
 
 
