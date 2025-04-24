@@ -15,7 +15,6 @@ from spacelink.signal import Signal
 from spacelink.units import Frequency, Decibels, Temperature, Dimensionless, enforce_units, to_linear, to_dB
 from spacelink.validation import non_negative
 from spacelink.noise import noise_figure_to_temperature, temperature_to_noise_figure, noise_factor_to_temperature, temperature_to_noise_factor
-from spacelink.source import Source
 
 
 class Stage(ABC):
@@ -107,13 +106,14 @@ class GainBlock(Stage):
             self._input_return_loss = None
 
     @property
-    def input(self) -> Optional[Union['Stage', Source]]:
+    def input(self) -> Optional[Union['Stage', 'Source']]:
         """Get the input stage or source for this stage."""
         return self._input
 
     @input.setter
-    def input(self, value: Optional[Union['Stage', Source]]) -> None:
+    def input(self, value: Optional[Union['Stage', 'Source']]) -> None:
         """Set the input stage or source for this stage."""
+        from spacelink.source import Source  # Import here to avoid circular import
         if value is not None and not isinstance(value, (Stage, Source)):
             raise ValueError("Input must be a Stage or Source instance")
         self._input = value
@@ -271,6 +271,51 @@ class GainBlock(Stage):
             Temperature: Output noise temperature in Kelvin
         """
         return (input_noise_temp + self.noise_temperature) * self._gain_linear
+
+    @property
+    def cascaded_gain(self) -> Decibels:
+        """
+        Get the cascaded gain up to this point.
+
+        The cascaded gain is the sum of all gains in the chain up to this point.
+
+        Returns:
+            Decibels: The cascaded gain in dB
+        """
+        if self.input is None:
+            return self.gain
+        return self.input.cascaded_gain + self.gain
+
+    @property
+    def cascaded_noise_figure(self) -> Decibels:
+        """
+        Get the cascaded noise figure up to this point.
+
+        The cascaded noise figure is calculated using Friis' formula:
+        F_total = F1 + (F2-1)/G1 + (F3-1)/(G1*G2) + ...
+        where:
+        - F1, F2, etc. are the noise factors (linear) of each stage
+        - G1, G2, etc. are the gains (linear) of each stage
+
+        Returns:
+            Decibels: The cascaded noise figure in dB
+        """
+        if self.input is None:
+            return self.noise_figure
+
+        # Get input stage's cascaded values
+        input_gain_lin = to_linear(self.input.cascaded_gain)
+        input_nf_lin = to_linear(self.input.cascaded_noise_figure)
+        
+        # Convert this stage's values to linear
+        stage_gain_lin = to_linear(self.gain)
+        stage_nf_lin = to_linear(self.noise_figure)
+        
+        # Calculate total noise factor using Friis' formula
+        total_nf_lin = input_nf_lin + (stage_nf_lin - 1) / input_gain_lin
+        
+        # Convert back to dB
+        return to_dB(total_nf_lin)
 
 
 class Attenuator(GainBlock):

@@ -8,10 +8,11 @@ signals without requiring an input, such as oscillators or signal generators.
 import astropy.units as u
 
 from spacelink.signal import Signal
-from spacelink.units import Frequency, Temperature, enforce_units
+from spacelink.units import Frequency, Temperature, Decibels, enforce_units
+from spacelink.stage import Stage
 
 
-class Source:
+class Source(Stage):
     """
     Base class for signal sources.
 
@@ -20,7 +21,8 @@ class Source:
     RF chains.
     """
     def __init__(self):
-        self._noise_temperature: Temperature = 0 * u.K
+        super().__init__()
+        self._noise_temperature: Temperature = 290 * u.K
 
     @property
     def noise_temperature(self) -> Temperature:
@@ -43,6 +45,30 @@ class Source:
         """
         self._noise_temperature = value
 
+    @property
+    def cascaded_gain(self) -> Decibels:
+        """
+        Get the cascaded gain up to this point.
+
+        For a source, this is 0 dB since it's the start of the chain.
+
+        Returns:
+            Decibels: The cascaded gain in dB
+        """
+        return 0 * u.dB
+
+    @property
+    def cascaded_noise_figure(self) -> Decibels:
+        """
+        Get the cascaded noise figure up to this point.
+
+        For a source, this is 0 dB since it's the start of the chain.
+
+        Returns:
+            Decibels: The cascaded noise figure in dB
+        """
+        return 0 * u.dB
+
     def output(self, frequency: Frequency) -> Signal:
         """
         Calculate the output signal for this source.
@@ -52,5 +78,8 @@ class Source:
 
         Returns:
             Signal: The output signal from this source
+
+        Raises:
+            NotImplementedError: If the source does not implement this method
         """
         raise NotImplementedError("Source must implement output method") 

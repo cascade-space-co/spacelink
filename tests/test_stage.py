@@ -140,6 +140,16 @@ def test_stage_chain():
     # all the stages together
     assert_quantity_allclose(temperature_to_noise_figure(output.noise_temperature), 62.044 * u.dB, atol=0.01 * u.dB)
 
+    # Cascaded noise figure should be 2.044
+    assert_quantity_allclose(gain_block3.cascaded_noise_figure, 2.044 * u.dB, atol=0.01 * u.dB)
+    assert_quantity_allclose(gain_block3.cascaded_gain, 60 * u.dB, atol=0.01 * u.dB)
+
+def test_cascaded_noise_figure():
+    """Test cascaded noise figure calculation."""
+    source = TestSource()
+    gain_block1 = GainBlock(gain=20 * u.dB, noise_figure=2 * u.dB)
+    gain_block2 = GainBlock(gain=20 * u.dB, noise_figure=4 * u.dB)
+
 
 def test_attenuator_noise_calculations():
     """Test that attenuator noise temperature and noise figure are calculated correctly."""
