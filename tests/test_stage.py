@@ -9,7 +9,6 @@ from spacelink.source import Source
 from spacelink.sink import Sink
 from spacelink.signal import Signal
 
-from spacelink.units import to_dB
 from spacelink.noise import temperature_to_noise_figure
 class TestSource(Source):
     """Concrete implementation of Source for testing."""
@@ -92,8 +91,8 @@ def test_attenuator_creation():
         input_return_loss=20 * u.dB
     )
     
-    assert attenuator.attenuation.value == pytest.approx(10.0)
-    assert attenuator.input_return_loss.value == pytest.approx(20.0)
+    assert_quantity_allclose(attenuator.attenuation, 10 * u.dB)
+    assert_quantity_allclose(attenuator.input_return_loss, 20 * u.dB)
 
 
 def test_attenuator_invalid_params():

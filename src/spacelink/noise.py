@@ -15,8 +15,8 @@ from spacelink.units import (
     Temperature,
     Frequency,
     enforce_units,
-    to_dB,
     to_linear,
+    to_dB
 )
 
 

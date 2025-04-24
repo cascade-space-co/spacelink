@@ -9,18 +9,18 @@ input property, allowing for flexible chaining of RF components.
 from typing import Optional, Union
 import astropy.units as u
 import numpy as np
+from abc import ABC, abstractmethod
 
 from spacelink.signal import Signal
-from spacelink.units import Frequency, Decibels, Temperature, Dimensionless, enforce_units
+from spacelink.units import Frequency, Decibels, Temperature, Dimensionless, enforce_units, to_linear, to_dB
 from spacelink.validation import non_negative
-from spacelink.units import to_linear, to_dB
 from spacelink.noise import noise_figure_to_temperature, temperature_to_noise_figure, noise_factor_to_temperature, temperature_to_noise_factor
 from spacelink.source import Source
 
 
-class Stage:
+class Stage(ABC):
     """
-    Base class for stages.
+    Abstract base class for stages.
 
     A stage represents a single component in a cascade of RF stages (e.g., amplifier,
     attenuator, filter). Each stage has an input that can be connected to another
@@ -31,105 +31,9 @@ class Stage:
                stage or source, allowing for chaining of stages.
     """
     def __init__(self):
-        self._input: Optional[Union['Stage', Source]] = None
-        self._noise_temperature: Temperature = 0 * u.K
+        pass
 
-    @property
-    def input(self) -> Optional[Union['Stage', Source]]:
-        """Get the input stage or source for this stage."""
-        return self._input
-
-    @input.setter
-    def input(self, value: Optional[Union['Stage', Source]]) -> None:
-        """Set the input stage or source for this stage."""
-        if value is not None and not isinstance(value, (Stage, Source)):
-            raise ValueError("Input must be a Stage or Source instance")
-        self._input = value
-
-    @property
-    def noise_temperature(self) -> Temperature:
-        """
-        Get the noise temperature of this stage.
-
-        Returns:
-            Temperature: The noise temperature in Kelvin
-        """
-        return self._noise_temperature
-
-    @noise_temperature.setter
-    @enforce_units
-    def noise_temperature(self, value: Temperature) -> None:
-        """
-        Set the noise temperature of this stage.
-
-        Args:
-            value: The noise temperature in Kelvin
-        """
-        self._noise_temperature = value
-
-    @property
-    def noise_factor(self) -> Dimensionless:
-        """
-        Get the noise factor of this stage.
-
-        The noise factor is the linear ratio (not dB) defined as:
-        F = 1 + T/T0
-        where:
-        - F is the noise factor
-        - T is the noise temperature
-        - T0 is the reference temperature (290K)
-
-        Returns:
-            Dimensionless: The noise factor (linear ratio)
-        """
-        return temperature_to_noise_factor(self.noise_temperature)
-
-    @noise_factor.setter
-    @enforce_units
-    def noise_factor(self, value: Dimensionless) -> None:
-        """
-        Set the noise factor of this stage.
-
-        Args:
-            value: The noise factor (linear ratio, not dB)
-
-        Raises:
-            ValueError: If noise factor is less than 1
-        """
-        if value < 1:
-            raise ValueError("Noise factor must be greater than or equal to 1")
-        self.noise_temperature = noise_factor_to_temperature(value)
-
-    @property
-    def noise_figure(self) -> Decibels:
-        """
-        Calculate the noise figure in dB based on the noise temperature.
-
-        The noise figure is the noise factor expressed in dB:
-        NF = 10 * log10(F)
-        where F is the noise factor.
-
-        Returns:
-            Decibels: The noise figure in dB
-        """
-        return temperature_to_noise_figure(self.noise_temperature)
-
-    @noise_figure.setter
-    @enforce_units
-    def noise_figure(self, value: Decibels) -> None:
-        """
-        Set the noise figure of this stage.
-
-        Args:
-            value: The noise figure in dB
-
-        Raises:
-            ValueError: If noise figure is negative
-        """
-        if value < 0 * u.dB:
-            raise ValueError("Noise figure must be non-negative")
-        self.noise_temperature = noise_figure_to_temperature(value)
-
+    @abstractmethod
     def output(self, frequency: Frequency) -> Signal:
         """
         Calculate the output signal for this stage.
@@ -143,9 +47,7 @@ class Stage:
         Raises:
             ValueError: If input is not set
         """
-        if self.input is None:
-            raise ValueError("Stage input must be set before calculating output")
-        return self.input.output(frequency)
+        pass
 
 
 class GainBlock(Stage):
@@ -183,7 +85,7 @@ class GainBlock(Stage):
         """
         super().__init__()
         self.gain = gain
-
+        self._input = None
         # Validate noise parameters
         if noise_temperature is not None and noise_figure is not None:
             raise ValueError("Cannot specify both noise_temperature and noise_figure")
@@ -205,6 +107,18 @@ class GainBlock(Stage):
             self._input_return_loss = None
 
     @property
+    def input(self) -> Optional[Union['Stage', Source]]:
+        """Get the input stage or source for this stage."""
+        return self._input
+
+    @input.setter
+    def input(self, value: Optional[Union['Stage', Source]]) -> None:
+        """Set the input stage or source for this stage."""
+        if value is not None and not isinstance(value, (Stage, Source)):
+            raise ValueError("Input must be a Stage or Source instance")
+        self._input = value
+
+    @property
     @enforce_units
     def gain(self) -> Decibels:
         """Get the gain in dB."""
@@ -215,7 +129,7 @@ class GainBlock(Stage):
     def gain(self, value: Decibels) -> None:
         """Set the gain in dB."""
         self._gain = value
-        self._gain_linear = 10 ** (value.to(u.dB).value / 10)
+        self._gain_linear = to_linear(value)
 
     @property
     @enforce_units
@@ -401,7 +315,7 @@ class Attenuator(GainBlock):
     @property
     def attenuation(self) -> Decibels:
         """Get the attenuation in dB."""
-        return -self.gain
+        return -to_dB(self._gain_linear)
 
     @attenuation.setter
     @enforce_units
@@ -411,6 +325,8 @@ class Attenuator(GainBlock):
             raise ValueError("attenuation must be non-negative")
         # Set gain to negative of attenuation
         self.gain = -value
-        self.noise_temperature = noise_factor_to_temperature(to_linear(value))
+        # Update noise temperature when attenuation changes
+        noise_factor = to_linear(value)
+        self.noise_temperature = noise_factor_to_temperature(noise_factor)
 
     

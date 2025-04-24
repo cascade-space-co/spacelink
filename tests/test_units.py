@@ -11,6 +11,7 @@ from spacelink.units import (
     wavelength,
     frequency,
     mismatch_loss,
+    to_linear,
 )
 
 
@@ -42,6 +43,7 @@ def test_db_conversion():
     # For dB to linear conversion, we need to use the proper conversion
     assert_quantity_allclose(10 ** (gain_db.value / 10), 1000.0)
     assert_quantity_allclose(power_db + gain_db, 50 * u.dBW)
+
 
 
 def test_invalid_inputs():
