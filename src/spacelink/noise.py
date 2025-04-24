@@ -56,6 +56,51 @@ def power(bandwidth: Frequency, temperature: Temperature = T0) -> Quantity:
 
 
 @enforce_units
+def temperature_to_noise_factor(temperature: Temperature) -> Dimensionless:
+    """
+    Convert noise temperature in Kelvin to noise factor (linear).
+
+    The noise factor is given by:
+    F = 1 + T/T0
+    where:
+    - T is the noise temperature in Kelvin
+    - T0 is the reference temperature (290K)
+
+    Args:
+        temperature: Noise temperature in Kelvin
+
+    Returns:
+        Noise factor (linear, dimensionless)
+    """
+    return 1.0 + (temperature / T0) * u.dimensionless
+
+
+@enforce_units
+def noise_factor_to_temperature(noise_factor: Dimensionless) -> Temperature:
+    """
+    Convert noise factor (linear) to noise temperature in Kelvin.
+
+    The noise temperature is given by:
+    T = (F - 1) * T0
+    where:
+    - F is the noise factor (linear)
+    - T0 is the reference temperature (290K)
+
+    Args:
+        noise_factor: Noise factor (linear, dimensionless)
+
+    Returns:
+        Noise temperature in Kelvin
+
+    Raises:
+        ValueError: If noise factor is less than 1
+    """
+    if noise_factor < 1:
+        raise ValueError(f"noise_factor must be >= 1 ({noise_factor})")
+    return (noise_factor - 1.0) * T0
+
+
+@enforce_units
 def noise_figure_to_temperature(noise_figure: Decibels) -> Temperature:
     """
     Convert noise figure in dB to noise temperature in Kelvin.
@@ -67,7 +112,7 @@ def noise_figure_to_temperature(noise_figure: Decibels) -> Temperature:
         Noise temperature in Kelvin
     """
     factor = to_linear(noise_figure)
-    return (factor - 1.0) * T0
+    return noise_factor_to_temperature(factor)
 
 
 @enforce_units
@@ -81,10 +126,8 @@ def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
     Returns:
         Noise figure in dB
     """
-    if temperature < 0 * u.K:
-        raise ValueError(f"temperature must be >= 0 ({temperature})")
-    factor = 1.0 + (temperature / T0)
-    return to_dB(factor * u.dimensionless)
+    factor = temperature_to_noise_factor(temperature)
+    return to_dB(factor)
 
 
 @enforce_units
@@ -153,8 +196,8 @@ def cascaded_noise_temperature(
     if len(noise_temps) != len(gains_lin):
         raise ValueError("noise_temps and gains_lin must have the same length.")
     # Convert noise temperatures to noise factors: F = 1 + T/T0
-    noise_factors = [1.0 + (temp / T0) * u.dimensionless for temp in noise_temps]
+    noise_factors = [temperature_to_noise_factor(temp) for temp in noise_temps]
     # Compute total noise factor
     total_nf = cascaded_noise_factor(noise_factors, gains_lin)
     # Convert back to noise temperature: T = (F - 1) * T0
-    return (total_nf - 1.0) * T0
+    return noise_factor_to_temperature(total_nf)

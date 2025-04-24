@@ -30,6 +30,7 @@ class Antenna(ABC):
     The gain method must be implemented by all concrete antenna classes.
     """
 
+    @enforce_units
     def __init__(
         self,
         axial_ratio: Decibels = 0.0 * u.dB,
@@ -63,6 +64,7 @@ class Antenna(ABC):
         self.return_loss = return_loss
 
     @abstractmethod
+    @enforce_units
     def gain(self, frequency: Frequency) -> Decibels:
         """
         Calculate the antenna gain at a given frequency.

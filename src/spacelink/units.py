@@ -16,6 +16,7 @@ from typing import get_type_hints, get_args, Annotated
 import astropy.units as u
 import astropy.constants as constants
 from astropy.units import Quantity
+import yaml
 
 import numpy as np
 
@@ -43,6 +44,7 @@ db_equivalencies = [
 Decibels = Annotated[Quantity, u.dB]
 DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
+Watts = Annotated[Quantity, u.W]
 Frequency = Annotated[Quantity, u.Hz]
 Wavelength = Annotated[Quantity, u.m]
 Dimensionless = Annotated[Quantity, u.dimensionless_unscaled]
@@ -67,6 +69,9 @@ def enforce_units(func):
                 if isinstance(value, Quantity):
                     # Convert to expected unit
                     bound.arguments[name] = value.to(unit)
+                    # Special case for Temperature: check if negative
+                    if quantity_type is Temperature and value < 0 * unit:
+                        raise ValueError(f"{name} must be non-negative")
                 else:
                     # Missing unit - check if this is a numeric type
                     if np.isscalar(value) and not isinstance(value, str):
@@ -79,6 +84,9 @@ def enforce_units(func):
                         )
                     # Convert raw numeric value to Quantity
                     bound.arguments[name] = quantity_type(value, unit)
+                    # Special case for Temperature: check if negative
+                    if quantity_type is Temperature and value < 0:
+                        raise ValueError(f"{name} must be non-negative")
 
         try:
             return func(*bound.args, **bound.kwargs)
@@ -244,3 +252,33 @@ def mismatch_loss(return_loss: Decibels) -> Decibels:
     gamma_2 = to_linear(-return_loss, factor=10)
     # Power loss is 1 - |Γ|²
     return -to_dB(1 - gamma_2)
+
+
+# Register YAML constructor for Quantity objects
+def quantity_constructor(loader, node):
+    """Constructor for !Quantity tags in YAML files."""
+    mapping = loader.construct_mapping(node)
+    value = mapping.get("value")
+
+    # Check for different key names that could contain the unit
+    unit_str = mapping.get("unit")
+    if unit_str is None:
+        unit_str = mapping.get("units")
+
+    if unit_str is None:
+        raise ValueError("Quantity must have 'unit' or 'units' key")
+
+    # Handle special cases
+    if unit_str == "linear":
+        return float(value) * u.dimensionless_unscaled
+    elif unit_str == "dB/K":
+        return float(value) * u.dB / u.K
+    elif unit_str == "dBW":
+        # Handle dBW unit differently since u.dB(u.W) syntax may not be supported in some versions
+        return float(value) * u.dBW
+    else:
+        return float(value) * getattr(u, unit_str)
+
+
+# Register the constructor with SafeLoader
+yaml.SafeLoader.add_constructor("!Quantity", quantity_constructor)

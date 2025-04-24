@@ -3,6 +3,7 @@
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 import pytest
+import numpy as np
 
 from spacelink.units import (
     return_loss_to_vswr,
