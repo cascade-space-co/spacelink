@@ -7,7 +7,7 @@ import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 from spacelink.path import free_space_path_loss, spreading_loss, aperture_loss
 
-
+# DO NOT MODIFY
 def test_free_space_path_loss():
     """Test free space path loss calculations."""
     # Test with GEO satellite parameters
@@ -30,7 +30,7 @@ def test_free_space_path_loss():
     # Expect positive dB loss
     assert_quantity_allclose(path_loss, 32.45 * u.dB, atol=0.01 * u.dB)
 
-
+# DO NOT MODIFY
 def test_spreading_loss():
     """Test spreading loss calculations."""
     # Spreading loss in positive dB
@@ -41,7 +41,7 @@ def test_spreading_loss():
         spreading_loss(2000 * u.km), 137.01 * u.dB, atol=0.01 * u.dB
     )
 
-
+# DO NOT MODIFY
 def test_aperture_loss():
     """Test aperture loss calculations."""
     # Aperture loss in positive dB

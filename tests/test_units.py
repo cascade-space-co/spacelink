@@ -14,7 +14,7 @@ from spacelink.units import (
     to_linear,
 )
 
-
+# DO NOT MODIFY
 def test_wavelength_calculation():
     """Test wavelength calculation from frequency."""
     # Test at different frequencies
@@ -26,7 +26,7 @@ def test_wavelength_calculation():
     wavelength_result = wavelength(2.4 * u.GHz)
     assert_quantity_allclose(wavelength_result.to(u.m), 0.12491352416667 * u.m)
 
-
+# DO NOT MODIFY
 def test_frequency_calculation():
     """Test frequency calculation from wavelength."""
     # Test at different wavelengths
@@ -34,7 +34,7 @@ def test_frequency_calculation():
     assert_quantity_allclose(frequency(10 * u.m).to(u.MHz), 29.9792458 * u.MHz)
     assert_quantity_allclose(frequency(0.1 * u.m).to(u.GHz), 2.99792458 * u.GHz)
 
-
+# DO NOT MODIFY
 def test_db_conversion():
     """Test dB conversion function."""
     power_db = 20 * u.dBW

@@ -10,12 +10,14 @@ from typing import Optional, Union
 import astropy.units as u
 import numpy as np
 from abc import ABC, abstractmethod
-
+from astropy import constants as const
+from spacelink.path import free_space_path_loss
+from spacelink.antenna import polarization_loss
 from spacelink.signal import Signal
-from spacelink.units import Frequency, Decibels, Temperature, Dimensionless, enforce_units, to_linear, to_dB
+from spacelink.units import Frequency, Decibels, Temperature, Dimensionless, Length, enforce_units, to_linear, to_dB
 from spacelink.validation import non_negative
 from spacelink.noise import noise_figure_to_temperature, temperature_to_noise_figure, noise_factor_to_temperature, temperature_to_noise_factor
-
+from spacelink.source import Source
 
 class Stage(ABC):
     """
@@ -40,27 +42,34 @@ class Stage(ABC):
     @input.setter
     def input(self, value: Optional[Union['Stage', 'Source']]) -> None:
         """Set the input stage or source for this stage."""
-        from spacelink.source import Source  # Import here to avoid circular import
+        from spacelink.source import Source  # Re-add local import
         if value is not None and not isinstance(value, (Stage, Source)):
             raise ValueError("Input must be a Stage or Source instance")
         self._input = value
 
-    @property
-    def cascaded_gain(self) -> Decibels:
+    def cascaded_gain(self, frequency: Frequency) -> Decibels:
         """
         Get the cascaded gain up to this point.
 
         The cascaded gain is the sum of all gains in the chain up to this point.
 
+        Args:
+            frequency: The frequency at which to calculate the gain
+
         Returns:
             Decibels: The cascaded gain in dB
         """
         if self.input is None:
-            return self.gain
-        return self.input.cascaded_gain + self.gain
+            # If no input, cascaded gain is just this stage's gain
+            return self.gain(frequency)
+        elif isinstance(self.input, Source):
+            # If input is a Source, cascaded gain starts at this stage
+            return self.gain(frequency)
+        else:
+            # Otherwise, add this stage's gain to the input's cascaded gain
+            return self.input.cascaded_gain(frequency) + self.gain(frequency)
 
-    @property
-    def cascaded_noise_figure(self) -> Decibels:
+    def cascaded_noise_figure(self, frequency: Frequency) -> Decibels:
         """
         Get the cascaded noise figure up to this point.
 
@@ -70,19 +79,26 @@ class Stage(ABC):
         - F1, F2, etc. are the noise factors (linear) of each stage
         - G1, G2, etc. are the gains (linear) of each stage
 
+        Args:
+            frequency: The frequency at which to calculate the noise figure
+
         Returns:
             Decibels: The cascaded noise figure in dB
         """
         if self.input is None:
-            return self.noise_figure
+            return self.noise_figure(frequency)
+
+        # Handle Source as input - cascaded NF starts at the first *Stage*
+        if isinstance(self.input, Source):
+            return self.noise_figure(frequency)
 
         # Get input stage's cascaded values
-        input_gain_lin = to_linear(self.input.cascaded_gain)
-        input_nf_lin = to_linear(self.input.cascaded_noise_figure)
+        input_gain_lin = to_linear(self.input.cascaded_gain(frequency))
+        input_nf_lin = to_linear(self.input.cascaded_noise_figure(frequency))
         
         # Convert this stage's values to linear
-        stage_gain_lin = to_linear(self.gain)
-        stage_nf_lin = to_linear(self.noise_figure)
+        stage_gain_lin = to_linear(self.gain(frequency))
+        stage_nf_lin = to_linear(self.noise_figure(frequency))
         
         # Calculate total noise factor using Friis' formula
         total_nf_lin = input_nf_lin + (stage_nf_lin - 1) / input_gain_lin
@@ -90,29 +106,43 @@ class Stage(ABC):
         # Convert back to dB
         return to_dB(total_nf_lin)
 
-    @property
     @abstractmethod
-    def gain(self) -> Decibels:
+    def gain(self, frequency: Frequency) -> Decibels:
         """
-        Get the gain of this stage.
+        Get the gain of this stage at a specific frequency.
+
+        Args:
+            frequency: The frequency at which to calculate the gain
 
         Returns:
             Decibels: The gain in dB
         """
         pass
 
-    @property
     @abstractmethod
-    def noise_figure(self) -> Decibels:
+    def noise_figure(self, frequency: Frequency) -> Decibels:
         """
         Get the noise figure of this stage.
+
+        Args:
+            frequency: The frequency at which to calculate the noise figure
 
         Returns:
             Decibels: The noise figure in dB
         """
         pass
 
+    @property
     @abstractmethod
+    def noise_temperature(self) -> Temperature:
+        """
+        Get the input-referred noise temperature of this stage.
+
+        Returns:
+            Temperature: The noise temperature in Kelvin
+        """
+        pass
+
     def output(self, frequency: Frequency) -> Signal:
         """
         Calculate the output signal for this stage.
@@ -126,7 +156,42 @@ class Stage(ABC):
         Raises:
             ValueError: If input is not set
         """
-        pass
+        if self.input is None:
+            raise ValueError("Stage input must be set before calculating output")
+
+        # Get input signal from the input stage
+        input_signal = self.input.output(frequency)
+
+        # Apply gain to power (using linear gain directly)
+        output_power = input_signal.power * to_linear(self.gain(frequency))
+
+        # Add noise temperature to input noise temperature
+        output_noise_temp = self.output_noise_temperature(input_signal.noise_temperature, frequency)
+
+        return Signal(power=output_power, noise_temperature=output_noise_temp)
+
+    def output_noise_temperature(self, input_noise_temp: Temperature, frequency: Frequency) -> Temperature:
+        """
+        Calculate the output noise temperature based on input noise temperature.
+
+        For a stage, the output noise temperature is:
+        T_out = (T_in + T_e) * G
+        where:
+        - T_in is the input noise temperature
+        - T_e is the stage's input-referred noise temperature
+        - G is the linear gain
+
+        Both the input noise and the stage's input-referred noise are added first,
+        then amplified by the gain.
+
+        Args:
+            input_noise_temp: Input noise temperature in Kelvin
+            frequency: The frequency at which to calculate the noise temperature
+
+        Returns:
+            Temperature: Output noise temperature in Kelvin
+        """
+        return (input_noise_temp + self.noise_temperature) * to_linear(self.gain(frequency))
 
 
 class GainBlock(Stage):
@@ -137,13 +202,12 @@ class GainBlock(Stage):
     model amplifiers, attenuators, and other gain-providing components.
 
     Attributes:
-        gain: Gain in dB (stored internally as linear ratio)
         noise_temperature: Noise temperature in Kelvin
         input_return_loss: Input return loss in dB (stored internally as linear ratio)
     """
     def __init__(
         self,
-        gain: Decibels,
+        gain_value: Decibels,
         noise_temperature: Optional[Temperature] = None,
         noise_figure: Optional[Decibels] = None,
         input_return_loss: Optional[Decibels] = None,
@@ -152,7 +216,7 @@ class GainBlock(Stage):
         Initialize a GainBlock.
 
         Args:
-            gain: The gain of the block in dB
+            gain_value: The gain of the block in dB (can be positive or negative)
             noise_temperature: The noise temperature in K
             noise_figure: The noise figure in dB
             input_return_loss: The input return loss in dB
@@ -163,7 +227,8 @@ class GainBlock(Stage):
             ValueError: If input_return_loss is negative
         """
         super().__init__()
-        self.gain = gain
+        self._gain_value = gain_value
+        self._gain_linear = to_linear(gain_value)
 
         # Validate noise parameters
         if noise_temperature is not None and noise_figure is not None:
@@ -185,18 +250,18 @@ class GainBlock(Stage):
         else:
             self._input_return_loss = None
 
-    @property
-    @enforce_units
-    def gain(self) -> Decibels:
-        """Get the gain in dB."""
-        return self._gain
+    def gain(self, frequency: Frequency) -> Decibels:
+        """Get the gain at a specific frequency."""
+        return self._gain_value
 
-    @gain.setter
-    @enforce_units
-    def gain(self, value: Decibels) -> None:
+    def set_gain(self, value: Decibels) -> None:
         """Set the gain in dB."""
-        self._gain = value
+        self._gain_value = value
         self._gain_linear = to_linear(value)
+
+    def noise_figure(self, frequency: Frequency) -> Decibels:
+        """Get the noise figure in dB."""
+        return temperature_to_noise_figure(self._noise_temperature)
 
     @property
     @enforce_units
@@ -259,86 +324,6 @@ class GainBlock(Stage):
             raise ValueError("Noise factor must be greater than or equal to 1")
         self.noise_temperature = noise_factor_to_temperature(value)
 
-    @property
-    def noise_figure(self) -> Decibels:
-        """
-        Calculate the noise figure in dB based on the noise temperature.
-
-        The noise figure is the noise factor expressed in dB:
-        NF = 10 * log10(F)
-        where F is the noise factor.
-
-        Returns:
-            Decibels: The noise figure in dB
-        """
-        return temperature_to_noise_figure(self.noise_temperature)
-
-    @noise_figure.setter
-    @enforce_units
-    def noise_figure(self, value: Decibels) -> None:
-        """
-        Set the noise figure of this stage.
-
-        Args:
-            value: The noise figure in dB
-
-        Raises:
-            ValueError: If noise figure is negative
-        """
-        if value < 0 * u.dB:
-            raise ValueError("Noise figure must be non-negative")
-        self.noise_temperature = noise_figure_to_temperature(value)
-
-    def output(self, frequency: Frequency) -> Signal:
-        """
-        Calculate the output signal for this gain block.
-
-        Args:
-            frequency: The frequency at which to calculate the output
-
-        Returns:
-            Signal: The output signal from this gain block
-
-        Raises:
-            ValueError: If input is not set
-        """
-        if self.input is None:
-            raise ValueError("GainBlock input must be set before calculating output")
-
-        # Get input signal from the input stage
-        input_signal = self.input.output(frequency)
-
-        # Apply gain to power (using linear gain directly)
-        output_power = input_signal.power * self._gain_linear
-
-        # Add noise temperature to input noise temperature
-        output_noise_temp = self.output_noise_temperature(input_signal.noise_temperature)
-
-        return Signal(power=output_power, noise_temperature=output_noise_temp)
-
-    @enforce_units
-    def output_noise_temperature(self, input_noise_temp: Temperature) -> Temperature:
-        """
-        Calculate the output noise temperature based on input noise temperature.
-
-        For a gain block, the output noise temperature is:
-        T_out = (T_in + T_e) * G
-        where:
-        - T_in is the input noise temperature
-        - T_e is the block's input-referred noise temperature
-        - G is the linear gain
-
-        Both the input noise and the block's input-referred noise are added first,
-        then amplified by the gain.
-
-        Args:
-            input_noise_temp: Input noise temperature in Kelvin
-
-        Returns:
-            Temperature: Output noise temperature in Kelvin
-        """
-        return (input_noise_temp + self.noise_temperature) * self._gain_linear
-
 
 class Attenuator(GainBlock):
     """
@@ -377,12 +362,12 @@ class Attenuator(GainBlock):
         noise_temp = noise_factor_to_temperature(noise_factor)
         
         # Initialize parent GainBlock with reciprocal gain and calculated noise temperature
-        super().__init__(gain=-attenuation, noise_temperature=noise_temp, input_return_loss=input_return_loss)
+        super().__init__(gain_value=-attenuation, noise_temperature=noise_temp, input_return_loss=input_return_loss)
 
     @property
     def attenuation(self) -> Decibels:
         """Get the attenuation in dB."""
-        return -to_dB(self._gain_linear)
+        return -self._gain_value
 
     @attenuation.setter
     @enforce_units
@@ -391,9 +376,121 @@ class Attenuator(GainBlock):
         if value < 0 * u.dB:
             raise ValueError("attenuation must be non-negative")
         # Set gain to negative of attenuation
-        self.gain = -value
+        self.set_gain(-value)
         # Update noise temperature when attenuation changes
         noise_factor = to_linear(value)
         self.noise_temperature = noise_factor_to_temperature(noise_factor)
+
+
+class Antenna:
+    """Base class for antenna properties."""
+    def __init__(self, gain: Decibels, axial_ratio: Decibels):
+        self._gain = gain
+        self._axial_ratio = axial_ratio
+
+    @property
+    def gain(self) -> Decibels:
+        return self._gain
+
+    @property
+    def axial_ratio(self) -> Decibels:
+        return self._axial_ratio
+
+
+class TransmitAntenna(Stage):
+    """Stage representing a transmitting antenna."""
+    def __init__(self, antenna: Antenna):
+        super().__init__()
+        self.antenna = antenna
+        self._noise_temperature = 0 * u.K  # Transmit antenna adds no noise
+
+    def gain(self, frequency: Frequency) -> Decibels:
+        return self.antenna.gain
+
+    def axial_ratio(self, frequency: Frequency) -> Decibels:
+        return self.antenna.axial_ratio
+
+    def noise_figure(self, frequency: Frequency) -> Decibels:
+        return 0 * u.dB  # No noise added
+        
+    @property
+    def noise_temperature(self) -> Temperature:
+        """Noise temperature of the transmit antenna (always 0 K)."""
+        return self._noise_temperature
+
+
+class ReceiveAntenna(Stage):
+    """Stage representing a receiving antenna."""
+    def __init__(self, antenna: Antenna, sky_temperature: Temperature = 290 * u.K):
+        super().__init__()
+        self.antenna = antenna
+        # Validate sky temperature
+        if not isinstance(sky_temperature, u.Quantity) or not sky_temperature.unit.is_equivalent(u.K):
+            raise TypeError("Sky temperature must be a Quantity with temperature units")
+        if sky_temperature < 0 * u.K:
+            raise ValueError("Sky temperature must be non-negative")
+        self._sky_temperature = sky_temperature.to(u.K)
+
+    def gain(self, frequency: Frequency) -> Decibels:
+        """Get the gain including polarization loss."""
+        return self.antenna.gain - self.polarization_loss(frequency)
+
+    def axial_ratio(self, frequency: Frequency) -> Decibels:
+        """Get the axial ratio of the antenna."""
+        return self.antenna.axial_ratio
+
+    def polarization_loss(self, frequency: Frequency) -> Decibels:
+        """Calculate polarization loss based on input stage's axial ratio."""
+        if self.input is None:
+            return 0 * u.dB
+            
+        # Get axial ratio of previous stage
+        prev_axial_ratio = self.input.axial_ratio(frequency)
+        
+        # Calculate polarization loss based on both axial ratios
+        return polarization_loss(prev_axial_ratio, self.antenna.axial_ratio)
+
+    def noise_figure(self, frequency: Frequency) -> Decibels:
+        """Get the noise figure based on sky temperature."""
+        return temperature_to_noise_figure(self._sky_temperature)
+
+    @property
+    def noise_temperature(self) -> Temperature:
+        """Effective input-referred noise temperature (sky temperature)."""
+        return self._sky_temperature
+
+
+class Path(Stage):
+    """Stage representing a free space path."""
+    def __init__(self, distance: Length):
+        super().__init__()
+        self._distance = distance
+
+    def axial_ratio(self, frequency: Frequency) -> Decibels:
+        """Pass through the axial ratio from the transmit antenna."""
+        if self.input is None:
+            return float('inf') * u.dB
+        return self.input.axial_ratio(frequency)
+
+    def gain(self, frequency: Frequency) -> Decibels:
+        """
+        Get the gain of the path.
+        
+        This is the negative of the free space path loss, since loss
+        reduces the signal power.
+        """
+        return -free_space_path_loss(self._distance, frequency)
+
+    def noise_figure(self, frequency: Frequency) -> Decibels:
+        return 0 * u.dB  # Path adds no noise
+
+    @property
+    def noise_temperature(self) -> Temperature:
+        """Noise temperature of the path (always 0 K)."""
+        return 0 * u.K
+
+
+# TestSource and TestSink removed as they are defined in tests or helpers now
+# and Source/Sink base classes no longer inherit Stage.
 
     

@@ -27,7 +27,6 @@ class Demodulator(Sink):
         conversion_loss: Conversion loss in dB
         noise_temperature: Noise temperature in Kelvin
     """
-    @enforce_units
     def __init__(self, conversion_loss: Decibels, noise_temperature: Temperature):
         """
         Initialize a Demodulator.
@@ -35,18 +34,74 @@ class Demodulator(Sink):
         Args:
             conversion_loss: Conversion loss in dB
             noise_temperature: Noise temperature in Kelvin
+
+        Raises:
+            TypeError: If conversion_loss is not a Quantity with dB units
+            TypeError: If noise_temperature is not a Quantity with temperature units
+            ValueError: If conversion_loss is negative
+            ValueError: If noise_temperature is negative
         """
         super().__init__()
-        self.conversion_loss = conversion_loss
-        self.noise_temperature = noise_temperature
+        
+        # Validate conversion loss
+        if not isinstance(conversion_loss, u.Quantity):
+            raise TypeError("Conversion loss must be a Quantity with dB units")
+        if not conversion_loss.unit.is_equivalent(u.dB):
+            raise u.UnitConversionError(f"Cannot convert {conversion_loss.unit} to dB")
+        if conversion_loss < 0 * u.dB:
+            raise ValueError("Conversion loss must be non-negative")
+        self._conversion_loss = conversion_loss
+        
+        # Validate noise temperature
+        if not isinstance(noise_temperature, u.Quantity):
+            raise TypeError("Noise temperature must be a Quantity with temperature units")
+        if not noise_temperature.unit.is_equivalent(u.K):
+            raise u.UnitConversionError(f"Cannot convert {noise_temperature.unit} to K")
+        if noise_temperature < 0 * u.K:
+            raise ValueError("Noise temperature must be non-negative")
+        self._noise_temperature = noise_temperature
 
-    @enforce_units
+    @property
+    def conversion_loss(self) -> Decibels:
+        """Get the conversion loss in dB."""
+        return self._conversion_loss
+
+    @conversion_loss.setter
+    def conversion_loss(self, value: Decibels) -> None:
+        """Set the conversion loss in dB."""
+        if not isinstance(value, u.Quantity):
+            raise TypeError("Conversion loss must be a Quantity with dB units")
+        if not value.unit.is_equivalent(u.dB):
+            raise u.UnitConversionError(f"Cannot convert {value.unit} to dB")
+        if value < 0 * u.dB:
+            raise ValueError("Conversion loss must be non-negative")
+        self._conversion_loss = value
+
+    @property
+    def noise_temperature(self) -> Temperature:
+        """Get the noise temperature in Kelvin."""
+        return self._noise_temperature
+
+    @noise_temperature.setter
+    def noise_temperature(self, value: Temperature) -> None:
+        """Set the noise temperature in Kelvin."""
+        if not isinstance(value, u.Quantity):
+            raise TypeError("Noise temperature must be a Quantity with temperature units")
+        if not value.unit.is_equivalent(u.K):
+            raise u.UnitConversionError(f"Cannot convert {value.unit} to K")
+        if value < 0 * u.K:
+            raise ValueError("Noise temperature must be non-negative")
+        self._noise_temperature = value
+
     def process_input(self, frequency: Frequency) -> None:
         """
         Process the input signal at the given frequency.
 
         Args:
             frequency: The frequency at which to process the input
+
+        Raises:
+            ValueError: If input is not set
 
         This method simulates the demodulation process by calculating the
         output power and noise temperature after conversion loss and
@@ -56,7 +111,7 @@ class Demodulator(Sink):
             raise ValueError("Demodulator input must be set before processing")
 
         # Get input signal
-        input_signal = self.input()
+        input_signal = self.input.output(frequency)
 
         # Apply conversion loss to power
         output_power = input_signal.power / (10 ** (self.conversion_loss.value / 10))

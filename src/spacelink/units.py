@@ -104,6 +104,7 @@ def enforce_units(func):
     return wrapper
 
 
+# DO NOT MODIFY
 @enforce_units
 def wavelength(frequency: Frequency) -> Wavelength:
     """
@@ -125,7 +126,7 @@ def wavelength(frequency: Frequency) -> Wavelength:
     """
     return constants.c / frequency.to(u.Hz)
 
-
+# DO NOT MODIFY
 @enforce_units
 def frequency(wavelength: Wavelength) -> Frequency:
     """
@@ -148,6 +149,7 @@ def frequency(wavelength: Wavelength) -> Frequency:
     return constants.c / wavelength.to(u.m)
 
 
+# DO NOT MODIFY
 @enforce_units
 def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
     """
@@ -163,6 +165,7 @@ def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
     return factor * u.dB * np.log10(x.to_value(u.dimensionless_unscaled))
 
 
+# DO NOT MODIFY
 @enforce_units
 def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
     """
@@ -179,6 +182,7 @@ def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
     return linear_value * u.dimensionless
 
 
+# DO NOT MODIFY
 @enforce_units
 def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
     """
@@ -205,6 +209,7 @@ def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
     return ((1 + gamma) / (1 - gamma)) * u.dimensionless
 
 
+# DO NOT MODIFY
 @enforce_units
 def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     """
@@ -231,6 +236,7 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     return -to_dB(gamma, factor=20)
 
 
+# DO NOT MODIFY
 @enforce_units
 def mismatch_loss(return_loss: Decibels) -> Decibels:
     """

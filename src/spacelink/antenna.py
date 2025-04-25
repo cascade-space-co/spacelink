@@ -200,7 +200,7 @@ class Dish(Antenna):
         # Convert result to dB and return
         return to_dB(gain_linear)
 
-
+# DO NOT MODIFY
 @enforce_units
 def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
     """
