@@ -15,6 +15,16 @@ class TestSource(Source):
     def output(self, frequency):
         return Signal(power=1 * u.W, noise_temperature=290 * u.K)
 
+    @property
+    def gain(self) -> u.Quantity:
+        """Get the gain of this source (0 dB)."""
+        return 0 * u.dB
+
+    @property
+    def noise_figure(self) -> u.Quantity:
+        """Get the noise figure of this source (0 dB)."""
+        return 0 * u.dB
+
 
 def test_source_input_property():
     """Test that Source doesn't accept inputs."""

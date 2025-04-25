@@ -25,6 +25,26 @@ class Source(Stage):
         self._noise_temperature: Temperature = 290 * u.K
 
     @property
+    def input(self):
+        """
+        Sources do not have inputs.
+
+        Raises:
+            AttributeError: Always, since sources do not have inputs
+        """
+        raise AttributeError("Source objects do not have inputs")
+
+    @input.setter
+    def input(self, value):
+        """
+        Sources do not have inputs.
+
+        Raises:
+            AttributeError: Always, since sources do not have inputs
+        """
+        raise AttributeError("Source objects do not have inputs")
+
+    @property
     def noise_temperature(self) -> Temperature:
         """
         Get the noise temperature of this source.
@@ -66,6 +86,30 @@ class Source(Stage):
 
         Returns:
             Decibels: The cascaded noise figure in dB
+        """
+        return 0 * u.dB
+
+    @property
+    def gain(self) -> Decibels:
+        """
+        Get the gain of this source.
+
+        For a source, this is 0 dB since it's the start of the chain.
+
+        Returns:
+            Decibels: The gain in dB
+        """
+        return 0 * u.dB
+
+    @property
+    def noise_figure(self) -> Decibels:
+        """
+        Get the noise figure of this source.
+
+        For a source, this is 0 dB since it's the start of the chain.
+
+        Returns:
+            Decibels: The noise figure in dB
         """
         return 0 * u.dB
 
