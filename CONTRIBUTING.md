@@ -85,14 +85,6 @@ poetry run flake8 .      # Lint code
 - Provide clear error messages
 - Include context in error descriptions
 
-### Testing Requirements
-- Maintain 90% code coverage minimum
-- Use pytest.approx for float comparisons
-  - Wrap expected values
-  - Use abs=0.01 for dB comparisons
-- when comparing pint units, use `assert_allclose`
-- Apply pytest parametrization where suitable
-
 ### Architecture
 - Follow single responsibility principle
 - Use dependency injection where appropriate

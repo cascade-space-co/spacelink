@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Adding dB to dBW is an allowed operation
+- Adding dB to dB is an allowed operation
+- When attenuation or loss are specified in dB, they are always positive
+- Gain in dB can be positive or negative
