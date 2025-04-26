@@ -8,7 +8,7 @@ import astropy.units as u
 # import astropy.constants as const # Unused
 # import numpy as np # Unused
 from astropy.units import Quantity
-from typing import List
+from typing import List, Tuple
 
 from .units import (
     Decibels,
@@ -136,25 +136,26 @@ def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
 
 @enforce_units
 def cascaded_noise_factor(
-    noise_factors: List[Dimensionless], gains_lin: List[Dimensionless]
+    stages: List[Tuple[Dimensionless, Dimensionless]]
 ) -> Dimensionless:
     """
     Calculate total cascaded noise factor (linear) using Friis formula.
 
     Args:
-        noise_factors: List of noise factors (linear, dimensionless) for each stage.
-        gains_lin: List of linear gains (dimensionless) for each stage.
+        stages: List of tuples containing (noise_factor, gain) for each stage.
+            noise_factor: Noise factor (linear, dimensionless)
+            gain: Linear gain (dimensionless)
 
     Returns:
         Total noise factor (linear, dimensionless) as a Quantity.
     """
-    if not noise_factors:
+    if not stages:
         raise ValueError("Cannot calculate cascaded noise factor for empty stages.")
-    if len(noise_factors) != len(gains_lin):
-        raise ValueError("noise_factors and gains_lin must have the same length.")
-    total_nf = noise_factors[0]
-    cum_gain = gains_lin[0]
-    for nf, gain in zip(noise_factors[1:], gains_lin[1:]):
+    
+    total_nf = stages[0][0]  # First stage noise factor
+    cum_gain = stages[0][1]  # First stage gain
+    
+    for nf, gain in stages[1:]:
         total_nf = total_nf + (nf - 1.0) / cum_gain
         cum_gain = cum_gain * gain
     return total_nf
@@ -162,46 +163,47 @@ def cascaded_noise_factor(
 
 @enforce_units
 def cascaded_noise_figure(
-    noise_factors: List[Dimensionless], gains_lin: List[Dimensionless]
+    stages: List[Tuple[Decibels, Decibels]]
 ) -> Decibels:
     """
     Calculate total cascaded noise figure in dB.
 
     Args:
-        noise_factors: List of noise factors (linear, dimensionless) for each stage.
-        gains_lin: List of linear gains (dimensionless) for each stage.
+        stages: List of tuples containing (noise_figure, gain) for each stage.
+            noise_figure: Noise figure in dB
+            gain: Gain in dB
 
     Returns:
         Total noise figure (dB) as a Quantity.
     """
-    total_nf = cascaded_noise_factor(noise_factors, gains_lin)
-    return to_dB(total_nf)
+    # Convert dB values to linear
+    linear_stages = [(to_linear(nf), to_linear(gain)) for nf, gain in stages]
+    return to_dB(cascaded_noise_factor(linear_stages))
 
 
 @enforce_units
 def cascaded_noise_temperature(
-    noise_temps: List[Temperature], gains_lin: List[Dimensionless]
+    stages: List[Tuple[Temperature, Dimensionless]]
 ) -> Temperature:
     """
     Calculate total cascaded noise temperature in Kelvin.
 
     Args:
-        noise_temps: List of noise temperatures (Kelvin) for each stage.
-        gains_lin: List of linear gains (dimensionless) for each stage.
+        stages: List of tuples containing (noise_temperature, gain) for each stage.
+            noise_temperature: Noise temperature in Kelvin
+            gain: Linear gain (dimensionless)
 
     Returns:
         Total noise temperature (Kelvin) as a Quantity.
     """
-    # Compute cascaded noise temperature via total noise factor
-    if not noise_temps:
+    if not stages:
         raise ValueError(
             "Cannot calculate cascaded noise temperature for empty stages."
         )
-    if len(noise_temps) != len(gains_lin):
-        raise ValueError("noise_temps and gains_lin must have the same length.")
+    
     # Convert noise temperatures to noise factors: F = 1 + T/T0
-    noise_factors = [temperature_to_noise_factor(temp) for temp in noise_temps]
+    noise_factors = [(temperature_to_noise_factor(temp), gain) for temp, gain in stages]
     # Compute total noise factor
-    total_nf = cascaded_noise_factor(noise_factors, gains_lin)
+    total_nf = cascaded_noise_factor(noise_factors)
     # Convert back to noise temperature: T = (F - 1) * T0
     return noise_factor_to_temperature(total_nf)
