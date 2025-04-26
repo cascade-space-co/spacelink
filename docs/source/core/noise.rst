@@ -1,7 +1,7 @@
 Noise Module
 ============
 
-.. automodule:: spacelink.noise
+.. automodule:: spacelink.core.noise
    :members:
    :undoc-members:
    :show-inheritance:

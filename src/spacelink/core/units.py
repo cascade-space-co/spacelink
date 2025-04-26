@@ -3,11 +3,12 @@ Units and constants for radio communications calculations.
 
 This module defines a Pint UnitRegistry and provides commonly used units and conversion
 functions for radio frequency applications, including:
-  - Wavelength and frequency conversions
-  - Decibel and linear scale conversions
-  - VSWR and return loss calculations
-  - Mismatch loss computation
-  - YAML serialization support for Pint quantities
+
+- Wavelength and frequency conversions
+- Decibel and linear scale conversions
+- VSWR and return loss calculations
+- Mismatch loss computation
+- YAML serialization support for Pint quantities
 """
 
 from functools import wraps
@@ -67,7 +68,7 @@ def enforce_units(func):
             # Check if hint is Annotated
             if hint and getattr(hint, "__origin__", None) is Annotated:
                 _, unit = get_args(hint) # Use _ for quantity_type if not needed
-                
+
                 if isinstance(value, Quantity):
                     # Convert to expected unit
                     try:
@@ -77,10 +78,10 @@ def enforce_units(func):
                             converted_value = value.to(unit)
                     except u.UnitConversionError as e:
                          raise u.UnitConversionError(f"Parameter '{name}' requires unit compatible with {unit}, but got {value.unit}. Original error: {e}") from e
-                    
+
                     # Unit conversion successful
                     bound.arguments[name] = converted_value
-                    
+
                     # --- Value Checks Removed - Handled by separate decorators ---
                     # if unit == u.K and converted_value < 0 * unit:
                     #    raise ValueError(f"{name} must be non-negative")
@@ -88,12 +89,12 @@ def enforce_units(func):
                     #    raise ValueError(f"{name} must be positive")
                     # if unit == u.m and name == "distance" and converted_value <= 0 * unit:
                     #    raise ValueError(f"{name} must be positive")
-                        
+
                 else:
                     # Handle non-Quantity inputs
                     raise TypeError(f"Parameter '{name}' must be provided as an astropy Quantity, not a raw number.")
             # else: No Annotated hint found
-            #    pass 
+            #    pass
 
         try:
             return func(*bound.args, **bound.kwargs)

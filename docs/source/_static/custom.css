@@ -1,4 +1,4 @@
-/* Custom styles for PyRadio documentation */
+/* Custom styles for SpaceLink documentation */
 
 /* Add any custom styles here */
 .highlight {
@@ -12,4 +12,24 @@ pre {
     background-color: #f8f9fa;
     border-radius: 4px;
     padding: 1em;
-} 
+}
+
+/* Human-verified equation block */
+.human-verified {
+    background-color: #f0e6ff;
+    border-left: 5px solid #6a0dad;
+    padding: 1em;
+    margin: 1em 0;
+    border-radius: 4px;
+}
+
+.human-verified .math {
+    font-weight: normal;
+}
+
+.human-verified-title {
+    font-weight: bold;
+    color: #6a0dad;
+    margin-bottom: 0.5em;
+    font-size: 1.1em;
+}

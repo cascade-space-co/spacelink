@@ -14,6 +14,9 @@ sys.path.insert(
     ),
 )
 
+# Add the _ext directory to the path for custom extensions
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "_ext")))
+
 # -- Project information -----------------------------------------------------
 project = "SpaceLink"
 copyright = "2025, Heliosphere Network"
@@ -29,6 +32,8 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx_rtd_theme",
     "sphinx_autodoc_typehints",
+    "sphinx.ext.mathjax",  # Add MathJax support for LaTeX math
+    "human_verified",      # Custom extension for human-verified equations
 ]
 
 templates_path = ["_templates"]
