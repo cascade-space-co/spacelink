@@ -115,22 +115,39 @@ def enforce_units(func):
 # DO NOT MODIFY
 @enforce_units
 def wavelength(frequency: Frequency) -> Wavelength:
-    """
+    r"""
     Convert frequency to wavelength.
 
-    Args:
-        frequency (pint.Quantity): Frequency quantity (e.g., in Hz).
+    The wavelength is calculated using:
 
-    Returns:
-        pint.Quantity: Wavelength in meters.
+    .. math::
+        \lambda = \frac{c}{f}
 
-    Raises:
-        Exception: If the input quantity has incompatible units.
+    where:
 
-    Example:
-        >>> from spacelink.units import wavelength, GHz, m
-        >>> wavelength(1 * GHz).to(m)
-        <Quantity(0.299792458, 'meter')>
+    * :math:`c` is the speed of light (299,792,458 m/s)
+    * :math:`f` is the frequency in Hz
+
+    Parameters
+    ----------
+    frequency : Quantity
+        Frequency quantity (e.g., in Hz)
+
+    Returns
+    -------
+    Quantity
+        Wavelength in meters
+
+    Raises
+    ------
+    UnitConversionError
+        If the input quantity has incompatible units
+
+    Examples
+    --------
+    >>> from spacelink.units import wavelength, GHz, m
+    >>> wavelength(1 * GHz).to(m)
+    <Quantity(0.299792458, 'meter')>
     """
     return constants.c / frequency.to(u.Hz)
 
@@ -138,22 +155,39 @@ def wavelength(frequency: Frequency) -> Wavelength:
 # DO NOT MODIFY
 @enforce_units
 def frequency(wavelength: Wavelength) -> Frequency:
-    """
+    r"""
     Convert wavelength to frequency.
 
-    Args:
-        wavelength (pint.Quantity): Wavelength quantity (e.g., in meters).
+    The frequency is calculated using:
 
-    Returns:
-        pint.Quantity: Frequency in hertz.
+    .. math::
+        f = \frac{c}{\lambda}
 
-    Raises:
-        Exception: If the input quantity has incompatible units.
+    where:
 
-    Example:
-        >>> from spacelink.units import frequency, m, MHz
-        >>> frequency(1 * m).to(MHz)
-        <Quantity(299.792458, 'megahertz')>
+    * :math:`c` is the speed of light (299,792,458 m/s)
+    * :math:`\lambda` is the wavelength in meters
+
+    Parameters
+    ----------
+    wavelength : Quantity
+        Wavelength quantity (e.g., in meters)
+
+    Returns
+    -------
+    Quantity
+        Frequency in hertz
+
+    Raises
+    ------
+    UnitConversionError
+        If the input quantity has incompatible units
+
+    Examples
+    --------
+    >>> from spacelink.units import frequency, m, MHz
+    >>> frequency(1 * m).to(MHz)
+    <Quantity(299.792458, 'megahertz')>
     """
     return constants.c / wavelength.to(u.m)
 
@@ -161,15 +195,30 @@ def frequency(wavelength: Wavelength) -> Frequency:
 # DO NOT MODIFY
 @enforce_units
 def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
-    """
+    r"""
     Convert a dimensionless quantity to decibels.
 
-    Args:
-        x: A dimensionless Quantity (e.g., power ratio).
-        factor: 10 for power, 20 for field (voltage, current, etc.)
+    The conversion is done using:
 
-    Returns:
-        Quantity in decibels (unit = u.dB)
+    .. math::
+        X_{dB} = factor \cdot \log_{10}(x)
+
+    where:
+
+    * :math:`x` is the dimensionless quantity
+    * :math:`factor` is 10 for power quantities, 20 for field quantities
+
+    Parameters
+    ----------
+    x : Quantity
+        A dimensionless Quantity (e.g., power ratio)
+    factor : int, optional
+        10 for power quantities, 20 for field quantities (voltage, current, etc.)
+
+    Returns
+    -------
+    Quantity
+        Value in decibels (unit = u.dB)
     """
     return factor * u.dB * np.log10(x.to_value(u.dimensionless_unscaled))
 
@@ -177,15 +226,30 @@ def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
 # DO NOT MODIFY
 @enforce_units
 def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
-    """
+    r"""
     Convert decibels to a linear (dimensionless) ratio.
 
-    Args:
-        x: A quantity in decibels.
-        factor: 10 for power quantities, 20 for field quantities.
+    The conversion is done using:
 
-    Returns:
-        A dimensionless quantity (e.g., gain or ratio).
+    .. math::
+        x = 10^{\frac{X_{dB}}{factor}}
+
+    where:
+
+    * :math:`X_{dB}` is the value in decibels
+    * :math:`factor` is 10 for power quantities, 20 for field quantities
+
+    Parameters
+    ----------
+    x : Quantity
+        A quantity in decibels
+    factor : float, optional
+        10 for power quantities, 20 for field quantities
+
+    Returns
+    -------
+    Quantity
+        A dimensionless quantity (e.g., gain or ratio)
     """
     linear_value = np.power(10, x.value / factor)
     return linear_value * u.dimensionless
@@ -194,21 +258,39 @@ def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
 # DO NOT MODIFY
 @enforce_units
 def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
-    """
+    r"""
     Convert a return loss in decibels to voltage standing wave ratio (VSWR).
 
-    Args:
-        return_loss (float): Return loss in decibels (>= 0). Use float('inf') for a perfect match.
+    The conversion is done using:
 
-    Returns:
-        float: VSWR (>= 1).
+    .. math::
+        VSWR = \frac{1 + |\Gamma|}{1 - |\Gamma|}
 
-    Raises:
-        ValueError: If return_loss is negative.
+    where:
 
-    Example:
-        >>> return_loss_to_vswr(20.0)
-        1.2
+    * :math:`|\Gamma|` is the magnitude of the reflection coefficient
+    * :math:`|\Gamma| = 10^{-\frac{RL}{20}}`
+    * :math:`RL` is the return loss in dB
+
+    Parameters
+    ----------
+    return_loss : Quantity
+        Return loss in decibels (>= 0). Use float('inf') for a perfect match
+
+    Returns
+    -------
+    Quantity
+        VSWR (>= 1)
+
+    Raises
+    ------
+    ValueError
+        If return_loss is negative
+
+    Examples
+    --------
+    >>> return_loss_to_vswr(20.0 * u.dB)
+    <Quantity(1.2, 'dimensionless')>
     """
     if return_loss.value < 0:
         raise ValueError(f"return loss must be >= 0 ({return_loss}).")
@@ -221,21 +303,38 @@ def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
 # DO NOT MODIFY
 @enforce_units
 def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
-    """
+    r"""
     Convert voltage standing wave ratio (VSWR) to return loss in decibels.
 
-    Args:
-        vswr (float): VSWR value (> 1). Use 1 for a perfect match (infinite return loss).
+    The conversion is done using:
 
-    Returns:
-        float: Return loss in decibels.
+    .. math::
+        RL = -20 \log_{10}\left(\frac{VSWR - 1}{VSWR + 1}\right)
 
-    Raises:
-        ValueError: If vswr is less than or equal to 1.
+    where:
 
-    Example:
-        >>> vswr_to_return_loss(1.2)
-        20.834...
+    * :math:`VSWR` is the voltage standing wave ratio
+    * :math:`RL` is the return loss in dB
+
+    Parameters
+    ----------
+    vswr : Quantity
+        VSWR value (> 1). Use 1 for a perfect match (infinite return loss)
+
+    Returns
+    -------
+    Quantity
+        Return loss in decibels
+
+    Raises
+    ------
+    ValueError
+        If vswr is less than 1
+
+    Examples
+    --------
+    >>> vswr_to_return_loss(1.2 * u.dimensionless)
+    <Quantity(20.83, 'dB')>
     """
     if vswr < 1.0:
         raise ValueError(f"VSWR must be >= 1 ({vswr}).")
@@ -248,20 +347,35 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
 # DO NOT MODIFY
 @enforce_units
 def mismatch_loss(return_loss: Decibels) -> Decibels:
-    """
+    r"""
     Compute the mismatch loss due to non-ideal return loss.
 
     Mismatch loss quantifies power lost from reflections at an interface.
+    It is calculated using:
 
-    Args:
-        return_loss (float): Return loss in decibels.
+    .. math::
+        ML = -10 \log_{10}(1 - |\Gamma|^2)
 
-    Returns:
-        float: Mismatch loss in decibels.
+    where:
 
-    Example:
-        >>> mismatch_loss(9.54)
-        0.5115...
+    * :math:`|\Gamma|` is the magnitude of the reflection coefficient
+    * :math:`|\Gamma| = 10^{-\frac{RL}{20}}`
+    * :math:`RL` is the return loss in dB
+
+    Parameters
+    ----------
+    return_loss : Quantity
+        Return loss in decibels
+
+    Returns
+    -------
+    Quantity
+        Mismatch loss in decibels
+
+    Examples
+    --------
+    >>> mismatch_loss(9.54 * u.dB)
+    <Quantity(0.51, 'dB')>
     """
     # Note that we want |Γ|² so we use factor=10 instead of factor=20
     gamma_2 = to_linear(-return_loss, factor=10)
