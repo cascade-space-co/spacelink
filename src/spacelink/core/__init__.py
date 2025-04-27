@@ -43,18 +43,15 @@ from .antenna import (
     dish_gain,
 )
 from .channelcoding import (
-    coding_gain,
-    required_ebno_coded,
-    theoretical_ber_bpsk,
-    theoretical_ber_qpsk,
-    theoretical_ber_mfsk,
-    hamming_distance,
-    error_correction_capability,
+    ErrorRate,
+    required_ebno_for_psk_ber,
+    get_code_rate_from_scheme,
+    psk_bandwidth,
+    required_c_n0,
+    coding_gain_from_ebno,
+    delta_c_n0
 )
-# Add back import from validation if non_negative exists
-# from .validation import (
-#     non_negative,
-# )
+
 
 __all__ = [
     # Units & Types
@@ -95,9 +92,13 @@ __all__ = [
     "theoretical_ber_mfsk",
     "hamming_distance",
     "error_correction_capability",
-    # Validation
-    # 'non_negative', # Keep commented if not defined in validation.py
-    # VSWR/Return Loss
+    "ErrorRate",
+    "required_ebno_for_psk_ber",
+    "get_code_rate_from_scheme",
+    "psk_bandwidth",
+    "required_c_n0",
+    "coding_gain_from_ebno",
+    "delta_c_n0",
     "return_loss_to_vswr",
     "vswr_to_return_loss",
     "mismatch_loss",
