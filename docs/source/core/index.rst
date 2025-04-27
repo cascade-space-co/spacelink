@@ -10,6 +10,7 @@ Key Modules
 * **antenna**: Core antenna calculations including dish gain and polarization loss
 * **noise**: Functions for noise calculations, including conversions between noise figure and temperature
 * **path**: Path loss calculations for radio communications, including free space path loss
+* **channelcoding**: Functions for channel coding calculations, including coding gain and error correction
 * **validation**: Validation decorators for ensuring correct function arguments
 
 Unit System
@@ -41,4 +42,5 @@ Example: Converting between noise figure and temperature
    antenna
    noise
    path
+   channelcoding
    validation

@@ -14,18 +14,18 @@ def test_thermal_noise_power():
     """Test thermal noise power calculation."""
     # Test with standard room temperature (290K)
     expected = 1.380649e-23 * 290.0 * 1e6
-    assert_quantity_allclose(noise.power(1.0 * u.MHz), expected * u.W)
+    assert_quantity_allclose(noise.noise_power(1.0 * u.MHz), expected * u.W)
 
     # Test with different temperature
     expected = 1.380649e-23 * 100.0 * 1e6
-    assert_quantity_allclose(noise.power(1.0 * u.MHz, 100 * u.K), expected * u.W)
+    assert_quantity_allclose(noise.noise_power(1.0 * u.MHz, 100 * u.K), expected * u.W)
 
     # Test with zero bandwidth
-    assert_quantity_allclose(noise.power(0.0 * u.MHz), 0.0 * u.W)
+    assert_quantity_allclose(noise.noise_power(0.0 * u.MHz), 0.0 * u.W)
 
     # Test with negative bandwidth
     with pytest.raises(ValueError):
-        noise.power(-1.0 * u.MHz)
+        noise.noise_power(-1.0 * u.MHz)
 
 # DO NOT MODIFY - This test uses validated reference values
 @pytest.mark.parametrize(
@@ -42,7 +42,7 @@ def test_noise_dBW_conversion(temperature, bandwidth, expected_noise_dBW):
     """
     -VALIDATED-
     """
-    noise_w = noise.power(bandwidth, temperature)
+    noise_w = noise.noise_power(bandwidth, temperature)
     assert_quantity_allclose(
         noise_w.to(u.dB(u.W)), expected_noise_dBW, atol=0.01 * u.dB(u.W)
     )

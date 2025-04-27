@@ -15,6 +15,7 @@ from .units import (
     Dimensionless,
     Temperature,
     Frequency,
+    Power,
     enforce_units,
     to_linear,
     to_dB,
@@ -28,8 +29,7 @@ T0 = 290.0 * u.K
 
 
 @enforce_units
-# @check_positive("bandwidth") # Removed check
-def power(bandwidth: Frequency, temperature: Temperature = T0) -> Quantity:
+def noise_power(bandwidth: Frequency, temperature: Temperature = T0) -> Power:
     r"""
     Calculate the thermal noise power in a given bandwidth.
 

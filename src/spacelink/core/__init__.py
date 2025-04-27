@@ -15,6 +15,7 @@ from .units import (
     DecibelWatts,
     DecibelMilliwatts,
     Watts,
+    Power,
     Wavelength,
     enforce_units,
     to_dB,
@@ -26,6 +27,7 @@ from .units import (
     mismatch_loss,
 )
 from .noise import (
+    noise_power,
     noise_figure_to_temperature,
     temperature_to_noise_figure,
     noise_factor_to_temperature,
@@ -39,6 +41,15 @@ from .path import (
 from .antenna import (
     polarization_loss,
     dish_gain,
+)
+from .channelcoding import (
+    coding_gain,
+    required_ebno_coded,
+    theoretical_ber_bpsk,
+    theoretical_ber_qpsk,
+    theoretical_ber_mfsk,
+    hamming_distance,
+    error_correction_capability,
 )
 # Add back import from validation if non_negative exists
 # from .validation import (
@@ -56,6 +67,7 @@ __all__ = [
     "DecibelWatts",
     "DecibelMilliwatts",
     "Watts",
+    "Power",
     "Wavelength",
     # Unit Conversion/Helpers
     "enforce_units",
@@ -75,6 +87,14 @@ __all__ = [
     # Antenna Calcs
     "polarization_loss",
     "dish_gain",
+    # Channel Coding
+    "coding_gain",
+    "required_ebno_coded",
+    "theoretical_ber_bpsk",
+    "theoretical_ber_qpsk",
+    "theoretical_ber_mfsk",
+    "hamming_distance",
+    "error_correction_capability",
     # Validation
     # 'non_negative', # Keep commented if not defined in validation.py
     # VSWR/Return Loss

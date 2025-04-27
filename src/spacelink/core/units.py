@@ -21,6 +21,9 @@ import yaml
 
 import numpy as np
 
+# Define dBHz if missing
+if not hasattr(u, "dBHz"):
+    u.dBHz = u.dB(u.Hz)
 # Define dBW if missing
 if not hasattr(u, "dBW"):
     u.dBW = u.dB(u.W)
@@ -46,12 +49,14 @@ Decibels = Annotated[Quantity, u.dB]
 DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
 Watts = Annotated[Quantity, u.W]
+Power = Annotated[Quantity, u.W]  # Added Power type
 Frequency = Annotated[Quantity, u.Hz]
 Wavelength = Annotated[Quantity, u.m]
 Dimensionless = Annotated[Quantity, u.dimensionless_unscaled]
 Distance = Annotated[Quantity, u.m]
 Temperature = Annotated[Quantity, u.K]
 Length = Annotated[Quantity, u.m]
+DecibelHertz = Annotated[Quantity, u.dB(u.Hz)]
 
 
 def enforce_units(func):
@@ -213,7 +218,7 @@ def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
     x : Quantity
         A dimensionless Quantity (e.g., power ratio)
     factor : int, optional
-        10 for power quantities, 20 for field quantities (voltage, current, etc.)
+        10 for power quantities, 20 for field quantities
 
     Returns
     -------
@@ -222,6 +227,12 @@ def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
     """
     return factor * u.dB * np.log10(x.to_value(u.dimensionless_unscaled))
 
+@enforce_units
+def to_dBHz(x: Frequency) -> DecibelHertz:
+    r"""
+    Convert a decibel quantity to dBHz
+    """
+    return 10 * np.log10(x.to_value(u.Hz)) * u.dBHz
 
 # DO NOT MODIFY
 @enforce_units

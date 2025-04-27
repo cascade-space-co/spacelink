@@ -1,0 +1,24 @@
+# Suggested update to src/spacelink/core/__init__.py to include ranging functions
+
+# Add this import section:
+from .ranging import (
+    pn_sequence_range_ambiguity,
+    compute_power_fractions,
+    chip_snr,
+    power_fractions_sine,
+    suppression_factor_sine,
+    modulation_factor_sine,
+    suppression_factor_bipolar,
+    modulation_factor_bipolar,
+)
+
+# Add these entries to the __all__ list:
+    # Ranging
+    "pn_sequence_range_ambiguity",
+    "compute_power_fractions",
+    "chip_snr",
+    "power_fractions_sine",
+    "suppression_factor_sine",
+    "modulation_factor_sine",
+    "suppression_factor_bipolar",
+    "modulation_factor_bipolar",
