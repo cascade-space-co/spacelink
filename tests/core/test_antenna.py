@@ -45,17 +45,13 @@ def test_polarization_loss_calculation(ar_tx_db, ar_rx_db, expected_loss_db, tol
         polarization_loss(ar_tx_db, ar_rx_db), expected_loss_db, atol=tol
     )
 
-
+# Unvalidated
 @pytest.mark.parametrize(
     "diameter, frequency, efficiency, expected_gain_db, tol",
     [
-        # Test case 1: Based on test_dish_calculates_gain
         (20.0 * u.m, 8.4 * u.GHz, 0.65 * u.dimensionless, 63.04 * u.dB, 0.01 * u.dB),
-        # Test case 2: Smaller dish
         (1.0 * u.m, 2.4 * u.GHz, 0.65 * u.dimensionless, 26.14 * u.dB, 0.01 * u.dB),
-        # Test case 3: Different efficiency
         (1.0 * u.m, 2.4 * u.GHz, 0.5 * u.dimensionless, 25.00 * u.dB, 0.01 * u.dB),
-        # Add cases from test_dish_calculates_gain component test
         (20.0 * u.m, 2.4 * u.GHz, 0.65 * u.dimensionless, 52.16 * u.dB, 0.01 * u.dB),
         (1.0 * u.m, 5.8 * u.GHz, 0.65 * u.dimensionless, 33.80 * u.dB, 0.01 * u.dB),
         (1.0 * u.m, 900 * u.MHz, 0.65 * u.dimensionless, 17.62 * u.dB, 0.01 * u.dB),

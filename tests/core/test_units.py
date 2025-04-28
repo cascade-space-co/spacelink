@@ -91,14 +91,10 @@ def test_vswr(vswr, gamma, return_loss):
 def test_enforce_units_decorator():
     """Test that enforce_units decorator raises the correct astropy exception
     with incompatible units."""
-    # Test that wavelength() raises UnitConversionError with incorrect units
     with pytest.raises(u.UnitConversionError):
-        # Passing length units to a function expecting frequency
         wavelength(1.0 * u.m)
 
-    # Test that frequency() raises UnitConversionError with incorrect units
     with pytest.raises(u.UnitConversionError):
-        # Passing frequency units to a function expecting length
         frequency(1.0 * u.Hz)
 
 # DO NOT MODIFY

@@ -21,35 +21,21 @@ import yaml
 
 import numpy as np
 
-# Define dBHz if missing
 if not hasattr(u, "dBHz"):
     u.dBHz = u.dB(u.Hz)
-# Define dBW if missing
 if not hasattr(u, "dBW"):
     u.dBW = u.dB(u.W)
-# Define dBW if missing
 if not hasattr(u, "dBm"):
     u.dBm = u.dB(u.mW)
-# Define dimensionless unit if missing
 if not hasattr(u, "dimensionless"):
     u.dimensionless = u.dimensionless_unscaled
 
-# Add dB to linear equivalencies for unit conversion
-db_equivalencies = [
-    (
-        u.dB,
-        u.dimensionless_unscaled,
-        lambda x: 10 ** (x / 10),
-        lambda x: 10 * np.log10(x),
-    )
-]
-
-
+# TODO: make unit naming consistent i.e. Watts not Power, Kelvins not Temperature, etc
 Decibels = Annotated[Quantity, u.dB]
 DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
 Watts = Annotated[Quantity, u.W]
-Power = Annotated[Quantity, u.W]  # Added Power type
+Power = Annotated[Quantity, u.W]
 Frequency = Annotated[Quantity, u.Hz]
 Wavelength = Annotated[Quantity, u.m]
 Dimensionless = Annotated[Quantity, u.dimensionless_unscaled]
@@ -87,19 +73,9 @@ def enforce_units(func):
                     # Unit conversion successful
                     bound.arguments[name] = converted_value
 
-                    # --- Value Checks Removed - Handled by separate decorators ---
-                    # if unit == u.K and converted_value < 0 * unit:
-                    #    raise ValueError(f"{name} must be non-negative")
-                    # if unit == u.Hz and converted_value <= 0 * unit:
-                    #    raise ValueError(f"{name} must be positive")
-                    # if unit == u.m and name == "distance" and converted_value <= 0 * unit:
-                    #    raise ValueError(f"{name} must be positive")
-
                 else:
                     # Handle non-Quantity inputs
                     raise TypeError(f"Parameter '{name}' must be provided as an astropy Quantity, not a raw number.")
-            # else: No Annotated hint found
-            #    pass
 
         try:
             return func(*bound.args, **bound.kwargs)

@@ -36,6 +36,7 @@ class ErrorRate(Enum):
 # Required Eb/N0 values (in dB) for concatenated coding schemes using PSK modulation
 # The list index corresponds to the ErrorRate Enum value (0: 1e-3, 1: 1e-4, 2: 1e-5, 3: 1e-6)
 _PSK_EBN0_VS_BER = {
+    "UNCODED": [6.8, 8.4, 9.6, 10.4] * u.dB,
     'CC(7,1/2) RS(255,223) I=5': [2.1, 2.25, 2.3, 2.4] * u.dB,
     'CC(7,2/3) RS(255,223) I=5': [2.8, 2.9, 3.05, 3.15] * u.dB,
     'CC(7,3/4) RS(255,223) I=5': [3.35, 3.5, 3.6, 3.65] * u.dB,
@@ -118,6 +119,7 @@ def psk_bandwidth(symbol_rate: Frequency, alpha: Dimensionless) -> Frequency:
 
 def required_c_n0(ebno: Decibels, bit_rate: Frequency) -> DecibelHertz:
     """
+    -VALIDATED-
     Calculate the required carrier-to-noise power spectral density ratio (C/N0)
     for a given Eb/N0 and bit rate. The result is in dB-Hz.
 
@@ -129,7 +131,6 @@ def required_c_n0(ebno: Decibels, bit_rate: Frequency) -> DecibelHertz:
     return ebno + bit_rate.to(u.dB(u.Hz))
 
 
-# Rename this function to avoid conflict
 def coding_gain_from_ebno(ebno_uncoded: Decibels, ebno_coded: Decibels) -> Decibels:
     return ebno_uncoded - ebno_coded
 

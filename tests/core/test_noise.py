@@ -85,7 +85,7 @@ TempStage = Tuple[Temperature, Dimensionless]
                 (3.0 * u.dimensionless, 5.0 * u.dimensionless),
             ],
             2.2 * u.dimensionless,
-        ), # F_tot = F1 + (F2-1)/G1 = 2 + (3-1)/10 = 2 + 2/10 = 2.2
+        ),
         # UNVALIDATED TEST DATA - Three stages
         (
              [
@@ -94,7 +94,7 @@ TempStage = Tuple[Temperature, Dimensionless]
                 (4.0 * u.dimensionless, 2.0 * u.dimensionless),
             ],
              2.26 * u.dimensionless,
-        ), # F_tot = 2.2 + (F3-1)/(G1*G2) = 2.2 + (4-1)/(10*5) = 2.2 + 3/50 = 2.2 + 0.06 = 2.26
+        ), 
         # Add more test cases as needed, ensuring data is validated
     ],
 )

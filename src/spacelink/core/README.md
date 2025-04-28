@@ -1,0 +1,2 @@
+# SpaceLink Core
+This section is comprised primarily of functions that are derived from physics and information theory. Any equations used by the rest of the library shall be defined and tested in this section.
