@@ -42,7 +42,7 @@ from .antenna import (
     polarization_loss,
     dish_gain,
 )
-from .channelcoding import (
+from .modcod import (
     ErrorRate,
     required_ebno_for_psk_ber,
     get_code_rate_from_scheme,
@@ -50,6 +50,15 @@ from .channelcoding import (
     required_c_n0,
     coding_gain_from_ebno,
     delta_c_n0
+)
+from .ranging import (
+    pn_sequence_range_ambiguity,
+    chip_snr,
+    suppression_factor_sine,
+    modulation_factor_sine,
+    suppression_factor_bipolar,
+    modulation_factor_bipolar,
+    power_fractions_sine
 )
 
 
@@ -73,6 +82,7 @@ __all__ = [
     "wavelength",
     "frequency",
     # Noise
+    "noise_power",
     "noise_figure_to_temperature",
     "temperature_to_noise_figure",
     "noise_factor_to_temperature",
@@ -85,13 +95,7 @@ __all__ = [
     "polarization_loss",
     "dish_gain",
     # Channel Coding
-    "coding_gain",
-    "required_ebno_coded",
-    "theoretical_ber_bpsk",
-    "theoretical_ber_qpsk",
-    "theoretical_ber_mfsk",
-    "hamming_distance",
-    "error_correction_capability",
+    "coding_gain_from_ebno",
     "ErrorRate",
     "required_ebno_for_psk_ber",
     "get_code_rate_from_scheme",
@@ -102,4 +106,12 @@ __all__ = [
     "return_loss_to_vswr",
     "vswr_to_return_loss",
     "mismatch_loss",
+    # Ranging
+    "pn_sequence_range_ambiguity",
+    "chip_snr",
+    "suppression_factor_sine",
+    "modulation_factor_sine",
+    "suppression_factor_bipolar",
+    "modulation_factor_bipolar",
+    "power_fractions_sine",
 ]

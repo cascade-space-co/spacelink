@@ -24,7 +24,7 @@ from .antenna import (
 from .receiver import Receiver
 from .demodulator import Demodulator
 from .transmitter import Transmitter
-from .mode import Mode
+from .mode import RangingMode, DataMode
 
 __all__ = [
     # Base classes
@@ -47,6 +47,7 @@ __all__ = [
     "Transmitter",
     # Data Structures
     "Signal",
-    "Mode",
+    "RangingMode",
+    "DataMode",
     # StageAntenna? - Revisit if needed
 ]

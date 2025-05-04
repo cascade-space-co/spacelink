@@ -5,7 +5,7 @@ import astropy.units as u
 import numpy as np
 from astropy.tests.helper import assert_quantity_allclose
 
-from src.spacelink.core.channelcoding import (
+from spacelink.core.modcod import (
     required_c_n0,
     delta_c_n0,
     required_ebno_for_psk_ber,

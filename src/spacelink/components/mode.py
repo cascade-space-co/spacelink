@@ -9,114 +9,75 @@ signal quality parameters.
 import astropy.units as u
 from dataclasses import dataclass
 
+from spacelink.core.ranging import power_fractions_sine, modulation_factor_sine, suppression_factor_sine
+
+from spacelink.core.modcod import (
+    ErrorRate,
+    required_ebno_for_psk_ber,
+    get_code_rate_from_scheme,
+)
 # Update imports
 from ..core.units import (
     Dimensionless,
     Decibels,
     to_dB,
+    Frequency,
+    enforce_units,
 )
 
-"""TODO: change this to an abstract base class
+class RangingMode:
+    def __init__(self, ranging_mod_idx: u.dimensionless, data_mod_idx: u.dimensionless):
+        self._ranging_mod_idx = ranging_mod_idx
+        self._data_mod_idx = data_mod_idx
 
-    Each class of modes will have unique functions for computing things like
-    spectral efficiency based on rolloff etc etc.
+    @property
+    def power_fractions(self):
+        return power_fractions_sine(self._ranging_mod_idx, self._data_mod_idx)
 
-    This class should only have parameters that are fairly static, and that don't
-    change during a mission
-"""
+    @property
+    def ranging_power_fraction(self) -> Decibels:
+        carrier, ranging, data = self.power_fractions
+        return to_dB(ranging)
 
+    @property
+    def data_power_fraction(self) -> Decibels:
+        carrier, ranging, data = self.power_fractions
+        return to_dB(data)
 
-@dataclass
-class Mode:
+class DataMode:
     """
-    A class representing a communication mode with specific coding and modulation.
-
-    This class encapsulates parameters for different communication modes, including
-    channel coding scheme, required Eb/N0 for a target BER, and implementation loss.
-
-    Attributes:
-        name: Human-readable name of the mode
-        coding_scheme: Channel coding scheme used (e.g., "Uncoded", "Reed-Solomon", "LDPC")
-        modulation: Modulation scheme used (e.g., "BPSK", "QPSK", "8PSK")
-        spectral_efficiency: Bits per symbol (accounting for coding overhead)
-        required_ebno: Required Eb/N0 in dB for the target BER
-        target_ber: Target bit error rate (e.g., 1e-5)
-        implementation_loss: Implementation loss in dB
-        code_rate: The channel code rate (data bits / coded bits)
+    Modulation scheme and channel coding for the data (sub) carrier.
     """
+    def __init__(self, 
+                 coding_scheme: str, 
+                 bits_per_symbol: Dimensionless, 
+                 error_rate: ErrorRate):
+        self.coding_scheme = coding_scheme
+        self.error_rate = error_rate
+        self.bits_per_symbol = bits_per_symbol
 
-    name: str
-    coding_scheme: str
-    modulation: str
-    bits_per_symbol: Dimensionless
-    code_rate: float
-    spectral_efficiency: float
-    required_ebno: float
-    implementation_loss: float = 0.0
+    @property
+    def required_ebno(self) -> Decibels:
+        return required_ebno_for_psk_ber(self.error_rate, self.coding_scheme)
+    
+    @property
+    def code_rate(self) -> Dimensionless:
+        return get_code_rate_from_scheme(self.coding_scheme)
 
-    def __post_init__(self):
-        """Validate parameters after initialization."""
-        if not self.name:
-            raise ValueError("Name must not be empty")
-        if not self.coding_scheme:
-            raise ValueError("Coding scheme must not be empty")
-        if not self.modulation:
-            raise ValueError("Modulation must not be empty")
-        if self.spectral_efficiency <= 0.0:
-            raise ValueError("Spectral efficiency must be positive")
-        if self.code_rate <= 0.0 or self.code_rate > 1.0:
-            raise ValueError("Code rate must be between 0 and 1")
-        if self.implementation_loss < 0.0:
-            raise ValueError("Implementation loss must be non-negative")
-        # Ensure bits_per_symbol is a Quantity
-        if not isinstance(self.bits_per_symbol, u.Quantity):
-            # Attempt conversion if it's a plain number
-            if isinstance(self.bits_per_symbol, (int, float)):
-                self.bits_per_symbol = self.bits_per_symbol * u.dimensionless
-            else:
-                raise TypeError("bits_per_symbol must be a dimensionless Quantity")
-        elif not self.bits_per_symbol.unit.is_equivalent(u.dimensionless):
-            raise u.UnitConversionError("bits_per_symbol must be dimensionless")
+    def bit_rate(self, symbol_rate: Frequency) -> Frequency:
+        return symbol_rate * self.bits_per_symbol * self.code_rate
 
-    def ebno(self, c_over_n: Decibels) -> Decibels:
-        """Eb/N0 for given carrier to noise ratio"""
-        bits_per_symbol_db = to_dB(self.bits_per_symbol)
-        return c_over_n - bits_per_symbol_db
+    def ebno(self, cn0: Decibels, symbol_rate: Frequency) -> Decibels:
+        return cn0 - to_dB(self.bit_rate(symbol_rate))
 
-    def margin(self, c_over_n: Decibels) -> Decibels:
-        """
-        Calculate the link margin in dB for a given carrier-to-noise ratio.
+    def margin(self, cn0: Decibels, symbol_rate: Frequency) -> Decibels:
+        ebn0 = self.ebno(cn0, symbol_rate)
+        return ebn0 - self.required_ebno
+    
 
-        The margin is calculated by converting C/N to Eb/N0 and comparing with the required Eb/N0.
-        The conversion accounts for the modulation and coding scheme encapsulated in this mode.
+# class Carrier:
+#     def __init__(self, ranging_mode: RangingMode, data_mode: DataMode):
+#         self.ranging_mode = ranging_mode
+#         self.data_mode = data_mode
 
-        Eb/N0 = C/N + 10*log10(bandwidth/symbol_rate) - 10*log10(spectral_efficiency)
-        Margin = Eb/N0 - Required Eb/N0 - Implementation Loss
-
-        Returns:
-            Link margin in dB
-        """
-
-        # Calculate margin (subtract positive implementation loss)
-        return (
-            self.ebno(c_over_n)
-            - self.required_ebno * u.dB
-            - self.implementation_loss * u.dB
-        )
-
-    def __str__(self) -> str:
-        """
-        Return a string representation of the mode.
-
-        Returns:
-            String representation of the mode
-        """
-        code_rate_str = (
-            f", Code Rate: {self.code_rate:.3f}" if self.code_rate is not None else ""
-        )
-        return (
-            f"{self.name}: {self.modulation} with {self.coding_scheme}\n"
-            f"  Spectral Efficiency: {self.spectral_efficiency:.3f} bits/symbol{code_rate_str}\n"
-            f"  Required Eb/N0: {self.required_ebno:.2f} dB\n"
-            f"  Implementation Loss: {self.implementation_loss:.2f} dB"
-        )
+    

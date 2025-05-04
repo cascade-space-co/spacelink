@@ -64,7 +64,7 @@ def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
     >>> polarization_loss(3 * u.dB, 3 * u.dB)  # Same elliptical polarization
     <Quantity(0.51, 'dB')>
     """
-    # Polarization mismatch angle is omitted (assumed to be 0 degrees)
+    # Polarization mismatch angle is omitted (assumed to be 90 degrees)
     # https://www.microwaves101.com/encyclopedias/polarization-mismatch-between-antennas
     gamma1 = to_linear(ar1, factor=20)
     gamma2 = to_linear(ar2, factor=20)

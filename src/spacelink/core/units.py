@@ -175,7 +175,7 @@ def frequency(wavelength: Wavelength) -> Frequency:
 
 # DO NOT MODIFY
 @enforce_units
-def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
+def to_dB(x: Quantity, *, factor=10) -> Decibels:
     r"""
     Convert a dimensionless quantity to decibels.
 
@@ -201,7 +201,7 @@ def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
     Quantity
         Value in decibels (unit = u.dB)
     """
-    return factor * u.dB * np.log10(x.to_value(u.dimensionless_unscaled))
+    return factor * np.log10(x.value) * u.dB
 
 @enforce_units
 def to_dBHz(x: Frequency) -> DecibelHertz:
