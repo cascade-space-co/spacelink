@@ -14,7 +14,6 @@ This example calculates a complete link budget for a satellite communication sys
    from spacelink.components.antenna import Dish
    from spacelink.components.stage import TransmitAntenna, ReceiveAntenna, Path
    from spacelink.components.transmitter import Transmitter
-   from spacelink.components.receiver import Receiver
    from spacelink.components.demodulator import Demodulator
    from spacelink.components.mode import Mode
 
@@ -40,13 +39,9 @@ This example calculates a complete link budget for a satellite communication sys
    rx_antenna = ReceiveAntenna(antenna=rx_dish)
    rx_antenna.input = space_path
 
-   # Create receiver (ground station)
-   rx = Receiver(gain=50 * u.dB, noise_temperature=120 * u.K)
-   rx.input = rx_antenna
-
-   # Create demodulator
+   # Create demodulator (ground station)
    demod = Demodulator(conversion_loss=2 * u.dB, noise_temperature=290 * u.K)
-   demod.input = rx
+   demod.input = rx_antenna
 
    # Define modulation mode
    qpsk = Mode(
@@ -59,11 +54,11 @@ This example calculates a complete link budget for a satellite communication sys
    )
 
    # Calculate received signal power
-   rx_power = rx.output(frequency).power
+   rx_power = demod.get_processed_signal().power
    print(f"Received power: {rx_power.to(u.dBm)}")
 
    # Calculate system noise temperature
-   sys_noise_temp = rx.output_noise_temperature(frequency)
+   sys_noise_temp = demod.get_processed_signal().noise_temperature
    print(f"System noise temperature: {sys_noise_temp.to(u.K)}")
 
    # Calculate link margin

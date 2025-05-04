@@ -50,7 +50,6 @@ Available Components
 
 * **Antenna**: Models for different antenna types (dish, fixed gain)
 * **Demodulator**: Signal demodulation with configurable parameters
-* **Receiver**: Complete receiver chains with gain and noise properties
 * **Transmitter**: Signal sources with configurable power and modulation
 * **Stage**: Various RF stages including gain blocks, attenuators, and paths
 
@@ -60,7 +59,6 @@ Available Components
    antenna
    demodulator
    mode
-   receiver
    signal
    sink
    source

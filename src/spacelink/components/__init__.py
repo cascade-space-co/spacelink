@@ -42,7 +42,6 @@ __all__ = [
     "FixedGain",
     "Dish",
     # End-to-end Components
-    "Receiver",
     "Demodulator",
     "Transmitter",
     # Data Structures
