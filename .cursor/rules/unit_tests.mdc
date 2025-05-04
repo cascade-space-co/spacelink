@@ -1,7 +1,6 @@
 ---
-description: 
-globs: 
-alwaysApply: true
+description: Rules for writing unit tests
+globs: tests/**/*.py
 ---
 - Never compare floating point values for equality
 - Never compare two Quantity objects for equality

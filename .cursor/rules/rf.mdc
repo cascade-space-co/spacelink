@@ -1,7 +1,6 @@
 ---
 description: RF engineering principles and conventions
-globs: src/spacelink/**/*.py
-alwaysApply: true
+globs: src/spacelink/core/*.py
 ---
 # RF Engineering Principles
 

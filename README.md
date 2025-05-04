@@ -2,7 +2,7 @@
 
 A Python library for radio frequency calculations, including antenna modeling, RF conversions, and noise calculations.
 
-Created and maintained by the [Heliosphere Network Corporation](https://www.heliospherenetwork.com)
+Created and maintained by [Cascade Space](https://www.cascade.space)
 
 ## Features
 
@@ -18,7 +18,6 @@ Created and maintained by the [Heliosphere Network Corporation](https://www.heli
 ### Quick Install
 
 For users who want to use the package:
-
 ```bash
 pip install spacelink
 ```
