@@ -8,7 +8,6 @@ to baseband.
 
 from astropy.units import Quantity, UnitConversionError
 import astropy.units as u
-from abc import ABC, abstractmethod
 from typing import Optional
 
 from .sink import Sink

@@ -2,8 +2,8 @@
 Core antenna calculation functions.
 """
 
-import astropy.units as u # Added import
-import numpy as np # Added import
+import astropy.units as u  # Added import
+import numpy as np  # Added import
 
 # Assuming units.py is now in the same core directory
 from .units import (
@@ -11,7 +11,7 @@ from .units import (
     Dimensionless,
     Frequency,
     Length,
-    wavelength, # Need wavelength
+    wavelength,  # Need wavelength
     enforce_units,
     to_dB,
     to_linear,
@@ -28,7 +28,8 @@ def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
     mismatch between two antennas with different axial ratios:
 
     .. math::
-        PLF = \frac{1}{2} + \frac{1}{2} \frac{4 \gamma_1 \gamma_2 - (1-\gamma_1^2)(1-\gamma_2^2)}{(1+\gamma_1^2)(1+\gamma_2^2)}
+        PLF = \frac{1}{2} + \frac{1}{2} \frac{4 \gamma_1 \gamma_2 - (1-\gamma_1^2)(1-\gamma_2^2)}
+             {(1+\gamma_1^2)(1+\gamma_2^2)}
 
     where:
 
@@ -81,9 +82,7 @@ def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
 
 @enforce_units
 def dish_gain(
-    diameter: Length,
-    frequency: Frequency,
-    efficiency: Dimensionless
+    diameter: Length, frequency: Frequency, efficiency: Dimensionless
 ) -> Decibels:
     r"""
     -VALIDATED-
@@ -103,7 +102,8 @@ def dish_gain(
     In decibels:
 
     .. math::
-        G_{dB} = 10\log_{10}(\eta) + 20\log_{10}(D) + 20\log_{10}(f) + 20\log_{10}\left(\frac{\pi}{c}\right)
+        G_{dB} = 10\log_{10}(\eta) + 20\log_{10}(D) + 20\log_{10}(f)
+        + 20\log_{10}\left(\frac{\pi}{c}\right)
 
     Parameters
     ----------

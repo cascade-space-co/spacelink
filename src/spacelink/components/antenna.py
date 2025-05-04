@@ -7,19 +7,17 @@ like FixedGain and Dish antennas.
 
 from abc import ABC, abstractmethod
 import astropy.units as u
-import numpy as np
 
 # Use relative imports for core modules
 from ..core.units import (
-    wavelength,
     Decibels,
     Dimensionless,
     Temperature,
     Frequency,
     Length,
     enforce_units,
-    to_dB,
 )
+
 # Update import to use renamed core function
 from ..core.antenna import dish_gain
 
@@ -187,7 +185,5 @@ class Dish(Antenna):
         """
         # Directly return the dB value from the core function
         return dish_gain(
-            diameter=self.diameter,
-            frequency=frequency,
-            efficiency=self.efficiency
+            diameter=self.diameter, frequency=frequency, efficiency=self.efficiency
         )

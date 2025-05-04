@@ -7,6 +7,7 @@ signals without producing an output, such as power meters or spectrum analyzers.
 
 from abc import ABC, abstractmethod
 from typing import Optional, Union, TYPE_CHECKING
+
 # import astropy.units as u # Unused
 
 # from .signal import Signal # Unused
@@ -51,7 +52,8 @@ class Sink(ABC):
         self._input = value
         self._processed_signal = None  # Reset processing when input changes
 
-    # Removed Stage methods: gain, noise_figure, cascaded_gain, cascaded_noise_figure, output, output_noise_temperature
+    # Removed Stage methods: gain, noise_figure, cascaded_gain, cascaded_noise_figure,
+    # output, output_noise_temperature
 
     @abstractmethod
     def process_input(self, frequency: Frequency) -> None:

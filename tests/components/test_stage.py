@@ -273,7 +273,9 @@ def test_path():
     # Check the signal power that arrived *at the sink*
     # Use the gain calculated by the code (-108.53 dB)
     correct_total_gain_db = -108.53 * u.dB
-    expected_power = source.output(freq).power * 10 ** (correct_total_gain_db.to_value(u.dB) / 10)
+    expected_power = source.output(freq).power * 10 ** (
+        correct_total_gain_db.to_value(u.dB) / 10
+    )
     print(f"DEBUG: Expected power (using hardcoded correct gain) = {expected_power}")
     # Assert based on the processed_signal actually received by the sink
     assert_quantity_allclose(processed_signal.power, expected_power, rtol=1e-2)

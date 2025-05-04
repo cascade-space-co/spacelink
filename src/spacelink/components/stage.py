@@ -8,8 +8,10 @@ input property, allowing for flexible chaining of RF components.
 
 from typing import Optional, Union, TYPE_CHECKING
 import astropy.units as u
+
 # import numpy as np # Unused
 from abc import ABC, abstractmethod
+
 # from astropy import constants as const # Unused
 from ..core.path import free_space_path_loss
 from ..core.antenna import polarization_loss
@@ -24,6 +26,7 @@ from ..core.units import (
     to_linear,
     to_dB,
 )
+
 # from ..core.validation import non_negative # Unused
 from ..core.noise import (
     noise_figure_to_temperature,
@@ -62,7 +65,8 @@ class Stage(ABC):
     def input(self, value: Optional[Union["Stage", "Source"]]) -> None:
         """Set the input stage or source for this stage."""
         # Import locally only if needed, otherwise TYPE_CHECKING handles it
-        from .source import Source 
+        from .source import Source
+
         if value is not None and not isinstance(value, (Stage, Source)):
             raise ValueError("Input must be a Stage or Source instance")
         self._input = value
@@ -81,6 +85,7 @@ class Stage(ABC):
         """
         # Import locally only if needed, otherwise TYPE_CHECKING handles it
         from .source import Source
+
         if self.input is None:
             # If no input, cascaded gain is just this stage's gain
             return self.gain(frequency)
@@ -109,6 +114,7 @@ class Stage(ABC):
         """
         # Import locally only if needed, otherwise TYPE_CHECKING handles it
         from .source import Source
+
         if self.input is None:
             return self.noise_figure(frequency)
 
@@ -119,10 +125,10 @@ class Stage(ABC):
         # Get input stage's cascaded values
         input_gain_lin = to_linear(self.input.cascaded_gain(frequency))
         input_nf_lin = to_linear(self.input.cascaded_noise_figure(frequency))
-        
+
         # Convert this stage's noise figure to linear
         stage_nf_lin = to_linear(self.noise_figure(frequency))
-        
+
         # Calculate total noise factor using Friis' formula
         total_nf_lin = input_nf_lin + (stage_nf_lin - 1) / input_gain_lin
 

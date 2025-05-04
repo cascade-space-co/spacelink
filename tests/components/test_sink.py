@@ -2,12 +2,14 @@
 
 import pytest
 import astropy.units as u
+
 # from astropy.tests.helper import assert_quantity_allclose # Unused
 from typing import Optional
 
 from spacelink.components.sink import Sink
 from spacelink.components.signal import Signal
 from spacelink.components.source import Source
+
 # from spacelink.components.stage import Stage # Unused
 
 

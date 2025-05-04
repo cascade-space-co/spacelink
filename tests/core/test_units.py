@@ -3,7 +3,6 @@
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 import pytest
-import numpy as np
 
 from spacelink.core import units
 from spacelink.core.units import (
@@ -42,7 +41,9 @@ def test_frequency_calculation(wavelength, expected_frequency):
     """
     TODO: validate
     """
-    assert_quantity_allclose(frequency(wavelength).to(expected_frequency.unit), expected_frequency)
+    assert_quantity_allclose(
+        frequency(wavelength).to(expected_frequency.unit), expected_frequency
+    )
 
 
 @pytest.mark.parametrize(
@@ -56,6 +57,7 @@ def test_frequency_calculation(wavelength, expected_frequency):
 def test_invalid_inputs(func, invalid_input, error_type):
     with pytest.raises(error_type):
         func(invalid_input)
+
 
 # DO NOT MODIFY
 @pytest.mark.parametrize(
@@ -97,6 +99,7 @@ def test_enforce_units_decorator():
     with pytest.raises(u.UnitConversionError):
         frequency(1.0 * u.Hz)
 
+
 # DO NOT MODIFY
 @pytest.mark.parametrize(
     "input_value, factor, expected",
@@ -125,6 +128,7 @@ def test_to_linear(input_value, factor, expected):
     """Test conversion from decibels to linear."""
     assert_quantity_allclose(units.to_linear(input_value, factor=factor), expected)
 
+
 @pytest.mark.parametrize(
     "return_loss, vswr",
     [
@@ -138,14 +142,10 @@ def test_vswr_return_loss_conversions(return_loss, vswr):
     """
 
     vswr_result = units.return_loss_to_vswr(return_loss)
-    assert_quantity_allclose(
-        vswr_result, vswr, atol=0.01 * u.dimensionless
-    )
+    assert_quantity_allclose(vswr_result, vswr, atol=0.01 * u.dimensionless)
 
     return_loss_result = units.vswr_to_return_loss(vswr)
-    assert_quantity_allclose(
-        return_loss_result, return_loss, atol=0.01 * u.dB
-    )
+    assert_quantity_allclose(return_loss_result, return_loss, atol=0.01 * u.dB)
 
 
 def test_return_loss_to_vswr_invalid_input():

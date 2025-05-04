@@ -33,7 +33,7 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinx_autodoc_typehints",
     "sphinx.ext.mathjax",  # Add MathJax support for LaTeX math
-    "human_verified",      # Custom extension for human-verified equations
+    "human_verified",  # Custom extension for human-verified equations
 ]
 
 templates_path = ["_templates"]

@@ -49,7 +49,7 @@ from .modcod import (
     psk_bandwidth,
     required_c_n0,
     coding_gain_from_ebno,
-    delta_c_n0
+    delta_c_n0,
 )
 from .ranging import (
     pn_sequence_range_ambiguity,
@@ -58,7 +58,7 @@ from .ranging import (
     modulation_factor_sine,
     suppression_factor_bipolar,
     modulation_factor_bipolar,
-    power_fractions_sine
+    power_fractions_sine,
 )
 
 

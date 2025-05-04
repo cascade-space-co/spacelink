@@ -7,23 +7,25 @@ signal quality parameters.
 """
 
 import astropy.units as u
-from dataclasses import dataclass
 
-from spacelink.core.ranging import power_fractions_sine, modulation_factor_sine, suppression_factor_sine
+from spacelink.core.ranging import (
+    power_fractions_sine,
+)
 
 from spacelink.core.modcod import (
     ErrorRate,
     required_ebno_for_psk_ber,
     get_code_rate_from_scheme,
 )
+
 # Update imports
 from ..core.units import (
     Dimensionless,
     Decibels,
     to_dB,
     Frequency,
-    enforce_units,
 )
+
 
 class RangingMode:
     def __init__(self, ranging_mod_idx: u.dimensionless, data_mod_idx: u.dimensionless):
@@ -44,14 +46,18 @@ class RangingMode:
         carrier, ranging, data = self.power_fractions
         return to_dB(data)
 
+
 class DataMode:
     """
     Modulation scheme and channel coding for the data (sub) carrier.
     """
-    def __init__(self, 
-                 coding_scheme: str, 
-                 bits_per_symbol: Dimensionless, 
-                 error_rate: ErrorRate):
+
+    def __init__(
+        self,
+        coding_scheme: str,
+        bits_per_symbol: Dimensionless,
+        error_rate: ErrorRate = ErrorRate.E_NEG_5,
+    ):
         self.coding_scheme = coding_scheme
         self.error_rate = error_rate
         self.bits_per_symbol = bits_per_symbol
@@ -59,7 +65,7 @@ class DataMode:
     @property
     def required_ebno(self) -> Decibels:
         return required_ebno_for_psk_ber(self.error_rate, self.coding_scheme)
-    
+
     @property
     def code_rate(self) -> Dimensionless:
         return get_code_rate_from_scheme(self.coding_scheme)
@@ -73,11 +79,9 @@ class DataMode:
     def margin(self, cn0: Decibels, symbol_rate: Frequency) -> Decibels:
         ebn0 = self.ebno(cn0, symbol_rate)
         return ebn0 - self.required_ebno
-    
+
 
 # class Carrier:
 #     def __init__(self, ranging_mode: RangingMode, data_mode: DataMode):
 #         self.ranging_mode = ranging_mode
 #         self.data_mode = data_mode
-
-    

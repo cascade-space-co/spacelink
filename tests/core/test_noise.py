@@ -1,12 +1,15 @@
 """Tests for the noise module."""
 
 import pytest
-from spacelink.core import noise
+from typing import Tuple, List
 import astropy.units as u
-# from astropy.units import Quantity # Unused
 from astropy.tests.helper import assert_quantity_allclose
+from spacelink.core import noise
+from spacelink.core.units import Dimensionless, Decibels, Temperature
 
-# Updated imports
+# Define type aliases for clarity
+LinearStage = Tuple[Dimensionless, Dimensionless]
+DbStage = Tuple[Decibels, Decibels]
 # from spacelink.core import units # Unused
 
 
@@ -26,6 +29,7 @@ def test_thermal_noise_power():
     # Test with negative bandwidth
     with pytest.raises(ValueError):
         noise.noise_power(-1.0 * u.MHz)
+
 
 # DO NOT MODIFY - This test uses validated reference values
 @pytest.mark.parametrize(
@@ -57,19 +61,12 @@ def test_noise_dBW_conversion(temperature, bandwidth, expected_noise_dBW):
     ],
 )
 def test_temperature_to_noise_figure(temperature, expected_noise_figure):
-    """Test temperature to noise figure conversion.""" # Updated docstring
+    """Test temperature to noise figure conversion."""  # Updated docstring
     nf = noise.temperature_to_noise_figure(temperature)
     assert_quantity_allclose(nf, expected_noise_figure, atol=0.01 * u.dB)
 
 
 # TODO: test cascaded noise values
-
-# Define type aliases for clarity
-from typing import Tuple, List
-from spacelink.core.units import Dimensionless, Decibels, Temperature
-
-LinearStage = Tuple[Dimensionless, Dimensionless]
-DbStage = Tuple[Decibels, Decibels]
 TempStage = Tuple[Temperature, Dimensionless]
 
 
@@ -88,13 +85,13 @@ TempStage = Tuple[Temperature, Dimensionless]
         ),
         # UNVALIDATED TEST DATA - Three stages
         (
-             [
+            [
                 (2.0 * u.dimensionless, 10.0 * u.dimensionless),
                 (3.0 * u.dimensionless, 5.0 * u.dimensionless),
                 (4.0 * u.dimensionless, 2.0 * u.dimensionless),
             ],
-             2.26 * u.dimensionless,
-        ), 
+            2.26 * u.dimensionless,
+        ),
         # Add more test cases as needed, ensuring data is validated
     ],
 )
@@ -121,17 +118,14 @@ def test_cascaded_noise_factor_empty():
         # NF1=3dB (F=2), G1=10dB (G=10)
         # NF2=4.77dB (F=3), G2=7dB (G=5)
         # F_tot = 2 + (3-1)/10 = 2.2 -> NF_tot = 10*log10(2.2) = 3.424 dB
-        (
-            [(3.0 * u.dB, 10.0 * u.dB), (4.77 * u.dB, 7.0 * u.dB)],
-            3.424 * u.dB
-        ),
+        ([(3.0 * u.dB, 10.0 * u.dB), (4.77 * u.dB, 7.0 * u.dB)], 3.424 * u.dB),
         # UNVALIDATED TEST DATA - Three stages
         # NF1=3dB (F=2), G1=10dB (G=10)
         # NF2=4.77dB (F=3), G2=7dB (G=5)
         # NF3=6.02dB (F=4), G3=3dB (G=2)
         # F_tot = 2.2 + (4-1)/(10*5) = 2.2 + 3/50 = 2.26 -> NF_tot = 10*log10(2.26) = 3.541 dB
         (
-             [
+            [
                 (3.0 * u.dB, 10.0 * u.dB),
                 (4.77 * u.dB, 7.0 * u.dB),
                 (6.02 * u.dB, 3.0 * u.dB),

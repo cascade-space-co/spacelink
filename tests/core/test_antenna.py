@@ -12,6 +12,8 @@ from spacelink.core.units import Dimensionless, Length, Frequency, Decibels
 This site was used to generate the following test cases:
 https://phillipmfeldman.org/Engineering/pol_mismatch_loss.html
 """
+
+
 @pytest.mark.parametrize(
     "ar_tx_db, ar_rx_db, expected_loss_db, tol",
     [
@@ -42,6 +44,7 @@ def test_polarization_loss_calculation(ar_tx_db, ar_rx_db, expected_loss_db, tol
     assert_quantity_allclose(
         polarization_loss(ar_tx_db, ar_rx_db), expected_loss_db, atol=tol
     )
+
 
 # Unvalidated
 @pytest.mark.parametrize(

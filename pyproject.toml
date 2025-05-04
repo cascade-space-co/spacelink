@@ -17,7 +17,8 @@ dependencies = [
     "scipy>=1.10.0,<2.0.0",
     "pandas>=2.0.0",
     "autopep8>=2.3.2",
-    "astropy (>=7.0.1,<8.0.0)"
+    "astropy (>=7.0.1,<8.0.0)",
+    "black[jupyter] (>=25.1.0,<26.0.0)"
 ]
 
 [project.optional-dependencies]
@@ -30,7 +31,7 @@ test = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
     "pyyaml>=6.0.2",
-    "black>=24.2.0",
+    "black>=25.1.0",
     "flake8>=7.0.0"
 ]
 demo = [
@@ -49,7 +50,7 @@ sphinx-autodoc-typehints = "^1.25.2"
 pytest = ">=7.4.0"
 pytest-cov = ">=4.1.0"
 pyyaml = "^6.0.2"
-black = "^24.2.0"
+black = "^25.1.0"
 flake8 = "^7.0.0"
 
 [tool.poetry.group.demo.dependencies]

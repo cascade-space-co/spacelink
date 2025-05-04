@@ -8,7 +8,9 @@ from astropy.tests.helper import assert_quantity_allclose
 
 # Updated imports
 from spacelink.core.path import free_space_path_loss, spreading_loss, aperture_loss
+
 # from spacelink.core import units # Unused
+
 
 # DO NOT MODIFY THIS TEST CASE
 @pytest.mark.parametrize(
@@ -40,16 +42,14 @@ def test_free_space_path_loss(distance, frequency, expected_loss):
     "distance, expected_loss",
     [
         (36000 * u.km, 162.12 * u.dB),  # GEO satellite distance
-        (2000 * u.km, 137.01 * u.dB),   # LEO satellite distance
+        (2000 * u.km, 137.01 * u.dB),  # LEO satellite distance
     ],
 )
 def test_spreading_loss(distance, expected_loss):
     """
     TODO: validate
     """
-    assert_quantity_allclose(
-        spreading_loss(distance), expected_loss, atol=0.01 * u.dB
-    )
+    assert_quantity_allclose(spreading_loss(distance), expected_loss, atol=0.01 * u.dB)
 
 
 @pytest.mark.parametrize(

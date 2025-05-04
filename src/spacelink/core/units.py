@@ -58,24 +58,32 @@ def enforce_units(func):
             hint = hints.get(name)
             # Check if hint is Annotated
             if hint and getattr(hint, "__origin__", None) is Annotated:
-                _, unit = get_args(hint) # Use _ for quantity_type if not needed
+                _, unit = get_args(hint)  # Use _ for quantity_type if not needed
 
                 if isinstance(value, Quantity):
                     # Convert to expected unit
                     try:
                         if unit.is_equivalent(u.K):
-                            converted_value = value.to(unit, equivalencies=u.temperature())
+                            converted_value = value.to(
+                                unit, equivalencies=u.temperature()
+                            )
                         else:
                             converted_value = value.to(unit)
                     except u.UnitConversionError as e:
-                         raise u.UnitConversionError(f"Parameter '{name}' requires unit compatible with {unit}, but got {value.unit}. Original error: {e}") from e
+                        raise u.UnitConversionError(
+                            f"Parameter '{name}' requires unit compatible with {unit}, "
+                            f"but got {value.unit}. Original error: {e}"
+                        ) from e
 
                     # Unit conversion successful
                     bound.arguments[name] = converted_value
 
                 else:
                     # Handle non-Quantity inputs
-                    raise TypeError(f"Parameter '{name}' must be provided as an astropy Quantity, not a raw number.")
+                    raise TypeError(
+                        f"Parameter '{name}' must be provided as an astropy Quantity, "
+                        f"not a raw number."
+                    )
 
         try:
             return func(*bound.args, **bound.kwargs)
@@ -203,12 +211,14 @@ def to_dB(x: Quantity, *, factor=10) -> Decibels:
     """
     return factor * np.log10(x.value) * u.dB
 
+
 @enforce_units
 def to_dBHz(x: Frequency) -> DecibelHertz:
     r"""
     Convert a decibel quantity to dBHz
     """
     return 10 * np.log10(x.to_value(u.Hz)) * u.dBHz
+
 
 # DO NOT MODIFY
 @enforce_units

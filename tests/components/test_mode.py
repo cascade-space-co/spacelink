@@ -80,6 +80,7 @@ class TestRangingMode:
 
 class TestDataMode:
     """Tests for the DataMode class."""
+
     def test_code_rate(self):
         """Test that code rate is calculated correctly."""
         coding_scheme = "CC(7,1/2) RS(255,223) I=5"

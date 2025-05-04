@@ -2,11 +2,11 @@
 
 import pytest
 import astropy.units as u
-import astropy.constants as const
 from astropy.tests.helper import assert_quantity_allclose
 
 from src.spacelink.core.ranging import pn_sequence_range_ambiguity
 from src.spacelink.core.units import Frequency, Distance
+
 
 # DO NOT MODIFY
 @pytest.mark.parametrize(
@@ -14,11 +14,10 @@ from src.spacelink.core.units import Frequency, Distance
     [
         # CCSDS 414.0-G-2, pg 2-2
         (1.0 * u.MHz, 75710 * u.km),
-    ]
+    ],
 )
 def test_pn_sequence_range_ambiguity_valid(
-    chip_rate: Frequency,
-    expected_ambiguity: Distance
+    chip_rate: Frequency, expected_ambiguity: Distance
 ):
     """Test pn_sequence_range_ambiguity with valid inputs."""
     ambiguity = pn_sequence_range_ambiguity(chip_rate)

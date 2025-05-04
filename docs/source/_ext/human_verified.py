@@ -3,7 +3,7 @@ Human-verified equation directive for Sphinx.
 """
 
 from docutils import nodes
-from docutils.parsers.rst import Directive, directives
+from docutils.parsers.rst import Directive
 
 
 class HumanVerifiedNode(nodes.General, nodes.Element):
@@ -12,11 +12,13 @@ class HumanVerifiedNode(nodes.General, nodes.Element):
 
 def visit_human_verified_node(self, node):
     self.body.append('<div class="human-verified">')
-    self.body.append('<div class="human-verified-title">✓ Human-Verified Equation</div>')
+    self.body.append(
+        '<div class="human-verified-title">✓ Human-Verified Equation</div>'
+    )
 
 
 def depart_human_verified_node(self, node):
-    self.body.append('</div>')
+    self.body.append("</div>")
 
 
 class HumanVerifiedDirective(Directive):
@@ -37,10 +39,10 @@ def setup(app):
         HumanVerifiedNode,
         html=(visit_human_verified_node, depart_human_verified_node),
     )
-    app.add_directive('human-verified', HumanVerifiedDirective)
+    app.add_directive("human-verified", HumanVerifiedDirective)
 
     return {
-        'version': '0.1',
-        'parallel_read_safe': True,
-        'parallel_write_safe': True,
+        "version": "0.1",
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
     }

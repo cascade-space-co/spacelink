@@ -5,9 +5,6 @@ Includes functions for noise power, temperature, figure, and factor conversions.
 """
 
 import astropy.units as u
-# import astropy.constants as const # Unused
-# import numpy as np # Unused
-from astropy.units import Quantity
 from typing import List, Tuple
 
 from .units import (
@@ -20,6 +17,7 @@ from .units import (
     to_linear,
     to_dB,
 )
+
 # from ..core.validation import check_positive # Removed import
 
 
@@ -64,7 +62,7 @@ def noise_power(bandwidth: Frequency, temperature: Temperature = T0) -> Power:
     """
     # Check for negative bandwidth remains
     if bandwidth < 0 * u.Hz:
-       raise ValueError("Bandwidth cannot be negative")
+        raise ValueError("Bandwidth cannot be negative")
 
     return BOLTZMANN * temperature * bandwidth.to(u.Hz)
 
@@ -200,7 +198,7 @@ def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
 
 @enforce_units
 def cascaded_noise_factor(
-    stages: List[Tuple[Dimensionless, Dimensionless]]
+    stages: List[Tuple[Dimensionless, Dimensionless]],
 ) -> Dimensionless:
     r"""
     Calculate total cascaded noise factor (linear) using Friis formula.
@@ -208,7 +206,8 @@ def cascaded_noise_factor(
     The cascaded noise factor is calculated using:
 
     .. math::
-        F_{total} = F_1 + \frac{F_2 - 1}{G_1} + \frac{F_3 - 1}{G_1 G_2} + \ldots + \frac{F_n - 1}{G_1 G_2 \ldots G_{n-1}}
+        F_{total} = F_1 + \frac{F_2 - 1}{G_1} + \frac{F_3 - 1}{G_1 G_2}
+        + \ldots + \frac{F_n - 1}{G_1 G_2 \ldots G_{n-1}}
 
     where:
 
@@ -245,9 +244,7 @@ def cascaded_noise_factor(
 
 
 @enforce_units
-def cascaded_noise_figure(
-    stages: List[Tuple[Decibels, Decibels]]
-) -> Decibels:
+def cascaded_noise_figure(stages: List[Tuple[Decibels, Decibels]]) -> Decibels:
     r"""
     Calculate total cascaded noise figure in dB.
 
@@ -278,7 +275,7 @@ def cascaded_noise_figure(
 
 @enforce_units
 def cascaded_noise_temperature(
-    stages: List[Tuple[Temperature, Dimensionless]]
+    stages: List[Tuple[Temperature, Dimensionless]],
 ) -> Temperature:
     r"""
     Calculate total cascaded noise temperature in Kelvin.

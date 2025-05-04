@@ -89,7 +89,8 @@ def test_demodulator_invalid_temperature_type():
 
 
 def test_demodulator_invalid_loss_unit():
-    """Test that creating a Demodulator with wrong conversion loss unit raises UnitConversionError."""
+    """Test that creating a Demodulator with invalid conversion loss unit
+    raises UnitConversionError."""
     with pytest.raises(u.UnitConversionError):
         Demodulator(conversion_loss=6 * u.W, noise_temperature=290 * u.K)
 
@@ -105,9 +106,7 @@ def test_demodulator_negative_values():
     with pytest.raises(ValueError, match="Conversion loss must be non-negative"):
         Demodulator(conversion_loss=-6 * u.dB, noise_temperature=290 * u.K)
 
-    with pytest.raises(
-        ValueError, match="Noise temperature must be non-negative"
-    ):
+    with pytest.raises(ValueError, match="Noise temperature must be non-negative"):
         Demodulator(conversion_loss=6 * u.dB, noise_temperature=-290 * u.K)
 
 
