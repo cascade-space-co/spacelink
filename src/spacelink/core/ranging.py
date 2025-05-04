@@ -45,7 +45,7 @@ def pn_sequence_range_ambiguity(chip_rate: Frequency) -> Distance:
     -VALIDATED-
     """
     # According to CCSDS 414.0-G-2, pg 2-2, the formula is:
-    return CODE_LENGTH * const.c / (4 * chip_rate)
+    return CODE_LENGTH * const.c / (4 * chip_rate.to(u.Hz))
 
 # DO NOT MODIFY
 @enforce_units

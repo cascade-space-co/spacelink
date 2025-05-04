@@ -4,9 +4,7 @@ import pytest
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 
-# Updated import
 from spacelink.core.antenna import polarization_loss, dish_gain
-# Import necessary units for the new test
 from spacelink.core.units import Dimensionless, Length, Frequency, Decibels
 
 """
