@@ -42,15 +42,7 @@ from .antenna import (
     polarization_loss,
     dish_gain,
 )
-from .modcod import (
-    ErrorRate,
-    required_ebno_for_psk_ber,
-    get_code_rate_from_scheme,
-    psk_bandwidth,
-    required_c_n0,
-    coding_gain_from_ebno,
-    delta_c_n0,
-)
+from . import modcod
 from .ranging import (
     pn_sequence_range_ambiguity,
     chip_snr,

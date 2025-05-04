@@ -21,7 +21,6 @@ from .antenna import (
     FixedGain,
     Dish,
 )
-from .receiver import Receiver
 from .demodulator import Demodulator
 from .transmitter import Transmitter
 from .mode import RangingMode, DataMode
