@@ -110,7 +110,7 @@ class FixedGain(Antenna):
                          >40 dB represents linear polarization
         """
         super().__init__(axial_ratio, noise_temperature, return_loss)
-        self.gain_ = gain
+        self._gain = gain
 
     def gain(self, frequency: Frequency) -> Decibels:
         """
@@ -122,7 +122,7 @@ class FixedGain(Antenna):
         Returns:
             Fixed antenna gain in dB
         """
-        return self.gain_
+        return self._gain
 
 
 class Dish(Antenna):

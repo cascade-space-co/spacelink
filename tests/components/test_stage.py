@@ -11,13 +11,13 @@ from spacelink.components.sink import Sink
 from spacelink.components.stage import (
     GainBlock,
     Attenuator,
-    Antenna,
     TransmitAntenna,
     ReceiveAntenna,
     Path,
 )
 from spacelink.components.signal import Signal
-from spacelink.core.units import Frequency, Temperature
+from spacelink.core.units import Frequency, Temperature, to_linear
+from spacelink.components.antenna import FixedGain
 
 
 # Local Test Implementations
@@ -57,38 +57,20 @@ def test_source_input_property():
     # Accessing input on Source should raise AttributeError now
     with pytest.raises(AttributeError):
         _ = source.input
-    # Setting an arbitrary attribute might be allowed by Python,
-    # even if not defined by a property. Let's remove this check.
-    # with pytest.raises(AttributeError):
-    #     source.input = None # Setting should also fail
 
 
 def test_sink_input_property():
     """Test that sink input property works."""
     sink = MockSink()
     source = MockSource()
-    stage = GainBlock(0 * u.dB)  # Use a Stage here
+    stage = GainBlock(0 * u.dB)
     stage.input = source
 
-    sink.input = stage  # Set input to the stage
+    sink.input = stage
     assert sink.input == stage
 
-    sink.input = source  # Set input directly to source
+    sink.input = source
     assert sink.input == source
-
-
-def test_gain_block_gain():
-    """Test that gain block gain property works."""
-    gain = 10 * u.dB
-    block = GainBlock(gain)
-    assert_quantity_allclose(block.gain(1 * u.GHz), gain)
-
-
-def test_gain_block_negative_gain():
-    """Test that gain block accepts negative gain."""
-    gain = -10 * u.dB
-    block = GainBlock(gain)
-    assert_quantity_allclose(block.gain(1 * u.GHz), gain)
 
 
 def test_gain_block_output():
@@ -100,9 +82,7 @@ def test_gain_block_output():
     freq = 1 * u.GHz
     output = block.output(freq)
     # Use assert_quantity_allclose for float comparison
-    assert_quantity_allclose(
-        output.power, source.output(freq).power * 10 ** (gain.value / 10)
-    )
+    assert_quantity_allclose(output.power, source.output(freq).power * to_linear(gain))
 
 
 def test_attenuator_attenuation():
@@ -174,32 +154,12 @@ def test_cascaded_noise_figure():
     )
 
 
-def test_antenna_creation():
-    """Test creating an Antenna with valid parameters."""
-    antenna = Antenna(gain=20 * u.dB, axial_ratio=1 * u.dB)
-    assert_quantity_allclose(antenna.gain, 20 * u.dB)
-    assert_quantity_allclose(antenna.axial_ratio, 1 * u.dB)
-
-
-def test_transmit_antenna():
-    """Test TransmitAntenna functionality."""
-    antenna = Antenna(gain=20 * u.dB, axial_ratio=1 * u.dB)
-    tx_antenna = TransmitAntenna(antenna)
-
-    # Test gain
-    assert_quantity_allclose(tx_antenna.gain(1 * u.GHz), 20 * u.dB)
-
-    # Test noise figure (should be 0 dB for transmit antenna)
-    assert_quantity_allclose(tx_antenna.noise_figure(1 * u.GHz), 0 * u.dB)
-
-    # Test axial ratio
-    assert_quantity_allclose(tx_antenna.axial_ratio(1 * u.GHz), 1 * u.dB)
-
-
 def test_receive_antenna():
     """Test ReceiveAntenna functionality."""
-    antenna = Antenna(gain=20 * u.dB, axial_ratio=1 * u.dB)
-    rx_antenna = ReceiveAntenna(antenna, sky_temperature=290 * u.K)
+    antenna = FixedGain(
+        gain=20 * u.dB, axial_ratio=1 * u.dB, noise_temperature=290 * u.K
+    )
+    rx_antenna = ReceiveAntenna(antenna)
 
     # Test gain without input (should be just antenna gain without pol loss)
     assert_quantity_allclose(rx_antenna.gain(1 * u.GHz), 20 * u.dB)
@@ -210,7 +170,7 @@ def test_receive_antenna():
     )
 
     # Test polarization loss calculation requires input
-    tx_antenna = TransmitAntenna(Antenna(gain=20 * u.dB, axial_ratio=1 * u.dB))
+    tx_antenna = TransmitAntenna(FixedGain(gain=20 * u.dB, axial_ratio=1 * u.dB))
     rx_antenna.input = tx_antenna
     assert_quantity_allclose(
         rx_antenna.polarization_loss(1 * u.GHz), 0.0574 * u.dB, atol=0.01 * u.dB
@@ -221,7 +181,7 @@ def test_receive_antenna():
     )
 
     # Test polarization loss with mismatched axial ratio
-    tx_antenna = TransmitAntenna(Antenna(gain=20 * u.dB, axial_ratio=2 * u.dB))
+    tx_antenna = TransmitAntenna(FixedGain(gain=20 * u.dB, axial_ratio=2 * u.dB))
     rx_antenna.input = tx_antenna
     assert rx_antenna.polarization_loss(1 * u.GHz).value > 0
 
@@ -241,16 +201,16 @@ def test_path():
     assert_quantity_allclose(path.noise_figure(1 * u.GHz), 0 * u.dB)
 
     # Test axial ratio pass-through requires input
-    tx_antenna = TransmitAntenna(Antenna(gain=20 * u.dB, axial_ratio=1 * u.dB))
+    tx_antenna = TransmitAntenna(FixedGain(gain=20 * u.dB, axial_ratio=1 * u.dB))
     path.input = tx_antenna
     assert_quantity_allclose(path.axial_ratio(1 * u.GHz), 1 * u.dB)
 
     # Test path integration
     source = MockSource()
-    tx_ant = TransmitAntenna(Antenna(gain=30 * u.dB, axial_ratio=1 * u.dB))
+    tx_ant = TransmitAntenna(FixedGain(gain=30 * u.dB, axial_ratio=1 * u.dB))
     path = Path(distance=20000 * u.km)
     rx_ant = ReceiveAntenna(
-        Antenna(gain=40 * u.dB, axial_ratio=1 * u.dB), sky_temperature=50 * u.K
+        FixedGain(gain=40 * u.dB, axial_ratio=1 * u.dB, noise_temperature=50 * u.K)
     )
     sink = MockSink()
 

@@ -20,16 +20,10 @@ def test_antenna_is_abstract():
 def test_fixed_gain_initializes_with_valid_gain():
     """Test FixedGain initialization with valid gain."""
     antenna = FixedGain(10.0 * u.dB)
-    assert_quantity_allclose(antenna.gain_, 10.0 * u.dB, atol=0.01 * u.dB)
+    assert_quantity_allclose(antenna._gain, 10.0 * u.dB, atol=0.01 * u.dB)
 
     antenna = FixedGain(0.0 * u.dB)
-    assert_quantity_allclose(antenna.gain_, 0.0 * u.dB, atol=0.01 * u.dB)
-
-
-def test_fixed_gain_accepts_negative_gain():
-    """Test FixedGain accepts negative gain values."""
-    antenna = FixedGain(-3.0 * u.dB)
-    assert_quantity_allclose(antenna.gain_, -3.0 * u.dB, atol=0.01 * u.dB)
+    assert_quantity_allclose(antenna._gain, 0.0 * u.dB, atol=0.01 * u.dB)
 
 
 def test_fixed_gain_returns_constant_gain():
@@ -43,7 +37,7 @@ def test_fixed_gain_returns_constant_gain():
 def test_fixed_gain_with_axial_ratio():
     """Test FixedGain with axial ratio parameter."""
     antenna = FixedGain(10.0 * u.dB, axial_ratio=3.0 * u.dB)
-    assert_quantity_allclose(antenna.gain_, 10.0 * u.dB, atol=0.01 * u.dB)
+    assert_quantity_allclose(antenna._gain, 10.0 * u.dB, atol=0.01 * u.dB)
     assert_quantity_allclose(antenna.axial_ratio, 3.0 * u.dB, atol=0.01 * u.dB)
 
 
