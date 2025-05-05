@@ -1,14 +1,13 @@
 """
 Units and constants for radio communications calculations.
 
-This module defines a Pint UnitRegistry and provides commonly used units and conversion
+This module defines an Astropy UnitRegistry and provides commonly used units and conversion
 functions for radio frequency applications, including:
 
 - Wavelength and frequency conversions
 - Decibel and linear scale conversions
 - VSWR and return loss calculations
 - Mismatch loss computation
-- YAML serialization support for Pint quantities
 """
 
 from functools import wraps
