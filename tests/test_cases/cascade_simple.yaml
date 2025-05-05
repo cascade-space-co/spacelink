@@ -1,4 +1,0 @@
-stages:
-  - label: simple_amp
-    gain: !Quantity { value: 10.0, units: dB }
-    noise_figure: !Quantity { value: 3.0, units: dB }

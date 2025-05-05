@@ -1,9 +1,13 @@
 """
-SpaceLink - A Python library for radio frequency calculations.
+Spacelink library top-level init.
 
-This package provides utilities for radio frequency calculations, including:
-- Antenna gain and beamwidth calculations
-- RF conversions between dB and linear scales
-- Noise calculations and conversions
-- Communication mode definitions for coding and modulation
+Exposes core functions and component classes.
 """
+
+# Imports will be handled by submodules (core, components)
+
+__version__ = "0.1.0"  # Example version
+
+__all__ = [
+    "__version__",
+]
