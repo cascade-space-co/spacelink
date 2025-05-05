@@ -42,7 +42,15 @@ from .antenna import (
     polarization_loss,
     dish_gain,
 )
-from . import modcod
+from .modcod import (
+    coding_gain_from_ebno,
+    required_ebno_for_psk_ber,
+    get_code_rate_from_scheme,
+    psk_bandwidth,
+    required_c_n0,
+    delta_c_n0,
+    ErrorRate,
+)
 from .ranging import (
     pn_sequence_range_ambiguity,
     chip_snr,
@@ -88,13 +96,12 @@ __all__ = [
     "dish_gain",
     # Channel Coding
     "coding_gain_from_ebno",
-    "ErrorRate",
     "required_ebno_for_psk_ber",
     "get_code_rate_from_scheme",
     "psk_bandwidth",
     "required_c_n0",
-    "coding_gain_from_ebno",
     "delta_c_n0",
+    "ErrorRate",
     "return_loss_to_vswr",
     "vswr_to_return_loss",
     "mismatch_loss",

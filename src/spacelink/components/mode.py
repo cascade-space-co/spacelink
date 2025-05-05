@@ -71,7 +71,7 @@ class DataMode:
         return get_code_rate_from_scheme(self.coding_scheme)
 
     def bit_rate(self, symbol_rate: Frequency) -> Frequency:
-        return symbol_rate * self.bits_per_symbol * self.code_rate
+        return symbol_rate.to(u.Hz) * self.bits_per_symbol * self.code_rate
 
     def ebno(self, cn0: Decibels, symbol_rate: Frequency) -> Decibels:
         return cn0 - to_dB(self.bit_rate(symbol_rate))

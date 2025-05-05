@@ -411,6 +411,11 @@ class ReceiveAntenna(Stage):
         # Calculate polarization loss based on both axial ratios
         return polarization_loss(prev_axial_ratio, self.antenna.axial_ratio)
 
+    def output_noise_temperature(
+        self, input_noise_temp: Temperature, frequency: Frequency
+    ) -> Temperature:
+        return input_noise_temp + self.noise_temperature
+
 
 class Path(Stage):
     """Stage representing a free space path."""

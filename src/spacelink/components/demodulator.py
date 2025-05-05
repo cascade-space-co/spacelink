@@ -1,145 +1,127 @@
 """
-Demodulator module for RF demodulators.
+Demodulator component model.
 
-This module provides the Demodulator class that represents a complete RF demodulator
-chain, including mixers, filters, and other components that convert RF signals
-to baseband.
+This stage represents the end of a receive chain, responsible for calculating
+link performance metrics like C/N0 and margins based on the received signal
+and the expected communication mode.
 """
 
-from astropy.units import Quantity, UnitConversionError
 import astropy.units as u
 from typing import Optional
 
-from .sink import Sink
+from .stage import Stage
 from .signal import Signal
+from .mode import DataMode, RangingMode
 from ..core.units import (
     Frequency,
-    Temperature,
     Decibels,
-    to_linear,
-)
-from ..core.noise import temperature_to_noise_figure
+    enforce_units,
+    to_dB,
+)  # Add necessary units
+from ..core.noise import noise_power
 
 
-class Demodulator(Sink):
+class Demodulator(Stage):
     """
-    A class representing an RF demodulator.
+    Represents a demodulator at the end of a receive chain.
 
-    A demodulator is a sink that processes input signals to extract baseband
-    information, typically including components like mixers, filters, and
-    other RF stages.
-
-    Attributes:
-        conversion_loss: Conversion loss in dB
-        noise_temperature: Noise temperature in Kelvin
+    Calculates key performance metrics like C/N0, Eb/N0, and link margins
+    for data and/or ranging signals, accounting for power sharing when both
+    modes are present.
     """
 
-    def __init__(self, conversion_loss: Decibels, noise_temperature: Temperature):
+    @enforce_units
+    def __init__(
+        self,
+        carrier_frequency: Frequency,
+        symbol_rate: Frequency,
+        data_mode: Optional[DataMode] = None,
+        ranging_mode: Optional[RangingMode] = None,
+        implementation_loss: Decibels = 0 * u.dB,
+    ):
         """
-        Initialize a Demodulator.
+        Initialize the Demodulator.
 
         Args:
-            conversion_loss: Conversion loss in dB
-            noise_temperature: Noise temperature in Kelvin
-
-        Raises:
-            TypeError: If conversion_loss is not a Quantity with dB units
-            TypeError: If noise_temperature is not a Quantity with temperature units
-            ValueError: If conversion_loss is negative
-            ValueError: If noise_temperature is negative
+            symbol_rate: The symbol rate of the signal in Hz or equivalent.
+                         (Primarily applies to the data mode).
+            data_mode: Optional DataMode object defining data modulation, coding, etc.
+            ranging_mode: Optional RangingMode object defining ranging modulation indices.
+            implementation_loss: Implementation loss of the demodulator in dB.
         """
         super().__init__()
-
-        # Validate conversion loss
-        if not isinstance(conversion_loss, Quantity):
-            raise TypeError("Conversion loss must be a Quantity with dB units")
-        if not conversion_loss.unit.is_equivalent(u.dB):
-            raise UnitConversionError(f"Cannot convert {conversion_loss.unit} to dB")
-        if conversion_loss < 0 * u.dB:
-            raise ValueError("Conversion loss must be non-negative")
-        self._conversion_loss = conversion_loss
-
-        # Validate noise temperature
-        if not isinstance(noise_temperature, Quantity):
-            raise TypeError(
-                "Noise temperature must be a Quantity with temperature units"
+        if data_mode is None and ranging_mode is None:
+            raise ValueError(
+                "At least one of data_mode or ranging_mode must be provided."
             )
-        if not noise_temperature.unit.is_equivalent(u.K):
-            raise UnitConversionError(f"Cannot convert {noise_temperature.unit} to K")
-        if noise_temperature < 0 * u.K:
-            raise ValueError("Noise temperature must be non-negative")
-        self._noise_temperature = noise_temperature
+        if data_mode is not None and not isinstance(data_mode, DataMode):
+            raise TypeError("data_mode must be an instance of DataMode or None")
+        if ranging_mode is not None and not isinstance(ranging_mode, RangingMode):
+            raise TypeError("ranging_mode must be an instance of RangingMode or None")
+
+        self.data_mode = data_mode
+        self.ranging_mode = ranging_mode
+        self.symbol_rate = symbol_rate
+        self.implementation_loss = implementation_loss
+        self.carrier_frequency = carrier_frequency
+
+    @enforce_units
+    def cn0(self) -> Decibels:
+        input_signal = self.input.output(self.carrier_frequency)
+        # Calculate noise power in 1 Hz bandwidth to get N0
+        n0 = noise_power(bandwidth=1 * u.Hz, temperature=input_signal.noise_temperature)
+        return to_dB(input_signal.power / n0)
 
     @property
-    def conversion_loss(self) -> Decibels:
-        """Get the conversion loss in dB."""
-        return self._conversion_loss
-
-    @conversion_loss.setter
-    def conversion_loss(self, value: Decibels) -> None:
-        """Set the conversion loss in dB."""
-        if not isinstance(value, Quantity):
-            raise TypeError("Conversion loss must be a Quantity with dB units")
-        if not value.unit.is_equivalent(u.dB):
-            raise UnitConversionError(f"Cannot convert {value.unit} to dB")
-        if value < 0 * u.dB:
-            raise ValueError("Conversion loss must be non-negative")
-        self._conversion_loss = value
+    def data_cn0(self) -> Decibels:
+        """
+        Calculates the C/N0 for the data mode in dB-Hz.
+        """
+        if self.ranging_mode is not None:
+            return self.cn0() + self.ranging_mode.data_power_fraction
+        else:
+            return self.cn0()
 
     @property
-    def noise_temperature(self) -> Temperature:
-        """Get the noise temperature in Kelvin."""
-        return self._noise_temperature
-
-    @noise_temperature.setter
-    def noise_temperature(self, value: Temperature) -> None:
-        """Set the noise temperature in Kelvin."""
-        if not isinstance(value, Quantity):
-            raise TypeError(
-                "Noise temperature must be a Quantity with temperature units"
-            )
-        if not value.unit.is_equivalent(u.K):
-            raise UnitConversionError(f"Cannot convert {value.unit} to K")
-        if value < 0 * u.K:
-            raise ValueError("Noise temperature must be non-negative")
-        self._noise_temperature = value
-
-    def process_input(self, frequency: Frequency) -> None:
+    def ranging_prn0(self) -> Decibels:
         """
-        Process the input signal at the given frequency.
-
-        Args:
-            frequency: The frequency at which to process the input (may not be used
-                       directly in this simple model but kept for interface compliance)
-
-        Raises:
-            ValueError: If input is not set
+        Calculates the PRN0 for the ranging mode in dB-Hz.
         """
-        if self.input is None:
-            raise ValueError("Demodulator input must be set before processing")
+        return self.cn0() + self.ranging_mode.ranging_power_fraction
 
-        # Get input signal
-        input_signal = self.input.output(frequency)
+    @property
+    def ebno(self) -> Decibels:
+        """
+        Calculates the Energy per bit to Noise Density ratio (Eb/N0) in dB.
 
-        # Apply conversion loss to power (Loss reduces power)
-        # Use to_linear with factor=10 for power ratio
-        loss_linear = to_linear(self.conversion_loss, factor=10)
-        output_power = input_signal.power / loss_linear
+        If ranging mode is present, C/N0 used is adjusted by the data power fraction.
+        Eb/N0 = (C_data / N0) / BitRate
 
-        # Add demodulator noise temperature to input noise temperature
-        # Note: In a real demodulator, noise temperature might be affected by conversion loss,
-        # but this simple model just adds them.
-        output_noise_temp = input_signal.noise_temperature + self.noise_temperature
-
-        # Store the processed signal internally (as required by Sink pattern)
-        self._processed_signal = Signal(
-            power=output_power, noise_temperature=output_noise_temp
+        Returns:
+            Eb/N0 in dB. Returns -inf dB if not a DataMode.
+        """
+        return (
+            self.data_mode.ebno(self.data_cn0, self.symbol_rate)
+            - self.implementation_loss
         )
 
-    def get_processed_signal(self) -> Optional[Signal]:
-        return self._processed_signal
+    @property
+    def data_margin(self) -> Decibels:
+        """
+        Calculates the data link margin in dB by delegating to the DataMode object.
 
-    def noise_figure(self, frequency: Frequency) -> Decibels:
-        """Calculate noise figure from noise temperature."""
-        # This might not be appropriate for a Sink, depends on definition.
-        return temperature_to_noise_figure(self.noise_temperature)
+        Margin = Actual_Eb/N0 - Required_Eb/N0
+
+        Returns:
+            Data link margin in dB.
+        """
+        return self.data_mode.margin(self.data_cn0, self.symbol_rate)
+
+    # --- Ranging Placeholder ---
+    # TODO: Implement ranging calculations based on core.ranging module
+
+    # Override output method - Demodulator consumes the signal
+    def output(self, frequency: Frequency) -> Signal:
+        raise NotImplementedError(
+            "Demodulator does not produce an output signal in the chain."
+        )
