@@ -209,3 +209,5 @@ def test_cascaded_noise_temperature_empty():
     """Test cascaded_noise_temperature with empty stages list."""
     with pytest.raises(ValueError):
         noise.cascaded_noise_temperature([])
+
+ 

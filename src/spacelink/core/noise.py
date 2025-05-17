@@ -29,135 +29,36 @@ T0 = 290.0 * u.K
 @enforce_units
 def noise_power(bandwidth: Frequency, temperature: Temperature = T0) -> Power:
     r"""
-    Calculate the thermal noise power in a given bandwidth.
-
-    The thermal noise power is given by:
-
-    .. math::
-        P = k \cdot T \cdot B
-
-    where:
-
-    * :math:`k` is Boltzmann's constant (:math:`1.380649 \times 10^{-23}` J/K)
-    * :math:`T` is the temperature in Kelvin
-    * :math:`B` is the bandwidth in Hz
-
-    Parameters
-    ----------
-    bandwidth : Quantity
-        Bandwidth in Hz
-    temperature : Quantity, optional
-        Temperature in Kelvin (default: 290K, standard room temperature)
-
-    Returns
-    -------
-    Quantity
-        Thermal noise power in watts
-
-    Examples
-    --------
-    >>> import math
-    >>> math.isclose(power(1e6 * u.Hz).value, 4.003e-15, rel_tol=1e-3)
-    True
     """
     # Check for negative bandwidth remains
     if bandwidth < 0 * u.Hz:
         raise ValueError("Bandwidth cannot be negative")
 
-    return BOLTZMANN * temperature * bandwidth.to(u.Hz)
+    result = BOLTZMANN * temperature * bandwidth.to(u.Hz)
+    return result.to(u.W)
 
 
 @enforce_units
 def temperature_to_noise_factor(temperature: Temperature) -> Dimensionless:
     r"""
-    Convert noise temperature in Kelvin to noise factor (linear).
-
-    The noise factor is given by:
-
-    .. math::
-        F = 1 + \frac{T}{T_0}
-
-    where:
-
-    * :math:`T` is the noise temperature in Kelvin
-    * :math:`T_0` is the reference temperature (290K)
-
-    Parameters
-    ----------
-    temperature : Quantity
-        Noise temperature in Kelvin
-
-    Returns
-    -------
-    Quantity
-        Noise factor (linear, dimensionless)
     """
-    return 1.0 + (temperature / T0) * u.dimensionless
+    return (1.0 + (temperature / T0)).to(u.dimensionless)
 
 
 @enforce_units
 def noise_factor_to_temperature(noise_factor: Dimensionless) -> Temperature:
     r"""
-    Convert noise factor (linear) to noise temperature in Kelvin.
 
-    The noise temperature is given by:
-
-    .. math::
-        T = (F - 1) \cdot T_0
-
-    where:
-
-    * :math:`F` is the noise factor (linear)
-    * :math:`T_0` is the reference temperature (290K)
-
-    Parameters
-    ----------
-    noise_factor : Quantity
-        Noise factor (linear, dimensionless)
-
-    Returns
-    -------
-    Quantity
-        Noise temperature in Kelvin
-
-    Raises
-    ------
-    ValueError
-        If noise factor is less than 1
     """
     if noise_factor < 1:
         raise ValueError(f"noise_factor must be >= 1 ({noise_factor})")
-    return (noise_factor - 1.0) * T0
+    result = (noise_factor - 1.0) * T0
+    return result.to(u.K)
 
 
 @enforce_units
 def noise_figure_to_temperature(noise_figure: Decibels) -> Temperature:
     r"""
-    Convert noise figure in dB to noise temperature in Kelvin.
-
-    The conversion is done in two steps:
-
-    1. Convert noise figure (dB) to noise factor (linear):
-
-       .. math::
-           F = 10^{\frac{NF_{dB}}{10}}
-
-    2. Convert noise factor to temperature:
-
-       .. math::
-           T = (F - 1) \cdot T_0
-
-    where :math:`T_0` is the reference temperature (290K).
-
-    Parameters
-    ----------
-    noise_figure : Quantity
-        Noise figure in dB
-
-    Returns
-    -------
-    Quantity
-        Noise temperature in Kelvin
     """
     factor = to_linear(noise_figure)
     return noise_factor_to_temperature(factor)
