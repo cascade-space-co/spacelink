@@ -150,9 +150,9 @@ where:
 
 * :math:`P_r` is the received power in dBW or dBm
 * :math:`P_t` is the transmitted power in dBW or dBm
-* :math:`G_t` is the transmitter antenna gain in dBi
+* :math:`G_t` is the transmitter antenna gain in dB
 * :math:`L_{path}` is the path loss in dB
-* :math:`G_r` is the receiver antenna gain in dBi
+* :math:`G_r` is the receiver antenna gain in dB
 * :math:`L_{misc}` is the sum of miscellaneous losses in dB
 
 Signal-to-Noise Ratio

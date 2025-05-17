@@ -15,6 +15,7 @@ from .units import (
     enforce_units,
     to_dB,
     to_linear,
+    safe_negate,  # Add safe_negate import
 )
 
 
@@ -77,7 +78,7 @@ def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
     plf = 0.5 + 0.5 * (numerator / denominator)
 
     # Convert to decibels and make positive (loss)
-    return -to_dB(plf)
+    return safe_negate(to_dB(plf))
 
 
 @enforce_units

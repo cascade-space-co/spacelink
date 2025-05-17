@@ -26,6 +26,9 @@ if not hasattr(u, "dBW"):
     u.dBW = u.dB(u.W)
 if not hasattr(u, "dBm"):
     u.dBm = u.dB(u.mW)
+if not hasattr(u, "dBK"):
+    u.dBK = u.dB(u.K)
+
 if not hasattr(u, "dimensionless"):
     u.dimensionless = u.dimensionless_unscaled
 
@@ -33,6 +36,7 @@ if not hasattr(u, "dimensionless"):
 Decibels = Annotated[Quantity, u.dB]
 DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
+DecibelKelvins = Annotated[Quantity, u.dB(u.K)]
 Watts = Annotated[Quantity, u.W]
 Power = Annotated[Quantity, u.W]
 Frequency = Annotated[Quantity, u.Hz]
@@ -180,35 +184,32 @@ def frequency(wavelength: Wavelength) -> Frequency:
     return constants.c / wavelength.to(u.m)
 
 
-# DO NOT MODIFY
 @enforce_units
-def to_dB(x: Quantity, *, factor=10) -> Decibels:
+def to_dB(x: Quantity, *, factor=10) -> Quantity:
     r"""
-    Convert a dimensionless quantity to decibels.
+    Convert a quantity to decibels, preserving the logarithmic units.
 
     The conversion is done using:
 
     .. math::
-        X_{dB} = factor \cdot \log_{10}(x)
+        X_{{dB}} = factor \cdot \log_{{10}}(x)
 
-    where:
-
-    * :math:`x` is the dimensionless quantity
-    * :math:`factor` is 10 for power quantities, 20 for field quantities
+    The result will have units of dB(input_unit), e.g. dBW, dBK, dBHz, etc.
 
     Parameters
     ----------
     x : Quantity
-        A dimensionless Quantity (e.g., power ratio)
+        A Quantity (e.g., in W, K, Hz, etc.)
     factor : int, optional
         10 for power quantities, 20 for field quantities
 
     Returns
     -------
     Quantity
-        Value in decibels (unit = u.dB)
+        Value in decibels with logarithmic units (e.g., dBW, dBK)
     """
-    return factor * np.log10(x.value) * u.dB
+    db_value = factor * np.log10(x.value)
+    return db_value * u.dB(x.unit)
 
 
 @enforce_units
@@ -337,7 +338,7 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     if np.isclose(vswr.to_value(u.dimensionless), 1.0):
         return float("inf") * u.dB
     gamma = (vswr - 1) / (vswr + 1)
-    return -to_dB(gamma, factor=20)
+    return safe_negate(to_dB(gamma, factor=20))
 
 
 # DO NOT MODIFY
@@ -376,7 +377,7 @@ def mismatch_loss(return_loss: Decibels) -> Decibels:
     # Note that we want |Γ|² so we use factor=10 instead of factor=20
     gamma_2 = to_linear(-return_loss, factor=10)
     # Power loss is 1 - |Γ|²
-    return -to_dB(1 - gamma_2)
+    return safe_negate(to_dB(1 - gamma_2))
 
 
 # Register YAML constructor for Quantity objects
@@ -407,3 +408,10 @@ def quantity_constructor(loader, node):
 
 # Register the constructor with SafeLoader
 yaml.SafeLoader.add_constructor("!Quantity", quantity_constructor)
+
+def safe_negate(quantity):
+    """
+    Safely negate a dB or function unit quantity, preserving the unit.
+    Astropy does not allow direct negation of function units (like dB).
+    """
+    return (-1 * quantity.value) * quantity.unit

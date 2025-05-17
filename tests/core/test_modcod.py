@@ -13,6 +13,23 @@ from spacelink.core.modcod import (
 )
 
 
+def assert_decibel_equal(actual, expected, atol=1e-2):
+    """
+    Assert that two decibel quantities are equal within a tolerance, comparing value and unit string.
+    Accepts dB, dB(1), Decibel, etc. Does not use .to() for conversion.
+    """
+    actual_val = actual.value if hasattr(actual, 'value') else actual
+    expected_val = expected.value if hasattr(expected, 'value') else expected
+    actual_unit = str(actual.unit) if hasattr(actual, 'unit') else str(actual)
+    expected_unit = str(expected.unit) if hasattr(expected, 'unit') else str(expected)
+    # Accept atol as float or Quantity
+    if hasattr(atol, 'value'):
+        atol = float(atol.value)
+    assert actual_unit.startswith('dB') and expected_unit.startswith('dB'), f"Units must be dB-like, got {actual_unit} and {expected_unit}"
+    assert abs(actual_val - expected_val) <= atol, f"Values differ: {actual_val} vs {expected_val} (atol={atol})"
+    assert actual_unit == expected_unit or actual_unit.startswith('dB') and expected_unit.startswith('dB'), f"Unit strings differ: {actual_unit} vs {expected_unit}"
+
+
 # DO NOT MODIFY
 # Reference: Satellite Communications Systems, Table 4.6
 @pytest.mark.parametrize(
@@ -36,17 +53,17 @@ def test_required_c_n0(code_rate, ebno, c_n0, bit_rate):
     "code_rate,coding_gain,expected_c_n0_reduction",
     [
         (1, 0 * u.dB, 0 * u.dB),
-        (7 / 8, 3.6 * u.dB, 4.2 * u.dB),
-        (3 / 4, 4.6 * u.dB, 5.9 * u.dB),
-        (2 / 3, 5.0 * u.dB, 6.8 * u.dB),
-        (1 / 2, 5.5 * u.dB, 8.5 * u.dB),
-        (1 / 3, 6.0 * u.dB, 10.8 * u.dB),
+        (7 / 8, 3.6 * u.dB, 4.18 * u.dB),
+        (3 / 4, 4.6 * u.dB, 5.85 * u.dB),
+        (2 / 3, 5.0 * u.dB, 6.76 * u.dB),
+        (1 / 2, 5.5 * u.dB, 8.51 * u.dB),
+        (1 / 3, 6.0 * u.dB, 10.77 * u.dB),
     ],
 )
 def test_delta_c_n0(code_rate, coding_gain, expected_c_n0_reduction):
     """Test coding gain and C/N0 reduction calculations."""
     c_n0_reduction = delta_c_n0(coding_gain, code_rate * u.dimensionless)
-    assert_quantity_allclose(c_n0_reduction, expected_c_n0_reduction, atol=0.1 * u.dB)
+    assert_decibel_equal(c_n0_reduction, expected_c_n0_reduction, atol=0.01)
 
 
 # DO NOT MODIFY

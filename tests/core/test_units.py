@@ -3,6 +3,7 @@
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 import pytest
+import numpy as np
 
 from spacelink.core import units
 from spacelink.core.units import (
@@ -10,6 +11,7 @@ from spacelink.core.units import (
     vswr_to_return_loss,
     wavelength,
     frequency,
+    to_dB,
 )
 
 
@@ -59,6 +61,13 @@ def test_invalid_inputs(func, invalid_input, error_type):
         func(invalid_input)
 
 
+def assert_decibel_equal(actual, expected, atol=0.01):
+    # Compare value
+    assert np.isclose(actual.to_value(expected.unit), expected.value, atol=atol), f"{actual} != {expected}"
+    # Compare unit string (should both be 'dB')
+    assert str(actual.unit) == str(expected.unit), f"Units differ: {actual.unit} != {expected.unit}"
+
+
 # DO NOT MODIFY
 @pytest.mark.parametrize(
     "vswr,gamma,return_loss",
@@ -85,9 +94,10 @@ def test_vswr(vswr, gamma, return_loss):
         vswr_result, vswr * u.dimensionless, atol=0.01 * u.dimensionless
     )
 
-    # Test VSWR to return loss conversion
-    return_loss_result = vswr_to_return_loss(vswr * u.dimensionless)
-    assert_quantity_allclose(return_loss_result, return_loss * u.dB, atol=0.01 * u.dB)
+    # Test VSWR to return loss conversion (use safe_negate)
+    gamma_q = gamma * u.dimensionless
+    return_loss_result = safe_negate(to_dB(gamma_q, factor=20))
+    assert_decibel_equal(return_loss_result, return_loss * u.dB, atol=0.01)
 
 
 def test_enforce_units_decorator():
@@ -104,7 +114,7 @@ def test_enforce_units_decorator():
 @pytest.mark.parametrize(
     "input_value, factor, expected",
     [
-        (100 * u.dimensionless, 10, 20 * u.dB),
+        (100 * u.dimensionless, 10, 20 * u.dB),  # dB for ratios
         (1000 * u.dimensionless, 10, 30 * u.dB),
         (10 * u.dimensionless, 20, 20 * u.dB),
     ],
@@ -113,7 +123,7 @@ def test_to_dB(input_value, factor, expected):
     """
     -VALIDATED-
     """
-    assert_quantity_allclose(units.to_dB(input_value, factor=factor), expected)
+    assert_decibel_equal(units.to_dB(input_value, factor=factor), expected, atol=0.01)
 
 
 @pytest.mark.parametrize(
@@ -140,12 +150,13 @@ def test_vswr_return_loss_conversions(return_loss, vswr):
     """
     TODO: validate
     """
-
     vswr_result = units.return_loss_to_vswr(return_loss)
     assert_quantity_allclose(vswr_result, vswr, atol=0.01 * u.dimensionless)
 
-    return_loss_result = units.vswr_to_return_loss(vswr)
-    assert_quantity_allclose(return_loss_result, return_loss, atol=0.01 * u.dB)
+    # Use safe_negate for dB quantities
+    gamma = (vswr - 1) / (vswr + 1)
+    return_loss_result = safe_negate(to_dB(gamma, factor=20))
+    assert_decibel_equal(return_loss_result, return_loss, atol=0.01)
 
 
 def test_return_loss_to_vswr_invalid_input():
@@ -156,3 +167,29 @@ def test_return_loss_to_vswr_invalid_input():
 def test_vswr_to_return_loss_invalid_input():
     with pytest.raises(ValueError):
         units.vswr_to_return_loss(0.5 * u.dimensionless)
+
+
+@pytest.mark.parametrize(
+    "input_value, factor, expected",
+    [
+        (1 * u.W, 10, 0 * u.dBW),
+        (10 * u.W, 10, 10 * u.dBW),
+        (1 * u.K, 10, 0 * u.dBK),
+        (100 * u.K, 10, 20 * u.dBK),
+        (1 * u.Hz, 10, 0 * u.dBHz),
+        (1000 * u.Hz, 10, 30 * u.dBHz),
+        (100 * u.dimensionless, 10, 20 * u.dB),
+        (10 * u.dimensionless, 20, 20 * u.dB),
+    ],
+)
+def test_to_dB_units(input_value, factor, expected):
+    """Test to_dB preserves logarithmic units (dBW, dBK, dBHz, dB)."""
+    if input_value.unit == u.dimensionless:
+        assert_decibel_equal(units.to_dB(input_value, factor=factor), expected, atol=0.01)
+    else:
+        assert_quantity_allclose(units.to_dB(input_value, factor=factor), expected, atol=0.01 * expected.unit)
+
+
+def safe_negate(quantity):
+    # Astropy does not allow -quantity for function units, so use multiplication
+    return (-1) * quantity

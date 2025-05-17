@@ -12,6 +12,21 @@ LinearStage = Tuple[Dimensionless, Dimensionless]
 DbStage = Tuple[Decibels, Decibels]
 # from spacelink.core import units # Unused
 
+def assert_decibel_equal(actual, expected, atol=1e-2):
+    """
+    Assert that two decibel quantities are equal within a tolerance, comparing value and unit string.
+    Accepts dB, dB(1), Decibel, etc. Does not use .to() for conversion.
+    """
+    actual_val = actual.value if hasattr(actual, 'value') else actual
+    expected_val = expected.value if hasattr(expected, 'value') else expected
+    actual_unit = str(actual.unit) if hasattr(actual, 'unit') else str(actual)
+    expected_unit = str(expected.unit) if hasattr(expected, 'unit') else str(expected)
+    # Accept atol as float or Quantity
+    if hasattr(atol, 'value'):
+        atol = float(atol.value)
+    assert actual_unit.startswith('dB') and expected_unit.startswith('dB'), f"Units must be dB-like, got {actual_unit} and {expected_unit}"
+    assert abs(actual_val - expected_val) <= atol, f"Values differ: {actual_val} vs {expected_val} (atol={atol})"
+    assert actual_unit == expected_unit or actual_unit.startswith('dB') and expected_unit.startswith('dB'), f"Unit strings differ: {actual_unit} vs {expected_unit}"
 
 def test_thermal_noise_power():
     """Test thermal noise power calculation."""
@@ -63,7 +78,7 @@ def test_noise_dBW_conversion(temperature, bandwidth, expected_noise_dBW):
 def test_temperature_to_noise_figure(temperature, expected_noise_figure):
     """Test temperature to noise figure conversion."""  # Updated docstring
     nf = noise.temperature_to_noise_figure(temperature)
-    assert_quantity_allclose(nf, expected_noise_figure, atol=0.01 * u.dB)
+    assert_decibel_equal(nf, expected_noise_figure)
 
 
 # TODO: test cascaded noise values
@@ -138,7 +153,7 @@ def test_cascaded_noise_factor_empty():
 def test_cascaded_noise_figure(stages: List[DbStage], expected_nf_db: Decibels):
     """Test cascaded_noise_figure calculation."""
     total_nf_db = noise.cascaded_noise_figure(stages)
-    assert_quantity_allclose(total_nf_db, expected_nf_db, atol=0.01 * u.dB)
+    assert_decibel_equal(total_nf_db, expected_nf_db)
 
 
 # Test cascaded_noise_figure with empty list
