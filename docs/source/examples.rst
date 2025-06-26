@@ -1,132 +1,64 @@
 Usage Examples
 ==============
 
-This page provides practical examples of using SpaceLink for common RF and space communication tasks.
+.. note::
+   These examples use only the core functions from ``spacelink.core``. The ``components`` submodule and cascaded noise figure analysis are no longer available.
 
 Satellite Link Budget Analysis
 ------------------------------
 
-This example calculates a complete link budget for a satellite communication system:
+This example demonstrates how to calculate a basic satellite link budget using only the core functions provided by SpaceLink:
 
 .. code-block:: python
 
    import astropy.units as u
-   from spacelink.components.antenna import Dish
-   from spacelink.components.stage import TransmitAntenna, ReceiveAntenna, Path
-   from spacelink.components.transmitter import Transmitter
-   from spacelink.components.demodulator import Demodulator
-   from spacelink.components.mode import Mode
+   from spacelink.core.units import to_dB, to_linear
+   from spacelink.core.noise import noise_power, temperature_to_noise_figure
+   from spacelink.core.pathloss import free_space_path_loss
 
    # Define system parameters
    frequency = 12 * u.GHz
    distance = 36000 * u.km  # GEO orbit
-
-   # Create transmitter (satellite)
+   bandwidth = 36 * u.MHz
    tx_power = 20 * u.W
-   tx = Transmitter(power=tx_power, noise_temperature=290 * u.K)
+   tx_antenna_gain = 40 * u.dB  # Example value
+   rx_antenna_gain = 50 * u.dB  # Example value
+   system_noise_temp = 290 * u.K
 
-   # Create transmit antenna (satellite)
-   tx_dish = Dish(diameter=1.2 * u.m, efficiency=0.65)
-   tx_antenna = TransmitAntenna(antenna=tx_dish)
-   tx_antenna.input = tx
+   # Calculate free-space path loss
+   fspl = free_space_path_loss(frequency, distance)
+   print(f"Free-space path loss: {fspl.to(u.dB):.2f}")
 
-   # Create path between satellite and ground
-   space_path = Path(distance=distance)
-   space_path.input = tx_antenna
+   # Calculate received power using Friis equation (in dB):
+   # Pr[dBW] = Pt[dBW] + Gt[dB] + Gr[dB] - Lfs[dB]
+   tx_power_dbw = to_dB(tx_power.to(u.W))
+   pr_dbw = tx_power_dbw + tx_antenna_gain + rx_antenna_gain - fspl.to(u.dB)
+   print(f"Received power: {pr_dbw.to(u.dBW):.2f}")
 
-   # Create receive antenna (ground station)
-   rx_dish = Dish(diameter=3.7 * u.m, efficiency=0.7)
-   rx_antenna = ReceiveAntenna(antenna=rx_dish)
-   rx_antenna.input = space_path
+   # Calculate noise power
+   n0 = noise_power(bandwidth, system_noise_temp)
+   n0_dbw = to_dB(n0.to(u.W))
+   print(f"Noise power: {n0_dbw.to(u.dBW):.2f}")
 
-   # Create demodulator (ground station)
-   demod = Demodulator(conversion_loss=2 * u.dB, noise_temperature=290 * u.K)
-   demod.input = rx_antenna
+   # Calculate carrier-to-noise ratio (C/N)
+   cn_db = pr_dbw - n0_dbw
+   print(f"Carrier-to-noise ratio (C/N): {cn_db.to(u.dB):.2f}")
 
-   # Define modulation mode
-   qpsk = Mode(
-       name="QPSK",
-       modulation="QPSK",
-       coding_scheme="LDPC",
-       code_rate=0.5,
-       required_ebno=4.5 * u.dB,
-       implementation_loss=2 * u.dB
-   )
+   # Convert system noise temperature to noise figure (optional)
+   nf = temperature_to_noise_figure(system_noise_temp)
+   print(f"System noise figure: {nf.to(u.dB):.2f}")
 
-   # Calculate received signal power
-   rx_power = demod.get_processed_signal().power
-   print(f"Received power: {rx_power.to(u.dBm)}")
+Expected Output
+---------------
 
-   # Calculate system noise temperature
-   sys_noise_temp = demod.get_processed_signal().noise_temperature
-   print(f"System noise temperature: {sys_noise_temp.to(u.K)}")
+.. code-block:: text
 
-   # Calculate link margin
-   link_margin = demod.calculate_link_margin(frequency, qpsk, bandwidth=36 * u.MHz)
-   print(f"Link margin: {link_margin.to(u.dB)}")
+   Free-space path loss: 205.16 dB
+   Received power: -102.15 dB(W)
+   Noise power: -128.41 dB(W)
+   Carrier-to-noise ratio (C/N): 26.27 dB
+   System noise figure: 3.01 dB
 
-Cascaded Noise Figure Analysis
-------------------------------
-
-This example analyzes the noise performance of a cascaded RF chain:
-
-.. code-block:: python
-
-   import astropy.units as u
-   import matplotlib.pyplot as plt
-   import numpy as np
-   from spacelink.components.source import Source
-   from spacelink.components.stage import GainBlock, Attenuator
-   from spacelink.components.sink import Sink
-
-   # Create components
-   source = Source()
-   lna = GainBlock(gain=20 * u.dB, noise_figure=1.2 * u.dB)
-   filter1 = Attenuator(attenuation=3 * u.dB)
-   amp2 = GainBlock(gain=15 * u.dB, noise_figure=3.5 * u.dB)
-   filter2 = Attenuator(attenuation=2 * u.dB)
-   mixer = GainBlock(gain=-6 * u.dB, noise_figure=8 * u.dB)
-   if_amp = GainBlock(gain=30 * u.dB, noise_figure=2.5 * u.dB)
-   sink = Sink()
-
-   # Connect the chain
-   lna.input = source
-   filter1.input = lna
-   amp2.input = filter1
-   filter2.input = amp2
-   mixer.input = filter2
-   if_amp.input = mixer
-   sink.input = if_amp
-
-   # Calculate cascaded properties at different stages
-   frequency = 2.4 * u.GHz
-   stages = [lna, filter1, amp2, filter2, mixer, if_amp]
-   stage_names = ["LNA", "Filter 1", "Amp 2", "Filter 2", "Mixer", "IF Amp"]
-
-   # Calculate cumulative gain and noise figure at each stage
-   gains = []
-   noise_figures = []
-
-   for stage in stages:
-       gains.append(stage.cascaded_gain(frequency).to(u.dB).value)
-       noise_figures.append(stage.cascaded_noise_figure(frequency).to(u.dB).value)
-
-   # Plot results
-   fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
-
-   ax1.plot(stage_names, gains, 'o-', linewidth=2)
-   ax1.set_ylabel('Cascaded Gain (dB)')
-   ax1.set_title('Cascaded RF Chain Analysis')
-   ax1.grid(True)
-
-   ax2.plot(stage_names, noise_figures, 'o-', linewidth=2, color='red')
-   ax2.set_ylabel('Cascaded Noise Figure (dB)')
-   ax2.set_xlabel('Stage')
-   ax2.grid(True)
-
-   plt.tight_layout()
-   plt.show()
-
-   # Print final results
-   print(f"Total gain: {gains[-1]:.2f} dB")
-   print(f"Total noise figure: {noise_figures[-1]:.2f} dB")
+#
+# Additional examples can be added here as new core functions are introduced.
+#

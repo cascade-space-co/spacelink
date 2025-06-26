@@ -60,7 +60,7 @@ where:
 * :math:`d` is the distance between antennas
 
 Noise Calculations
------------------
+-------------------
 
 Noise Temperature and Noise Figure
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -84,7 +84,7 @@ The noise figure in dB is related to the noise factor by:
    NF_{dB} = 10 \log_{10}(F)
 
 Cascaded Noise Figure
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 
 For a cascade of components, the total noise factor is calculated using Friis' formula:
 
@@ -98,10 +98,10 @@ where:
 * :math:`G_i` is the gain (linear, not in dB) of the i-th stage
 
 Antenna Formulas
---------------
+----------------
 
 Parabolic Dish Gain
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 The gain of a parabolic dish antenna can be approximated by:
 
@@ -123,7 +123,7 @@ In decibels:
    G_{dB} = 10\log_{10}(\eta) + 20\log_{10}(D) + 20\log_{10}(f) + 20\log_{10}\left(\frac{\pi}{c}\right)
 
 Beamwidth
-^^^^^^^^
+^^^^^^^^^
 
 The half-power beamwidth (HPBW) of a parabolic antenna can be approximated by:
 
@@ -138,7 +138,7 @@ where:
 * :math:`D` is the diameter of the dish
 
 Link Budget Equation
-------------------
+---------------------
 
 The basic link budget equation in decibels is:
 
@@ -156,7 +156,7 @@ where:
 * :math:`L_{misc}` is the sum of miscellaneous losses in dB
 
 Signal-to-Noise Ratio
--------------------
+----------------------
 
 The signal-to-noise ratio (SNR) is given by:
 
@@ -178,7 +178,7 @@ In decibels:
    SNR_{dB} = P_{r,dBW} - 10\log_{10}(k) - 10\log_{10}(T) - 10\log_{10}(B)
 
 Bit Error Rate
-------------
+--------------
 
 For QPSK modulation with Gray coding in an AWGN channel, the bit error rate (BER) can be approximated by:
 

@@ -12,4 +12,3 @@ SpaceLink Modules
    :caption: Module Documentation:
 
    core/index
-   components/index
