@@ -2,44 +2,25 @@
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[project]
+[tool.poetry]
 name = "spacelink"
 version = "0.1.0"
 description = "Space link budget calculation package"
 readme = "README.md"
-requires-python = ">=3.11"
 authors = [
-    {name = "Jacob Portukalian", email = "jacob@heliospherenetwork.com"},
-    {name = "Arlen Abraham", email = "arlen@heliospherenetwork.com"}
+    "Jacob Portukalian <jacob@heliospherenetwork.com>",
+    "Arlen Abraham <arlen@heliospherenetwork.com>"
 ]
-dependencies = [
-    "numpy>=1.24.0,<3.0.0",
-    "scipy>=1.10.0,<2.0.0",
-    "pandas>=2.0.0",
-    "autopep8>=2.3.2",
-    "astropy (>=7.0.1,<8.0.0)",
-    "black[jupyter] (>=25.1.0,<26.0.0)"
-]
+packages = [{include = "spacelink", from = "src"}]
 
-[project.optional-dependencies]
-dev = [
-    "sphinx>=7.2.6",
-    "sphinx-rtd-theme>=2.0.0",
-    "sphinx-autodoc-typehints>=1.25.2"
-]
-test = [
-    "pytest>=7.4.0",
-    "pytest-cov>=4.1.0",
-    "pyyaml>=6.0.2",
-    "black>=25.1.0",
-    "flake8>=7.0.0"
-]
-demo = [
-    "jupyter>=1.0.0",
-    "notebook>=7.0.6",
-    "matplotlib>=3.8.2",
-    "ipykernel>=6.27.1"
-]
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.24.0,<3.0.0"
+scipy = "^1.10.0,<2.0.0"
+pandas = "^2.0.0"
+autopep8 = "^2.3.2"
+astropy = "^7.0.1,<8.0.0"
+black = {version = "^25.1.0,<26.0.0", extras = ["jupyter"]}
 
 [tool.poetry.group.dev.dependencies]
 sphinx = "^7.2.6"
@@ -47,8 +28,8 @@ sphinx-rtd-theme = "^2.0.0"
 sphinx-autodoc-typehints = "^1.25.2"
 
 [tool.poetry.group.test.dependencies]
-pytest = ">=7.4.0"
-pytest-cov = ">=4.1.0"
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
 pyyaml = "^6.0.2"
 black = "^25.1.0"
 flake8 = "^7.0.0"
