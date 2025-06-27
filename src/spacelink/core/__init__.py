@@ -45,11 +45,10 @@ from .antenna import (
 from .ranging import (
     pn_sequence_range_ambiguity,
     chip_snr,
-    suppression_factor_sine,
-    modulation_factor_sine,
-    suppression_factor_bipolar,
-    modulation_factor_bipolar,
-    power_fractions_sine,
+    uplink_carrier_to_total_power,
+    uplink_ranging_to_total_power,
+    uplink_data_to_total_power,
+    CommandModulation,
 )
 
 
@@ -99,9 +98,8 @@ __all__ = [
     # Ranging
     "pn_sequence_range_ambiguity",
     "chip_snr",
-    "suppression_factor_sine",
-    "modulation_factor_sine",
-    "suppression_factor_bipolar",
-    "modulation_factor_bipolar",
-    "power_fractions_sine",
+    "uplink_carrier_to_total_power",
+    "uplink_ranging_to_total_power",
+    "uplink_data_to_total_power",
+    "CommandModulation",
 ]
