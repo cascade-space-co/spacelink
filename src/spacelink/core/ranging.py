@@ -4,8 +4,8 @@ Calculations related to two-way pseudo-noise (PN) radiometric ranging.
 This module provides functions for calculating range ambiguity, power allocations
 between residual carrier and modulated components, range jitter, and acquisition time.
 
-References:
-
+References
+----------
 [1] 810-005 214, Rev. C "Pseudo-Noise and Regenerative Ranging"
     (part of the Deep Space Network Telecommunications Link Design Handbook)
     https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf
@@ -52,11 +52,23 @@ CODE_LENGTH = 1_009_470
 # DO NOT MODIFY
 @enforce_units
 def pn_sequence_range_ambiguity(chip_rate: Frequency) -> Distance:
-    """Compute the range ambiguity of the standard PN ranging sequences.
+    r"""
+    Compute the range ambiguity of the standard PN ranging sequences.
 
-    References:
-        [1] Equation (11).
-        [3] p. 2-2.
+    Parameters
+    ----------
+    chip_rate : Frequency
+        The chip rate of the PN ranging sequence.
+
+    Returns
+    -------
+    Distance
+        The range ambiguity distance.
+
+    References
+    ----------
+    [1] Equation (11).
+    [3] p. 2-2.
     """
     return (CODE_LENGTH * const.c / (4 * chip_rate)).decompose()
 
@@ -64,18 +76,24 @@ def pn_sequence_range_ambiguity(chip_rate: Frequency) -> Distance:
 # DO NOT MODIFY
 @enforce_units
 def chip_snr(ranging_clock_rate: Frequency, prn0: DecibelHertz) -> Decibels:
-    """Compute the chip SNR :math:`2E_C/N_0` in decibels.
+    r"""
+    Compute the chip SNR :math:`2E_C/N_0` in decibels.
 
-    References:
-        [3] p. 2-3.
+    Parameters
+    ----------
+    ranging_clock_rate : Frequency
+        Rate of the ranging clock :math:`f_{RC}`. This is half the chip rate.
+    prn0 : DecibelHertz
+        The ranging signal-to-noise spectral density ratio :math:`P_R/N_0`.
 
-    Args:
-        ranging_clock_rate: Rate of the ranging clock :math:`f_{RC}`. This is half the
-            chip rate.
-        prn0: The ranging signal-to-noise spectral density ratio :math:`P_R/N_0`.
-
-    Returns:
+    Returns
+    -------
+    Decibels
         The chip SNR :math:`2E_C/N_0`.
+
+    References
+    ----------
+    [3] p. 2-3.
     """
     return prn0 - to_dBHz(ranging_clock_rate)
 
@@ -83,16 +101,26 @@ def chip_snr(ranging_clock_rate: Frequency, prn0: DecibelHertz) -> Decibels:
 # DO NOT MODIFY
 @enforce_units
 def _suppression_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimensionless:
-    r"""Compute the suppression factor :math:`S_{cmd}(\phi_{cmd})`.
+    r"""
+    Compute the suppression factor :math:`S_{cmd}(\phi_{cmd})`.
 
     This is used in the expressions for uplink carrier and ranging power fractions.
 
-    Args:
-        mod_idx_data: The RMS phase deviation by command signal :math:`\phi_{cmd}`.
-        modulation: The command modulation type.
+    Parameters
+    ----------
+    mod_idx : Angle
+        The RMS phase deviation by command signal :math:`\phi_{cmd}`.
+    modulation : CommandModulation
+        The command modulation type.
 
-    References:
-        [1] Equation (24).
+    Returns
+    -------
+    Dimensionless
+        The suppression factor :math:`S_{cmd}(\phi_{cmd})`.
+
+    References
+    ----------
+    [1] Equation (24).
     """
     mod_idx_rad = mod_idx.to(u.rad).value
     if modulation == CommandModulation.BIPOLAR:
@@ -106,16 +134,26 @@ def _suppression_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimens
 # DO NOT MODIFY
 @enforce_units
 def _modulation_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimensionless:
-    r"""Compute the modulation factor :math:`M_{cmd}(\phi_{cmd})`.
+    r"""
+    Compute the modulation factor :math:`M_{cmd}(\phi_{cmd})`.
 
     This is used in the expression for uplink data power fraction.
 
-    Args:
-        mod_idx_data: The RMS phase deviation by command signal :math:`\phi_{cmd}`.
-        modulation: The command modulation type.
+    Parameters
+    ----------
+    mod_idx : Angle
+        The RMS phase deviation by command signal :math:`\phi_{cmd}`.
+    modulation : CommandModulation
+        The command modulation type.
 
-    References:
-        [1] Equation (25).
+    Returns
+    -------
+    Dimensionless
+        The modulation factor :math:`M_{cmd}(\phi_{cmd})`.
+
+    References
+    ----------
+    [1] Equation (25).
     """
     mod_idx_rad = mod_idx.to(u.rad).value
     if modulation == CommandModulation.BIPOLAR:
@@ -131,16 +169,27 @@ def uplink_carrier_to_total_power(
     mod_idx_ranging: Angle,
     mod_idx_cmd: Angle,
     modulation: CommandModulation,
-):
-    r"""Uplink ratio of residual carrier power to total power :math:`P_{C}/P_{T}`.
+) -> Dimensionless:
+    r"""
+    Uplink ratio of residual carrier power to total power :math:`P_{C}/P_{T}`.
 
-    Args:
-        mod_idx_ranging: The RMS phase deviation by ranging signal :math:`\phi_{r}`.
-        mod_idx_cmd: The RMS phase deviation by command signal :math:`\phi_{cmd}`.
-        modulation: The command modulation type.
+    Parameters
+    ----------
+    mod_idx_ranging : Angle
+        The RMS phase deviation by ranging signal :math:`\phi_{r}`.
+    mod_idx_cmd : Angle
+        The RMS phase deviation by command signal :math:`\phi_{cmd}`.
+    modulation : CommandModulation
+        The command modulation type.
 
-    References:
-        [1] Equation (20).
+    Returns
+    -------
+    Dimensionless
+        The ratio of residual carrier power to total power :math:`P_{C}/P_{T}`.
+
+    References
+    ----------
+    [1] Equation (20).
     """
     return j0(math.sqrt(2) * mod_idx_ranging) ** 2 * _suppression_factor(
         mod_idx_cmd, modulation
@@ -152,16 +201,27 @@ def uplink_ranging_to_total_power(
     mod_idx_ranging: Angle,
     mod_idx_cmd: Angle,
     modulation: CommandModulation,
-):
-    r"""Uplink ratio of usable ranging power to total power :math:`P_{R}/P_{T}`.
+) -> Dimensionless:
+    r"""
+    Uplink ratio of usable ranging power to total power :math:`P_{R}/P_{T}`.
 
-    Args:
-        mod_idx_ranging: The RMS phase deviation by ranging signal :math:`\phi_{r}`.
-        mod_idx_cmd: The RMS phase deviation by command signal :math:`\phi_{cmd}`.
-        modulation: The command modulation type.
+    Parameters
+    ----------
+    mod_idx_ranging : Angle
+        The RMS phase deviation by ranging signal :math:`\phi_{r}`.
+    mod_idx_cmd : Angle
+        The RMS phase deviation by command signal :math:`\phi_{cmd}`.
+    modulation : CommandModulation
+        The command modulation type.
 
-    References:
-        [1] Equation (20).
+    Returns
+    -------
+    Dimensionless
+        The ratio of usable ranging power to total power :math:`P_{R}/P_{T}`.
+
+    References
+    ----------
+    [1] Equation (20).
     """
     return (
         2
@@ -175,16 +235,27 @@ def uplink_data_to_total_power(
     mod_idx_ranging: Angle,
     mod_idx_cmd: Angle,
     modulation: CommandModulation,
-):
-    r"""Uplink ratio of usable data power to total power :math:`P_{D}/P_{T}`.
+) -> Dimensionless:
+    r"""
+    Uplink ratio of usable data power to total power :math:`P_{D}/P_{T}`.
 
-    Args:
-        mod_idx_ranging: The RMS phase deviation by ranging signal :math:`\phi_{r}`.
-        mod_idx_cmd: The RMS phase deviation by command signal :math:`\phi_{cmd}`.
-        modulation: The command modulation type.
+    Parameters
+    ----------
+    mod_idx_ranging : Angle
+        The RMS phase deviation by ranging signal :math:`\phi_{r}`.
+    mod_idx_cmd : Angle
+        The RMS phase deviation by command signal :math:`\phi_{cmd}`.
+    modulation : CommandModulation
+        The command modulation type.
 
-    References:
-        [1] Equation (21).
+    Returns
+    -------
+    Dimensionless
+        The ratio of usable data power to total power :math:`P_{D}/P_{T}`.
+
+    References
+    ----------
+    [1] Equation (21).
     """
     return j0(math.sqrt(2) * mod_idx_ranging) ** 2 * _modulation_factor(
         mod_idx_cmd, modulation
