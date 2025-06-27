@@ -38,6 +38,7 @@ from .units import (
 
 class CommandModulation(enum.Enum):
     """The type of command modulation used alongside ranging on the uplink."""
+
     BIPOLAR = enum.auto()
     SINE_SUBCARRIER = enum.auto()
 
@@ -52,7 +53,7 @@ CODE_LENGTH = 1_009_470
 @enforce_units
 def pn_sequence_range_ambiguity(chip_rate: Frequency) -> Distance:
     """Compute the range ambiguity of the standard PN ranging sequences.
-    
+
     References:
         [1] Equation (11).
         [3] p. 2-2.
@@ -95,9 +96,9 @@ def _suppression_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimens
     """
     mod_idx_rad = mod_idx.to(u.rad).value
     if modulation == CommandModulation.BIPOLAR:
-        return np.cos(mod_idx_rad)**2
+        return np.cos(mod_idx_rad) ** 2
     elif modulation == CommandModulation.SINE_SUBCARRIER:
-        return j0(math.sqrt(2) * mod_idx_rad)**2
+        return j0(math.sqrt(2) * mod_idx_rad) ** 2
     else:
         raise ValueError(f"Invalid command modulation type: {modulation}")
 
@@ -118,31 +119,73 @@ def _modulation_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimensi
     """
     mod_idx_rad = mod_idx.to(u.rad).value
     if modulation == CommandModulation.BIPOLAR:
-        return np.sin(mod_idx_rad)**2
+        return np.sin(mod_idx_rad) ** 2
     elif modulation == CommandModulation.SINE_SUBCARRIER:
-        return 2 * j1(math.sqrt(2) * mod_idx_rad)**2
+        return 2 * j1(math.sqrt(2) * mod_idx_rad) ** 2
     else:
         raise ValueError(f"Invalid command modulation type: {modulation}")
 
 
-# DO NOT MODIFY
 @enforce_units
-def power_fractions(mod_idx_ranging: Angle, mod_idx_cmd: Angle, modulation: CommandModulation):
-    """
+def uplink_carrier_to_total_power(
+    mod_idx_ranging: Angle,
+    mod_idx_cmd: Angle,
+    modulation: CommandModulation,
+):
+    r"""Uplink ratio of residual carrier power to total power :math:`P_{C}/P_{T}`.
+
+    Args:
+        mod_idx_ranging: The RMS phase deviation by ranging signal :math:`\phi_{r}`.
+        mod_idx_cmd: The RMS phase deviation by command signal :math:`\phi_{cmd}`.
+        modulation: The command modulation type.
+
     References:
-        [1] Equations (19), (20), (21).
+        [1] Equation (20).
     """
-    # [1] Equation (19).
-    carrier_power_frac = j0(np.sqrt(2) * mod_idx_ranging) ** 2 * _suppression_factor(
-        mod_idx_cmd, modulation
-    )
-    # [1] Equation (20).
-    ranging_power_frac = (
-        2 * j1(np.sqrt(2) * mod_idx_ranging) ** 2 * _suppression_factor(mod_idx_cmd, modulation)
-    )
-    # [1] Equation (21).
-    data_power_frac = j0(np.sqrt(2) * mod_idx_ranging) ** 2 * _modulation_factor(
+    return j0(math.sqrt(2) * mod_idx_ranging) ** 2 * _suppression_factor(
         mod_idx_cmd, modulation
     )
 
-    return carrier_power_frac, ranging_power_frac, data_power_frac
+
+@enforce_units
+def uplink_ranging_to_total_power(
+    mod_idx_ranging: Angle,
+    mod_idx_cmd: Angle,
+    modulation: CommandModulation,
+):
+    r"""Uplink ratio of usable ranging power to total power :math:`P_{R}/P_{T}`.
+
+    Args:
+        mod_idx_ranging: The RMS phase deviation by ranging signal :math:`\phi_{r}`.
+        mod_idx_cmd: The RMS phase deviation by command signal :math:`\phi_{cmd}`.
+        modulation: The command modulation type.
+
+    References:
+        [1] Equation (20).
+    """
+    return (
+        2
+        * j1(math.sqrt(2) * mod_idx_ranging) ** 2
+        * _suppression_factor(mod_idx_cmd, modulation)
+    )
+
+
+@enforce_units
+def uplink_data_to_total_power(
+    mod_idx_ranging: Angle,
+    mod_idx_cmd: Angle,
+    modulation: CommandModulation,
+):
+    r"""Uplink ratio of usable data power to total power :math:`P_{D}/P_{T}`.
+
+    Args:
+        mod_idx_ranging: The RMS phase deviation by ranging signal :math:`\phi_{r}`.
+        mod_idx_cmd: The RMS phase deviation by command signal :math:`\phi_{cmd}`.
+        modulation: The command modulation type.
+
+    References:
+        [1] Equation (21).
+    """
+    return j0(math.sqrt(2) * mod_idx_ranging) ** 2 * _modulation_factor(
+        mod_idx_cmd, modulation
+    )
