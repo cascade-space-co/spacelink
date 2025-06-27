@@ -17,7 +17,10 @@ References:
     https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf
 """
 
+import enum
+import math
 import astropy.units as u
+from astropy.coordinates import Angle
 import astropy.constants as const
 import numpy as np
 from scipy.special import j0, j1
@@ -31,6 +34,12 @@ from .units import (
     enforce_units,
     to_dBHz,
 )
+
+
+class CommandModulation(enum.Enum):
+    """The type of command modulation used alongside ranging on the uplink."""
+    BIPOLAR = enum.auto()
+    SINE_SUBCARRIER = enum.auto()
 
 
 # The DSN and CCSDS PN ranging codes all have the same length.
@@ -72,62 +81,68 @@ def chip_snr(ranging_clock_rate: Frequency, prn0: DecibelHertz) -> Decibels:
 
 # DO NOT MODIFY
 @enforce_units
-def suppression_factor_sine(mod_idx_data: Dimensionless) -> float:
-    """
+def _suppression_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimensionless:
+    """Compute the suppression factor :math:`S_{cmd}(\phi_{cmd})`.
+
+    This is used in the expressions for uplink carrier and ranging power fractions.
+
+    Args:
+        mod_idx_data: The RMS phase deviation by command signal :math:`\phi_{cmd}`.
+        modulation: The command modulation type.
+
     References:
         [1] Equation (24).
     """
-    return j0(np.sqrt(2) * mod_idx_data.value) ** 2
+    mod_idx_rad = mod_idx.to(u.rad).value
+    if modulation == CommandModulation.BIPOLAR:
+        return np.cos(mod_idx_rad)**2
+    elif modulation == CommandModulation.SINE_SUBCARRIER:
+        return j0(math.sqrt(2) * mod_idx_rad)**2
+    else:
+        raise ValueError(f"Invalid command modulation type: {modulation}")
 
 
 # DO NOT MODIFY
 @enforce_units
-def modulation_factor_sine(mod_idx_data: Dimensionless) -> float:
-    """
+def _modulation_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimensionless:
+    """Compute the modulation factor :math:`M_{cmd}(\phi_{cmd})`.
+
+    This is used in the expression for uplink data power fraction.
+
+    Args:
+        mod_idx_data: The RMS phase deviation by command signal :math:`\phi_{cmd}`.
+        modulation: The command modulation type.
+
     References:
         [1] Equation (25).
     """
-    return 2 * j1(np.sqrt(2) * mod_idx_data.value) ** 2
+    mod_idx_rad = mod_idx.to(u.rad).value
+    if modulation == CommandModulation.BIPOLAR:
+        return np.sin(mod_idx_rad)**2
+    elif modulation == CommandModulation.SINE_SUBCARRIER:
+        return 2 * j1(math.sqrt(2) * mod_idx_rad)**2
+    else:
+        raise ValueError(f"Invalid command modulation type: {modulation}")
 
 
 # DO NOT MODIFY
 @enforce_units
-def suppression_factor_bipolar(mod_idx_data: Dimensionless) -> float:
-    """
-    References:
-        [1] Equation (24).
-    """
-    return np.cos(np.sqrt(2) * mod_idx_data.value) ** 2
-
-
-# DO NOT MODIFY
-@enforce_units
-def modulation_factor_bipolar(mod_idx_data: Dimensionless) -> float:
-    """
-    References:
-        [1] Equation (25).
-    """
-    return np.sin(np.sqrt(2) * mod_idx_data.value) ** 2
-
-
-# DO NOT MODIFY
-@enforce_units
-def power_fractions_sine(mod_idx_r: Dimensionless, mod_idx_data: Dimensionless):
+def power_fractions(mod_idx_ranging: Angle, mod_idx_cmd: Angle, modulation: CommandModulation):
     """
     References:
         [1] Equations (19), (20), (21).
     """
     # [1] Equation (19).
-    carrier_power_frac = j0(np.sqrt(2) * mod_idx_r) ** 2 * suppression_factor_sine(
-        mod_idx_data
+    carrier_power_frac = j0(np.sqrt(2) * mod_idx_ranging) ** 2 * _suppression_factor(
+        mod_idx_cmd, modulation
     )
     # [1] Equation (20).
     ranging_power_frac = (
-        2 * j1(np.sqrt(2) * mod_idx_r) ** 2 * suppression_factor_sine(mod_idx_data)
+        2 * j1(np.sqrt(2) * mod_idx_ranging) ** 2 * _suppression_factor(mod_idx_cmd, modulation)
     )
     # [1] Equation (21).
-    data_power_frac = j0(np.sqrt(2) * mod_idx_r) ** 2 * modulation_factor_sine(
-        mod_idx_data
+    data_power_frac = j0(np.sqrt(2) * mod_idx_ranging) ** 2 * _modulation_factor(
+        mod_idx_cmd, modulation
     )
 
     return carrier_power_frac, ranging_power_frac, data_power_frac
