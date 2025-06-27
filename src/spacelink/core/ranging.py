@@ -191,9 +191,9 @@ def uplink_carrier_to_total_power(
     ----------
     [1] Equation (20).
     """
-    return j0(math.sqrt(2) * mod_idx_ranging) ** 2 * _suppression_factor(
-        mod_idx_cmd, modulation
-    )
+    return j0(
+        math.sqrt(2) * mod_idx_ranging.to(u.rad).value
+    ) ** 2 * _suppression_factor(mod_idx_cmd, modulation)
 
 
 @enforce_units
@@ -225,7 +225,7 @@ def uplink_ranging_to_total_power(
     """
     return (
         2
-        * j1(math.sqrt(2) * mod_idx_ranging) ** 2
+        * j1(math.sqrt(2) * mod_idx_ranging.to(u.rad).value) ** 2
         * _suppression_factor(mod_idx_cmd, modulation)
     )
 
@@ -257,6 +257,6 @@ def uplink_data_to_total_power(
     ----------
     [1] Equation (21).
     """
-    return j0(math.sqrt(2) * mod_idx_ranging) ** 2 * _modulation_factor(
+    return j0(math.sqrt(2) * mod_idx_ranging.to(u.rad).value) ** 2 * _modulation_factor(
         mod_idx_cmd, modulation
     )
