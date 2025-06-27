@@ -42,6 +42,6 @@ def test_chip_snr(
     ranging_clock_rate: Frequency, prn0: DecibelHertz, expected_chip_snr: Decibels
 ):
     chip_snr_result = chip_snr(ranging_clock_rate, prn0)
-    # TODO: There is a subtle unit incompatibility here, requiring the use of 
+    # TODO: There is a subtle unit incompatibility here, requiring the use of
     # `.to(u.dB)` to make `assert_quantity_allclose()` happy.
     assert_quantity_allclose(chip_snr_result.to(u.dB), expected_chip_snr)
