@@ -33,7 +33,7 @@ class ErrorRate(Enum):
 # The list index corresponds to the ErrorRate Enum value (0: 1e-3, 1: 1e-4, 2: 1e-5, 3: 1e-6)
 _PSK_EBN0_VS_BER = {
     "UNCODED": [6.8, 8.4, 9.6, 10.4] * u.dB,
-    "CC(7,1/2) RS(255,223) I=5": [2.1, 2.25, 2.3, 2.4] * u.dB,
+    "CC(7,1/2) RS(255,223) I=5": [2.10, 2.25, 2.30, 2.40] * u.dB,
     "CC(7,2/3) RS(255,223) I=5": [2.8, 2.9, 3.05, 3.15] * u.dB,
     "CC(7,3/4) RS(255,223) I=5": [3.35, 3.5, 3.6, 3.65] * u.dB,
     "CC(7,5/6) RS(255,223) I=5": [4.1, 4.2, 4.3, 4.45] * u.dB,

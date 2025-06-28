@@ -1,9 +1,6 @@
 Usage Examples
 ==============
 
-.. note::
-   These examples use only the core functions from ``spacelink.core``. The ``components`` submodule and cascaded noise figure analysis are no longer available.
-
 Satellite Link Budget Analysis
 ------------------------------
 

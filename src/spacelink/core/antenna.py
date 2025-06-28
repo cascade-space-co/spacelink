@@ -130,5 +130,5 @@ def dish_gain(
         raise ValueError("Frequency must be positive")
 
     wl = wavelength(frequency)
-    gain_linear = efficiency * (np.pi * diameter / wl) ** 2
+    gain_linear = efficiency * (np.pi * diameter.to(u.m) / wl) ** 2
     return to_dB(gain_linear)

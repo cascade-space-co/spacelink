@@ -7,7 +7,7 @@ Created and maintained by [Cascade Space](https://www.cascade.space)
 ## Features
 
 - **Antenna Modeling**: Calculate antenna gain, beamwidth, and polarization effects
-- **RF System Analysis**: Model complete RF chains with cascaded components
+- **RF System Analysis**: Model complete RF chains with cascaded elements
 - **Link Budget Calculations**: Comprehensive analysis of radio communication links
 - **Noise Calculations**: System noise temperature and related parameters
 - **Space Communications**: Built-in support for satellite link analysis

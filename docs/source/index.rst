@@ -7,7 +7,7 @@ Key Features
 ------------
 
 * **Antenna Modeling**: Calculate antenna gain, beamwidth, and polarization effects for various antenna types including parabolic dishes
-* **RF System Analysis**: Model complete RF chains with cascaded components including amplifiers, attenuators, and filters
+* **RF System Analysis**: Model complete RF chains with cascaded elements including amplifiers, attenuators, and filters
 * **Link Budget Calculations**: Perform comprehensive analysis of radio communication links between spacecraft and ground stations
 * **Noise Calculations**: Calculate system noise temperature, noise figure, and related parameters
 * **Space Communications**: Built-in support for satellite link analysis with path loss and atmospheric effects
@@ -56,7 +56,6 @@ Library Structure
 SpaceLink is organized into two main subpackages:
 
 * **Core**: Fundamental calculations, units, constants, and validation logic with minimal dependencies
-* **Components**: Object-oriented models for RF components and systems, building on the core functionality
 
 .. toctree::
    :maxdepth: 2
@@ -64,7 +63,6 @@ SpaceLink is organized into two main subpackages:
 
    modules
    examples
-   math_examples
 
 Indices and tables
 ==================
