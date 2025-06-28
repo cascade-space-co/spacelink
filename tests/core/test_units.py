@@ -63,9 +63,13 @@ def test_invalid_inputs(func, invalid_input, error_type):
 
 def assert_decibel_equal(actual, expected, atol=0.01):
     # Compare value
-    assert np.isclose(actual.to_value(expected.unit), expected.value, atol=atol), f"{actual} != {expected}"
+    assert np.isclose(
+        actual.to_value(expected.unit), expected.value, atol=atol
+    ), f"{actual} != {expected}"
     # Compare unit string (should both be 'dB')
-    assert str(actual.unit) == str(expected.unit), f"Units differ: {actual.unit} != {expected.unit}"
+    assert str(actual.unit) == str(
+        expected.unit
+    ), f"Units differ: {actual.unit} != {expected.unit}"
 
 
 # DO NOT MODIFY
@@ -166,7 +170,7 @@ def test_return_loss_to_vswr_invalid_input():
 
 def test_vswr_to_return_loss_invalid_input():
     with pytest.raises(ValueError):
-        units.vswr_to_return_loss(0.5 * u.dimensionless)
+        vswr_to_return_loss(0.5 * u.dimensionless)
 
 
 @pytest.mark.parametrize(
@@ -185,9 +189,13 @@ def test_vswr_to_return_loss_invalid_input():
 def test_to_dB_units(input_value, factor, expected):
     """Test to_dB preserves logarithmic units (dBW, dBK, dBHz, dB)."""
     if input_value.unit == u.dimensionless:
-        assert_decibel_equal(units.to_dB(input_value, factor=factor), expected, atol=0.01)
+        assert_decibel_equal(
+            units.to_dB(input_value, factor=factor), expected, atol=0.01
+        )
     else:
-        assert_quantity_allclose(units.to_dB(input_value, factor=factor), expected, atol=0.01 * expected.unit)
+        assert_quantity_allclose(
+            units.to_dB(input_value, factor=factor), expected, atol=0.01 * expected.unit
+        )
 
 
 def safe_negate(quantity):

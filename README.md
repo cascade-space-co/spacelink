@@ -26,7 +26,7 @@ pip install spacelink
 
 #### Prerequisites
 
-1. Python 3.10 or higher
+1. Python 3.11 or higher
 2. Poetry package manager ([Install Poetry](https://python-poetry.org/docs/))
 
 #### Getting Started

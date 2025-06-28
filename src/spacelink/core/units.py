@@ -37,7 +37,6 @@ Decibels = Annotated[Quantity, u.dB]
 DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
 DecibelKelvins = Annotated[Quantity, u.dB(u.K)]
-Watts = Annotated[Quantity, u.W]
 Power = Annotated[Quantity, u.W]
 Frequency = Annotated[Quantity, u.Hz]
 Wavelength = Annotated[Quantity, u.m]
@@ -195,6 +194,7 @@ def to_dB(x: Quantity, *, factor=10) -> Quantity:
         X_{{dB}} = factor \cdot \log_{{10}}(x)
 
     The result will have units of dB(input_unit), e.g. dBW, dBK, dBHz, etc.
+    For dimensionless input, the result will have unit dB.
 
     Parameters
     ----------
@@ -206,10 +206,21 @@ def to_dB(x: Quantity, *, factor=10) -> Quantity:
     Returns
     -------
     Quantity
-        Value in decibels with logarithmic units (e.g., dBW, dBK)
+        Value in decibels with logarithmic units (e.g., dBW, dBK, dBHz, dB)
     """
+    if x.value <= 0:
+        # Return -inf dB for zero or negative input, matching RF convention
+        if x.unit == u.dimensionless_unscaled or x.unit == u.dimensionless:
+            return float("-inf") * u.dB
+        else:
+            return float("-inf") * u.dB(x.unit)
     db_value = factor * np.log10(x.value)
-    return db_value * u.dB(x.unit)
+    if x.unit == u.dimensionless_unscaled or x.unit == u.dimensionless:
+        # Force unit to be exactly 'dB' (not dex, dB(1), etc.)
+        result = u.Quantity(db_value, "dB")
+    else:
+        result = db_value * u.dB(x.unit)
+    return result
 
 
 @enforce_units
@@ -408,6 +419,7 @@ def quantity_constructor(loader, node):
 
 # Register the constructor with SafeLoader
 yaml.SafeLoader.add_constructor("!Quantity", quantity_constructor)
+
 
 def safe_negate(quantity):
     """

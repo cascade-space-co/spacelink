@@ -14,7 +14,6 @@ from .units import (
     Distance,
     DecibelWatts,
     DecibelMilliwatts,
-    Watts,
     Power,
     Wavelength,
     enforce_units,
@@ -72,7 +71,6 @@ __all__ = [
     "Distance",
     "DecibelWatts",
     "DecibelMilliwatts",
-    "Watts",
     "Power",
     "Wavelength",
     # Unit Conversion/Helpers

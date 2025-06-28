@@ -13,21 +13,6 @@ This site was used to generate the following test cases:
 https://phillipmfeldman.org/Engineering/pol_mismatch_loss.html
 """
 
-def assert_decibel_equal(actual, expected, atol=1e-2):
-    """
-    Assert that two decibel quantities are equal within a tolerance, comparing value and unit string.
-    Accepts dB, dB(1), Decibel, etc. Does not use .to() for conversion.
-    """
-    actual_val = actual.value if hasattr(actual, 'value') else actual
-    expected_val = expected.value if hasattr(expected, 'value') else expected
-    actual_unit = str(actual.unit) if hasattr(actual, 'unit') else str(actual)
-    expected_unit = str(expected.unit) if hasattr(expected, 'unit') else str(expected)
-    # Accept atol as float or Quantity
-    if hasattr(atol, 'value'):
-        atol = float(atol.value)
-    assert actual_unit.startswith('dB') and expected_unit.startswith('dB'), f"Units must be dB-like, got {actual_unit} and {expected_unit}"
-    assert abs(actual_val - expected_val) <= atol, f"Values differ: {actual_val} vs {expected_val} (atol={atol})"
-    assert actual_unit == expected_unit or actual_unit.startswith('dB') and expected_unit.startswith('dB'), f"Unit strings differ: {actual_unit} vs {expected_unit}"
 
 @pytest.mark.parametrize(
     "ar_tx_db, ar_rx_db, expected_loss_db, tol",
@@ -56,7 +41,7 @@ def test_polarization_loss_calculation(ar_tx_db, ar_rx_db, expected_loss_db, tol
     -VALIDATED-
     Test the polarization loss calculation based on axial ratios.
     """
-    assert_decibel_equal(
+    assert_quantity_allclose(
         polarization_loss(ar_tx_db, ar_rx_db), expected_loss_db, atol=tol
     )
 
@@ -81,7 +66,7 @@ def test_dish_gain_calculation(
     tol: Decibels,
 ):
     """Test the core dish_gain calculation function with various parameters."""
-    assert_decibel_equal(
+    assert_quantity_allclose(
         dish_gain(diameter, frequency, efficiency), expected_gain_db, atol=tol
     )
 

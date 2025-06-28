@@ -11,7 +11,7 @@ Use these for type hints:
 Decibels
 DecibelWatts
 DecibelMilliwatts
-Watts
+Power
 Frequency
 Wavelength
 Dimensionless
