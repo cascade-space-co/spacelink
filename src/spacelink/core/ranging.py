@@ -51,14 +51,14 @@ CODE_LENGTH = 1_009_470
 
 # DO NOT MODIFY
 @enforce_units
-def pn_sequence_range_ambiguity(chip_rate: Frequency) -> Distance:
+def pn_sequence_range_ambiguity(ranging_clock_rate: Frequency) -> Distance:
     r"""
     Compute the range ambiguity of the standard PN ranging sequences.
 
     Parameters
     ----------
-    chip_rate : Frequency
-        The chip rate of the PN ranging sequence.
+    ranging_clock_rate : Frequency
+        Rate of the ranging clock :math:`f_{RC}`. This is half the chip rate.
 
     Returns
     -------
@@ -70,7 +70,7 @@ def pn_sequence_range_ambiguity(chip_rate: Frequency) -> Distance:
     [1] Equation (11).
     [3] p. 2-2.
     """
-    return (CODE_LENGTH * const.c / (4 * chip_rate)).decompose()
+    return (CODE_LENGTH * const.c / (4 * ranging_clock_rate)).decompose()
 
 
 # DO NOT MODIFY
