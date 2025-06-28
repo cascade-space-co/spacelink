@@ -1,8 +1,8 @@
 """
 Calculations related to two-way pseudo-noise (PN) radiometric ranging.
 
-This module provides functions for calculating range ambiguity, power allocations
-between residual carrier and modulated components, range jitter, and acquisition time.
+This module provides functions for calculating range ambiguity and power allocations
+between residual carrier and modulated components.
 
 References
 ----------
