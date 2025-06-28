@@ -36,7 +36,7 @@ from .units import (
 )
 
 
-class CommandModulation(enum.Enum):
+class CommandMod(enum.Enum):
     """The type of command modulation used alongside ranging on the uplink."""
 
     BIPOLAR = enum.auto()
@@ -100,7 +100,7 @@ def chip_snr(ranging_clock_rate: Frequency, prn0: DecibelHertz) -> Decibels:
 
 # DO NOT MODIFY
 @enforce_units
-def _suppression_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimensionless:
+def _suppression_factor(mod_idx: Angle, modulation: CommandMod) -> Dimensionless:
     r"""
     Compute the suppression factor :math:`S_{cmd}(\phi_{cmd})`.
 
@@ -123,9 +123,9 @@ def _suppression_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimens
     [1] Equation (24).
     """
     mod_idx_rad = mod_idx.to(u.rad).value
-    if modulation == CommandModulation.BIPOLAR:
+    if modulation == CommandMod.BIPOLAR:
         return np.cos(mod_idx_rad) ** 2
-    elif modulation == CommandModulation.SINE_SUBCARRIER:
+    elif modulation == CommandMod.SINE_SUBCARRIER:
         return j0(math.sqrt(2) * mod_idx_rad) ** 2
     else:
         raise ValueError(f"Invalid command modulation type: {modulation}")
@@ -133,7 +133,7 @@ def _suppression_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimens
 
 # DO NOT MODIFY
 @enforce_units
-def _modulation_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimensionless:
+def _modulation_factor(mod_idx: Angle, modulation: CommandMod) -> Dimensionless:
     r"""
     Compute the modulation factor :math:`M_{cmd}(\phi_{cmd})`.
 
@@ -156,9 +156,9 @@ def _modulation_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimensi
     [1] Equation (25).
     """
     mod_idx_rad = mod_idx.to(u.rad).value
-    if modulation == CommandModulation.BIPOLAR:
+    if modulation == CommandMod.BIPOLAR:
         return np.sin(mod_idx_rad) ** 2
-    elif modulation == CommandModulation.SINE_SUBCARRIER:
+    elif modulation == CommandMod.SINE_SUBCARRIER:
         return 2 * j1(math.sqrt(2) * mod_idx_rad) ** 2
     else:
         raise ValueError(f"Invalid command modulation type: {modulation}")
@@ -168,7 +168,7 @@ def _modulation_factor(mod_idx: Angle, modulation: CommandModulation) -> Dimensi
 def uplink_carrier_to_total_power(
     mod_idx_ranging: Angle,
     mod_idx_cmd: Angle,
-    modulation: CommandModulation,
+    modulation: CommandMod,
 ) -> Dimensionless:
     r"""
     Uplink ratio of residual carrier power to total power :math:`P_{C}/P_{T}`.
@@ -200,7 +200,7 @@ def uplink_carrier_to_total_power(
 def uplink_ranging_to_total_power(
     mod_idx_ranging: Angle,
     mod_idx_cmd: Angle,
-    modulation: CommandModulation,
+    modulation: CommandMod,
 ) -> Dimensionless:
     r"""
     Uplink ratio of usable ranging power to total power :math:`P_{R}/P_{T}`.
@@ -234,7 +234,7 @@ def uplink_ranging_to_total_power(
 def uplink_data_to_total_power(
     mod_idx_ranging: Angle,
     mod_idx_cmd: Angle,
-    modulation: CommandModulation,
+    modulation: CommandMod,
 ) -> Dimensionless:
     r"""
     Uplink ratio of usable data power to total power :math:`P_{D}/P_{T}`.

@@ -48,7 +48,7 @@ from .ranging import (
     uplink_carrier_to_total_power,
     uplink_ranging_to_total_power,
     uplink_data_to_total_power,
-    CommandModulation,
+    CommandMod,
 )
 
 
@@ -101,5 +101,5 @@ __all__ = [
     "uplink_carrier_to_total_power",
     "uplink_ranging_to_total_power",
     "uplink_data_to_total_power",
-    "CommandModulation",
+    "CommandMod",
 ]
