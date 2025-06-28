@@ -21,7 +21,7 @@ from spacelink.core.units import (
 
 # DO NOT MODIFY
 @pytest.mark.parametrize(
-    "chip_rate, expected_ambiguity",
+    "ranging_clock_rate, expected_ambiguity",
     [
         # [1] p. 13.
         #
@@ -32,9 +32,9 @@ from spacelink.core.units import (
     ],
 )
 def test_pn_sequence_range_ambiguity(
-    chip_rate: Frequency, expected_ambiguity: Distance
+    ranging_clock_rate: Frequency, expected_ambiguity: Distance
 ):
-    ambiguity = ranging.pn_sequence_range_ambiguity(chip_rate)
+    ambiguity = ranging.pn_sequence_range_ambiguity(ranging_clock_rate)
     # Using loose tolerance because the example is approximate
     assert_quantity_allclose(ambiguity, expected_ambiguity, rtol=1e-4)
 
