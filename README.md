@@ -33,7 +33,7 @@ pip install spacelink
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Heliosphere-Network/spacelink.git
+   git clone https://github.com/cascade-space-co/spacelink.git
    cd spacelink
    ```
 

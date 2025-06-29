@@ -1,5 +1,5 @@
 """
-Spacelink Core Submodule.
+SpaceLink Core Submodule.
 
 Contains fundamental units, constants, validation logic,
 and calculation functions.

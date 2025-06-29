@@ -10,7 +10,6 @@ Key Modules
 * **antenna**: Core antenna calculations including dish gain and polarization loss
 * **noise**: Functions for noise calculations, including conversions between noise figure and temperature
 * **path**: Path loss calculations for radio communications, including free space path loss
-* **modcod**: Modulation and coding schemes for space communications
 * **ranging**: Functions for ranging and distance calculations
 
 Unit System
@@ -42,5 +41,4 @@ Example: Converting between noise figure and temperature
    antenna
    noise
    path
-   modcod
    ranging

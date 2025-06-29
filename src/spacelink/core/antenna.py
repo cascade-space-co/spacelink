@@ -2,20 +2,19 @@
 Core antenna calculation functions.
 """
 
-import astropy.units as u  # Added import
-import numpy as np  # Added import
+import astropy.units as u
+import numpy as np
 
-# Assuming units.py is now in the same core directory
 from .units import (
     Decibels,
     Dimensionless,
     Frequency,
     Length,
-    wavelength,  # Need wavelength
+    wavelength,
     enforce_units,
     to_dB,
     to_linear,
-    safe_negate,  # Add safe_negate import
+    safe_negate,
 )
 
 
@@ -76,8 +75,6 @@ def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
 
     # Calculate polarization loss factor
     plf = 0.5 + 0.5 * (numerator / denominator)
-
-    # Convert to decibels and make positive (loss)
     return safe_negate(to_dB(plf))
 
 
@@ -125,7 +122,6 @@ def dish_gain(
     ValueError
         If frequency is not positive
     """
-    # Added check back
     if frequency <= 0 * u.Hz:
         raise ValueError("Frequency must be positive")
 

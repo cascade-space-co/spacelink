@@ -56,9 +56,6 @@ Here's a simple example of calculating free space path loss:
 
 Library Structure
 -----------------
-
-SpaceLink is organized into two main subpackages:
-
 * **Core**: Fundamental calculations, units, constants, and validation logic with minimal dependencies
 
 .. toctree::
