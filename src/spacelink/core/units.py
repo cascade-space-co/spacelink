@@ -32,7 +32,6 @@ if not hasattr(u, "dBK"):
 if not hasattr(u, "dimensionless"):
     u.dimensionless = u.dimensionless_unscaled
 
-# TODO: make unit naming consistent i.e. Watts not Power, Kelvins not Temperature, etc
 Decibels = Annotated[Quantity, u.dB]
 DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
@@ -104,21 +103,10 @@ def enforce_units(func):
     return wrapper
 
 
-# DO NOT MODIFY
 @enforce_units
 def wavelength(frequency: Frequency) -> Wavelength:
     r"""
     Convert frequency to wavelength.
-
-    The wavelength is calculated using:
-
-    .. math::
-        \lambda = \frac{c}{f}
-
-    where:
-
-    * :math:`c` is the speed of light (299,792,458 m/s)
-    * :math:`f` is the frequency in Hz
 
     Parameters
     ----------
@@ -134,31 +122,14 @@ def wavelength(frequency: Frequency) -> Wavelength:
     ------
     UnitConversionError
         If the input quantity has incompatible units
-
-    Examples
-    --------
-    >>> from spacelink.units import wavelength, GHz, m
-    >>> wavelength(1 * GHz).to(m)
-    <Quantity(0.299792458, 'meter')>
     """
     return constants.c / frequency.to(u.Hz)
 
 
-# DO NOT MODIFY
 @enforce_units
 def frequency(wavelength: Wavelength) -> Frequency:
     r"""
     Convert wavelength to frequency.
-
-    The frequency is calculated using:
-
-    .. math::
-        f = \frac{c}{\lambda}
-
-    where:
-
-    * :math:`c` is the speed of light (299,792,458 m/s)
-    * :math:`\lambda` is the wavelength in meters
 
     Parameters
     ----------
@@ -174,12 +145,6 @@ def frequency(wavelength: Wavelength) -> Frequency:
     ------
     UnitConversionError
         If the input quantity has incompatible units
-
-    Examples
-    --------
-    >>> from spacelink.units import frequency, m, MHz
-    >>> frequency(1 * m).to(MHz)
-    <Quantity(299.792458, 'megahertz')>
     """
     return constants.c / wavelength.to(u.m)
 
@@ -188,14 +153,6 @@ def frequency(wavelength: Wavelength) -> Frequency:
 def to_dB(x: Quantity, *, factor=10) -> Quantity:
     r"""
     Convert a quantity to decibels, preserving the logarithmic units.
-
-    The conversion is done using:
-
-    .. math::
-        X_{{dB}} = factor \cdot \log_{{10}}(x)
-
-    The result will have units of dB(input_unit), e.g. dBW, dBK, dBHz, etc.
-    For dimensionless input, the result will have unit dB.
 
     Parameters
     ----------
@@ -227,26 +184,15 @@ def to_dB(x: Quantity, *, factor=10) -> Quantity:
 @enforce_units
 def to_dBHz(x: Frequency) -> DecibelHertz:
     r"""
-    Convert a decibel quantity to dBHz
+    Convert a decibel quantity to dBHz.
     """
     return 10 * np.log10(x.to_value(u.Hz)) * u.dBHz
 
 
-# DO NOT MODIFY
 @enforce_units
 def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
     r"""
     Convert decibels to a linear (dimensionless) ratio.
-
-    The conversion is done using:
-
-    .. math::
-        x = 10^{\frac{X_{dB}}{factor}}
-
-    where:
-
-    * :math:`X_{dB}` is the value in decibels
-    * :math:`factor` is 10 for power quantities, 20 for field quantities
 
     Parameters
     ----------
@@ -264,22 +210,10 @@ def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
     return linear_value * u.dimensionless
 
 
-# DO NOT MODIFY
 @enforce_units
 def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
     r"""
     Convert a return loss in decibels to voltage standing wave ratio (VSWR).
-
-    The conversion is done using:
-
-    .. math::
-        VSWR = \frac{1 + |\Gamma|}{1 - |\Gamma|}
-
-    where:
-
-    * :math:`|\Gamma|` is the magnitude of the reflection coefficient
-    * :math:`|\Gamma| = 10^{-\frac{RL}{20}}`
-    * :math:`RL` is the return loss in dB
 
     Parameters
     ----------
@@ -295,11 +229,6 @@ def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
     ------
     ValueError
         If return_loss is negative
-
-    Examples
-    --------
-    >>> return_loss_to_vswr(20.0 * u.dB)
-    <Quantity(1.2, 'dimensionless')>
     """
     if return_loss.value < 0:
         raise ValueError(f"return loss must be >= 0 ({return_loss}).")
@@ -309,21 +238,10 @@ def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
     return ((1 + gamma) / (1 - gamma)) * u.dimensionless
 
 
-# DO NOT MODIFY
 @enforce_units
 def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     r"""
     Convert voltage standing wave ratio (VSWR) to return loss in decibels.
-
-    The conversion is done using:
-
-    .. math::
-        RL = -20 \log_{10}\left(\frac{VSWR - 1}{VSWR + 1}\right)
-
-    where:
-
-    * :math:`VSWR` is the voltage standing wave ratio
-    * :math:`RL` is the return loss in dB
 
     Parameters
     ----------
@@ -339,11 +257,6 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     ------
     ValueError
         If vswr is less than 1
-
-    Examples
-    --------
-    >>> vswr_to_return_loss(1.2 * u.dimensionless)
-    <Quantity(20.83, 'dB')>
     """
     if vswr < 1.0:
         raise ValueError(f"VSWR must be >= 1 ({vswr}).")
@@ -353,23 +266,10 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     return safe_negate(to_dB(gamma, factor=20))
 
 
-# DO NOT MODIFY
 @enforce_units
 def mismatch_loss(return_loss: Decibels) -> Decibels:
     r"""
     Compute the mismatch loss due to non-ideal return loss.
-
-    Mismatch loss quantifies power lost from reflections at an interface.
-    It is calculated using:
-
-    .. math::
-        ML = -10 \log_{10}(1 - |\Gamma|^2)
-
-    where:
-
-    * :math:`|\Gamma|` is the magnitude of the reflection coefficient
-    * :math:`|\Gamma| = 10^{-\frac{RL}{20}}`
-    * :math:`RL` is the return loss in dB
 
     Parameters
     ----------
@@ -380,11 +280,6 @@ def mismatch_loss(return_loss: Decibels) -> Decibels:
     -------
     Quantity
         Mismatch loss in decibels
-
-    Examples
-    --------
-    >>> mismatch_loss(9.54 * u.dB)
-    <Quantity(0.51, 'dB')>
     """
     # Note that we want |Γ|² so we use factor=10 instead of factor=20
     gamma_2 = to_linear(-return_loss, factor=10)
@@ -392,7 +287,6 @@ def mismatch_loss(return_loss: Decibels) -> Decibels:
     return safe_negate(to_dB(1 - gamma_2))
 
 
-# Register YAML constructor for Quantity objects
 def quantity_constructor(loader, node):
     """Constructor for !Quantity tags in YAML files."""
     mapping = loader.construct_mapping(node)

@@ -31,14 +31,6 @@ def noise_power(bandwidth: Frequency, temperature: Temperature = T0) -> Power:
     r"""
     Calculate the thermal noise power for a given bandwidth and temperature.
 
-    The noise power is given by:
-
-    .. math::
-        P_n = k T B
-
-    where :math:`k` is Boltzmann's constant, :math:`T` is the
-    noise temperature in Kelvin, and :math:`B` is the bandwidth in Hz.
-
     Parameters
     ----------
     bandwidth : Quantity
@@ -64,14 +56,6 @@ def noise_power_density(temperature: Temperature) -> PowerDensity:
     r"""
     Calculate the noise power density for a given temperature.
 
-    The noise power density is given by:
-
-    .. math::
-        P_n = k T
-
-    where :math:`k` is Boltzmann's constant and :math:`T` is the
-    noise temperature in Kelvin.
-
     Parameters
     ----------
     temperature : Quantity
@@ -91,14 +75,6 @@ def temperature_to_noise_factor(temperature: Temperature) -> Dimensionless:
     r"""
     Convert noise temperature to noise factor (linear).
 
-    The noise factor is given by:
-
-    .. math::
-        F = 1 + \frac{T}{T_0}
-
-    where :math:`T` is the noise temperature and :math:`T_0` is the
-    reference temperature (290 K).
-
     Parameters
     ----------
     temperature : Quantity
@@ -116,14 +92,6 @@ def temperature_to_noise_factor(temperature: Temperature) -> Dimensionless:
 def noise_factor_to_temperature(noise_factor: Dimensionless) -> Temperature:
     r"""
     Convert noise factor (linear) to noise temperature.
-
-    The noise temperature is given by:
-
-    .. math::
-        T = (F - 1) T_0
-
-    where :math:`F` is the noise factor (linear) and :math:`T_0` is the
-    reference temperature (290 K).
 
     Parameters
     ----------
@@ -146,21 +114,6 @@ def noise_figure_to_temperature(noise_figure: Decibels) -> Temperature:
     r"""
     Convert noise figure (in dB) to noise temperature (in Kelvin).
 
-    The conversion is done in two steps:
-
-    1. Convert noise figure (dB) to noise factor (linear):
-
-       .. math::
-           F = 10^{NF_{dB}/10}
-
-    2. Convert noise factor to noise temperature:
-
-       .. math::
-           T = (F - 1) T_0
-
-    where :math:`NF_{dB}` is the noise figure in dB and :math:`T_0` is the
-    reference temperature (290 K).
-
     Parameters
     ----------
     noise_figure : Quantity
@@ -179,20 +132,6 @@ def noise_figure_to_temperature(noise_figure: Decibels) -> Temperature:
 def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
     r"""
     Convert noise temperature in Kelvin to noise figure in dB.
-
-    The conversion is done in two steps:
-
-    1. Convert temperature to noise factor (linear):
-
-       .. math::
-           F = 1 + \frac{T}{T_0}
-
-    2. Convert noise factor to noise figure (dB):
-
-       .. math::
-           NF_{dB} = 10 \log_{10}(F)
-
-    where :math:`T_0` is the reference temperature (290K).
 
     Parameters
     ----------
