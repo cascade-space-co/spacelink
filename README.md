@@ -79,7 +79,7 @@ We welcome contributions to the SpaceLink project! To get started, please follow
      ```
    - Run a specific test file:
      ```bash
-     poetry run pytest tests/test_antenna.py
+     poetry run pytest tests/core/test_antenna.py
      ```
    - Run tests with verbose output:
      ```bash
@@ -105,3 +105,5 @@ Thank you for contributing to SpaceLink!
 ## License
 
 MIT License
+
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
