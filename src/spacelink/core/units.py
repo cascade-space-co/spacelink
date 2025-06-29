@@ -246,7 +246,7 @@ def to_dB(x: Quantity, *, factor=10) -> Quantity:
     Returns
     -------
     Quantity
-        Value in decibels with logarithmic units (e.g., dBW, dBK, dBHz, dB)
+        Value in logarithmic units (e.g., dBW, dBK, dBHz, dB)
     """
     if x.value <= 0:
         # Return -inf dB for zero or negative input, matching RF convention
@@ -264,31 +264,33 @@ def to_dB(x: Quantity, *, factor=10) -> Quantity:
 
 
 @enforce_units
-def to_dBHz(x: Frequency) -> DecibelHertz:
-    r"""
-    Convert a decibel quantity to dBHz.
+def to_linear(x: Decibels, *, factor: float = 10) -> Quantity:
     """
-    return 10 * np.log10(x.to_value(u.Hz)) * u.dBHz
+    Convert a decibel quantity to its linear equivalent, preserving the underlying units.
 
-
-@enforce_units
-def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
-    r"""
-    Convert decibels to a linear (dimensionless) ratio.
-
-    Parameters
-    ----------
-    x : Quantity
-        A quantity in decibels
-    factor : float, optional
-        10 for power quantities, 20 for field quantities
-
-    Returns
-    -------
-    Quantity
-        A dimensionless quantity (e.g., gain or ratio)
+    If the input is in plain dB, output is dimensionless. If the input is in dB(someunit),
+    output is in that unit (e.g., dBW -> W, dBHz -> Hz, dBK -> K).
     """
+    # For dB(someunit), use astropy's .to() for robust conversion
+    if hasattr(x.unit, "function_unit") and x.unit.function_unit is not None:
+        try:
+            return x.to(x.unit.function_unit)
+        except Exception:
+            pass
+    if hasattr(x.unit, "physical_unit") and x.unit.physical_unit is not None:
+        try:
+            return x.to(x.unit.physical_unit)
+        except Exception:
+            pass
+    # For plain dB or dimensionless
     linear_value = np.power(10, x.value / factor)
+    if (
+        x.unit == u.dB
+        or x.unit == u.dimensionless_unscaled
+        or x.unit == u.dimensionless
+    ):
+        return linear_value * u.dimensionless
+    # Fallback: return dimensionless
     return linear_value * u.dimensionless
 
 
@@ -304,7 +306,7 @@ def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
 
     Returns
     -------
-    Quantity
+    Dimensionless
         VSWR (>= 1)
 
     Raises

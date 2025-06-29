@@ -18,7 +18,7 @@ where:
 The polarization loss in dB is then:
 
 .. math::
-   L_{pol} = -10 \log_{10}(PLF)
+   L_{pol} = -10 \log_{10}(\text{PLF})
 
 For circular polarization, the axial ratio is 0 dB, and for linear polarization,
 it is >40 dB.
@@ -36,13 +36,6 @@ where:
 * :math:`\eta` is the efficiency factor (typically 0.55 to 0.70)
 * :math:`D` is the diameter of the dish
 * :math:`\lambda` is the wavelength
-
-In decibels:
-
-.. math::
-   G_{dB} = 10\log_{10}(\eta) + 20\log_{10}(D) + 20\log_{10}(f) +\
-   20\log_{10}\left(\frac{\pi}{c}\right)
-
 """
 
 import astropy.units as u

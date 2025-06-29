@@ -32,7 +32,7 @@ from .units import (
     Frequency,
     Distance,
     enforce_units,
-    to_dBHz,
+    to_dB,
 )
 
 
@@ -93,7 +93,7 @@ def chip_snr(ranging_clock_rate: Frequency, prn0: DecibelHertz) -> Decibels:
     ----------
     [3] p. 2-3.
     """
-    return prn0 - to_dBHz(ranging_clock_rate)
+    return prn0 - to_dB(ranging_clock_rate)
 
 
 @enforce_units

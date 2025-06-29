@@ -136,6 +136,7 @@ def test_to_dB(input_value, factor, expected):
         (20 * u.dB, 10, 100 * u.dimensionless),
         (30 * u.dB, 10, 1000 * u.dimensionless),
         (20 * u.dB, 20, 10 * u.dimensionless),
+        (10 * u.dBW, 10, 10 * u.W),
     ],
 )
 def test_to_linear(input_value, factor, expected):
