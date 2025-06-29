@@ -1,5 +1,0 @@
-name: receive_front_end
-description: "Receive front end cascade test"
-frequency: "1.0 GHz"
-distance: "1.0 km"
-bandwidth: "1.0 kHz"

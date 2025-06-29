@@ -1,5 +1,5 @@
 SpaceLink Modules
-===============
+=================
 
 .. automodule:: spacelink
    :members:
@@ -7,17 +7,8 @@ SpaceLink Modules
    :show-inheritance:
    :noindex:
 
-Module Documentation
---------------------
-
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
+   :caption: Module Documentation:
 
-   units
-   dish
-   antenna
-   cascade
-   link
-   mode
-   noise
-   path
+   core/index

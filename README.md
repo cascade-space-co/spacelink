@@ -2,109 +2,109 @@
 
 A Python library for radio frequency calculations, including antenna modeling, RF conversions, and noise calculations.
 
-Created and maintained by the Heliosphere Network Corporation
+Created and maintained by [Cascade Space](https://www.cascade.space)
 
-https://www.heliospherenetwork.com
+## Features
+
+- **Antenna Modeling**: Calculate antenna gain, beamwidth, and polarization effects
+- **RF System Analysis**: Model complete RF chains with cascaded elements
+- **Link Budget Calculations**: Comprehensive analysis of radio communication links
+- **Noise Calculations**: System noise temperature and related parameters
+- **Space Communications**: Built-in support for satellite link analysis
+- **Unit-Aware Calculations**: Integrated unit handling for RF parameters
 
 ## Installation
 
+### Quick Install
+
+For users who want to use the package:
 ```bash
-# Install using poetry
-poetry install
-
-# Or install directly with pip
-pip install .
+pip install spacelink
 ```
 
-## Usage
+### Development Setup
 
-## Development
+#### Prerequisites
 
-### Setup
-#### Mac OS X
-```bash
-# Install dependencies and the package in development mode
-poetry install
-```
+1. Python 3.11 or higher
+2. Poetry package manager ([Install Poetry](https://python-poetry.org/docs/))
 
-### Project Structure
+#### Getting Started
 
-```
-spacelink/
-├── src/
-│   └── spacelink/
-│       ├── __init__.py
-│       ├── antenna.py     # Antenna gain and beamwidth calculations
-│       ├── conversions.py # dB/linear conversions
-│       └── noise.py      # Noise calculations
-├── tests/
-│   ├── __init__.py
-│   ├── test_antenna.py
-│   ├── test_conversions.py
-│   └── test_noise.py
-├── pyproject.toml
-├── poetry.lock
-└── README.md
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-poetry run pytest
-
-# Run tests with coverage
-poetry run pytest --cov=spacelink --cov-report=term-missing
-
-# Run a specific test file
-poetry run pytest tests/test_antenna.py
-
-# Run tests with verbose output
-poetry run pytest -v
-```
-
-### Code Formatting and Linting
-
-```bash
-# Format code with Black
-poetry run black .
-
-# Lint code with Flake8
-poetry run flake8 .
-```
-
-### Running Jupyter Notebooks
-
-The examples directory contains Jupyter notebooks demonstrating SpaceLink's capabilities. To run these notebooks:
-
-```bash
-# Install the development dependencies which include Jupyter
-poetry install --with dev
-
-# Start the Jupyter server
-poetry run jupyter notebook
-
-# This will open your browser to the Jupyter file browser
-# Navigate to the examples/ directory and open any .ipynb file
-```
-
-When running a notebook for the first time, make sure to select the correct kernel:
-
-1. After opening the notebook, look for the kernel indicator in the top-right corner
-2. Click on it and select "Python (spacelink-*)" from the dropdown menu
-   - This is the Poetry-managed virtual environment with all dependencies installed
-3. If you don't see the spacelink kernel, run:
+1. Clone the repository:
    ```bash
-   poetry run python -m ipykernel install --user --name spacelink --display-name "Python (SpaceLink)"
+   git clone https://github.com/cascade-space-co/spacelink.git
+   cd spacelink
    ```
 
-### Building Documentation
+2. Install dependencies:
+   ```bash
+   poetry install
+   ```
 
+For production use without development tools:
+   ```bash
+   poetry install --without dev
+   ```
+
+## Documentation
+
+The documentation includes API references and technical guides.
+
+To build the documentation locally:
 ```bash
-# Build HTML documentation
 poetry run sphinx-build -b html docs/source docs/build
 ```
 
+## Contributing
+
+We welcome contributions to the SpaceLink project! To get started, please follow these steps:
+
+1. **Read the Guidelines**: Review the [CONTRIBUTING.md](../CONTRIBUTING.md) file for detailed instructions on coding style, testing, and project conventions.
+
+2. **Set Up Your Environment**:
+   - Install dependencies using Poetry:
+     ```bash
+     poetry install
+     ```
+
+3. **Run Tests**:
+   - Ensure all tests pass before submitting your changes:
+     ```bash
+     poetry run pytest
+     ```
+   - Run tests with coverage:
+     ```bash
+     poetry run pytest --cov=spacelink --cov-report=term-missing
+     ```
+   - Run a specific test file:
+     ```bash
+     poetry run pytest tests/core/test_antenna.py
+     ```
+   - Run tests with verbose output:
+     ```bash
+     poetry run pytest -v
+     ```
+
+4. **Follow Code Style**:
+   - Format your code with Black:
+     ```bash
+     poetry run black .
+     ```
+   - Lint your code with Flake8:
+     ```bash
+     poetry run flake8 .
+     ```
+
+5. **Submit a Pull Request**:
+   - Push your changes to a feature branch and open a pull request on GitHub.
+   - Provide a clear description of your changes and link any related issues.
+
+Thank you for contributing to SpaceLink!
+
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
 ## License
 
-MIT License
+[MIT License](LICENSE)
+
