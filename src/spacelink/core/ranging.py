@@ -49,7 +49,6 @@ class CommandMod(enum.Enum):
 CODE_LENGTH = 1_009_470
 
 
-# DO NOT MODIFY
 @enforce_units
 def pn_sequence_range_ambiguity(ranging_clock_rate: Frequency) -> Distance:
     r"""
@@ -73,7 +72,6 @@ def pn_sequence_range_ambiguity(ranging_clock_rate: Frequency) -> Distance:
     return (CODE_LENGTH * const.c / (4 * ranging_clock_rate)).decompose()
 
 
-# DO NOT MODIFY
 @enforce_units
 def chip_snr(ranging_clock_rate: Frequency, prn0: DecibelHertz) -> Decibels:
     r"""
@@ -98,7 +96,6 @@ def chip_snr(ranging_clock_rate: Frequency, prn0: DecibelHertz) -> Decibels:
     return prn0 - to_dBHz(ranging_clock_rate)
 
 
-# DO NOT MODIFY
 @enforce_units
 def _suppression_factor(mod_idx: Angle, modulation: CommandMod) -> Dimensionless:
     r"""
@@ -131,7 +128,6 @@ def _suppression_factor(mod_idx: Angle, modulation: CommandMod) -> Dimensionless
         raise ValueError(f"Invalid command modulation type: {modulation}")
 
 
-# DO NOT MODIFY
 @enforce_units
 def _modulation_factor(mod_idx: Angle, modulation: CommandMod) -> Dimensionless:
     r"""
