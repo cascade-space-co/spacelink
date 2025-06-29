@@ -1,7 +1,52 @@
-"""
-Functions for calculating noise in radio systems.
+r"""
+Noise Power
+-----------
 
-Includes functions for noise power, temperature, figure, and factor conversions.
+The thermal noise power for a given bandwidth and temperature is:
+
+.. math::
+   P_n = k T B
+
+where :math:`k` is Boltzmann's constant, :math:`T` is the noise temperature in Kelvin,
+and :math:`B` is the bandwidth in Hz.
+
+Density, is just:
+
+.. math::
+   P_n = k T
+
+Noise Figure / Factor Modeling
+------------------------------
+The noise figure is a measure of the degradation of the signal-to-noise ratio (SNR) due to the
+noise added by the amplifier, given an input noise temperature of T_0. If the input noise
+temperature is not equal to T_0, noise figure cannot be used to measure the degradation in SNR.
+
+The relationships between noise temperature, noise figure, and noise factor are:
+
+.. math::
+    F = 1 + \frac{T}{T_0}
+
+.. math::
+    T = (F - 1) T_0
+
+.. math::
+    \text{NF}_{\text{dB}} = 10 \log_{10}(F)
+
+.. math::
+    F = 10^{\text{NF}_{\text{dB}}/10}
+
+where :math:`T` is the noise temperature, :math:`T_0` is the reference temperature (290 K),
+:math:`F` is the noise factor, and :math:`\text{NF}_{\text{dB}}` is the noise figure in dB.
+
+Noise temperature and SNR
+-------------------------
+It is important to remember what the noise temperature is. The noise temperature of an amplifier
+is the input referred noise temperature, meaning we model the amplifier as a noiseless amplifier
+with a noisy resistor at the input with temperature :math:`T`. The output noise temperature is
+therefore :math:`G T` where :math:`G` is the gain of the amplifier. To accurately model the
+SNR through the amplifier chain, best practice is to model the noise power separately from the
+signal power and then compute the SNR at the output.
+
 """
 
 import astropy.units as u
@@ -18,9 +63,6 @@ from .units import (
     to_dB,
 )
 
-# from ..core.validation import check_positive # Removed import
-
-
 # Define constants with units
 BOLTZMANN = 1.380649e-23 * u.J / u.K
 T0 = 290.0 * u.K
@@ -33,17 +75,16 @@ def noise_power(bandwidth: Frequency, temperature: Temperature = T0) -> Power:
 
     Parameters
     ----------
-    bandwidth : Quantity
+    bandwidth : Frequency
         Bandwidth in Hz
-    temperature : Quantity, optional
+    temperature : Temperature, optional
         Noise temperature in Kelvin (default: 290 K)
 
     Returns
     -------
-    Quantity
+    Power
         Noise power in Watts
     """
-    # Check for negative bandwidth remains
     if bandwidth < 0 * u.Hz:
         raise ValueError("Bandwidth cannot be negative")
 
@@ -58,12 +99,12 @@ def noise_power_density(temperature: Temperature) -> PowerDensity:
 
     Parameters
     ----------
-    temperature : Quantity
+    temperature : Temperature
         Noise temperature in Kelvin
 
     Returns
     -------
-    Quantity
+    PowerDensity
         Noise power density in Watts per Hertz
     """
     result = BOLTZMANN * temperature.to(u.K)
@@ -77,12 +118,12 @@ def temperature_to_noise_factor(temperature: Temperature) -> Dimensionless:
 
     Parameters
     ----------
-    temperature : Quantity
+    temperature : Temperature
         Noise temperature in Kelvin
 
     Returns
     -------
-    Quantity
+    Dimensionless
         Noise factor (dimensionless, linear)
     """
     return (1.0 + (temperature.to(u.K) / T0)).to(u.dimensionless)
@@ -95,12 +136,12 @@ def noise_factor_to_temperature(noise_factor: Dimensionless) -> Temperature:
 
     Parameters
     ----------
-    noise_factor : Quantity
+    noise_factor : Dimensionless
         Noise factor (dimensionless, linear)
 
     Returns
     -------
-    Quantity
+    Temperature
         Noise temperature in Kelvin
     """
     if noise_factor < 1:
@@ -116,12 +157,12 @@ def noise_figure_to_temperature(noise_figure: Decibels) -> Temperature:
 
     Parameters
     ----------
-    noise_figure : Quantity
+    noise_figure : Decibels
         Noise figure in dB
 
     Returns
     -------
-    Quantity
+    Temperature
         Noise temperature in Kelvin
     """
     factor = to_linear(noise_figure)
@@ -135,12 +176,12 @@ def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
 
     Parameters
     ----------
-    temperature : Quantity
+    temperature : Temperature
         Noise temperature in Kelvin
 
     Returns
     -------
-    Quantity
+    Decibels
         Noise figure in dB
     """
     factor = temperature_to_noise_factor(temperature)

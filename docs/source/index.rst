@@ -37,23 +37,6 @@ For development:
    cd spacelink
    poetry install
 
-Basic Usage
-^^^^^^^^^^^
-
-Here's a simple example of calculating free space path loss:
-
-.. code-block:: python
-
-   import astropy.units as u
-   from spacelink.core.path import free_space_path_loss
-
-   # Calculate path loss for a 2.4 GHz signal over 1000 km
-   distance = 1000 * u.km
-   frequency = 2.4 * u.GHz
-
-   loss = free_space_path_loss(distance, frequency)
-   print(f"Free space path loss: {loss}")
-
 Library Structure
 -----------------
 * **Core**: Fundamental calculations, units, constants, and validation logic with minimal dependencies

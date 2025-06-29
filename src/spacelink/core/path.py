@@ -1,8 +1,39 @@
-"""
-Path loss calculations for radio communications.
+r"""
+The Friis Transmission Equation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This module provides functions for calculating various types of path loss,
-including free space path loss, spreading loss, and aperture loss.
+The complete Friis transmission equation is:
+
+.. math::
+
+   P_r = P_t G_t G_r \left(\frac{\lambda}{4\pi d}\right)^2
+
+where:
+
+* :math:`P_r` is the received power
+* :math:`P_t` is the transmitted power
+* :math:`G_t` is the gain of the transmitting antenna
+* :math:`G_r` is the gain of the receiving antenna
+* :math:`\lambda` is the wavelength
+* :math:`d` is the distance between antennas
+
+Loss Components
+^^^^^^^^^^^^^^^
+
+.. math::
+
+   \text{FSPL} = \underbrace{(4\pi d^2)}_{\text{Spreading Loss}} \times\
+   \underbrace{\left(\frac{4\pi}{\lambda^2}\right)}_{\text{Aperture Loss}}
+
+
+Spreading Loss
+^^^^^^^^^^^^^^
+The spreading loss is the loss due to spherical spreading of the plane wave.
+
+Aperture Loss
+^^^^^^^^^^^^^
+The aperture loss is the loss due to the effective aperture of the antenna.
+The aperture loss term is actually the effective aperture of an ideal isotropic antenna.
 """
 
 import astropy.units as u
