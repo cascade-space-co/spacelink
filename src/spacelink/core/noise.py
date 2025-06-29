@@ -12,6 +12,7 @@ from .units import (
     Temperature,
     Frequency,
     Power,
+    PowerDensity,
     enforce_units,
     to_linear,
     to_dB,
@@ -56,6 +57,33 @@ def noise_power(bandwidth: Frequency, temperature: Temperature = T0) -> Power:
 
     result = BOLTZMANN * temperature.to(u.K) * bandwidth.to(u.Hz)
     return result.to(u.W)
+
+
+@enforce_units
+def noise_power_density(temperature: Temperature) -> PowerDensity:
+    r"""
+    Calculate the noise power density for a given temperature.
+
+    The noise power density is given by:
+
+    .. math::
+        P_n = k T
+
+    where :math:`k` is Boltzmann's constant and :math:`T` is the
+    noise temperature in Kelvin.
+
+    Parameters
+    ----------
+    temperature : Quantity
+        Noise temperature in Kelvin
+
+    Returns
+    -------
+    Quantity
+        Noise power density in Watts per Hertz
+    """
+    result = BOLTZMANN * temperature.to(u.K)
+    return result.to(u.W / u.Hz)
 
 
 @enforce_units

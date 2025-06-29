@@ -3506,6 +3506,24 @@ files = [
 ]
 
 [[package]]
+name = "uncertainties"
+version = "3.2.3"
+description = "calculations with values with uncertainties, error propagation"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "uncertainties-3.2.3-py3-none-any.whl", hash = "sha256:313353900d8f88b283c9bad81e7d2b2d3d4bcc330cbace35403faaed7e78890a"},
+    {file = "uncertainties-3.2.3.tar.gz", hash = "sha256:76a5653e686f617a42922d546a239e9efce72e6b35411b7750a1d12dcba03031"},
+]
+
+[package.extras]
+all = ["uncertainties[arrays,doc,test]"]
+arrays = ["numpy"]
+doc = ["python-docs-theme", "sphinx", "sphinx-copybutton"]
+test = ["pytest", "pytest_codspeed", "pytest_cov", "scipy"]
+
+[[package]]
 name = "uri-template"
 version = "1.3.0"
 description = "RFC 6570 URI Template Processor"
@@ -3611,4 +3629,4 @@ test = ["black", "flake8", "pytest", "pytest-cov", "pyyaml"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "2a8906178331032f00c9b37b2485450946541892b22b134cfd688b4e9fc3e62e"
+content-hash = "3aa847e4133fe93cf786b65505e18e7088abd6963280e82cffbb9b8c644463b2"

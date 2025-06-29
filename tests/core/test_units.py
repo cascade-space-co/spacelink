@@ -201,3 +201,10 @@ def test_to_dB_units(input_value, factor, expected):
 def safe_negate(quantity):
     # Astropy does not allow -quantity for function units, so use multiplication
     return (-1) * quantity
+
+
+def test_to_dB_output_unit_is_dBW():
+    """Test that to_dB with input in W returns output in dBW."""
+    value = 5.0
+    result = units.to_dB(value * u.W)
+    assert result.unit == u.dBW, f"Expected unit dBW, got {result.unit}"

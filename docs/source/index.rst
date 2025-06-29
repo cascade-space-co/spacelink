@@ -1,7 +1,11 @@
 Welcome to SpaceLink's documentation!
 =====================================
 
-SpaceLink is a comprehensive Python library for radio frequency (RF) calculations, designed specifically for space communications and RF system analysis. Developed by `Heliosphere Network <https://www.heliospherenetwork.com>`_, SpaceLink provides tools for antenna modeling, RF chain analysis, link budget calculations, and noise analysis.
+SpaceLink is a comprehensive Python library for radio frequency (RF) calculations,
+designed specifically for space communications and RF system analysis.
+Developed by `Cascade Space <https://cascade.space>`_,
+SpaceLink provides tools for antenna modeling, RF chain analysis,
+link budget calculations, and noise analysis.
 
 Key Features
 ------------
@@ -29,7 +33,7 @@ For development:
 
 .. code-block:: bash
 
-   git clone https://github.com/Heliosphere-Network/spacelink.git
+   git clone https://github.com/cascade-space-co/spacelink.git
    cd spacelink
    poetry install
 
