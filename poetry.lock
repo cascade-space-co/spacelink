@@ -2707,6 +2707,28 @@ rpds-py = ">=0.7.0"
 typing-extensions = {version = ">=4.4.0", markers = "python_version < \"3.13\""}
 
 [[package]]
+name = "renku-sphinx-theme"
+version = "0.5.0"
+description = "A Sphinx theme for Renku documentation."
+optional = false
+python-versions = "*"
+groups = ["dev"]
+files = [
+    {file = "renku-sphinx-theme-0.5.0.tar.gz", hash = "sha256:8fcf80b854681119ee4dd6268c6a4ed80f9303a3fa9fdc020fd1cb4926dc4c6e"},
+    {file = "renku_sphinx_theme-0.5.0-py2.py3-none-any.whl", hash = "sha256:1bd92cf728c00d539ebbaa59bb3d5e8eee977ad0aecaa3034962a315b8fa42aa"},
+]
+
+[package.dependencies]
+Sphinx = ">=1.6.3,<9.0.0"
+sphinx-rtd-theme = ">=0.5.0,<3.1"
+
+[package.extras]
+all = ["Sphinx (>=1.6.3,<9.0.0)", "check-manifest (>=0.25)", "isort (>=4.2.2)", "libsass (>=0.23.0,<0.24.0)", "pkginfo (<1.13)", "pydocstyle (>=1.0.0)", "setuptools", "sphinx-rtd-theme (>=0.5.0,<3.1)", "twine (>=4.0,<7.0)", "wheel"]
+dev = ["libsass (>=0.23.0,<0.24.0)"]
+docs = ["Sphinx (>=1.6.3,<9.0.0)", "sphinx-rtd-theme (>=0.5.0,<3.1)"]
+tests = ["check-manifest (>=0.25)", "isort (>=4.2.2)", "pkginfo (<1.13)", "pydocstyle (>=1.0.0)", "setuptools", "twine (>=4.0,<7.0)", "wheel"]
+
+[[package]]
 name = "requests"
 version = "2.32.4"
 description = "Python HTTP for Humans."
@@ -3450,4 +3472,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "2038cda65b60d7a400a897d83df766a89a1739e6d90aa4e56deafce0f09bf59f"
+content-hash = "da8d2752c920257b1946993724bfac42f650ec0b16666479d81788efed5d2a02"
