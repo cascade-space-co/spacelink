@@ -1,0 +1,39 @@
+name: Build Documentation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'src/**'
+      - 'pyproject.toml'
+      - 'poetry.lock'
+      - '.github/workflows/docs-build.yml'
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "export PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          poetry install --with dev
+
+      - name: Build documentation
+        run: |
+          poetry run sphinx-build -b html docs/source docs/build
+
+      - name: Check for HTML output
+        run: |
+          test -f docs/build/index.html 
