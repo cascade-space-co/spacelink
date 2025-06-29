@@ -1,0 +1,42 @@
+name: Deploy Documentation to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - hotfix/documentation-deploy
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "export PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          poetry install --with dev
+
+      - name: Build documentation
+        run: |
+          poetry run sphinx-build -b html docs/source docs/build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/build

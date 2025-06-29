@@ -38,7 +38,7 @@ exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "renku"
-
+html_baseurl = "https://cascade-space-co.github.io/spacelink/"
 # -- Extension configuration -------------------------------------------------
 autodoc_default_options = {
     "members": True,
