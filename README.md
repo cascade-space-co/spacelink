@@ -106,5 +106,5 @@ Thank you for contributing to SpaceLink!
 
 ## License
 
-MIT License
+[MIT License](LICENSE)
 

@@ -16,9 +16,8 @@ packages = [{include = "spacelink", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-numpy = "^1.24.0,<3.0.0"
+numpy = "^2.0.0,<3.0.0"
 scipy = "^1.10.0,<2.0.0"
-pandas = "^2.0.0"
 autopep8 = "^2.3.2"
 astropy = "^7.0.1,<8.0.0"
 black = {version = "^25.1.0,<26.0.0", extras = ["jupyter"]}
