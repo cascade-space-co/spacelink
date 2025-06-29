@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ranging Module &mdash; SpaceLink 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/core/ranging.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Usage Examples" href="../examples.html" />
+    <link rel="prev" title="Path Module" href="path.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#key-modules">Key Modules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="units.html">Units Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="noise.html">Noise Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="path.html">Path Module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Ranging Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Core Modules</a></li>
+      <li class="breadcrumb-item active">Ranging Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/core/ranging.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-spacelink.core.ranging">
+<span id="ranging-module"></span><h1>Ranging Module<a class="headerlink" href="#module-spacelink.core.ranging" title="Link to this heading"></a></h1>
+<p>Calculations related to two-way pseudo-noise (PN) radiometric ranging.</p>
+<p>This module provides functions for calculating range ambiguity and power allocations
+between residual carrier and modulated components.</p>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] 810-005 214, Rev. C “Pseudo-Noise and Regenerative Ranging”</dt><dd><p>(part of the Deep Space Network Telecommunications Link Design Handbook)
+<a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf">https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf</a></p>
+</dd>
+<dt>[2] CCSDS 414.1-B-3 “Pseudo-Noise (PN) Ranging Systems Recommended Standard”</dt><dd><p><a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf">https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf</a></p>
+</dd>
+<dt>[3] CCSDS 414.0-G-2 “Pseudo-Noise (PN) Ranging Systems Informational Report”</dt><dd><p><a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf">https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf</a></p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.core.ranging.CommandMod">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">CommandMod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#CommandMod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.CommandMod" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>The type of command modulation used alongside ranging on the uplink.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.core.ranging.CommandMod.BIPOLAR">
+<span class="sig-name descname"><span class="pre">BIPOLAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#spacelink.core.ranging.CommandMod.BIPOLAR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.core.ranging.CommandMod.SINE_SUBCARRIER">
+<span class="sig-name descname"><span class="pre">SINE_SUBCARRIER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#spacelink.core.ranging.CommandMod.SINE_SUBCARRIER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.ranging.pn_sequence_range_ambiguity">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">pn_sequence_range_ambiguity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ranging_clock_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#pn_sequence_range_ambiguity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.pn_sequence_range_ambiguity" title="Link to this definition"></a></dt>
+<dd><p>Compute the range ambiguity of the standard PN ranging sequences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ranging_clock_rate</strong> (<em>Frequency</em>) – Rate of the ranging clock <span class="math notranslate nohighlight">\(f_{RC}\)</span>. This is half the chip rate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The range ambiguity distance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Distance</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>[1] Equation (11).
+[3] p. 2-2.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.ranging.chip_snr">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">chip_snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ranging_clock_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prn0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#chip_snr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.chip_snr" title="Link to this definition"></a></dt>
+<dd><p>Compute the chip SNR <span class="math notranslate nohighlight">\(2E_C/N_0\)</span> in decibels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ranging_clock_rate</strong> (<em>Frequency</em>) – Rate of the ranging clock <span class="math notranslate nohighlight">\(f_{RC}\)</span>. This is half the chip rate.</p></li>
+<li><p><strong>prn0</strong> (<em>DecibelHertz</em>) – The ranging signal-to-noise spectral density ratio <span class="math notranslate nohighlight">\(P_R/N_0\)</span>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The chip SNR <span class="math notranslate nohighlight">\(2E_C/N_0\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decibels</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>[3] p. 2-3.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.ranging.uplink_carrier_to_total_power">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">uplink_carrier_to_total_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod_idx_ranging</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_idx_cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modulation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#uplink_carrier_to_total_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.uplink_carrier_to_total_power" title="Link to this definition"></a></dt>
+<dd><p>Uplink ratio of residual carrier power to total power <span class="math notranslate nohighlight">\(P_{C}/P_{T}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mod_idx_ranging</strong> (<em>Angle</em>) – The RMS phase deviation by ranging signal <span class="math notranslate nohighlight">\(\phi_{r}\)</span>.</p></li>
+<li><p><strong>mod_idx_cmd</strong> (<em>Angle</em>) – The RMS phase deviation by command signal <span class="math notranslate nohighlight">\(\phi_{cmd}\)</span>.</p></li>
+<li><p><strong>modulation</strong> (<em>CommandModulation</em>) – The command modulation type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The ratio of residual carrier power to total power <span class="math notranslate nohighlight">\(P_{C}/P_{T}\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dimensionless</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>[1] Equation (20).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.ranging.uplink_ranging_to_total_power">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">uplink_ranging_to_total_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod_idx_ranging</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_idx_cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modulation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#uplink_ranging_to_total_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.uplink_ranging_to_total_power" title="Link to this definition"></a></dt>
+<dd><p>Uplink ratio of usable ranging power to total power <span class="math notranslate nohighlight">\(P_{R}/P_{T}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mod_idx_ranging</strong> (<em>Angle</em>) – The RMS phase deviation by ranging signal <span class="math notranslate nohighlight">\(\phi_{r}\)</span>.</p></li>
+<li><p><strong>mod_idx_cmd</strong> (<em>Angle</em>) – The RMS phase deviation by command signal <span class="math notranslate nohighlight">\(\phi_{cmd}\)</span>.</p></li>
+<li><p><strong>modulation</strong> (<em>CommandModulation</em>) – The command modulation type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The ratio of usable ranging power to total power <span class="math notranslate nohighlight">\(P_{R}/P_{T}\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dimensionless</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>[1] Equation (20).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.ranging.uplink_data_to_total_power">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">uplink_data_to_total_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod_idx_ranging</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_idx_cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modulation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#uplink_data_to_total_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.uplink_data_to_total_power" title="Link to this definition"></a></dt>
+<dd><p>Uplink ratio of usable data power to total power <span class="math notranslate nohighlight">\(P_{D}/P_{T}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mod_idx_ranging</strong> (<em>Angle</em>) – The RMS phase deviation by ranging signal <span class="math notranslate nohighlight">\(\phi_{r}\)</span>.</p></li>
+<li><p><strong>mod_idx_cmd</strong> (<em>Angle</em>) – The RMS phase deviation by command signal <span class="math notranslate nohighlight">\(\phi_{cmd}\)</span>.</p></li>
+<li><p><strong>modulation</strong> (<em>CommandModulation</em>) – The command modulation type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The ratio of usable data power to total power <span class="math notranslate nohighlight">\(P_{D}/P_{T}\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dimensionless</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>[1] Equation (21).</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="path.html" class="btn btn-neutral float-left" title="Path Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../examples.html" class="btn btn-neutral float-right" title="Usage Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

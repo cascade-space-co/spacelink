@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Noise Module &mdash; SpaceLink 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/core/noise.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Path Module" href="path.html" />
+    <link rel="prev" title="Antenna Module" href="antenna.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#key-modules">Key Modules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="units.html">Units Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Noise Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="path.html">Path Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Core Modules</a></li>
+      <li class="breadcrumb-item active">Noise Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/core/noise.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-spacelink.core.noise">
+<span id="noise-module"></span><h1>Noise Module<a class="headerlink" href="#module-spacelink.core.noise" title="Link to this heading"></a></h1>
+<section id="noise-power">
+<h2>Noise Power<a class="headerlink" href="#noise-power" title="Link to this heading"></a></h2>
+<p>The thermal noise power for a given bandwidth and temperature is:</p>
+<div class="math notranslate nohighlight">
+\[P_n = k T B\]</div>
+<p>where <span class="math notranslate nohighlight">\(k\)</span> is Boltzmann’s constant, <span class="math notranslate nohighlight">\(T\)</span> is the noise temperature in Kelvin,
+and <span class="math notranslate nohighlight">\(B\)</span> is the bandwidth in Hz.</p>
+<p>Density, is just:</p>
+<div class="math notranslate nohighlight">
+\[P_n = k T\]</div>
+</section>
+<section id="noise-figure-factor-modeling">
+<h2>Noise Figure / Factor Modeling<a class="headerlink" href="#noise-figure-factor-modeling" title="Link to this heading"></a></h2>
+<p>The noise figure is a measure of the degradation of the signal-to-noise ratio (SNR) due to the
+noise added by the amplifier, given an input noise temperature of T_0. If the input noise
+temperature is not equal to T_0, noise figure cannot be used to measure the degradation in SNR.</p>
+<p>The relationships between noise temperature, noise figure, and noise factor are:</p>
+<div class="math notranslate nohighlight">
+\[F = 1 + \frac{T}{T_0}\]</div>
+<div class="math notranslate nohighlight">
+\[T = (F - 1) T_0\]</div>
+<div class="math notranslate nohighlight">
+\[\text{NF}_{\text{dB}} = 10 \log_{10}(F)\]</div>
+<div class="math notranslate nohighlight">
+\[F = 10^{\text{NF}_{\text{dB}}/10}\]</div>
+<p>where <span class="math notranslate nohighlight">\(T\)</span> is the noise temperature, <span class="math notranslate nohighlight">\(T_0\)</span> is the reference temperature (290 K),
+<span class="math notranslate nohighlight">\(F\)</span> is the noise factor, and <span class="math notranslate nohighlight">\(\text{NF}_{\text{dB}}\)</span> is the noise figure in dB.</p>
+</section>
+<section id="noise-temperature-and-snr">
+<h2>Noise temperature and SNR<a class="headerlink" href="#noise-temperature-and-snr" title="Link to this heading"></a></h2>
+<p>It is important to remember what the noise temperature is. The noise temperature of an amplifier
+is the input referred noise temperature, meaning we model the amplifier as a noiseless amplifier
+with a noisy resistor at the input with temperature <span class="math notranslate nohighlight">\(T\)</span>. The output noise temperature is
+therefore <span class="math notranslate nohighlight">\(G T\)</span> where <span class="math notranslate nohighlight">\(G\)</span> is the gain of the amplifier. To accurately model the
+SNR through the amplifier chain, best practice is to model the noise power separately from the
+signal power and then compute the SNR at the output.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.noise.noise_power">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature=&lt;Quantity</span> <span class="pre">290.</span> <span class="pre">K&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.noise_power" title="Link to this definition"></a></dt>
+<dd><p>Calculate the thermal noise power for a given bandwidth and temperature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bandwidth</strong> (<em>Frequency</em>) – Bandwidth in Hz</p></li>
+<li><p><strong>temperature</strong> (<em>Temperature</em><em>, </em><em>optional</em>) – Noise temperature in Kelvin (default: 290 K)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Noise power in Watts</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Power</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.noise.noise_power_density">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_power_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_power_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.noise_power_density" title="Link to this definition"></a></dt>
+<dd><p>Calculate the noise power density for a given temperature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>temperature</strong> (<em>Temperature</em>) – Noise temperature in Kelvin</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Noise power density in Watts per Hertz</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>PowerDensity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.noise.temperature_to_noise_factor">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">temperature_to_noise_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#temperature_to_noise_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.temperature_to_noise_factor" title="Link to this definition"></a></dt>
+<dd><p>Convert noise temperature to noise factor (linear).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>temperature</strong> (<em>Temperature</em>) – Noise temperature in Kelvin</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Noise factor (dimensionless, linear)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dimensionless</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.noise.noise_factor_to_temperature">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_factor_to_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_factor_to_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.noise_factor_to_temperature" title="Link to this definition"></a></dt>
+<dd><p>Convert noise factor (linear) to noise temperature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>noise_factor</strong> (<em>Dimensionless</em>) – Noise factor (dimensionless, linear)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Noise temperature in Kelvin</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Temperature</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.noise.noise_figure_to_temperature">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_figure_to_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_figure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_figure_to_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.noise_figure_to_temperature" title="Link to this definition"></a></dt>
+<dd><p>Convert noise figure (in dB) to noise temperature (in Kelvin).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>noise_figure</strong> (<em>Decibels</em>) – Noise figure in dB</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Noise temperature in Kelvin</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Temperature</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.noise.temperature_to_noise_figure">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">temperature_to_noise_figure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#temperature_to_noise_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.temperature_to_noise_figure" title="Link to this definition"></a></dt>
+<dd><p>Convert noise temperature in Kelvin to noise figure in dB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>temperature</strong> (<em>Temperature</em>) – Noise temperature in Kelvin</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Noise figure in dB</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decibels</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="antenna.html" class="btn btn-neutral float-left" title="Antenna Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="path.html" class="btn btn-neutral float-right" title="Path Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

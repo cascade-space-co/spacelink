@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Core Modules &mdash; SpaceLink 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/core/index.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Units Module" href="units.html" />
+    <link rel="prev" title="SpaceLink Modules" href="../modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Core Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#key-modules">Key Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="units.html">Units Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="noise.html">Noise Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="path.html">Path Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
+      <li class="breadcrumb-item active">Core Modules</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/core/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="core-modules">
+<h1>Core Modules<a class="headerlink" href="#core-modules" title="Link to this heading"></a></h1>
+<p>The Core subpackage provides fundamental calculations, units, constants, and validation logic for radio frequency applications. These modules form the foundation of SpaceLink and are designed to be used both directly and by the higher-level Components subpackage.</p>
+<section id="key-modules">
+<h2>Key Modules<a class="headerlink" href="#key-modules" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>units</strong>: Defines unit types, conversion functions, and utilities for working with RF quantities</p></li>
+<li><p><strong>antenna</strong>: Antenna calculations including dish gain and polarization loss</p></li>
+<li><p><strong>noise</strong>: Functions for noise calculations, including conversions between noise figure and temperature</p></li>
+<li><p><strong>path</strong>: Path loss calculations for radio communications, including free space path loss</p></li>
+<li><p><strong>ranging</strong>: Functions for ranging and distance calculations</p></li>
+</ul>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units.html#wavelength">Wavelength</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#to-db">to_dB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#to-linear">to_linear</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#return-loss-to-vswr">Return Loss to VSWR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#vswr-to-return-loss">VSWR to Return Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#mismatch-loss">Mismatch Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.enforce_units"><code class="docutils literal notranslate"><span class="pre">enforce_units()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.wavelength"><code class="docutils literal notranslate"><span class="pre">wavelength()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.frequency"><code class="docutils literal notranslate"><span class="pre">frequency()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.to_dB"><code class="docutils literal notranslate"><span class="pre">to_dB()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.to_linear"><code class="docutils literal notranslate"><span class="pre">to_linear()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.return_loss_to_vswr"><code class="docutils literal notranslate"><span class="pre">return_loss_to_vswr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.vswr_to_return_loss"><code class="docutils literal notranslate"><span class="pre">vswr_to_return_loss()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.mismatch_loss"><code class="docutils literal notranslate"><span class="pre">mismatch_loss()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.quantity_constructor"><code class="docutils literal notranslate"><span class="pre">quantity_constructor()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.safe_negate"><code class="docutils literal notranslate"><span class="pre">safe_negate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="antenna.html">Antenna Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="antenna.html#polarization-loss">Polarization Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="antenna.html#dish-gain">Dish Gain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.polarization_loss"><code class="docutils literal notranslate"><span class="pre">polarization_loss()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.dish_gain"><code class="docutils literal notranslate"><span class="pre">dish_gain()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="noise.html">Noise Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="noise.html#noise-power">Noise Power</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html#noise-figure-factor-modeling">Noise Figure / Factor Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html#noise-temperature-and-snr">Noise temperature and SNR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.noise_power"><code class="docutils literal notranslate"><span class="pre">noise_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.noise_power_density"><code class="docutils literal notranslate"><span class="pre">noise_power_density()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.temperature_to_noise_factor"><code class="docutils literal notranslate"><span class="pre">temperature_to_noise_factor()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.noise_factor_to_temperature"><code class="docutils literal notranslate"><span class="pre">noise_factor_to_temperature()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.noise_figure_to_temperature"><code class="docutils literal notranslate"><span class="pre">noise_figure_to_temperature()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.temperature_to_noise_figure"><code class="docutils literal notranslate"><span class="pre">temperature_to_noise_figure()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="path.html">Path Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="path.html#module-spacelink.core.path">Module Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ranging.html">Ranging Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html#spacelink.core.ranging.CommandMod"><code class="docutils literal notranslate"><span class="pre">CommandMod</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html#spacelink.core.ranging.pn_sequence_range_ambiguity"><code class="docutils literal notranslate"><span class="pre">pn_sequence_range_ambiguity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html#spacelink.core.ranging.chip_snr"><code class="docutils literal notranslate"><span class="pre">chip_snr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html#spacelink.core.ranging.uplink_carrier_to_total_power"><code class="docutils literal notranslate"><span class="pre">uplink_carrier_to_total_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html#spacelink.core.ranging.uplink_ranging_to_total_power"><code class="docutils literal notranslate"><span class="pre">uplink_ranging_to_total_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html#spacelink.core.ranging.uplink_data_to_total_power"><code class="docutils literal notranslate"><span class="pre">uplink_data_to_total_power()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../modules.html" class="btn btn-neutral float-left" title="SpaceLink Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="units.html" class="btn btn-neutral float-right" title="Units Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

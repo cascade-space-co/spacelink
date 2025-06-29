@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Units Module &mdash; SpaceLink 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/core/units.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Antenna Module" href="antenna.html" />
+    <link rel="prev" title="Core Modules" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#key-modules">Key Modules</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Units Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="noise.html">Noise Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="path.html">Path Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Core Modules</a></li>
+      <li class="breadcrumb-item active">Units Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/core/units.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-spacelink.core.units">
+<span id="units-module"></span><h1>Units Module<a class="headerlink" href="#module-spacelink.core.units" title="Link to this heading"></a></h1>
+<section id="wavelength">
+<h2>Wavelength<a class="headerlink" href="#wavelength" title="Link to this heading"></a></h2>
+<p>The relationship between wavelength and frequency is given by:</p>
+<div class="math notranslate nohighlight">
+\[\lambda = \frac{c}{f}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(c\)</span> is the speed of light (299,792,458 m/s)</p></li>
+<li><p><span class="math notranslate nohighlight">\(f\)</span> is the frequency in Hz</p></li>
+</ul>
+</section>
+<section id="to-db">
+<h2>to_dB<a class="headerlink" href="#to-db" title="Link to this heading"></a></h2>
+<p>The conversion to decibels is done using:</p>
+<div class="math notranslate nohighlight">
+\[\text{X}_{\text{dB}} = \text{factor} \cdot \log_{10}(x)\]</div>
+<p>The result will have units of dB(input_unit), e.g. dBW, dBK, dBHz, etc.
+For dimensionless input, the result will have unit dB.</p>
+</section>
+<section id="to-linear">
+<h2>to_linear<a class="headerlink" href="#to-linear" title="Link to this heading"></a></h2>
+<p>The conversion from decibels to a linear (dimensionless) ratio is done using:</p>
+<div class="math notranslate nohighlight">
+\[x = 10^{\frac{\text{X}_{\text{dB}}}{\text{factor}}}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\text{X}_{\text{dB}}\)</span> is the value in decibels</p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{factor}\)</span> is 10 for power quantities, 20 for field quantities</p></li>
+</ul>
+</section>
+<section id="return-loss-to-vswr">
+<h2>Return Loss to VSWR<a class="headerlink" href="#return-loss-to-vswr" title="Link to this heading"></a></h2>
+<p>The conversion from return loss in decibels to voltage standing wave ratio (VSWR) is done using:</p>
+<div class="math notranslate nohighlight">
+\[\text{VSWR} = \frac{1 + |\Gamma|}{1 - |\Gamma|}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(|\Gamma|\)</span> is the magnitude of the reflection coefficient</p></li>
+<li><p><span class="math notranslate nohighlight">\(|\Gamma| = 10^{-\frac{\text{RL}}{20}}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{RL}\)</span> is the return loss in dB</p></li>
+</ul>
+</section>
+<section id="vswr-to-return-loss">
+<h2>VSWR to Return Loss<a class="headerlink" href="#vswr-to-return-loss" title="Link to this heading"></a></h2>
+<p>The conversion from voltage standing wave ratio (VSWR) to return loss in decibels is done using:</p>
+<div class="math notranslate nohighlight">
+\[\text{RL} = -20 \log_{10}\left(\frac{\text{VSWR} - 1}{\text{VSWR} + 1}\right)\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\text{VSWR}\)</span> is the voltage standing wave ratio</p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{RL}\)</span> is the return loss in dB</p></li>
+</ul>
+</section>
+<section id="mismatch-loss">
+<h2>Mismatch Loss<a class="headerlink" href="#mismatch-loss" title="Link to this heading"></a></h2>
+<p>Mismatch loss quantifies power lost from reflections at an interface. It is calculated using:</p>
+<div class="math notranslate nohighlight">
+\[\text{ML} = -10 \log_{10}(1 - |\Gamma|^2)\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(|\Gamma|\)</span> is the magnitude of the reflection coefficient</p></li>
+<li><p><span class="math notranslate nohighlight">\(|\Gamma| = 10^{-\frac{\text{RL}}{20}}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{RL}\)</span> is the return loss in dB</p></li>
+</ul>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.units.enforce_units">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">enforce_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#enforce_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.enforce_units" title="Link to this definition"></a></dt>
+<dd><p>Decorator to enforce and convert function arguments to the units specified in type annotations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> (<em>callable</em>) – The function to wrap.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The wrapped function with unit enforcement.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.units.wavelength">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">wavelength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#wavelength"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.wavelength" title="Link to this definition"></a></dt>
+<dd><p>Convert frequency to wavelength.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>frequency</strong> (<em>Quantity</em>) – Frequency quantity (e.g., in Hz)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Wavelength in meters</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Quantity</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>UnitConversionError</strong> – If the input quantity has incompatible units</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.units.frequency">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#frequency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.frequency" title="Link to this definition"></a></dt>
+<dd><p>Convert wavelength to frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>wavelength</strong> (<em>Quantity</em>) – Wavelength quantity (e.g., in meters)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Frequency in hertz</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Quantity</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>UnitConversionError</strong> – If the input quantity has incompatible units</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.units.to_dB">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">to_dB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#to_dB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.to_dB" title="Link to this definition"></a></dt>
+<dd><p>Convert dimensionless quantity to decibels.</p>
+<p>Note that for referenced logarithmic units, conversions should
+be done using the .to(unit) method.
+:type x: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code></span>
+:param x: value to be converted
+:type x: Dimensionless
+:type factor: 
+:param factor: 10 for power quantities, 20 for field quantities
+:type factor: int, optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decibels</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.units.to_linear">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">to_linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#to_linear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.to_linear" title="Link to this definition"></a></dt>
+<dd><p>Convert decibels to a linear (dimensionless) ratio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Decibels</em>) – A quantity in decibels</p></li>
+<li><p><strong>factor</strong> (<em>float</em><em>, </em><em>optional</em>) – 10 for power quantities, 20 for field quantities</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dimensionless</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.units.return_loss_to_vswr">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">return_loss_to_vswr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_loss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#return_loss_to_vswr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.return_loss_to_vswr" title="Link to this definition"></a></dt>
+<dd><p>Convert a return loss in decibels to voltage standing wave ratio (VSWR).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>return_loss</strong> (<em>Quantity</em>) – Return loss in decibels (&gt;= 0). Use float(‘inf’) for a perfect match</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>VSWR (&gt;= 1)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dimensionless</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If return_loss is negative</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.units.vswr_to_return_loss">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">vswr_to_return_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vswr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#vswr_to_return_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.vswr_to_return_loss" title="Link to this definition"></a></dt>
+<dd><p>Convert voltage standing wave ratio (VSWR) to return loss in decibels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vswr</strong> (<em>Quantity</em>) – VSWR value (&gt; 1). Use 1 for a perfect match (infinite return loss)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Return loss in decibels</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Quantity</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If vswr is less than 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.units.mismatch_loss">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">mismatch_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_loss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#mismatch_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.mismatch_loss" title="Link to this definition"></a></dt>
+<dd><p>Compute the mismatch loss due to non-ideal return loss.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>return_loss</strong> (<em>Quantity</em>) – Return loss in decibels</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mismatch loss in decibels</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Quantity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.units.quantity_constructor">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">quantity_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#quantity_constructor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.quantity_constructor" title="Link to this definition"></a></dt>
+<dd><p>Constructor for !Quantity tags in YAML files.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.units.safe_negate">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">safe_negate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#safe_negate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.safe_negate" title="Link to this definition"></a></dt>
+<dd><p>Safely negate a dB or function unit quantity, preserving the unit.
+Astropy does not allow direct negation of function units (like dB).</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Core Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="antenna.html" class="btn btn-neutral float-right" title="Antenna Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

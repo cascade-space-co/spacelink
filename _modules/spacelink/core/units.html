@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spacelink.core.units &mdash; SpaceLink 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/_modules/spacelink/core/units.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SpaceLink Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">spacelink.core.units</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for spacelink.core.units</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Wavelength</span>
+<span class="sd">----------</span>
+
+<span class="sd">The relationship between wavelength and frequency is given by:</span>
+
+<span class="sd">.. math::</span>
+<span class="sd">   \lambda = \frac{c}{f}</span>
+
+<span class="sd">where:</span>
+
+<span class="sd">* :math:`c` is the speed of light (299,792,458 m/s)</span>
+<span class="sd">* :math:`f` is the frequency in Hz</span>
+
+
+<span class="sd">to_dB</span>
+<span class="sd">-----</span>
+
+<span class="sd">The conversion to decibels is done using:</span>
+
+<span class="sd">.. math::</span>
+<span class="sd">   \text{X}_{\text{dB}} = \text{factor} \cdot \log_{10}(x)</span>
+
+<span class="sd">The result will have units of dB(input_unit), e.g. dBW, dBK, dBHz, etc.</span>
+<span class="sd">For dimensionless input, the result will have unit dB.</span>
+
+<span class="sd">to_linear</span>
+<span class="sd">---------</span>
+
+<span class="sd">The conversion from decibels to a linear (dimensionless) ratio is done using:</span>
+
+<span class="sd">.. math::</span>
+<span class="sd">   x = 10^{\frac{\text{X}_{\text{dB}}}{\text{factor}}}</span>
+
+<span class="sd">where:</span>
+
+<span class="sd">* :math:`\text{X}_{\text{dB}}` is the value in decibels</span>
+<span class="sd">* :math:`\text{factor}` is 10 for power quantities, 20 for field quantities</span>
+
+<span class="sd">Return Loss to VSWR</span>
+<span class="sd">-------------------</span>
+
+<span class="sd">The conversion from return loss in decibels to voltage standing wave ratio (VSWR) is done using:</span>
+
+<span class="sd">.. math::</span>
+<span class="sd">   \text{VSWR} = \frac{1 + |\Gamma|}{1 - |\Gamma|}</span>
+
+<span class="sd">where:</span>
+
+<span class="sd">* :math:`|\Gamma|` is the magnitude of the reflection coefficient</span>
+<span class="sd">* :math:`|\Gamma| = 10^{-\frac{\text{RL}}{20}}`</span>
+<span class="sd">* :math:`\text{RL}` is the return loss in dB</span>
+
+<span class="sd">VSWR to Return Loss</span>
+<span class="sd">-------------------</span>
+
+<span class="sd">The conversion from voltage standing wave ratio (VSWR) to return loss in decibels is done using:</span>
+
+<span class="sd">.. math::</span>
+<span class="sd">   \text{RL} = -20 \log_{10}\left(\frac{\text{VSWR} - 1}{\text{VSWR} + 1}\right)</span>
+
+<span class="sd">where:</span>
+
+<span class="sd">* :math:`\text{VSWR}` is the voltage standing wave ratio</span>
+<span class="sd">* :math:`\text{RL}` is the return loss in dB</span>
+
+<span class="sd">Mismatch Loss</span>
+<span class="sd">-------------</span>
+
+<span class="sd">Mismatch loss quantifies power lost from reflections at an interface. It is calculated using:</span>
+
+<span class="sd">.. math::</span>
+<span class="sd">   \text{ML} = -10 \log_{10}(1 - |\Gamma|^2)</span>
+
+<span class="sd">where:</span>
+
+<span class="sd">* :math:`|\Gamma|` is the magnitude of the reflection coefficient</span>
+<span class="sd">* :math:`|\Gamma| = 10^{-\frac{\text{RL}}{20}}`</span>
+<span class="sd">* :math:`\text{RL}` is the return loss in dB</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">signature</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_type_hints</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">Annotated</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">astropy.constants</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s2">&quot;dBHz&quot;</span><span class="p">):</span>
+    <span class="n">u</span><span class="o">.</span><span class="n">dBHz</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s2">&quot;dBW&quot;</span><span class="p">):</span>
+    <span class="n">u</span><span class="o">.</span><span class="n">dBW</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">W</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s2">&quot;dBm&quot;</span><span class="p">):</span>
+    <span class="n">u</span><span class="o">.</span><span class="n">dBm</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">mW</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s2">&quot;dBK&quot;</span><span class="p">):</span>
+    <span class="n">u</span><span class="o">.</span><span class="n">dBK</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s2">&quot;dimensionless&quot;</span><span class="p">):</span>
+    <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span>
+
+<span class="n">Decibels</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">]</span>
+<span class="n">DecibelWatts</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">W</span><span class="p">)]</span>
+<span class="n">DecibelMilliwatts</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">mW</span><span class="p">)]</span>
+<span class="n">DecibelKelvins</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">)]</span>
+<span class="n">Power</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">W</span><span class="p">]</span>
+<span class="n">PowerDensity</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">W</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">]</span>
+<span class="n">Frequency</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">]</span>
+<span class="n">Wavelength</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="p">]</span>
+<span class="n">Dimensionless</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span><span class="p">]</span>
+<span class="n">Distance</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="p">]</span>
+<span class="n">Temperature</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">]</span>
+<span class="n">Length</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="p">]</span>
+<span class="n">DecibelHertz</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)]</span>
+
+
+<div class="viewcode-block" id="enforce_units">
+<a class="viewcode-back" href="../../../core/units.html#spacelink.core.units.enforce_units">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">enforce_units</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator to enforce and convert function arguments to the units specified in type annotations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    func : callable</span>
+<span class="sd">        The function to wrap.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    callable</span>
+<span class="sd">        The wrapped function with unit enforcement.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="n">hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">bound</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">bound</span><span class="o">.</span><span class="n">apply_defaults</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">bound</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">hint</span> <span class="o">=</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="c1"># Check if hint is Annotated</span>
+            <span class="k">if</span> <span class="n">hint</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="s2">&quot;__origin__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>  <span class="c1"># Use _ for quantity_type if not needed</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">):</span>
+                    <span class="c1"># Convert to expected unit</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">unit</span><span class="o">.</span><span class="n">is_equivalent</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">):</span>
+                            <span class="n">converted_value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                                <span class="n">unit</span><span class="p">,</span> <span class="n">equivalencies</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">temperature</span><span class="p">()</span>
+                            <span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">converted_value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="n">u</span><span class="o">.</span><span class="n">UnitConversionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">u</span><span class="o">.</span><span class="n">UnitConversionError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; requires unit compatible with </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">, &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;but got </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s2">. Original error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+                    <span class="c1"># Unit conversion successful</span>
+                    <span class="n">bound</span><span class="o">.</span><span class="n">arguments</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">converted_value</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Handle non-Quantity inputs</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Parameter &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must be provided as an astropy Quantity, &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;not a raw number.&quot;</span>
+                    <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">bound</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">bound</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;&#39;numpy.float64&#39; object has no attribute &#39;to_value&#39;&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                <span class="c1"># Common error when forgetting to add units to computed values</span>
+                <span class="n">func_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;In function &#39;</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2">&#39;: A numeric value is missing units. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;You might have forgotten to add &#39;* u.dimensionless&#39; to a calculation &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;result. Original error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+            <span class="k">raise</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+
+<div class="viewcode-block" id="wavelength">
+<a class="viewcode-back" href="../../../core/units.html#spacelink.core.units.wavelength">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wavelength</span><span class="p">(</span><span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavelength</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert frequency to wavelength.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    frequency : Quantity</span>
+<span class="sd">        Frequency quantity (e.g., in Hz)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        Wavelength in meters</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    UnitConversionError</span>
+<span class="sd">        If the input quantity has incompatible units</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">c</span> <span class="o">/</span> <span class="n">frequency</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="frequency">
+<a class="viewcode-back" href="../../../core/units.html#spacelink.core.units.frequency">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">frequency</span><span class="p">(</span><span class="n">wavelength</span><span class="p">:</span> <span class="n">Wavelength</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Frequency</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert wavelength to frequency.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    wavelength : Quantity</span>
+<span class="sd">        Wavelength quantity (e.g., in meters)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        Frequency in hertz</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    UnitConversionError</span>
+<span class="sd">        If the input quantity has incompatible units</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">c</span> <span class="o">/</span> <span class="n">wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="to_dB">
+<a class="viewcode-back" href="../../../core/units.html#spacelink.core.units.to_dB">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_dB</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert dimensionless quantity to decibels.</span>
+
+<span class="sd">    Note that for referenced logarithmic units, conversions should</span>
+<span class="sd">    be done using the .to(unit) method.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : Dimensionless</span>
+<span class="sd">        value to be converted</span>
+<span class="sd">    factor : int, optional</span>
+<span class="sd">        10 for power quantities, 20 for field quantities</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Decibels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span>
+    <span class="k">return</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span></div>
+
+
+
+<div class="viewcode-block" id="to_linear">
+<a class="viewcode-back" href="../../../core/units.html#spacelink.core.units.to_linear">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_linear</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Decibels</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert decibels to a linear (dimensionless) ratio.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : Decibels</span>
+<span class="sd">        A quantity in decibels</span>
+<span class="sd">    factor : float, optional</span>
+<span class="sd">        10 for power quantities, 20 for field quantities</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Dimensionless</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">linear_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="n">factor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">linear_value</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span></div>
+
+
+
+<div class="viewcode-block" id="return_loss_to_vswr">
+<a class="viewcode-back" href="../../../core/units.html#spacelink.core.units.return_loss_to_vswr">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">return_loss_to_vswr</span><span class="p">(</span><span class="n">return_loss</span><span class="p">:</span> <span class="n">Decibels</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a return loss in decibels to voltage standing wave ratio (VSWR).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    return_loss : Quantity</span>
+<span class="sd">        Return loss in decibels (&gt;= 0). Use float(&#39;inf&#39;) for a perfect match</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Dimensionless</span>
+<span class="sd">        VSWR (&gt;= 1)</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If return_loss is negative</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">return_loss</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;return loss must be &gt;= 0 (</span><span class="si">{</span><span class="n">return_loss</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_loss</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">to_linear</span><span class="p">(</span><span class="o">-</span><span class="n">return_loss</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">gamma</span><span class="p">))</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span></div>
+
+
+
+<div class="viewcode-block" id="vswr_to_return_loss">
+<a class="viewcode-back" href="../../../core/units.html#spacelink.core.units.vswr_to_return_loss">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">vswr_to_return_loss</span><span class="p">(</span><span class="n">vswr</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert voltage standing wave ratio (VSWR) to return loss in decibels.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vswr : Quantity</span>
+<span class="sd">        VSWR value (&gt; 1). Use 1 for a perfect match (infinite return loss)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        Return loss in decibels</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If vswr is less than 1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">vswr</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;VSWR must be &gt;= 1 (</span><span class="si">{</span><span class="n">vswr</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vswr</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="p">(</span><span class="n">vswr</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">vswr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">safe_negate</span><span class="p">(</span><span class="n">to_dB</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">20</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="mismatch_loss">
+<a class="viewcode-back" href="../../../core/units.html#spacelink.core.units.mismatch_loss">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mismatch_loss</span><span class="p">(</span><span class="n">return_loss</span><span class="p">:</span> <span class="n">Decibels</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the mismatch loss due to non-ideal return loss.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    return_loss : Quantity</span>
+<span class="sd">        Return loss in decibels</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Quantity</span>
+<span class="sd">        Mismatch loss in decibels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note that we want |Γ|² so we use factor=10 instead of factor=20</span>
+    <span class="n">gamma_2</span> <span class="o">=</span> <span class="n">to_linear</span><span class="p">(</span><span class="o">-</span><span class="n">return_loss</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="c1"># Power loss is 1 - |Γ|²</span>
+    <span class="k">return</span> <span class="n">safe_negate</span><span class="p">(</span><span class="n">to_dB</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">gamma_2</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="quantity_constructor">
+<a class="viewcode-back" href="../../../core/units.html#spacelink.core.units.quantity_constructor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">quantity_constructor</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constructor for !Quantity tags in YAML files.&quot;&quot;&quot;</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">construct_mapping</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check for different key names that could contain the unit</span>
+    <span class="n">unit_str</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;unit&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unit_str</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">unit_str</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">unit_str</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Quantity must have &#39;unit&#39; or &#39;units&#39; key&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Handle special cases</span>
+    <span class="k">if</span> <span class="n">unit_str</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span>
+    <span class="k">elif</span> <span class="n">unit_str</span> <span class="o">==</span> <span class="s2">&quot;dB/K&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span>
+    <span class="k">elif</span> <span class="n">unit_str</span> <span class="o">==</span> <span class="s2">&quot;dBW&quot;</span><span class="p">:</span>
+        <span class="c1"># Handle dBW unit differently since u.dB(u.W) syntax may not be supported in some versions</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dBW</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">unit_str</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Register the constructor with SafeLoader</span>
+<span class="n">yaml</span><span class="o">.</span><span class="n">SafeLoader</span><span class="o">.</span><span class="n">add_constructor</span><span class="p">(</span><span class="s2">&quot;!Quantity&quot;</span><span class="p">,</span> <span class="n">quantity_constructor</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="safe_negate">
+<a class="viewcode-back" href="../../../core/units.html#spacelink.core.units.safe_negate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">safe_negate</span><span class="p">(</span><span class="n">quantity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Safely negate a dB or function unit quantity, preserving the unit.</span>
+<span class="sd">    Astropy does not allow direct negation of function units (like dB).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">quantity</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="n">quantity</span><span class="o">.</span><span class="n">unit</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spacelink.core.antenna &mdash; SpaceLink 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/_modules/spacelink/core/antenna.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SpaceLink Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">spacelink.core.antenna</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for spacelink.core.antenna</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Polarization Loss</span>
+<span class="sd">-----------------</span>
+
+<span class="sd">The polarization loss between two antennas with given axial ratios is</span>
+<span class="sd">calculated using the standard formula for polarization mismatch:</span>
+
+<span class="sd">.. math::</span>
+<span class="sd">   \text{PLF} = \frac{1}{2} +\</span>
+<span class="sd">   \frac{1}{2} \frac{4 \gamma_1 \gamma_2 -\</span>
+<span class="sd">   (1-\gamma_1^2)(1-\gamma_2^2)}{(1+\gamma_1^2)(1+\gamma_2^2)}</span>
+
+<span class="sd">where:</span>
+
+<span class="sd">* :math:`\gamma_1` and :math:`\gamma_2` are the voltage axial ratios (linear, not dB)</span>
+<span class="sd">* PLF is the polarization loss factor (linear)</span>
+
+<span class="sd">The polarization loss in dB is then:</span>
+
+<span class="sd">.. math::</span>
+<span class="sd">   L_{\text{pol}} = -10 \log_{10}(\text{PLF})</span>
+
+<span class="sd">For circular polarization, the axial ratio is 0 dB, and for linear polarization,</span>
+<span class="sd">it is &gt;40 dB.</span>
+
+<span class="sd">Dish Gain</span>
+<span class="sd">---------</span>
+
+<span class="sd">The gain of a parabolic dish antenna is given by:</span>
+
+<span class="sd">.. math::</span>
+<span class="sd">   G = \eta \left(\frac{\pi D}{\lambda}\right)^2</span>
+
+<span class="sd">where:</span>
+
+<span class="sd">* :math:`\eta` is the efficiency factor (typically 0.55 to 0.70)</span>
+<span class="sd">* :math:`D` is the diameter of the dish</span>
+<span class="sd">* :math:`\lambda` is the wavelength</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Decibels</span><span class="p">,</span>
+    <span class="n">Dimensionless</span><span class="p">,</span>
+    <span class="n">Frequency</span><span class="p">,</span>
+    <span class="n">Length</span><span class="p">,</span>
+    <span class="n">wavelength</span><span class="p">,</span>
+    <span class="n">enforce_units</span><span class="p">,</span>
+    <span class="n">to_dB</span><span class="p">,</span>
+    <span class="n">to_linear</span><span class="p">,</span>
+    <span class="n">safe_negate</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="polarization_loss">
+<a class="viewcode-back" href="../../../core/antenna.html#spacelink.core.antenna.polarization_loss">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">polarization_loss</span><span class="p">(</span><span class="n">ar1</span><span class="p">:</span> <span class="n">Decibels</span><span class="p">,</span> <span class="n">ar2</span><span class="p">:</span> <span class="n">Decibels</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the polarization loss in dB between two antennas with given axial ratios.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ar1 : Decibels</span>
+<span class="sd">        First antenna axial ratio in dB (amplitude ratio)</span>
+<span class="sd">    ar2 : Decibels</span>
+<span class="sd">        Second antenna axial ratio in dB (amplitude ratio)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Decibels</span>
+<span class="sd">        Polarization loss in dB (positive value)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Polarization mismatch angle is omitted (assumed to be 90 degrees)</span>
+    <span class="c1"># https://www.microwaves101.com/encyclopedias/polarization-mismatch-between-antennas</span>
+    <span class="n">gamma1</span> <span class="o">=</span> <span class="n">to_linear</span><span class="p">(</span><span class="n">ar1</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">gamma2</span> <span class="o">=</span> <span class="n">to_linear</span><span class="p">(</span><span class="n">ar2</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+    <span class="n">numerator</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">gamma1</span> <span class="o">*</span> <span class="n">gamma2</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">gamma1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">gamma2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">denominator</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">gamma1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">gamma2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># Calculate polarization loss factor</span>
+    <span class="n">plf</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">safe_negate</span><span class="p">(</span><span class="n">to_dB</span><span class="p">(</span><span class="n">plf</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="dish_gain">
+<a class="viewcode-back" href="../../../core/antenna.html#spacelink.core.antenna.dish_gain">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dish_gain</span><span class="p">(</span>
+    <span class="n">diameter</span><span class="p">:</span> <span class="n">Length</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">,</span> <span class="n">efficiency</span><span class="p">:</span> <span class="n">Dimensionless</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the gain in dB of a parabolic dish antenna.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    diameter : Length</span>
+<span class="sd">        Dish diameter</span>
+<span class="sd">    frequency : Frequency</span>
+<span class="sd">        Frequency</span>
+<span class="sd">    efficiency : Dimensionless</span>
+<span class="sd">        Antenna efficiency (dimensionless)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Decibels</span>
+<span class="sd">        Gain in decibels (dB)</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If frequency is not positive</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">frequency</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Frequency must be positive&quot;</span><span class="p">)</span>
+
+    <span class="n">wl</span> <span class="o">=</span> <span class="n">wavelength</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+    <span class="n">gain_linear</span> <span class="o">=</span> <span class="n">efficiency</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">diameter</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">/</span> <span class="n">wl</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">to_dB</span><span class="p">(</span><span class="n">gain_linear</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
