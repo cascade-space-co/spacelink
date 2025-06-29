@@ -4,3 +4,5 @@
 3. Commit your changes
 4. Submit a Pull Request to `main`
 5. Wait for review and feedback
+
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)

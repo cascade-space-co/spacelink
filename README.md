@@ -102,8 +102,9 @@ We welcome contributions to the SpaceLink project! To get started, please follow
 
 Thank you for contributing to SpaceLink!
 
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
 ## License
 
 MIT License
 
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
