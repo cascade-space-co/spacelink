@@ -18,7 +18,7 @@ where:
 The polarization loss in dB is then:
 
 .. math::
-   L_{pol} = -10 \log_{10}(\text{PLF})
+   L_{\text{pol}} = -10 \log_{10}(\text{PLF})
 
 For circular polarization, the axial ratio is 0 dB, and for linear polarization,
 it is >40 dB.
@@ -61,14 +61,14 @@ def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
 
     Parameters
     ----------
-    ar1 : Quantity
+    ar1 : Decibels
         First antenna axial ratio in dB (amplitude ratio)
-    ar2 : Quantity
+    ar2 : Decibels
         Second antenna axial ratio in dB (amplitude ratio)
 
     Returns
     -------
-    Quantity
+    Decibels
         Polarization loss in dB (positive value)
     """
     # Polarization mismatch angle is omitted (assumed to be 90 degrees)
@@ -93,16 +93,16 @@ def dish_gain(
 
     Parameters
     ----------
-    diameter : Quantity
+    diameter : Length
         Dish diameter
-    frequency : Quantity
+    frequency : Frequency
         Frequency
-    efficiency : Quantity
+    efficiency : Dimensionless
         Antenna efficiency (dimensionless)
 
     Returns
     -------
-    Quantity
+    Decibels
         Gain in decibels (dB)
 
     Raises

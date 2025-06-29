@@ -4,7 +4,6 @@ import pytest
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 from spacelink.core import noise
-from spacelink.core.units import to_dB
 
 
 def test_thermal_noise_power():
@@ -45,9 +44,7 @@ def test_noise_power_density():
     ],
 )
 def test_noise_dBW_conversion(temperature, bandwidth, expected_noise_dBW):
-    """
-    -VALIDATED-
-    """
+    """ """
     noise_w = noise.noise_power(bandwidth, temperature)
     assert_quantity_allclose(
         noise_w.to(u.dB(u.W)), expected_noise_dBW, atol=0.01 * u.dB(u.W)
@@ -65,12 +62,3 @@ def test_temperature_to_noise_figure(temperature, expected_noise_figure):
     """Test temperature to noise figure conversion."""
     nf = noise.temperature_to_noise_figure(temperature)
     assert_quantity_allclose(nf, expected_noise_figure, atol=0.01 * u.dB)
-
-
-def test_to_dB_noise_power_returns_dBW():
-    """Test that to_dB(noise_power(...)) returns a value with unit dBW."""
-    bandwidth = 1 * u.Hz
-    temperature = 290 * u.K
-    noise_w = noise.noise_power(bandwidth, temperature)
-    result = to_dB(noise_w)
-    assert result.unit == u.dBW, f"Expected unit dBW, got {result.unit}"

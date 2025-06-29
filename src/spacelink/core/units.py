@@ -232,65 +232,45 @@ def frequency(wavelength: Wavelength) -> Frequency:
 
 
 @enforce_units
-def to_dB(x: Quantity, *, factor=10) -> Quantity:
+def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
     r"""
-    Convert a quantity to decibels, preserving the logarithmic units.
+    Convert dimensionless quantity to decibels.
 
+    Note that for referenced logarithmic units, conversions should
+    be done using the .to(unit) method.
     Parameters
     ----------
-    x : Quantity
-        A Quantity (e.g., in W, K, Hz, etc.)
+    x : Dimensionless
+        value to be converted
     factor : int, optional
         10 for power quantities, 20 for field quantities
 
     Returns
     -------
-    Quantity
-        Value in logarithmic units (e.g., dBW, dBK, dBHz, dB)
+    Decibels
     """
     if x.value <= 0:
-        # Return -inf dB for zero or negative input, matching RF convention
-        if x.unit == u.dimensionless_unscaled or x.unit == u.dimensionless:
-            return float("-inf") * u.dB
-        else:
-            return float("-inf") * u.dB(x.unit)
-    db_value = factor * np.log10(x.value)
-    if x.unit == u.dimensionless_unscaled or x.unit == u.dimensionless:
-        # Force unit to be exactly 'dB' (not dex, dB(1), etc.)
-        result = u.Quantity(db_value, "dB")
-    else:
-        result = db_value * u.dB(x.unit)
-    return result
+        return float("-inf") * u.dB
+    return factor * np.log10(x.value) * u.dB
 
 
 @enforce_units
-def to_linear(x: Decibels, *, factor: float = 10) -> Quantity:
+def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
     """
-    Convert a decibel quantity to its linear equivalent, preserving the underlying units.
+    Convert decibels to a linear (dimensionless) ratio.
 
-    If the input is in plain dB, output is dimensionless. If the input is in dB(someunit),
-    output is in that unit (e.g., dBW -> W, dBHz -> Hz, dBK -> K).
+    Parameters
+    ----------
+    x : Decibels
+        A quantity in decibels
+    factor : float, optional
+        10 for power quantities, 20 for field quantities
+
+    Returns
+    -------
+    Dimensionless
     """
-    # For dB(someunit), use astropy's .to() for robust conversion
-    if hasattr(x.unit, "function_unit") and x.unit.function_unit is not None:
-        try:
-            return x.to(x.unit.function_unit)
-        except Exception:
-            pass
-    if hasattr(x.unit, "physical_unit") and x.unit.physical_unit is not None:
-        try:
-            return x.to(x.unit.physical_unit)
-        except Exception:
-            pass
-    # For plain dB or dimensionless
     linear_value = np.power(10, x.value / factor)
-    if (
-        x.unit == u.dB
-        or x.unit == u.dimensionless_unscaled
-        or x.unit == u.dimensionless
-    ):
-        return linear_value * u.dimensionless
-    # Fallback: return dimensionless
     return linear_value * u.dimensionless
 
 

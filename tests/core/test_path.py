@@ -30,9 +30,7 @@ from spacelink.core.path import free_space_path_loss, spreading_loss, aperture_l
     ],
 )
 def test_free_space_path_loss(distance, frequency, expected_loss):
-    """
-    -VALIDATED-
-    """
+    """ """
     path_loss = free_space_path_loss(distance, frequency)
     assert_quantity_allclose(path_loss, expected_loss, atol=0.01 * u.dB)
 
