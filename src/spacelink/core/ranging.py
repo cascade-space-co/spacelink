@@ -24,7 +24,7 @@ import numpy as np
 from scipy.special import j0, j1
 
 from .units import (
-    AngularQuantity,
+    Angle,
     Decibels,
     DecibelHertz,
     Dimensionless,
@@ -96,7 +96,7 @@ def chip_snr(ranging_clock_rate: Frequency, prn0: DecibelHertz) -> Decibels:
 
 @enforce_units
 def _suppression_factor(
-    mod_idx: AngularQuantity, modulation: CommandMod
+    mod_idx: Angle, modulation: CommandMod
 ) -> Dimensionless:
     r"""
     Compute the suppression factor :math:`S_{cmd}(\phi_{cmd})`.
@@ -131,7 +131,7 @@ def _suppression_factor(
 
 @enforce_units
 def _modulation_factor(
-    mod_idx: AngularQuantity, modulation: CommandMod
+    mod_idx: Angle, modulation: CommandMod
 ) -> Dimensionless:
     r"""
     Compute the modulation factor :math:`M_{cmd}(\phi_{cmd})`.
@@ -140,7 +140,7 @@ def _modulation_factor(
 
     Parameters
     ----------
-    mod_idx : AngularQuantity
+    mod_idx : Angle
         The RMS phase deviation by command signal :math:`\phi_{cmd}`.
     modulation : CommandModulation
         The command modulation type.
@@ -166,8 +166,8 @@ def _modulation_factor(
 
 @enforce_units
 def uplink_carrier_to_total_power(
-    mod_idx_ranging: AngularQuantity,
-    mod_idx_cmd: AngularQuantity,
+    mod_idx_ranging: Angle,
+    mod_idx_cmd: Angle,
     modulation: CommandMod,
 ) -> Dimensionless:
     r"""
@@ -199,8 +199,8 @@ def uplink_carrier_to_total_power(
 
 @enforce_units
 def uplink_ranging_to_total_power(
-    mod_idx_ranging: AngularQuantity,
-    mod_idx_cmd: AngularQuantity,
+    mod_idx_ranging: Angle,
+    mod_idx_cmd: Angle,
     modulation: CommandMod,
 ) -> Dimensionless:
     r"""
@@ -208,9 +208,9 @@ def uplink_ranging_to_total_power(
 
     Parameters
     ----------
-    mod_idx_ranging : AngularQuantity
+    mod_idx_ranging : Angle
         The RMS phase deviation by ranging signal :math:`\phi_{r}`.
-    mod_idx_cmd : AngularQuantity
+    mod_idx_cmd : Angle
         The RMS phase deviation by command signal :math:`\phi_{cmd}`.
     modulation : CommandModulation
         The command modulation type.
@@ -233,8 +233,8 @@ def uplink_ranging_to_total_power(
 
 @enforce_units
 def uplink_data_to_total_power(
-    mod_idx_ranging: AngularQuantity,
-    mod_idx_cmd: AngularQuantity,
+    mod_idx_ranging: Angle,
+    mod_idx_cmd: Angle,
     modulation: CommandMod,
 ) -> Dimensionless:
     r"""
