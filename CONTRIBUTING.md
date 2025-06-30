@@ -7,7 +7,6 @@ Thank you for your interest in contributing! Please read these guidelines to hel
 
 ### Project Scope
 - We welcome bugfixes, new features, documentation, and tests.
-- Out-of-scope: [list if any].
 
 ### Development Setup
 1. Install Python 3.11+ and Poetry.
