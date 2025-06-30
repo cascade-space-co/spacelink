@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Upload Python Package to TestPyPI
+name: Publish Python Package to TestPyPI
 
 on:
   release:
