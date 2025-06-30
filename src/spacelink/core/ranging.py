@@ -95,9 +95,7 @@ def chip_snr(ranging_clock_rate: Frequency, prn0: DecibelHertz) -> Decibels:
 
 
 @enforce_units
-def _suppression_factor(
-    mod_idx: Angle, modulation: CommandMod
-) -> Dimensionless:
+def _suppression_factor(mod_idx: Angle, modulation: CommandMod) -> Dimensionless:
     r"""
     Compute the suppression factor :math:`S_{cmd}(\phi_{cmd})`.
 
@@ -130,9 +128,7 @@ def _suppression_factor(
 
 
 @enforce_units
-def _modulation_factor(
-    mod_idx: Angle, modulation: CommandMod
-) -> Dimensionless:
+def _modulation_factor(mod_idx: Angle, modulation: CommandMod) -> Dimensionless:
     r"""
     Compute the modulation factor :math:`M_{cmd}(\phi_{cmd})`.
 
