@@ -120,7 +120,7 @@ def _suppression_factor(
     ----------
     [1] Equation (24).
     """
-    mod_idx_rad = mod_idx.to(u.rad).value
+    mod_idx_rad = mod_idx.value
     if modulation == CommandMod.BIPOLAR:
         suppression_factor = np.cos(mod_idx_rad) ** 2
     elif modulation == CommandMod.SINE_SUBCARRIER:
@@ -155,7 +155,7 @@ def _modulation_factor(
     ----------
     [1] Equation (25).
     """
-    mod_idx_rad = mod_idx.to(u.rad).value
+    mod_idx_rad = mod_idx.value
     if modulation == CommandMod.BIPOLAR:
         mod_factor = np.sin(mod_idx_rad) ** 2
     elif modulation == CommandMod.SINE_SUBCARRIER:
@@ -193,7 +193,7 @@ def uplink_carrier_to_total_power(
     [1] Equation (19).
     """
     return (
-        j0(math.sqrt(2) * mod_idx_ranging.to(u.rad).value) ** 2
+        j0(math.sqrt(2) * mod_idx_ranging.value) ** 2
         * _suppression_factor(mod_idx_cmd, modulation)
     ) * u.dimensionless_unscaled
 
@@ -227,7 +227,7 @@ def uplink_ranging_to_total_power(
     """
     return (
         2
-        * j1(math.sqrt(2) * mod_idx_ranging.to(u.rad).value) ** 2
+        * j1(math.sqrt(2) * mod_idx_ranging.value) ** 2
         * _suppression_factor(mod_idx_cmd, modulation)
     ) * u.dimensionless_unscaled
 
@@ -260,6 +260,6 @@ def uplink_data_to_total_power(
     [1] Equation (21).
     """
     return (
-        j0(math.sqrt(2) * mod_idx_ranging.to(u.rad).value) ** 2
+        j0(math.sqrt(2) * mod_idx_ranging.value) ** 2
         * _modulation_factor(mod_idx_cmd, modulation)
     ) * u.dimensionless_unscaled
