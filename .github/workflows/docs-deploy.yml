@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - hotfix/documentation-deploy
 
 permissions:
   contents: write

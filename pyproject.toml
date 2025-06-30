@@ -21,6 +21,9 @@ scipy = "^1.10.0,<2.0.0"
 autopep8 = "^2.3.2"
 astropy = "^7.0.1,<8.0.0"
 black = {version = "^25.1.0,<26.0.0", extras = ["jupyter"]}
+setuptools = "^80.9.0"
+wheel = "^0.45.1"
+twine = "^6.1.0"
 
 [tool.poetry.group.dev.dependencies]
 sphinx = "^7.2.6"
