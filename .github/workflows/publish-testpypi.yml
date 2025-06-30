@@ -6,12 +6,13 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Publish Python Package to TestPyPI
+name: Upload Python Package to TestPyPI
 
 on:
   release:
     types: [published]
   workflow_dispatch:
+  pull_request:
 
 permissions:
   contents: read
