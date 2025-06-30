@@ -6,15 +6,14 @@ between residual carrier and modulated components.
 
 References
 ----------
-[1] 810-005 214, Rev. C "Pseudo-Noise and Regenerative Ranging"
-    (part of the Deep Space Network Telecommunications Link Design Handbook)
-    https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf
+[1] `810-005 214, Rev. C "Pseudo-Noise and Regenerative Ranging"
+<https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf>`__
 
-[2] CCSDS 414.1-B-3 "Pseudo-Noise (PN) Ranging Systems Recommended Standard"
-    https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf
+[2] `CCSDS 414.1-B-3 "Pseudo-Noise (PN) Ranging Systems Recommended Standard"
+<https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf>`__
 
-[3] CCSDS 414.0-G-2 "Pseudo-Noise (PN) Ranging Systems Informational Report"
-    https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf
+[3] `CCSDS 414.0-G-2 "Pseudo-Noise (PN) Ranging Systems Informational Report"
+<https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf>`__
 """
 
 import enum
