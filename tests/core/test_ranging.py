@@ -114,7 +114,6 @@ def test_invalid_modulation():
         ranging._suppression_factor(0.5 * u.rad, invalid_modulation)
 
 
-
 @pytest.mark.parametrize(
     "mod_idx_ranging, mod_idx_cmd, modulation, expected_carrier_ratio",
     [
