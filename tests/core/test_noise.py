@@ -32,6 +32,54 @@ def test_noise_power_density():
     )
 
 
+def test_temperature_to_noise_factor():
+    """Test temperature to noise factor conversion."""
+    temp = 290 * u.K
+    expected_factor = 2.0
+    result = noise.temperature_to_noise_factor(temp)
+    assert_quantity_allclose(result, expected_factor * u.dimensionless)
+
+    temp = 0 * u.K
+    expected_factor = 1.0
+    result = noise.temperature_to_noise_factor(temp)
+    assert_quantity_allclose(result, expected_factor * u.dimensionless)
+
+    temp = 580 * u.K  # 2 * T0
+    expected_factor = 3.0
+    result = noise.temperature_to_noise_factor(temp)
+    assert_quantity_allclose(result, expected_factor * u.dimensionless)
+
+
+def test_noise_factor_to_temperature():
+    """Test noise factor to temperature conversion."""
+    factor = 2.0 * u.dimensionless
+    expected_temp = 290 * u.K
+    result = noise.noise_factor_to_temperature(factor)
+    assert_quantity_allclose(result, expected_temp)
+
+    factor = 1.0 * u.dimensionless
+    expected_temp = 0 * u.K
+    result = noise.noise_factor_to_temperature(factor)
+    assert_quantity_allclose(result, expected_temp)
+
+    # Factor < 1 should raise ValueError
+    with pytest.raises(ValueError):
+        noise.noise_factor_to_temperature(0.5 * u.dimensionless)
+
+
+def test_noise_figure_to_temperature():
+    """Test noise figure to temperature conversion."""
+    noise_figure = 3.0 * u.dB  # Noise factor ~2.0
+    expected_temp = 290 * u.K
+    result = noise.noise_figure_to_temperature(noise_figure)
+    assert_quantity_allclose(result, expected_temp, rtol=1e-2)
+
+    noise_figure = 0.0 * u.dB
+    expected_temp = 0 * u.K
+    result = noise.noise_figure_to_temperature(noise_figure)
+    assert_quantity_allclose(result, expected_temp)
+
+
 # DO NOT MODIFY - This test uses validated reference values
 @pytest.mark.parametrize(
     "temperature, bandwidth, expected_noise_dBW",
