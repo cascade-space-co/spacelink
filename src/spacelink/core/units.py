@@ -85,7 +85,6 @@ from typing import get_type_hints, get_args, get_origin, Annotated
 import astropy.units as u
 import astropy.constants as constants
 from astropy.units import Quantity
-import yaml
 
 import numpy as np
 
@@ -348,35 +347,6 @@ def mismatch_loss(return_loss: Decibels) -> Decibels:
     gamma_2 = to_linear(-return_loss, factor=10)
     # Power loss is 1 - |Γ|²
     return safe_negate(to_dB(1 - gamma_2))
-
-
-def quantity_constructor(loader, node):
-    """Constructor for !Quantity tags in YAML files."""
-    mapping = loader.construct_mapping(node)
-    value = mapping.get("value")
-
-    # Check for different key names that could contain the unit
-    unit_str = mapping.get("unit")
-    if unit_str is None:
-        unit_str = mapping.get("units")
-
-    if unit_str is None:
-        raise ValueError("Quantity must have 'unit' or 'units' key")
-
-    # Handle special cases
-    if unit_str == "linear":
-        return float(value) * u.dimensionless_unscaled
-    elif unit_str == "dB/K":
-        return float(value) * u.dB / u.K
-    elif unit_str == "dBW":
-        # Handle dBW unit differently since u.dB(u.W) syntax may not be supported in some versions
-        return float(value) * u.dBW
-    else:
-        return float(value) * getattr(u, unit_str)
-
-
-# Register the constructor with SafeLoader
-yaml.SafeLoader.add_constructor("!Quantity", quantity_constructor)
 
 
 def safe_negate(quantity: Quantity) -> Quantity:
