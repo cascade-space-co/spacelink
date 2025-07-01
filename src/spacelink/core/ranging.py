@@ -6,26 +6,25 @@ between residual carrier and modulated components.
 
 References
 ----------
-[1] 810-005 214, Rev. C "Pseudo-Noise and Regenerative Ranging"
-    (part of the Deep Space Network Telecommunications Link Design Handbook)
-    https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf
+[1] `810-005 214, Rev. C "Pseudo-Noise and Regenerative Ranging"
+<https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf>`__
 
-[2] CCSDS 414.1-B-3 "Pseudo-Noise (PN) Ranging Systems Recommended Standard"
-    https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf
+[2] `CCSDS 414.1-B-3 "Pseudo-Noise (PN) Ranging Systems Recommended Standard"
+<https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf>`__
 
-[3] CCSDS 414.0-G-2 "Pseudo-Noise (PN) Ranging Systems Informational Report"
-    https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf
+[3] `CCSDS 414.0-G-2 "Pseudo-Noise (PN) Ranging Systems Informational Report"
+<https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf>`__
 """
 
 import enum
 import math
 import astropy.units as u
-from astropy.coordinates import Angle
 import astropy.constants as const
 import numpy as np
 from scipy.special import j0, j1
 
 from .units import (
+    Angle,
     Decibels,
     DecibelHertz,
     Dimensionless,
@@ -118,13 +117,14 @@ def _suppression_factor(mod_idx: Angle, modulation: CommandMod) -> Dimensionless
     ----------
     [1] Equation (24).
     """
-    mod_idx_rad = mod_idx.to(u.rad).value
+    mod_idx_rad = mod_idx.value
     if modulation == CommandMod.BIPOLAR:
-        return np.cos(mod_idx_rad) ** 2
+        suppression_factor = np.cos(mod_idx_rad) ** 2
     elif modulation == CommandMod.SINE_SUBCARRIER:
-        return j0(math.sqrt(2) * mod_idx_rad) ** 2
+        suppression_factor = j0(math.sqrt(2) * mod_idx_rad) ** 2
     else:
         raise ValueError(f"Invalid command modulation type: {modulation}")
+    return suppression_factor * u.dimensionless_unscaled
 
 
 @enforce_units
@@ -150,13 +150,14 @@ def _modulation_factor(mod_idx: Angle, modulation: CommandMod) -> Dimensionless:
     ----------
     [1] Equation (25).
     """
-    mod_idx_rad = mod_idx.to(u.rad).value
+    mod_idx_rad = mod_idx.value
     if modulation == CommandMod.BIPOLAR:
-        return np.sin(mod_idx_rad) ** 2
+        mod_factor = np.sin(mod_idx_rad) ** 2
     elif modulation == CommandMod.SINE_SUBCARRIER:
-        return 2 * j1(math.sqrt(2) * mod_idx_rad) ** 2
+        mod_factor = 2 * j1(math.sqrt(2) * mod_idx_rad) ** 2
     else:
         raise ValueError(f"Invalid command modulation type: {modulation}")
+    return mod_factor * u.dimensionless_unscaled
 
 
 @enforce_units
@@ -184,11 +185,12 @@ def uplink_carrier_to_total_power(
 
     References
     ----------
-    [1] Equation (20).
+    [1] Equation (19).
     """
-    return j0(
-        math.sqrt(2) * mod_idx_ranging.to(u.rad).value
-    ) ** 2 * _suppression_factor(mod_idx_cmd, modulation)
+    return (
+        j0(math.sqrt(2) * mod_idx_ranging.value) ** 2
+        * _suppression_factor(mod_idx_cmd, modulation)
+    ) * u.dimensionless_unscaled
 
 
 @enforce_units
@@ -220,9 +222,9 @@ def uplink_ranging_to_total_power(
     """
     return (
         2
-        * j1(math.sqrt(2) * mod_idx_ranging.to(u.rad).value) ** 2
+        * j1(math.sqrt(2) * mod_idx_ranging.value) ** 2
         * _suppression_factor(mod_idx_cmd, modulation)
-    )
+    ) * u.dimensionless_unscaled
 
 
 @enforce_units
@@ -252,6 +254,7 @@ def uplink_data_to_total_power(
     ----------
     [1] Equation (21).
     """
-    return j0(math.sqrt(2) * mod_idx_ranging.to(u.rad).value) ** 2 * _modulation_factor(
-        mod_idx_cmd, modulation
-    )
+    return (
+        j0(math.sqrt(2) * mod_idx_ranging.value) ** 2
+        * _modulation_factor(mod_idx_cmd, modulation)
+    ) * u.dimensionless_unscaled

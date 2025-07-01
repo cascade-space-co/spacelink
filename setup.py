@@ -1,11 +1,26 @@
 import setuptools
+import os
+import re
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+
+def get_version():
+    version_file = os.path.join(
+        os.path.dirname(__file__), "src", "spacelink", "__init__.py"
+    )
+    with open(version_file, "r") as f:
+        content = f.read()
+    version_match = re.search(r'__version__\\s*=\\s*[\'\\"]([^\'\\"]*)[\'\\"]', content)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
+
 setuptools.setup(
     name="spacelink",
-    version="0.1.0",
+    version=get_version(),
     author="Jacob Portukalian, Arlen Abraham, Brett Gottula",
     author_email="jacob@cascade.space",
     description="Space link budget calculation package",
