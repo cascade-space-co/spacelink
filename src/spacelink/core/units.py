@@ -328,27 +328,6 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     return safe_negate(to_dB(gamma, factor=20))
 
 
-@enforce_units
-def mismatch_loss(return_loss: Decibels) -> Decibels:
-    r"""
-    Compute the mismatch loss due to non-ideal return loss.
-
-    Parameters
-    ----------
-    return_loss : Quantity
-        Return loss in decibels
-
-    Returns
-    -------
-    Quantity
-        Mismatch loss in decibels
-    """
-    # Note that we want |Γ|² so we use factor=10 instead of factor=20
-    gamma_2 = to_linear(-return_loss, factor=10)
-    # Power loss is 1 - |Γ|²
-    return safe_negate(to_dB(1 - gamma_2))
-
-
 def safe_negate(quantity: Quantity) -> Quantity:
     """
     Safely negate a dB or function unit quantity, preserving the unit.
