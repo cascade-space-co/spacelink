@@ -89,16 +89,16 @@ import yaml
 
 import numpy as np
 
-if not hasattr(u, "dBHz"):
+if not hasattr(u, "dBHz"):  # pragma: no cover
     u.dBHz = u.dB(u.Hz)
-if not hasattr(u, "dBW"):
+if not hasattr(u, "dBW"):  # pragma: no cover
     u.dBW = u.dB(u.W)
-if not hasattr(u, "dBm"):
+if not hasattr(u, "dBm"):  # pragma: no cover
     u.dBm = u.dB(u.mW)
-if not hasattr(u, "dBK"):
+if not hasattr(u, "dBK"):  # pragma: no cover
     u.dBK = u.dB(u.K)
 
-if not hasattr(u, "dimensionless"):
+if not hasattr(u, "dimensionless"):  # pragma: no cover
     u.dimensionless = u.dimensionless_unscaled
 
 Decibels = Annotated[Quantity, u.dB]

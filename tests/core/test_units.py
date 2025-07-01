@@ -252,3 +252,12 @@ def test_mismatch_loss():
     assert_quantity_allclose(result, 0.04 * u.dB, atol=0.01 * u.dB)
     result = mismatch_loss(3.01 * u.dB)
     assert_quantity_allclose(result, 3.01 * u.dB, atol=0.01 * u.dB)
+
+
+def test_custom_units_exist():
+    """Test that custom units are added to astropy.units"""
+    assert hasattr(u, "dBHz")
+    assert hasattr(u, "dBW")
+    assert hasattr(u, "dBm")
+    assert hasattr(u, "dBK")
+    assert hasattr(u, "dimensionless")
