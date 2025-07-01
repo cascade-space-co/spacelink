@@ -12,6 +12,7 @@ from spacelink.core.units import (
     wavelength,
     frequency,
     to_dB,
+    mismatch_loss,
     enforce_units,
     Angle,
     Frequency,
@@ -237,3 +238,17 @@ def test_enforce_units_rejects_incompatible_units():
     # Should raise TypeError for raw numbers
     with pytest.raises(TypeError, match="must be provided as an astropy Quantity"):
         test_angle_function(45)  # Raw number instead of Quantity
+
+
+def test_mismatch_loss():
+    """Test mismatch loss calculation for key return loss values."""
+
+    # Perfect match should have zero mismatch loss
+    result = mismatch_loss(float("inf") * u.dB)
+    assert result.value == 0.0
+
+    # Expected values checked using https://northeastrf.com/return-loss-calculator/
+    result = mismatch_loss(20 * u.dB)
+    assert_quantity_allclose(result, 0.04 * u.dB, atol=0.01 * u.dB)
+    result = mismatch_loss(3.01 * u.dB)
+    assert_quantity_allclose(result, 3.01 * u.dB, atol=0.01 * u.dB)
