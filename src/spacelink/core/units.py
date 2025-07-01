@@ -325,8 +325,6 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     """
     if vswr < 1.0:
         raise ValueError(f"VSWR must be >= 1 ({vswr}).")
-    if np.isclose(vswr.to_value(u.dimensionless), 1.0):
-        return float("inf") * u.dB
     gamma = (vswr - 1) / (vswr + 1)
     return safe_negate(to_dB(gamma, factor=20))
 

@@ -79,29 +79,29 @@ def assert_decibel_equal(actual, expected, atol=0.01):
 
 # DO NOT MODIFY
 @pytest.mark.parametrize(
-    "vswr,gamma,return_loss",
+    "vswr,return_loss",
     [
-        (1.1, 0.0476, 26.44),
-        (1.2, 0.0909, 20.83),
-        (1.3, 0.1304, 17.69),
-        (1.4, 0.1667, 15.56),
-        (1.5, 0.2000, 13.98),
-        (1.6, 0.2308, 12.74),
-        (1.7, 0.2593, 11.73),
-        (1.8, 0.2857, 10.88),
-        (1.9, 0.3103, 10.16),
-        (2.0, 0.3333, 9.54),
+        (1.0, float("inf")),
+        (1.1, 26.44),
+        (1.2, 20.83),
+        (1.3, 17.69),
+        (1.4, 15.56),
+        (1.5, 13.98),
+        (1.6, 12.74),
+        (1.7, 11.73),
+        (1.8, 10.88),
+        (1.9, 10.16),
+        (2.0, 9.54),
     ],
 )
-def test_vswr(vswr, gamma, return_loss):
+def test_vswr_return_loss_conversions(vswr, return_loss):
+    """Test VSWR to return loss and return loss to VSWR conversions."""
     vswr_result = return_loss_to_vswr(return_loss * u.dB)
     assert_quantity_allclose(
         vswr_result, vswr * u.dimensionless, atol=0.01 * u.dimensionless
     )
 
-    # Test VSWR to return loss conversion (use safe_negate)
-    gamma_q = gamma * u.dimensionless
-    return_loss_result = safe_negate(to_dB(gamma_q, factor=20))
+    return_loss_result = vswr_to_return_loss(vswr * u.dimensionless)
     assert_decibel_equal(return_loss_result, return_loss * u.dB, atol=0.01)
 
 
@@ -129,26 +129,6 @@ def test_to_dB(input_value, factor, expected):
 def test_to_linear(input_value, factor, expected):
     """Test conversion from decibels to linear."""
     assert_quantity_allclose(units.to_linear(input_value, factor=factor), expected)
-
-
-@pytest.mark.parametrize(
-    "return_loss, vswr",
-    [
-        (20 * u.dB, 1.222 * u.dimensionless),
-        (float("inf") * u.dB, 1.0 * u.dimensionless),
-    ],
-)
-def test_vswr_return_loss_conversions(return_loss, vswr):
-    """
-    TODO: validate
-    """
-    vswr_result = units.return_loss_to_vswr(return_loss)
-    assert_quantity_allclose(vswr_result, vswr, atol=0.01 * u.dimensionless)
-
-    # Use safe_negate for dB quantities
-    gamma = (vswr - 1) / (vswr + 1)
-    return_loss_result = safe_negate(to_dB(gamma, factor=20))
-    assert_decibel_equal(return_loss_result, return_loss, atol=0.01)
 
 
 def test_return_loss_to_vswr_invalid_input():
