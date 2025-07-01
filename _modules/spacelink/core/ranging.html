@@ -86,26 +86,25 @@
 
 <span class="sd">References</span>
 <span class="sd">----------</span>
-<span class="sd">[1] 810-005 214, Rev. C &quot;Pseudo-Noise and Regenerative Ranging&quot;</span>
-<span class="sd">    (part of the Deep Space Network Telecommunications Link Design Handbook)</span>
-<span class="sd">    https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf</span>
+<span class="sd">[1] `810-005 214, Rev. C &quot;Pseudo-Noise and Regenerative Ranging&quot;</span>
+<span class="sd">&lt;https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf&gt;`__</span>
 
-<span class="sd">[2] CCSDS 414.1-B-3 &quot;Pseudo-Noise (PN) Ranging Systems Recommended Standard&quot;</span>
-<span class="sd">    https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf</span>
+<span class="sd">[2] `CCSDS 414.1-B-3 &quot;Pseudo-Noise (PN) Ranging Systems Recommended Standard&quot;</span>
+<span class="sd">&lt;https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf&gt;`__</span>
 
-<span class="sd">[3] CCSDS 414.0-G-2 &quot;Pseudo-Noise (PN) Ranging Systems Informational Report&quot;</span>
-<span class="sd">    https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf</span>
+<span class="sd">[3] `CCSDS 414.0-G-2 &quot;Pseudo-Noise (PN) Ranging Systems Informational Report&quot;</span>
+<span class="sd">&lt;https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf&gt;`__</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.coordinates</span><span class="w"> </span><span class="kn">import</span> <span class="n">Angle</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.constants</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">const</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">j0</span><span class="p">,</span> <span class="n">j1</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Angle</span><span class="p">,</span>
     <span class="n">Decibels</span><span class="p">,</span>
     <span class="n">DecibelHertz</span><span class="p">,</span>
     <span class="n">Dimensionless</span><span class="p">,</span>
@@ -207,13 +206,14 @@
 <span class="sd">    ----------</span>
 <span class="sd">    [1] Equation (24).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">mod_idx_rad</span> <span class="o">=</span> <span class="n">mod_idx</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">mod_idx_rad</span> <span class="o">=</span> <span class="n">mod_idx</span><span class="o">.</span><span class="n">value</span>
     <span class="k">if</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">CommandMod</span><span class="o">.</span><span class="n">BIPOLAR</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">suppression_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="k">elif</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">CommandMod</span><span class="o">.</span><span class="n">SINE_SUBCARRIER</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">suppression_factor</span> <span class="o">=</span> <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid command modulation type: </span><span class="si">{</span><span class="n">modulation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">suppression_factor</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span>
 
 
 <span class="nd">@enforce_units</span>
@@ -239,13 +239,14 @@
 <span class="sd">    ----------</span>
 <span class="sd">    [1] Equation (25).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">mod_idx_rad</span> <span class="o">=</span> <span class="n">mod_idx</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">mod_idx_rad</span> <span class="o">=</span> <span class="n">mod_idx</span><span class="o">.</span><span class="n">value</span>
     <span class="k">if</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">CommandMod</span><span class="o">.</span><span class="n">BIPOLAR</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">mod_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="k">elif</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">CommandMod</span><span class="o">.</span><span class="n">SINE_SUBCARRIER</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">j1</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">mod_factor</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">j1</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid command modulation type: </span><span class="si">{</span><span class="n">modulation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mod_factor</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span>
 
 
 <div class="viewcode-block" id="uplink_carrier_to_total_power">
@@ -275,11 +276,12 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    [1] Equation (20).</span>
+<span class="sd">    [1] Equation (19).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">j0</span><span class="p">(</span>
-        <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-    <span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx_cmd</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">*</span> <span class="n">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx_cmd</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span></div>
 
 
 
@@ -314,9 +316,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">2</span>
-        <span class="o">*</span> <span class="n">j1</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">*</span> <span class="n">j1</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="o">*</span> <span class="n">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx_cmd</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
-    <span class="p">)</span></div>
+    <span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span></div>
 
 
 
@@ -349,9 +351,10 @@
 <span class="sd">    ----------</span>
 <span class="sd">    [1] Equation (21).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_modulation_factor</span><span class="p">(</span>
-        <span class="n">mod_idx_cmd</span><span class="p">,</span> <span class="n">modulation</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">*</span> <span class="n">_modulation_factor</span><span class="p">(</span><span class="n">mod_idx_cmd</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span></div>
 
 </pre></div>
 
