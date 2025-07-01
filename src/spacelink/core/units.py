@@ -381,7 +381,7 @@ def quantity_constructor(loader, node):
 yaml.SafeLoader.add_constructor("!Quantity", quantity_constructor)
 
 
-def safe_negate(quantity):
+def safe_negate(quantity: Quantity) -> Quantity:
     """
     Safely negate a dB or function unit quantity, preserving the unit.
     Astropy does not allow direct negation of function units (like dB).
