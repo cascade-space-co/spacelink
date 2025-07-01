@@ -81,7 +81,7 @@ where:
 
 from functools import wraps
 from inspect import signature
-from typing import get_type_hints, get_args, Annotated
+from typing import get_type_hints, get_args, get_origin, Annotated
 import astropy.units as u
 import astropy.constants as constants
 from astropy.units import Quantity
@@ -142,7 +142,7 @@ def enforce_units(func):
         for name, value in bound.arguments.items():
             hint = hints.get(name)
             # Check if hint is Annotated
-            if hint and getattr(hint, "__origin__", None) is Annotated:
+            if hint and get_origin(hint) is Annotated:
                 _, unit = get_args(hint)  # Use _ for quantity_type if not needed
 
                 if isinstance(value, Quantity):
