@@ -16,8 +16,8 @@ References
 
 .. _[1]: https://deepspace.jpl.nasa.gov/dsndocs/810-005/203/203D.pdf
 .. _[2]: https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf
-.. _[3]: https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf
-.. _[4]: https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf
+.. _[3]: https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf  # noqa: E501
+.. _[4]: https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf  # noqa: E501
 """
 
 import enum
