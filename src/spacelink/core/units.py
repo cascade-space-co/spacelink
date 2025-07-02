@@ -133,11 +133,9 @@ def enforce_units(func):
     Raises
     ------
     UnitConversionError
-        If the input quantity has incompatible units.
+        If any argument has incompatible units.
     TypeError
-        If the input is not a ``Quantity`` object.
-    AttributeError
-        If the function tries to call ``to_value()`` on a non-Quantity object.
+        If an ``Annotated`` argument is not an Astropy ``Quantity`` object.
     """
     sig = signature(func)
     hints = get_type_hints(func, include_extras=True)
