@@ -63,20 +63,6 @@ where:
 
 * :math:`\text{VSWR}` is the voltage standing wave ratio
 * :math:`\text{RL}` is the return loss in dB
-
-Mismatch Loss
--------------
-
-Mismatch loss quantifies power lost from reflections at an interface. It is calculated using:
-
-.. math::
-   \text{ML} = -10 \log_{10}(1 - |\Gamma|^2)
-
-where:
-
-* :math:`|\Gamma|` is the magnitude of the reflection coefficient
-* :math:`|\Gamma| = 10^{-\frac{\text{RL}}{20}}`
-* :math:`\text{RL}` is the return loss in dB
 """
 
 from functools import wraps
