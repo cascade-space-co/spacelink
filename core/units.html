@@ -151,22 +151,23 @@ For dimensionless input, the result will have unit dB.</p>
 <li><p><span class="math notranslate nohighlight">\(\text{RL}\)</span> is the return loss in dB</p></li>
 </ul>
 </section>
-<section id="mismatch-loss">
-<h2>Mismatch Loss<a class="headerlink" href="#mismatch-loss" title="Link to this heading"></a></h2>
-<p>Mismatch loss quantifies power lost from reflections at an interface. It is calculated using:</p>
-<div class="math notranslate nohighlight">
-\[\text{ML} = -10 \log_{10}(1 - |\Gamma|^2)\]</div>
-<p>where:</p>
-<ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(|\Gamma|\)</span> is the magnitude of the reflection coefficient</p></li>
-<li><p><span class="math notranslate nohighlight">\(|\Gamma| = 10^{-\frac{\text{RL}}{20}}\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\text{RL}\)</span> is the return loss in dB</p></li>
-</ul>
-</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="spacelink.core.units.enforce_units">
 <span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">enforce_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#enforce_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.enforce_units" title="Link to this definition"></a></dt>
-<dd><p>Decorator to enforce and convert function arguments to the units specified in type annotations.</p>
+<dd><p>Decorator to enforce the units specified in function parameter type annotations.</p>
+<p>This decorator enforces some unit consistency rules for function parameters that
+annotated with one of the <code class="docutils literal notranslate"><span class="pre">Annotated</span></code> types in this module:</p>
+<ul class="simple">
+<li><p>The argument must be a <code class="docutils literal notranslate"><span class="pre">Quantity</span></code> object.</p></li>
+<li><p>The argument must be provided with a compatible unit. For example, a <code class="docutils literal notranslate"><span class="pre">Frequency</span></code>
+argument’s units can be <code class="docutils literal notranslate"><span class="pre">u.Hz</span></code>, <code class="docutils literal notranslate"><span class="pre">u.MHz</span></code>, <code class="docutils literal notranslate"><span class="pre">u.GHz</span></code>, etc. but not <code class="docutils literal notranslate"><span class="pre">u.m</span></code>,
+<code class="docutils literal notranslate"><span class="pre">u.K</span></code>, or any other non-frequency unit.</p></li>
+</ul>
+<p>In addition to the above, the value of any <code class="docutils literal notranslate"><span class="pre">Annotated</span></code> argument will be converted
+automatically to the unit specified in for that type. For example, the <code class="docutils literal notranslate"><span class="pre">Angle</span></code>
+type will be converted to <code class="docutils literal notranslate"><span class="pre">u.rad</span></code>, even if the argument is provided with a unit of
+<code class="docutils literal notranslate"><span class="pre">u.deg</span></code>. This allows functions to flexibly handle compatible units while keeping
+tedious unit conversion logic out of the function body.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>func</strong> (<em>callable</em>) – The function to wrap.</p>
@@ -176,6 +177,12 @@ For dimensionless input, the result will have unit dB.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>callable</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>UnitConversionError</strong> – If any argument has incompatible units.</p></li>
+<li><p><strong>TypeError</strong> – If an <code class="docutils literal notranslate"><span class="pre">Annotated</span></code> argument is not an Astropy <code class="docutils literal notranslate"><span class="pre">Quantity</span></code> object.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -297,33 +304,15 @@ be done using the .to(unit) method.
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.units.mismatch_loss">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">mismatch_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_loss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#mismatch_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.mismatch_loss" title="Link to this definition"></a></dt>
-<dd><p>Compute the mismatch loss due to non-ideal return loss.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>return_loss</strong> (<em>Quantity</em>) – Return loss in decibels</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Mismatch loss in decibels</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Quantity</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.units.quantity_constructor">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">quantity_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#quantity_constructor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.quantity_constructor" title="Link to this definition"></a></dt>
-<dd><p>Constructor for !Quantity tags in YAML files.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="spacelink.core.units.safe_negate">
 <span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">safe_negate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#safe_negate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.safe_negate" title="Link to this definition"></a></dt>
 <dd><p>Safely negate a dB or function unit quantity, preserving the unit.
 Astropy does not allow direct negation of function units (like dB).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
