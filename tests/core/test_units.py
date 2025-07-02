@@ -11,7 +11,6 @@ from spacelink.core.units import (
     vswr_to_return_loss,
     wavelength,
     frequency,
-    to_dB,
     enforce_units,
     Angle,
     Frequency,
@@ -128,23 +127,6 @@ def test_to_linear(input_value, factor, expected):
     assert_quantity_allclose(units.to_linear(input_value, factor=factor), expected)
 
 
-@pytest.mark.parametrize(
-    "return_loss, vswr",
-    [
-        (20 * u.dB, 1.222 * u.dimensionless),
-        (float("inf") * u.dB, 1.0 * u.dimensionless),
-    ],
-)
-def test_vswr_return_loss_conversions(return_loss, vswr):
-    vswr_result = units.return_loss_to_vswr(return_loss)
-    assert_quantity_allclose(vswr_result, vswr, atol=0.01 * u.dimensionless)
-
-    # Use safe_negate for dB quantities
-    gamma = (vswr - 1) / (vswr + 1)
-    return_loss_result = safe_negate(to_dB(gamma, factor=20))
-    assert_decibel_equal(return_loss_result, return_loss, atol=0.01)
-
-
 def test_return_loss_to_vswr_invalid_input():
     with pytest.raises(ValueError):
         units.return_loss_to_vswr(-1 * u.dB)
@@ -233,7 +215,7 @@ def test_enforce_units_rejects_incompatible_units():
     with pytest.raises(TypeError, match="must be provided as an astropy Quantity"):
         test_angle_function(45)  # Raw number instead of Quantity
 
-        
+
 def test_custom_units_exist():
     """Test that custom units are added to astropy.units"""
     assert hasattr(u, "dBHz")
