@@ -12,16 +12,12 @@ import nbformat
 matplotlib.use("Agg")
 
 
-# Directories containing notebooks
-EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
-VALIDATION_DIR = Path(__file__).parent.parent / "validation"
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 def get_notebooks():
     """Get all notebooks to test."""
-    notebooks = list(EXAMPLES_DIR.glob("*.ipynb"))
-    notebooks.extend(VALIDATION_DIR.glob("*.ipynb"))
-    return notebooks
+    return list(PROJECT_ROOT.rglob("*.ipynb"))
 
 
 @pytest.mark.parametrize("nb_path", get_notebooks())
@@ -71,4 +67,4 @@ def test_notebook_execution(nb_path):
         exec(script, ns, ns)
 
     except Exception as e:
-        pytest.skip(f"Skipping notebook due to error: {e}")
+        pytest.skip(f"Skipping notebook {nb_path.name} due to error: {e}")
