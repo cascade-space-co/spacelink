@@ -64,18 +64,6 @@ def test_invalid_inputs(func, invalid_input, error_type):
         func(invalid_input)
 
 
-def assert_decibel_equal(actual, expected, atol=0.01):
-    # Compare value
-    assert np.isclose(
-        actual.to_value(expected.unit), expected.value, atol=atol
-    ), f"{actual} != {expected}"
-    # Compare unit string (should both be 'dB')
-    assert str(actual.unit) == str(
-        expected.unit
-    ), f"Units differ: {actual.unit} != {expected.unit}"
-
-
-# DO NOT MODIFY
 @pytest.mark.parametrize(
     "vswr,return_loss",
     [
@@ -100,7 +88,7 @@ def test_vswr_return_loss_conversions(vswr, return_loss):
     )
 
     return_loss_result = vswr_to_return_loss(vswr * u.dimensionless)
-    assert_decibel_equal(return_loss_result, return_loss * u.dB, atol=0.01)
+    assert_quantity_allclose(return_loss_result, return_loss * u.dB, atol=0.01 * u.dB)
 
 
 @pytest.mark.parametrize(
@@ -112,7 +100,9 @@ def test_vswr_return_loss_conversions(vswr, return_loss):
     ],
 )
 def test_to_dB(input_value, factor, expected):
-    assert_decibel_equal(units.to_dB(input_value, factor=factor), expected, atol=0.01)
+    assert_quantity_allclose(
+        units.to_dB(input_value, factor=factor), expected, atol=0.01 * u.dB
+    )
 
 
 @pytest.mark.parametrize(

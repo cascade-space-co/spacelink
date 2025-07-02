@@ -48,7 +48,6 @@ from .units import (
 import numpy as np
 
 
-# DO NOT MODIFY
 @enforce_units
 def spreading_loss(distance: Distance) -> Decibels:
     r"""
@@ -72,7 +71,6 @@ def spreading_loss(distance: Distance) -> Decibels:
     return to_dB(4.0 * np.pi * r**2 * u.dimensionless)
 
 
-# DO NOT MODIFY
 @enforce_units
 def aperture_loss(frequency: Frequency) -> Decibels:
     r"""
@@ -96,7 +94,6 @@ def aperture_loss(frequency: Frequency) -> Decibels:
     return to_dB(4.0 * np.pi / (lam**2) * u.dimensionless)
 
 
-# DO NOT MODIFY
 @enforce_units
 def free_space_path_loss(distance: Distance, frequency: Frequency) -> Decibels:
     r"""
