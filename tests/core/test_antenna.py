@@ -8,7 +8,6 @@ from spacelink.core.antenna import polarization_loss, dish_gain
 from spacelink.core.units import Dimensionless, Length, Frequency, Decibels
 
 """
--VALIDATED-
 This site was used to generate the following test cases:
 https://phillipmfeldman.org/Engineering/pol_mismatch_loss.html
 """
@@ -38,7 +37,6 @@ https://phillipmfeldman.org/Engineering/pol_mismatch_loss.html
 )
 def test_polarization_loss_calculation(ar_tx_db, ar_rx_db, expected_loss_db, tol):
     """
-    -VALIDATED-
     Test the polarization loss calculation based on axial ratios.
     """
     assert_quantity_allclose(

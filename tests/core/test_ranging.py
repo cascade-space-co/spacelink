@@ -105,6 +105,15 @@ def test_modulation_factor(
     )
 
 
+def test_invalid_modulation():
+    """Test that ValueError is raised for invalid modulation type."""
+    invalid_modulation = "hogwash"
+    with pytest.raises(ValueError):
+        ranging._modulation_factor(0.5 * u.rad, invalid_modulation)
+    with pytest.raises(ValueError):
+        ranging._suppression_factor(0.5 * u.rad, invalid_modulation)
+
+
 @pytest.mark.parametrize(
     "mod_idx_ranging, mod_idx_cmd, modulation, expected_carrier_ratio",
     [

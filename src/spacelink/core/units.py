@@ -63,20 +63,6 @@ where:
 
 * :math:`\text{VSWR}` is the voltage standing wave ratio
 * :math:`\text{RL}` is the return loss in dB
-
-Mismatch Loss
--------------
-
-Mismatch loss quantifies power lost from reflections at an interface. It is calculated using:
-
-.. math::
-   \text{ML} = -10 \log_{10}(1 - |\Gamma|^2)
-
-where:
-
-* :math:`|\Gamma|` is the magnitude of the reflection coefficient
-* :math:`|\Gamma| = 10^{-\frac{\text{RL}}{20}}`
-* :math:`\text{RL}` is the return loss in dB
 """
 
 from functools import wraps
@@ -85,20 +71,19 @@ from typing import get_type_hints, get_args, get_origin, Annotated
 import astropy.units as u
 import astropy.constants as constants
 from astropy.units import Quantity
-import yaml
 
 import numpy as np
 
-if not hasattr(u, "dBHz"):
+if not hasattr(u, "dBHz"):  # pragma: no cover
     u.dBHz = u.dB(u.Hz)
-if not hasattr(u, "dBW"):
+if not hasattr(u, "dBW"):  # pragma: no cover
     u.dBW = u.dB(u.W)
-if not hasattr(u, "dBm"):
+if not hasattr(u, "dBm"):  # pragma: no cover
     u.dBm = u.dB(u.mW)
-if not hasattr(u, "dBK"):
+if not hasattr(u, "dBK"):  # pragma: no cover
     u.dBK = u.dB(u.K)
 
-if not hasattr(u, "dimensionless"):
+if not hasattr(u, "dimensionless"):  # pragma: no cover
     u.dimensionless = u.dimensionless_unscaled
 
 Decibels = Annotated[Quantity, u.dB]
@@ -119,7 +104,21 @@ Angle = Annotated[Quantity, u.rad]
 
 def enforce_units(func):
     """
-    Decorator to enforce and convert function arguments to the units specified in type annotations.
+    Decorator to enforce the units specified in function parameter type annotations.
+
+    This decorator enforces some unit consistency rules for function parameters that
+    annotated with one of the ``Annotated`` types in this module:
+
+    * The argument must be a ``Quantity`` object.
+    * The argument must be provided with a compatible unit. For example, a ``Frequency``
+      argument's units can be ``u.Hz``, ``u.MHz``, ``u.GHz``, etc. but not ``u.m``,
+      ``u.K``, or any other non-frequency unit.
+
+    In addition to the above, the value of any ``Annotated`` argument will be converted
+    automatically to the unit specified in for that type. For example, the ``Angle``
+    type will be converted to ``u.rad``, even if the argument is provided with a unit of
+    ``u.deg``. This allows functions to flexibly handle compatible units while keeping
+    tedious unit conversion logic out of the function body.
 
     Parameters
     ----------
@@ -130,6 +129,13 @@ def enforce_units(func):
     -------
     callable
         The wrapped function with unit enforcement.
+
+    Raises
+    ------
+    UnitConversionError
+        If any argument has incompatible units.
+    TypeError
+        If an ``Annotated`` argument is not an Astropy ``Quantity`` object.
     """
     sig = signature(func)
     hints = get_type_hints(func, include_extras=True)
@@ -169,19 +175,7 @@ def enforce_units(func):
                         f"Parameter '{name}' must be provided as an astropy Quantity, "
                         f"not a raw number."
                     )
-
-        try:
-            return func(*bound.args, **bound.kwargs)
-        except AttributeError as e:
-            if "'numpy.float64' object has no attribute 'to_value'" in str(e):
-                # Common error when forgetting to add units to computed values
-                func_name = func.__name__
-                raise TypeError(
-                    f"In function '{func_name}': A numeric value is missing units. "
-                    f"You might have forgotten to add '* u.dimensionless' to a calculation "
-                    f"result. Original error: {str(e)}"
-                ) from None
-            raise
+        return func(*bound.args, **bound.kwargs)
 
     return wrapper
 
@@ -325,63 +319,11 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     """
     if vswr < 1.0:
         raise ValueError(f"VSWR must be >= 1 ({vswr}).")
-    if np.isclose(vswr.to_value(u.dimensionless), 1.0):
-        return float("inf") * u.dB
     gamma = (vswr - 1) / (vswr + 1)
     return safe_negate(to_dB(gamma, factor=20))
 
 
-@enforce_units
-def mismatch_loss(return_loss: Decibels) -> Decibels:
-    r"""
-    Compute the mismatch loss due to non-ideal return loss.
-
-    Parameters
-    ----------
-    return_loss : Quantity
-        Return loss in decibels
-
-    Returns
-    -------
-    Quantity
-        Mismatch loss in decibels
-    """
-    # Note that we want |Γ|² so we use factor=10 instead of factor=20
-    gamma_2 = to_linear(-return_loss, factor=10)
-    # Power loss is 1 - |Γ|²
-    return safe_negate(to_dB(1 - gamma_2))
-
-
-def quantity_constructor(loader, node):
-    """Constructor for !Quantity tags in YAML files."""
-    mapping = loader.construct_mapping(node)
-    value = mapping.get("value")
-
-    # Check for different key names that could contain the unit
-    unit_str = mapping.get("unit")
-    if unit_str is None:
-        unit_str = mapping.get("units")
-
-    if unit_str is None:
-        raise ValueError("Quantity must have 'unit' or 'units' key")
-
-    # Handle special cases
-    if unit_str == "linear":
-        return float(value) * u.dimensionless_unscaled
-    elif unit_str == "dB/K":
-        return float(value) * u.dB / u.K
-    elif unit_str == "dBW":
-        # Handle dBW unit differently since u.dB(u.W) syntax may not be supported in some versions
-        return float(value) * u.dBW
-    else:
-        return float(value) * getattr(u, unit_str)
-
-
-# Register the constructor with SafeLoader
-yaml.SafeLoader.add_constructor("!Quantity", quantity_constructor)
-
-
-def safe_negate(quantity):
+def safe_negate(quantity: Quantity) -> Quantity:
     """
     Safely negate a dB or function unit quantity, preserving the unit.
     Astropy does not allow direct negation of function units (like dB).

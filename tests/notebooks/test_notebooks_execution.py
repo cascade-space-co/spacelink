@@ -2,26 +2,17 @@
 Test that Jupyter notebooks execute without errors.
 """
 
-import matplotlib
 from pathlib import Path
 import pytest
 import nbformat
 
 
-# Use non-interactive backend for plotting
-matplotlib.use("Agg")
-
-
-# Directories containing notebooks
-EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
-VALIDATION_DIR = Path(__file__).parent.parent / "validation"
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 def get_notebooks():
     """Get all notebooks to test."""
-    notebooks = list(EXAMPLES_DIR.glob("*.ipynb"))
-    notebooks.extend(VALIDATION_DIR.glob("*.ipynb"))
-    return notebooks
+    return list(PROJECT_ROOT.rglob("*.ipynb"))
 
 
 @pytest.mark.parametrize("nb_path", get_notebooks())
@@ -44,9 +35,13 @@ def test_notebook_execution(nb_path):
 
         # Build a combined script
         script_lines = []
-        # Prepend backend setting in case notebooks import matplotlib.pyplot
+        # Prepend backend setting and warning suppression for matplotlib
         script_lines.append("import matplotlib\n")
+        script_lines.append("import warnings\n")
         script_lines.append("matplotlib.use('Agg')\n")
+        script_lines.append(
+            "warnings.filterwarnings('ignore', message='.*FigureCanvasAgg is non-interactive.*')\n"
+        )
 
         for cell in cells:
             source = cell.source
@@ -71,4 +66,4 @@ def test_notebook_execution(nb_path):
         exec(script, ns, ns)
 
     except Exception as e:
-        pytest.skip(f"Skipping notebook due to error: {e}")
+        pytest.skip(f"Skipping notebook {nb_path.name} due to error: {e}")
