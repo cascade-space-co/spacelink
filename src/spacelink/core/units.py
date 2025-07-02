@@ -118,7 +118,21 @@ Angle = Annotated[Quantity, u.rad]
 
 def enforce_units(func):
     """
-    Decorator to enforce and convert function arguments to the units specified in type annotations.
+    Decorator to enforce the units specified in function parameter type annotations.
+
+    This decorator enforces some unit consistency rules for function parameters that
+    annotated with one of the ``Annotated`` types in this module:
+
+    * The argument must be a ``Quantity`` object.
+    * The argument must be provided with a compatible unit. For example, a ``Frequency``
+      argument's units can be ``u.Hz``, ``u.MHz``, ``u.GHz``, etc. but not ``u.m``,
+      ``u.K``, or any other non-frequency unit.
+
+    In addition to the above, the value of any ``Annotated`` argument will be converted
+    automatically to the unit specified in for that type. For example, the ``Angle``
+    type will be converted to ``u.rad``, even if the argument is provided with a unit of
+    ``u.deg``. This allows functions to flexibly handle compatible units while keeping
+    tedious unit conversion logic out of the function body.
 
     Parameters
     ----------
@@ -129,6 +143,15 @@ def enforce_units(func):
     -------
     callable
         The wrapped function with unit enforcement.
+
+    Raises
+    ------
+    UnitConversionError
+        If the input quantity has incompatible units.
+    TypeError
+        If the input is not a ``Quantity`` object.
+    AttributeError
+        If the function tries to call ``to_value()`` on a non-Quantity object.
     """
     sig = signature(func)
     hints = get_type_hints(func, include_extras=True)
