@@ -12,6 +12,10 @@ from spacelink.core.units import (
     wavelength,
     frequency,
     to_dB,
+    enforce_units,
+    Angle,
+    Frequency,
+    Temperature,
 )
 
 
@@ -100,16 +104,6 @@ def test_vswr(vswr, gamma, return_loss):
     assert_decibel_equal(return_loss_result, return_loss * u.dB, atol=0.01)
 
 
-def test_enforce_units_decorator():
-    """Test that enforce_units decorator raises the correct astropy exception
-    with incompatible units."""
-    with pytest.raises(u.UnitConversionError):
-        wavelength(1.0 * u.m)
-
-    with pytest.raises(u.UnitConversionError):
-        frequency(1.0 * u.Hz)
-
-
 @pytest.mark.parametrize(
     "input_value, factor, expected",
     [
@@ -119,7 +113,6 @@ def test_enforce_units_decorator():
     ],
 )
 def test_to_dB(input_value, factor, expected):
-    """ """
     assert_decibel_equal(units.to_dB(input_value, factor=factor), expected, atol=0.01)
 
 
@@ -132,7 +125,6 @@ def test_to_dB(input_value, factor, expected):
     ],
 )
 def test_to_linear(input_value, factor, expected):
-    """Test conversion from decibels to linear."""
     assert_quantity_allclose(units.to_linear(input_value, factor=factor), expected)
 
 
@@ -144,9 +136,6 @@ def test_to_linear(input_value, factor, expected):
     ],
 )
 def test_vswr_return_loss_conversions(return_loss, vswr):
-    """
-    TODO: validate
-    """
     vswr_result = units.return_loss_to_vswr(return_loss)
     assert_quantity_allclose(vswr_result, vswr, atol=0.01 * u.dimensionless)
 
@@ -182,3 +171,64 @@ def test_vswr_to_return_loss_invalid_input():
 def safe_negate(quantity):
     # Astropy does not allow -quantity for function units, so use multiplication
     return (-1) * quantity
+
+
+def test_enforce_units_conversion():
+    """Test that enforce_units decorator properly converts units."""
+
+    @enforce_units
+    def test_angle_function(angle: Angle) -> Angle:
+        """Function that expects angle in radians."""
+        # This function expects the input to be converted to radians
+        # If the decorator works correctly, angle.unit should be u.rad
+        assert angle.unit == u.rad, f"Expected radians, got {angle.unit}"
+        return angle * 2
+
+    @enforce_units
+    def test_frequency_function(freq: Frequency) -> Frequency:
+        """Function that expects frequency in Hz."""
+        # This function expects the input to be converted to Hz
+        assert freq.unit == u.Hz, f"Expected Hz, got {freq.unit}"
+        return freq * 2
+
+    @enforce_units
+    def test_temperature_function(temp: Temperature) -> Temperature:
+        """Function that expects temperature in Kelvin."""
+        # This function expects the input to be converted to Kelvin
+        assert temp.unit == u.K, f"Expected K, got {temp.unit}"
+        return temp + (10 * u.K)
+
+    # Test angle conversion: degrees should be converted to radians
+    input_angle = 180 * u.deg  # 180 degrees = π radians
+    result_angle = test_angle_function(input_angle)
+    expected_radians = np.pi * u.rad
+    assert_quantity_allclose(input_angle.to(u.rad), expected_radians)
+    assert_quantity_allclose(result_angle, 2 * expected_radians)
+
+    # Test frequency conversion: MHz should be converted to Hz
+    input_freq = 1000 * u.MHz  # 1000 MHz = 1e9 Hz
+    result_freq = test_frequency_function(input_freq)
+    expected_hz = 1e9 * u.Hz
+    assert_quantity_allclose(result_freq, 2 * expected_hz)
+
+    # Test temperature conversion: Celsius should be converted to Kelvin
+    input_temp = 0 * u.deg_C  # 0°C = 273.15 K
+    result_temp = test_temperature_function(input_temp)
+    expected_k = 273.15 * u.K
+    assert_quantity_allclose(result_temp, expected_k + (10 * u.K), rtol=1e-10)
+
+
+def test_enforce_units_rejects_incompatible_units():
+    """Test that enforce_units decorator rejects incompatible units."""
+
+    @enforce_units
+    def test_angle_function(angle: Angle) -> Angle:
+        return angle * 2
+
+    # Should raise UnitConversionError for incompatible units
+    with pytest.raises(u.UnitConversionError):
+        test_angle_function(5 * u.m)  # Length instead of angle
+
+    # Should raise TypeError for raw numbers
+    with pytest.raises(TypeError, match="must be provided as an astropy Quantity"):
+        test_angle_function(45)  # Raw number instead of Quantity
