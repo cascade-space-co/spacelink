@@ -177,19 +177,7 @@ def enforce_units(func):
                         f"Parameter '{name}' must be provided as an astropy Quantity, "
                         f"not a raw number."
                     )
-
-        try:
-            return func(*bound.args, **bound.kwargs)
-        except AttributeError as e:
-            if "'numpy.float64' object has no attribute 'to_value'" in str(e):
-                # Common error when forgetting to add units to computed values
-                func_name = func.__name__
-                raise TypeError(
-                    f"In function '{func_name}': A numeric value is missing units. "
-                    f"You might have forgotten to add '* u.dimensionless' to a calculation "
-                    f"result. Original error: {str(e)}"
-                ) from None
-            raise
+        return func(*bound.args, **bound.kwargs)
 
     return wrapper
 
