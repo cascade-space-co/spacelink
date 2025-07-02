@@ -2,14 +2,9 @@
 Test that Jupyter notebooks execute without errors.
 """
 
-import matplotlib
 from pathlib import Path
 import pytest
 import nbformat
-
-
-# Use non-interactive backend for plotting
-matplotlib.use("Agg")
 
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -40,9 +35,13 @@ def test_notebook_execution(nb_path):
 
         # Build a combined script
         script_lines = []
-        # Prepend backend setting in case notebooks import matplotlib.pyplot
+        # Prepend backend setting and warning suppression for matplotlib
         script_lines.append("import matplotlib\n")
+        script_lines.append("import warnings\n")
         script_lines.append("matplotlib.use('Agg')\n")
+        script_lines.append(
+            "warnings.filterwarnings('ignore', message='.*FigureCanvasAgg is non-interactive.*')\n"
+        )
 
         for cell in cells:
             source = cell.source
