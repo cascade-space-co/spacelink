@@ -113,7 +113,6 @@ def test_vswr(vswr, gamma, return_loss):
     ],
 )
 def test_to_dB(input_value, factor, expected):
-    """ """
     assert_decibel_equal(units.to_dB(input_value, factor=factor), expected, atol=0.01)
 
 
@@ -126,7 +125,6 @@ def test_to_dB(input_value, factor, expected):
     ],
 )
 def test_to_linear(input_value, factor, expected):
-    """Test conversion from decibels to linear."""
     assert_quantity_allclose(units.to_linear(input_value, factor=factor), expected)
 
 
@@ -138,9 +136,6 @@ def test_to_linear(input_value, factor, expected):
     ],
 )
 def test_vswr_return_loss_conversions(return_loss, vswr):
-    """
-    TODO: validate
-    """
     vswr_result = units.return_loss_to_vswr(return_loss)
     assert_quantity_allclose(vswr_result, vswr, atol=0.01 * u.dimensionless)
 
