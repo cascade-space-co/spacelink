@@ -6,17 +6,18 @@ between residual carrier and modulated components.
 
 References
 ----------
-[1] `810-005 203, Rev. D "Sequential Ranging"
-<https://deepspace.jpl.nasa.gov/dsndocs/810-005/203/203D.pdf>`__
+`[1]`_ 810-005 203, Rev. D "Sequential Ranging"
 
-[2] `810-005 214, Rev. C "Pseudo-Noise and Regenerative Ranging"
-<https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf>`__
+`[2]`_ 810-005 214, Rev. C "Pseudo-Noise and Regenerative Ranging"
 
-[3] `CCSDS 414.1-B-3 "Pseudo-Noise (PN) Ranging Systems Recommended Standard"
-<https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf>`__
+`[3]`_ CCSDS 414.1-B-3 "Pseudo-Noise (PN) Ranging Systems Recommended Standard"
 
-[4] `CCSDS 414.0-G-2 "Pseudo-Noise (PN) Ranging Systems Informational Report"
-<https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf>`__
+`[4]`_ CCSDS 414.0-G-2 "Pseudo-Noise (PN) Ranging Systems Informational Report"
+
+.. _[1]: https://deepspace.jpl.nasa.gov/dsndocs/810-005/203/203D.pdf
+.. _[2]: https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf
+.. _[3]: https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf
+.. _[4]: https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf
 """
 
 import enum
@@ -67,8 +68,9 @@ def pn_sequence_range_ambiguity(ranging_clock_rate: Frequency) -> Distance:
 
     References
     ----------
-    [2] Equation (11).
-    [4] p. 2-2.
+    `[2]`_ Equation (11).
+
+    `[4]`_ p. 2-2.
     """
     return (CODE_LENGTH * const.c / (4 * ranging_clock_rate)).decompose()
 
@@ -92,7 +94,7 @@ def chip_snr(ranging_clock_rate: Frequency, prn0: DecibelHertz) -> Decibels:
 
     References
     ----------
-    [4] p. 2-3.
+    `[4]`_ p. 2-3.
     """
     return prn0 - ranging_clock_rate.to(u.dB(u.Hz))
 
@@ -118,8 +120,9 @@ def _suppression_factor(mod_idx: Angle, modulation: DataModulation) -> Dimension
 
     References
     ----------
-    [1] Equation (15).
-    [2] Equation (24).
+    `[1]`_ Equation (15).
+
+    `[2]`_ Equation (24).
     """
     mod_idx_rad = mod_idx.value
     if modulation == DataModulation.BIPOLAR:
@@ -152,8 +155,9 @@ def _modulation_factor(mod_idx: Angle, modulation: DataModulation) -> Dimensionl
 
     References
     ----------
-    [1] Equation (16).
-    [2] Equation (25).
+    `[1]`_ Equation (16).
+
+    `[2]`_ Equation (25).
     """
     mod_idx_rad = mod_idx.value
     if modulation == DataModulation.BIPOLAR:
@@ -200,8 +204,9 @@ def carrier_to_total_power(
 
     References
     ----------
-    [1] Equation (10) for sequential ranging uplink.
-    [2] Equation (19) for PN ranging uplink, (50) for regenerative downlink.
+    `[1]`_ Equation (10) for sequential ranging uplink.
+
+    `[2]`_ Equation (19) for PN ranging uplink, (50) for regenerative downlink.
     """
     return (
         j0(math.sqrt(2) * mod_idx_ranging.value) ** 2
@@ -244,8 +249,9 @@ def ranging_to_total_power(
 
     References
     ----------
-    [1] Equation (11) for sequential ranging uplink.
-    [2] Equation (20) for PN ranging uplink, (51) for regenerative downlink.
+    `[1]`_ Equation (11) for sequential ranging uplink.
+
+    `[2]`_ Equation (20) for PN ranging uplink, (51) for regenerative downlink.
     """
     return (
         2
@@ -289,8 +295,9 @@ def data_to_total_power(
 
     References
     ----------
-    [1] Equation (12) for sequential ranging uplink.
-    [2] Equation (21) for PN ranging uplink, (52) for regenerative downlink.
+    `[1]`_ Equation (12) for sequential ranging uplink.
+
+    `[2]`_ Equation (21) for PN ranging uplink, (52) for regenerative downlink.
     """
     return (
         j0(math.sqrt(2) * mod_idx_ranging.value) ** 2
