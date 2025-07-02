@@ -7,7 +7,6 @@ from spacelink.core import noise
 
 
 def test_thermal_noise_power():
-    """Test thermal noise power calculation."""
     # Test with standard room temperature (290K)
     expected = 1.380649e-23 * 290.0 * 1e6
     assert_quantity_allclose(noise.noise_power(1.0 * u.MHz), expected * u.W)
@@ -25,7 +24,6 @@ def test_thermal_noise_power():
 
 
 def test_noise_power_density():
-    """Test noise power density calculation."""
     expected = 1.380649e-23 * 290.0
     assert_quantity_allclose(
         noise.noise_power_density(290 * u.K), expected * u.W / u.Hz
@@ -33,7 +31,6 @@ def test_noise_power_density():
 
 
 def test_temperature_to_noise_factor():
-    """Test temperature to noise factor conversion."""
     temp = 290 * u.K
     expected_factor = 2.0
     result = noise.temperature_to_noise_factor(temp)
@@ -51,7 +48,6 @@ def test_temperature_to_noise_factor():
 
 
 def test_noise_factor_to_temperature():
-    """Test noise factor to temperature conversion."""
     factor = 2.0 * u.dimensionless
     expected_temp = 290 * u.K
     result = noise.noise_factor_to_temperature(factor)
@@ -68,7 +64,6 @@ def test_noise_factor_to_temperature():
 
 
 def test_noise_figure_to_temperature():
-    """Test noise figure to temperature conversion."""
     noise_figure = 3.0 * u.dB  # Noise factor ~2.0
     expected_temp = 290 * u.K
     result = noise.noise_figure_to_temperature(noise_figure)
