@@ -31,7 +31,7 @@ jobs:
           poetry install --with test
         timeout-minutes: 5
 
-      - name: Format with Black
+      - name: Check formatting with Black
         run: poetry run black --check .
 
       - name: Lint with flake8
