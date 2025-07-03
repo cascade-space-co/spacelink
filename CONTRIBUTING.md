@@ -10,7 +10,7 @@ Thank you for your interest in contributing! Please read these guidelines to hel
 
 ### Development Setup
 1. Install Python 3.11+ and Poetry.
-2. Clone the repo and run `poetry install`.
+2. Clone the repo and run `poetry install --with dev`.
 3. Run tests with `poetry run pytest`.
 4. Lint with `poetry run flake8 .` and format with `poetry run black .`.
 

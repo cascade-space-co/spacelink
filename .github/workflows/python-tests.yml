@@ -28,7 +28,7 @@ jobs:
         timeout-minutes: 5
       - name: Install dependencies
         run: |
-          poetry install --with test
+          poetry install --with dev
         timeout-minutes: 5
 
       - name: Check formatting with Black

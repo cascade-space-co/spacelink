@@ -39,12 +39,12 @@ pip install spacelink
 
 2. Install dependencies:
    ```bash
-   poetry install
+   poetry install --with dev
    ```
 
 For production use without development tools:
    ```bash
-   poetry install --without dev
+   poetry install
    ```
 
 ## Documentation
