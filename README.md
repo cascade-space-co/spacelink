@@ -65,7 +65,7 @@ We welcome contributions to the SpaceLink project! To get started, please follow
 2. **Set Up Your Environment**:
    - Install dependencies using Poetry:
      ```bash
-     poetry install
+     poetry install --with dev
      ```
 
 3. **Run Tests**:
