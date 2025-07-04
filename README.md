@@ -1,8 +1,12 @@
 # SpaceLink
 
-A Python library for radio frequency calculations, including antenna modeling, RF conversions, and noise calculations.
+A Python library for radio frequency calculations, including antenna modeling, RF 
+conversions, and noise calculations.
 
-Created and maintained by [Cascade Space](https://www.cascade.space)
+Created and maintained by [Cascade Space](https://cascade.space).
+
+Published documentation for the latest released version can be found here: 
+https://cascade-space-co.github.io/spacelink/
 
 ## Features
 
@@ -17,12 +21,18 @@ Created and maintained by [Cascade Space](https://www.cascade.space)
 
 ### Quick Install
 
-For users who want to use the package:
+For users who want to import a released version of the package:
 ```bash
 pip install spacelink
 ```
 
 ### Development Setup
+
+Aside from modifying the source code you may want to install from source in order to:
+
+* Run the provided Jupyter notebooks
+* Generate the documentation locally for a specific version
+
 
 #### Prerequisites
 
@@ -37,15 +47,27 @@ pip install spacelink
    cd spacelink
    ```
 
-2. Install dependencies:
-   ```bash
-   poetry install --with dev
-   ```
+2. Install it to a Poetry virtual environment using one of these options:
+   
+   * Production mode without developer tools:
+     ```bash
+     poetry install
+     ```
+   
+   * With developer tools:
+     ```bash
+     poetry install --with dev
+     ```
 
-For production use without development tools:
-   ```bash
-   poetry install
-   ```
+   * With Jupyter notebook dependencies:
+     ```bash
+     poetry install --with demo
+     ```
+
+   * With developer tools and Jupyter notebook dependencies:
+     ```bash
+     poetry install --with dev,demo
+     ```
 
 ## Documentation
 
@@ -58,51 +80,8 @@ poetry run sphinx-build -b html docs/source docs/build
 
 ## Contributing
 
-We welcome contributions to the SpaceLink project! To get started, please follow these steps:
-
-1. **Read the Guidelines**: Review the [CONTRIBUTING.md](../CONTRIBUTING.md) file for detailed instructions on coding style, testing, and project conventions.
-
-2. **Set Up Your Environment**:
-   - Install dependencies using Poetry:
-     ```bash
-     poetry install --with dev
-     ```
-
-3. **Run Tests**:
-   - Ensure all tests pass before submitting your changes:
-     ```bash
-     poetry run pytest
-     ```
-   - Run tests with coverage:
-     ```bash
-     poetry run pytest --cov=spacelink --cov-report=term-missing
-     ```
-   - Run a specific test file:
-     ```bash
-     poetry run pytest tests/core/test_antenna.py
-     ```
-   - Run tests with verbose output:
-     ```bash
-     poetry run pytest -v
-     ```
-
-4. **Follow Code Style**:
-   - Format your code with Black:
-     ```bash
-     poetry run black .
-     ```
-   - Lint your code with Flake8:
-     ```bash
-     poetry run flake8 .
-     ```
-
-5. **Submit a Pull Request**:
-   - Push your changes to a feature branch and open a pull request on GitHub.
-   - Provide a clear description of your changes and link any related issues.
-
-Thank you for contributing to SpaceLink!
-
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+We welcome contributions to the SpaceLink project! See 
+[CONTRIBUTING.md](CONTRIBUTING.md) for detailed instructions and guidelines.
 
 ## License
 
