@@ -38,7 +38,7 @@ By contributing, you agree your contributions will be licensed under the MIT Lic
 This section describes how to publish a new release of SpaceLink to PyPI. Only maintainers should perform these steps.
 
 ### 1. Bump the Version
-- Update the version number in `pyproject.toml` (and `src/spacelink/__init__.py` if present).
+- Update the version number in `pyproject.toml`.
 - Follow [semantic versioning](https://semver.org/).
 - Commit the version bump (e.g., `git commit -am 'Bump version to X.Y.Z'`).
 
