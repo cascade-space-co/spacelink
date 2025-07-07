@@ -81,9 +81,9 @@ poetry run sphinx-build -b html docs/source docs/build
 ## Contributing
 
 We welcome contributions to the SpaceLink project! See 
-[CONTRIBUTING.md](CONTRIBUTING.md) for detailed instructions and guidelines.
+[CONTRIBUTING.md](https://github.com/cascade-space-co/spacelink/blob/main/CONTRIBUTING.md) for detailed instructions and guidelines.
 
 ## License
 
-[MIT License](LICENSE)
+[MIT License](https://github.com/cascade-space-co/spacelink/blob/main/LICENSE)
 
