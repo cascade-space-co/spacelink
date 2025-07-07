@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.core.ranging &mdash; SpaceLink 0.1.0 documentation</title>
+  <title>spacelink.core.ranging &mdash; SpaceLink 0.1.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../../_static/documentation_options.js?v=360bc84d"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.0
+                0.1.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -79,21 +79,27 @@
              
   <h1>Source code for spacelink.core.ranging</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Calculations related to two-way pseudo-noise (PN) radiometric ranging.</span>
+<span class="sd">Calculations related to two-way sequential or pseudo-noise (PN) radiometric ranging.</span>
 
 <span class="sd">This module provides functions for calculating range ambiguity and power allocations</span>
 <span class="sd">between residual carrier and modulated components.</span>
 
 <span class="sd">References</span>
 <span class="sd">----------</span>
-<span class="sd">[1] `810-005 214, Rev. C &quot;Pseudo-Noise and Regenerative Ranging&quot;</span>
-<span class="sd">&lt;https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf&gt;`__</span>
+<span class="sd">`[1]`_ 810-005 203, Rev. D &quot;Sequential Ranging&quot;</span>
 
-<span class="sd">[2] `CCSDS 414.1-B-3 &quot;Pseudo-Noise (PN) Ranging Systems Recommended Standard&quot;</span>
-<span class="sd">&lt;https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf&gt;`__</span>
+<span class="sd">`[2]`_ 810-005 214, Rev. C &quot;Pseudo-Noise and Regenerative Ranging&quot;</span>
 
-<span class="sd">[3] `CCSDS 414.0-G-2 &quot;Pseudo-Noise (PN) Ranging Systems Informational Report&quot;</span>
-<span class="sd">&lt;https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf&gt;`__</span>
+<span class="sd">`[3]`_ CCSDS 414.1-B-3 &quot;Pseudo-Noise (PN) Ranging Systems Recommended Standard&quot;</span>
+
+<span class="sd">`[4]`_ CCSDS 414.0-G-2 &quot;Pseudo-Noise (PN) Ranging Systems Informational Report&quot;</span>
+
+<span class="sd">.. _[1]: https://deepspace.jpl.nasa.gov/dsndocs/810-005/203/203D.pdf</span>
+<span class="sd">.. _[2]: https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf</span>
+<span class="sd">.. _[3]: https://ccsds.org/wp-content/uploads/gravity_forms/\</span>
+<span class="sd">5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf</span>
+<span class="sd">.. _[4]: https://ccsds.org/wp-content/uploads/gravity_forms/\</span>
+<span class="sd">5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
@@ -114,10 +120,10 @@
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="CommandMod">
-<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.CommandMod">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CommandMod</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of command modulation used alongside ranging on the uplink.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="DataModulation">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.DataModulation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DataModulation</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of data modulation used alongside ranging.&quot;&quot;&quot;</span>
 
     <span class="n">BIPOLAR</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
     <span class="n">SINE_SUBCARRIER</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span></div>
@@ -125,8 +131,8 @@
 
 
 <span class="c1"># The DSN and CCSDS PN ranging codes all have the same length.</span>
-<span class="c1"># [1] Equation (9).</span>
-<span class="c1"># [2] Sections 3.2.2 and 3.2.3.</span>
+<span class="c1"># [2] Equation (9).</span>
+<span class="c1"># [3] Sections 3.2.2 and 3.2.3.</span>
 <span class="n">CODE_LENGTH</span> <span class="o">=</span> <span class="mi">1_009_470</span>
 
 
@@ -149,8 +155,9 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    [1] Equation (11).</span>
-<span class="sd">    [3] p. 2-2.</span>
+<span class="sd">    `[2]`_ Equation (11).</span>
+
+<span class="sd">    `[4]`_ p. 2-2.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">CODE_LENGTH</span> <span class="o">*</span> <span class="n">const</span><span class="o">.</span><span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">ranging_clock_rate</span><span class="p">))</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span></div>
 
@@ -177,25 +184,25 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    [3] p. 2-3.</span>
+<span class="sd">    `[4]`_ p. 2-3.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">prn0</span> <span class="o">-</span> <span class="n">ranging_clock_rate</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">))</span></div>
 
 
 
 <span class="nd">@enforce_units</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">modulation</span><span class="p">:</span> <span class="n">CommandMod</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">modulation</span><span class="p">:</span> <span class="n">DataModulation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the suppression factor :math:`S_{cmd}(\phi_{cmd})`.</span>
 
-<span class="sd">    This is used in the expressions for uplink carrier and ranging power fractions.</span>
+<span class="sd">    This is used in the expressions for carrier and ranging power fractions.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    mod_idx : Angle</span>
 <span class="sd">        The RMS phase deviation by command signal :math:`\phi_{cmd}`.</span>
-<span class="sd">    modulation : CommandModulation</span>
-<span class="sd">        The command modulation type.</span>
+<span class="sd">    modulation : DataModulation</span>
+<span class="sd">        The data modulation type.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -204,31 +211,33 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    [1] Equation (24).</span>
+<span class="sd">    `[1]`_ Equation (15).</span>
+
+<span class="sd">    `[2]`_ Equation (24).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mod_idx_rad</span> <span class="o">=</span> <span class="n">mod_idx</span><span class="o">.</span><span class="n">value</span>
-    <span class="k">if</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">CommandMod</span><span class="o">.</span><span class="n">BIPOLAR</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">DataModulation</span><span class="o">.</span><span class="n">BIPOLAR</span><span class="p">:</span>
         <span class="n">suppression_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="k">elif</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">CommandMod</span><span class="o">.</span><span class="n">SINE_SUBCARRIER</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">DataModulation</span><span class="o">.</span><span class="n">SINE_SUBCARRIER</span><span class="p">:</span>
         <span class="n">suppression_factor</span> <span class="o">=</span> <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid command modulation type: </span><span class="si">{</span><span class="n">modulation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid data modulation type: </span><span class="si">{</span><span class="n">modulation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">suppression_factor</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span>
 
 
 <span class="nd">@enforce_units</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_modulation_factor</span><span class="p">(</span><span class="n">mod_idx</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">modulation</span><span class="p">:</span> <span class="n">CommandMod</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_modulation_factor</span><span class="p">(</span><span class="n">mod_idx</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">modulation</span><span class="p">:</span> <span class="n">DataModulation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the modulation factor :math:`M_{cmd}(\phi_{cmd})`.</span>
 
-<span class="sd">    This is used in the expression for uplink data power fraction.</span>
+<span class="sd">    This is used in the expression for data power fraction.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    mod_idx : Angle</span>
 <span class="sd">        The RMS phase deviation by command signal :math:`\phi_{cmd}`.</span>
-<span class="sd">    modulation : CommandModulation</span>
-<span class="sd">        The command modulation type.</span>
+<span class="sd">    modulation : DataModulation</span>
+<span class="sd">        The data modulation type.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -237,37 +246,49 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    [1] Equation (25).</span>
+<span class="sd">    `[1]`_ Equation (16).</span>
+
+<span class="sd">    `[2]`_ Equation (25).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mod_idx_rad</span> <span class="o">=</span> <span class="n">mod_idx</span><span class="o">.</span><span class="n">value</span>
-    <span class="k">if</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">CommandMod</span><span class="o">.</span><span class="n">BIPOLAR</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">DataModulation</span><span class="o">.</span><span class="n">BIPOLAR</span><span class="p">:</span>
         <span class="n">mod_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="k">elif</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">CommandMod</span><span class="o">.</span><span class="n">SINE_SUBCARRIER</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">DataModulation</span><span class="o">.</span><span class="n">SINE_SUBCARRIER</span><span class="p">:</span>
         <span class="n">mod_factor</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">j1</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid command modulation type: </span><span class="si">{</span><span class="n">modulation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid data modulation type: </span><span class="si">{</span><span class="n">modulation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mod_factor</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span>
 
 
-<div class="viewcode-block" id="uplink_carrier_to_total_power">
-<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.uplink_carrier_to_total_power">[docs]</a>
+<div class="viewcode-block" id="carrier_to_total_power">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.carrier_to_total_power">[docs]</a>
 <span class="nd">@enforce_units</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">uplink_carrier_to_total_power</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">carrier_to_total_power</span><span class="p">(</span>
     <span class="n">mod_idx_ranging</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
-    <span class="n">mod_idx_cmd</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
-    <span class="n">modulation</span><span class="p">:</span> <span class="n">CommandMod</span><span class="p">,</span>
+    <span class="n">mod_idx_data</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+    <span class="n">modulation</span><span class="p">:</span> <span class="n">DataModulation</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Uplink ratio of residual carrier power to total power :math:`P_{C}/P_{T}`.</span>
+<span class="sd">    Ratio of residual carrier power to total power :math:`P_{C}/P_{T}`.</span>
+
+<span class="sd">    This applies under the following conditions:</span>
+
+<span class="sd">    * The ranging clock (chip pulse shape in the case of PN ranging) is a sinewave.</span>
+<span class="sd">    * Uplink or regenerative downlink.</span>
+
+<span class="sd">    This does not apply to the downlink case when a transparent (non-regenerative)</span>
+<span class="sd">    transponder is used.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    mod_idx_ranging : Angle</span>
-<span class="sd">        The RMS phase deviation by ranging signal :math:`\phi_{r}`.</span>
-<span class="sd">    mod_idx_cmd : Angle</span>
-<span class="sd">        The RMS phase deviation by command signal :math:`\phi_{cmd}`.</span>
-<span class="sd">    modulation : CommandModulation</span>
-<span class="sd">        The command modulation type.</span>
+<span class="sd">        The RMS phase deviation by ranging signal; :math:`\phi_{r}` for uplink or</span>
+<span class="sd">        :math:`\theta_{rs}` for downlink.</span>
+<span class="sd">    mod_idx_data : Angle</span>
+<span class="sd">        The RMS phase deviation by data signal; :math:`\phi_{cmd}` for uplink or</span>
+<span class="sd">        :math:`\theta_{tlm}` for downlink.</span>
+<span class="sd">    modulation : DataModulation</span>
+<span class="sd">        The data modulation type.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -276,34 +297,46 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    [1] Equation (19).</span>
+<span class="sd">    `[1]`_ Equation (10) for sequential ranging uplink.</span>
+
+<span class="sd">    `[2]`_ Equation (19) for PN ranging uplink, (50) for regenerative downlink.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="o">*</span> <span class="n">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx_cmd</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx_data</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span></div>
 
 
 
-<div class="viewcode-block" id="uplink_ranging_to_total_power">
-<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.uplink_ranging_to_total_power">[docs]</a>
+<div class="viewcode-block" id="ranging_to_total_power">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.ranging_to_total_power">[docs]</a>
 <span class="nd">@enforce_units</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">uplink_ranging_to_total_power</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ranging_to_total_power</span><span class="p">(</span>
     <span class="n">mod_idx_ranging</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
-    <span class="n">mod_idx_cmd</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
-    <span class="n">modulation</span><span class="p">:</span> <span class="n">CommandMod</span><span class="p">,</span>
+    <span class="n">mod_idx_data</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+    <span class="n">modulation</span><span class="p">:</span> <span class="n">DataModulation</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Uplink ratio of usable ranging power to total power :math:`P_{R}/P_{T}`.</span>
+<span class="sd">    Ratio of usable ranging power to total power :math:`P_{R}/P_{T}`.</span>
+
+<span class="sd">    This applies under the following conditions:</span>
+
+<span class="sd">    * The ranging clock (chip pulse shape in the case of PN ranging) is a sinewave.</span>
+<span class="sd">    * Uplink or regenerative downlink.</span>
+
+<span class="sd">    This does not apply to the downlink case when a transparent (non-regenerative)</span>
+<span class="sd">    transponder is used.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    mod_idx_ranging : Angle</span>
-<span class="sd">        The RMS phase deviation by ranging signal :math:`\phi_{r}`.</span>
-<span class="sd">    mod_idx_cmd : Angle</span>
-<span class="sd">        The RMS phase deviation by command signal :math:`\phi_{cmd}`.</span>
-<span class="sd">    modulation : CommandModulation</span>
-<span class="sd">        The command modulation type.</span>
+<span class="sd">        The RMS phase deviation by ranging signal; :math:`\phi_{r}` for uplink or</span>
+<span class="sd">        :math:`\theta_{rs}` for downlink.</span>
+<span class="sd">    mod_idx_data : Angle</span>
+<span class="sd">        The RMS phase deviation by data signal; :math:`\phi_{cmd}` for uplink or</span>
+<span class="sd">        :math:`\theta_{tlm}` for downlink.</span>
+<span class="sd">    modulation : DataModulation</span>
+<span class="sd">        The data modulation type.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -312,35 +345,47 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    [1] Equation (20).</span>
+<span class="sd">    `[1]`_ Equation (11) for sequential ranging uplink.</span>
+
+<span class="sd">    `[2]`_ Equation (20) for PN ranging uplink, (51) for regenerative downlink.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">2</span>
         <span class="o">*</span> <span class="n">j1</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="o">*</span> <span class="n">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx_cmd</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx_data</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span></div>
 
 
 
-<div class="viewcode-block" id="uplink_data_to_total_power">
-<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.uplink_data_to_total_power">[docs]</a>
+<div class="viewcode-block" id="data_to_total_power">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.data_to_total_power">[docs]</a>
 <span class="nd">@enforce_units</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">uplink_data_to_total_power</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">data_to_total_power</span><span class="p">(</span>
     <span class="n">mod_idx_ranging</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
-    <span class="n">mod_idx_cmd</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
-    <span class="n">modulation</span><span class="p">:</span> <span class="n">CommandMod</span><span class="p">,</span>
+    <span class="n">mod_idx_data</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+    <span class="n">modulation</span><span class="p">:</span> <span class="n">DataModulation</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Uplink ratio of usable data power to total power :math:`P_{D}/P_{T}`.</span>
+<span class="sd">    Ratio of usable data power to total power :math:`P_{D}/P_{T}`.</span>
+
+<span class="sd">    This applies under the following conditions:</span>
+
+<span class="sd">    * The ranging clock (chip pulse shape in the case of PN ranging) is a sinewave.</span>
+<span class="sd">    * Uplink or regenerative downlink.</span>
+
+<span class="sd">    This does not apply to the downlink case when a transparent (non-regenerative)</span>
+<span class="sd">    transponder is used.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    mod_idx_ranging : Angle</span>
-<span class="sd">        The RMS phase deviation by ranging signal :math:`\phi_{r}`.</span>
-<span class="sd">    mod_idx_cmd : Angle</span>
-<span class="sd">        The RMS phase deviation by command signal :math:`\phi_{cmd}`.</span>
-<span class="sd">    modulation : CommandModulation</span>
-<span class="sd">        The command modulation type.</span>
+<span class="sd">        The RMS phase deviation by ranging signal; :math:`\phi_{r}` for uplink or</span>
+<span class="sd">        :math:`\theta_{rs}` for downlink.</span>
+<span class="sd">    mod_idx_data : Angle</span>
+<span class="sd">        The RMS phase deviation by data signal; :math:`\phi_{cmd}` for uplink or</span>
+<span class="sd">        :math:`\theta_{tlm}` for downlink.</span>
+<span class="sd">    modulation : DataModulation</span>
+<span class="sd">        The data modulation type.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -349,11 +394,13 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    [1] Equation (21).</span>
+<span class="sd">    `[1]`_ Equation (12) for sequential ranging uplink.</span>
+
+<span class="sd">    `[2]`_ Equation (21) for PN ranging uplink, (52) for regenerative downlink.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="o">*</span> <span class="n">_modulation_factor</span><span class="p">(</span><span class="n">mod_idx_cmd</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">_modulation_factor</span><span class="p">(</span><span class="n">mod_idx_data</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span></div>
 
 </pre></div>

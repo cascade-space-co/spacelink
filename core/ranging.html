@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ranging Module &mdash; SpaceLink 0.1.0 documentation</title>
+  <title>Ranging Module &mdash; SpaceLink 0.1.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../_static/documentation_options.js?v=360bc84d"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.0
+                0.1.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -98,26 +98,27 @@
              
   <section id="module-spacelink.core.ranging">
 <span id="ranging-module"></span><h1>Ranging Module<a class="headerlink" href="#module-spacelink.core.ranging" title="Link to this heading"></a></h1>
-<p>Calculations related to two-way pseudo-noise (PN) radiometric ranging.</p>
+<p>Calculations related to two-way sequential or pseudo-noise (PN) radiometric ranging.</p>
 <p>This module provides functions for calculating range ambiguity and power allocations
 between residual carrier and modulated components.</p>
 <p class="rubric">References</p>
-<p>[1] <a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf">810-005 214, Rev. C “Pseudo-Noise and Regenerative Ranging”</a></p>
-<p>[2] <a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf">CCSDS 414.1-B-3 “Pseudo-Noise (PN) Ranging Systems Recommended Standard”</a></p>
-<p>[3] <a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf">CCSDS 414.0-G-2 “Pseudo-Noise (PN) Ranging Systems Informational Report”</a></p>
+<p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/203/203D.pdf">[1]</a> 810-005 203, Rev. D “Sequential Ranging”</p>
+<p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf">[2]</a> 810-005 214, Rev. C “Pseudo-Noise and Regenerative Ranging”</p>
+<p><a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf">[3]</a> CCSDS 414.1-B-3 “Pseudo-Noise (PN) Ranging Systems Recommended Standard”</p>
+<p><a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf">[4]</a> CCSDS 414.0-G-2 “Pseudo-Noise (PN) Ranging Systems Informational Report”</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="spacelink.core.ranging.CommandMod">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">CommandMod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#CommandMod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.CommandMod" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.core.ranging.DataModulation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">DataModulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#DataModulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.DataModulation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>The type of command modulation used alongside ranging on the uplink.</p>
+<p>The type of data modulation used alongside ranging.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="spacelink.core.ranging.CommandMod.BIPOLAR">
-<span class="sig-name descname"><span class="pre">BIPOLAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#spacelink.core.ranging.CommandMod.BIPOLAR" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.core.ranging.DataModulation.BIPOLAR">
+<span class="sig-name descname"><span class="pre">BIPOLAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#spacelink.core.ranging.DataModulation.BIPOLAR" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="spacelink.core.ranging.CommandMod.SINE_SUBCARRIER">
-<span class="sig-name descname"><span class="pre">SINE_SUBCARRIER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#spacelink.core.ranging.CommandMod.SINE_SUBCARRIER" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.core.ranging.DataModulation.SINE_SUBCARRIER">
+<span class="sig-name descname"><span class="pre">SINE_SUBCARRIER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#spacelink.core.ranging.DataModulation.SINE_SUBCARRIER" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -138,8 +139,8 @@ between residual carrier and modulated components.</p>
 </dd>
 </dl>
 <p class="rubric">References</p>
-<p>[1] Equation (11).
-[3] p. 2-2.</p>
+<p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf">[2]</a> Equation (11).</p>
+<p><a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf">[4]</a> p. 2-2.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -161,19 +162,28 @@ between residual carrier and modulated components.</p>
 </dd>
 </dl>
 <p class="rubric">References</p>
-<p>[3] p. 2-3.</p>
+<p><a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf">[4]</a> p. 2-3.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.ranging.uplink_carrier_to_total_power">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">uplink_carrier_to_total_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod_idx_ranging</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_idx_cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modulation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#uplink_carrier_to_total_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.uplink_carrier_to_total_power" title="Link to this definition"></a></dt>
-<dd><p>Uplink ratio of residual carrier power to total power <span class="math notranslate nohighlight">\(P_{C}/P_{T}\)</span>.</p>
+<dt class="sig sig-object py" id="spacelink.core.ranging.carrier_to_total_power">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">carrier_to_total_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod_idx_ranging</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_idx_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modulation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#carrier_to_total_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.carrier_to_total_power" title="Link to this definition"></a></dt>
+<dd><p>Ratio of residual carrier power to total power <span class="math notranslate nohighlight">\(P_{C}/P_{T}\)</span>.</p>
+<p>This applies under the following conditions:</p>
+<ul class="simple">
+<li><p>The ranging clock (chip pulse shape in the case of PN ranging) is a sinewave.</p></li>
+<li><p>Uplink or regenerative downlink.</p></li>
+</ul>
+<p>This does not apply to the downlink case when a transparent (non-regenerative)
+transponder is used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mod_idx_ranging</strong> (<em>Angle</em>) – The RMS phase deviation by ranging signal <span class="math notranslate nohighlight">\(\phi_{r}\)</span>.</p></li>
-<li><p><strong>mod_idx_cmd</strong> (<em>Angle</em>) – The RMS phase deviation by command signal <span class="math notranslate nohighlight">\(\phi_{cmd}\)</span>.</p></li>
-<li><p><strong>modulation</strong> (<em>CommandModulation</em>) – The command modulation type.</p></li>
+<li><p><strong>mod_idx_ranging</strong> (<em>Angle</em>) – The RMS phase deviation by ranging signal; <span class="math notranslate nohighlight">\(\phi_{r}\)</span> for uplink or
+<span class="math notranslate nohighlight">\(\theta_{rs}\)</span> for downlink.</p></li>
+<li><p><strong>mod_idx_data</strong> (<em>Angle</em>) – The RMS phase deviation by data signal; <span class="math notranslate nohighlight">\(\phi_{cmd}\)</span> for uplink or
+<span class="math notranslate nohighlight">\(\theta_{tlm}\)</span> for downlink.</p></li>
+<li><p><strong>modulation</strong> (<a class="reference internal" href="#spacelink.core.ranging.DataModulation" title="spacelink.core.ranging.DataModulation"><em>DataModulation</em></a>) – The data modulation type.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -184,19 +194,29 @@ between residual carrier and modulated components.</p>
 </dd>
 </dl>
 <p class="rubric">References</p>
-<p>[1] Equation (19).</p>
+<p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/203/203D.pdf">[1]</a> Equation (10) for sequential ranging uplink.</p>
+<p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf">[2]</a> Equation (19) for PN ranging uplink, (50) for regenerative downlink.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.ranging.uplink_ranging_to_total_power">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">uplink_ranging_to_total_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod_idx_ranging</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_idx_cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modulation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#uplink_ranging_to_total_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.uplink_ranging_to_total_power" title="Link to this definition"></a></dt>
-<dd><p>Uplink ratio of usable ranging power to total power <span class="math notranslate nohighlight">\(P_{R}/P_{T}\)</span>.</p>
+<dt class="sig sig-object py" id="spacelink.core.ranging.ranging_to_total_power">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">ranging_to_total_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod_idx_ranging</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_idx_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modulation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#ranging_to_total_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.ranging_to_total_power" title="Link to this definition"></a></dt>
+<dd><p>Ratio of usable ranging power to total power <span class="math notranslate nohighlight">\(P_{R}/P_{T}\)</span>.</p>
+<p>This applies under the following conditions:</p>
+<ul class="simple">
+<li><p>The ranging clock (chip pulse shape in the case of PN ranging) is a sinewave.</p></li>
+<li><p>Uplink or regenerative downlink.</p></li>
+</ul>
+<p>This does not apply to the downlink case when a transparent (non-regenerative)
+transponder is used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mod_idx_ranging</strong> (<em>Angle</em>) – The RMS phase deviation by ranging signal <span class="math notranslate nohighlight">\(\phi_{r}\)</span>.</p></li>
-<li><p><strong>mod_idx_cmd</strong> (<em>Angle</em>) – The RMS phase deviation by command signal <span class="math notranslate nohighlight">\(\phi_{cmd}\)</span>.</p></li>
-<li><p><strong>modulation</strong> (<em>CommandModulation</em>) – The command modulation type.</p></li>
+<li><p><strong>mod_idx_ranging</strong> (<em>Angle</em>) – The RMS phase deviation by ranging signal; <span class="math notranslate nohighlight">\(\phi_{r}\)</span> for uplink or
+<span class="math notranslate nohighlight">\(\theta_{rs}\)</span> for downlink.</p></li>
+<li><p><strong>mod_idx_data</strong> (<em>Angle</em>) – The RMS phase deviation by data signal; <span class="math notranslate nohighlight">\(\phi_{cmd}\)</span> for uplink or
+<span class="math notranslate nohighlight">\(\theta_{tlm}\)</span> for downlink.</p></li>
+<li><p><strong>modulation</strong> (<a class="reference internal" href="#spacelink.core.ranging.DataModulation" title="spacelink.core.ranging.DataModulation"><em>DataModulation</em></a>) – The data modulation type.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -207,19 +227,29 @@ between residual carrier and modulated components.</p>
 </dd>
 </dl>
 <p class="rubric">References</p>
-<p>[1] Equation (20).</p>
+<p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/203/203D.pdf">[1]</a> Equation (11) for sequential ranging uplink.</p>
+<p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf">[2]</a> Equation (20) for PN ranging uplink, (51) for regenerative downlink.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.ranging.uplink_data_to_total_power">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">uplink_data_to_total_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod_idx_ranging</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_idx_cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modulation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#uplink_data_to_total_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.uplink_data_to_total_power" title="Link to this definition"></a></dt>
-<dd><p>Uplink ratio of usable data power to total power <span class="math notranslate nohighlight">\(P_{D}/P_{T}\)</span>.</p>
+<dt class="sig sig-object py" id="spacelink.core.ranging.data_to_total_power">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">data_to_total_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod_idx_ranging</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_idx_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modulation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#data_to_total_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.data_to_total_power" title="Link to this definition"></a></dt>
+<dd><p>Ratio of usable data power to total power <span class="math notranslate nohighlight">\(P_{D}/P_{T}\)</span>.</p>
+<p>This applies under the following conditions:</p>
+<ul class="simple">
+<li><p>The ranging clock (chip pulse shape in the case of PN ranging) is a sinewave.</p></li>
+<li><p>Uplink or regenerative downlink.</p></li>
+</ul>
+<p>This does not apply to the downlink case when a transparent (non-regenerative)
+transponder is used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mod_idx_ranging</strong> (<em>Angle</em>) – The RMS phase deviation by ranging signal <span class="math notranslate nohighlight">\(\phi_{r}\)</span>.</p></li>
-<li><p><strong>mod_idx_cmd</strong> (<em>Angle</em>) – The RMS phase deviation by command signal <span class="math notranslate nohighlight">\(\phi_{cmd}\)</span>.</p></li>
-<li><p><strong>modulation</strong> (<em>CommandModulation</em>) – The command modulation type.</p></li>
+<li><p><strong>mod_idx_ranging</strong> (<em>Angle</em>) – The RMS phase deviation by ranging signal; <span class="math notranslate nohighlight">\(\phi_{r}\)</span> for uplink or
+<span class="math notranslate nohighlight">\(\theta_{rs}\)</span> for downlink.</p></li>
+<li><p><strong>mod_idx_data</strong> (<em>Angle</em>) – The RMS phase deviation by data signal; <span class="math notranslate nohighlight">\(\phi_{cmd}\)</span> for uplink or
+<span class="math notranslate nohighlight">\(\theta_{tlm}\)</span> for downlink.</p></li>
+<li><p><strong>modulation</strong> (<a class="reference internal" href="#spacelink.core.ranging.DataModulation" title="spacelink.core.ranging.DataModulation"><em>DataModulation</em></a>) – The data modulation type.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -230,7 +260,8 @@ between residual carrier and modulated components.</p>
 </dd>
 </dl>
 <p class="rubric">References</p>
-<p>[1] Equation (21).</p>
+<p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/203/203D.pdf">[1]</a> Equation (12) for sequential ranging uplink.</p>
+<p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf">[2]</a> Equation (21) for PN ranging uplink, (52) for regenerative downlink.</p>
 </dd></dl>
 
 </section>
