@@ -16,11 +16,13 @@ sys.path.insert(
 # Add the _ext directory to the path for custom extensions
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "_ext")))
 
+import spacelink  # noqa: E402
+
 # -- Project information -----------------------------------------------------
 project = "SpaceLink"
 copyright = "2025, Cascade Space"
 author = "Cascade Space"
-release = "0.1.0"
+release = spacelink.__version__
 version = release
 root_doc = "index"
 

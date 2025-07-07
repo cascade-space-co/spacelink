@@ -28,8 +28,11 @@ jobs:
         timeout-minutes: 5
       - name: Install dependencies
         run: |
-          poetry install --with test
+          poetry install --with dev
         timeout-minutes: 5
+
+      - name: Check formatting with Black
+        run: poetry run black --check .
 
       - name: Lint with flake8
         run: poetry run flake8 .
