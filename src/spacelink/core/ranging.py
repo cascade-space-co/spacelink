@@ -57,19 +57,19 @@ class DataModulation(enum.Enum):
     SINE_SUBCARRIER = enum.auto()
 
 
-# The length of the full PN ranging sequence.
-# The DSN and CCSDS PN ranging codes all have the same length.
-# [2] Equation (9).
-# [3] Sections 3.2.2 and 3.2.3.
 CODE_LENGTH = 1_009_470
+"""int: The length of the full PN ranging sequence.
+
+The DSN and CCSDS PN ranging codes all have the same length.
+
+References
+----------
+`[2]`_ Equation (9).
+
+`[3]`_ Sections 3.2.2 and 3.2.3.
+"""
 
 
-# The lengths of the six components of the PN ranging codes.
-# The DSN and CCSDS PN ranging codes all have the same component lengths.
-# Key is the component index.
-# Value is the length of the component in chips.
-# [2] Table 2.
-# [3] Sections 3.2.2 and 3.2.3.
 COMPONENT_LENGTHS = {
     1: 2,
     2: 7,
@@ -78,6 +78,19 @@ COMPONENT_LENGTHS = {
     5: 19,
     6: 23,
 }
+"""dict[int, int]: The lengths of the six components of the PN ranging codes.
+
+The DSN and CCSDS PN ranging codes all have the same component lengths.
+
+The key is the component index (1-6).
+The value is the length of the component in chips.
+
+References
+----------
+`[2]`_ Table 2.
+
+`[3]`_ Sections 3.2.2 and 3.2.3.
+"""
 
 
 @enforce_units
