@@ -3,13 +3,11 @@
 See ranging.py for references.
 """
 
-import io
 import pytest
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 from astropy.coordinates import Angle
 import numpy as np
-import pandas as pd
 
 from spacelink.core import ranging
 from spacelink.core.units import (
@@ -217,6 +215,8 @@ def generate_pn_acquisition_test_params():
     """Generate test parameters for pn_component_acquisition_probability."""
 
     # Raw values copied directly from [2] Table 6.
+    # First column is log10(Pn).
+    # Remaining columns are (Rn**2 * T * Pr/N0) in dB for components 2-6.
     dsn_table_6_raw = [
         "-0.050 5.7 6.5 6.9 7.1 7.4",
         "-0.040 6.2 6.9 7.2 7.5 7.7",
@@ -233,19 +233,17 @@ def generate_pn_acquisition_test_params():
         "-0.002 9.9 10.3 10.5 10.7 10.8",
         "-0.001 10.5 10.8 11.0 11.1 11.3",
     ]
-    df = pd.read_csv(io.StringIO("\n".join(dsn_table_6_raw)), sep=" ", header=None)
-    df.columns = ["logPn", 2, 3, 4, 5, 6]
 
     params = []
+    integration_time = 1.0 * u.s
+    components = [2, 3, 4, 5, 6]
     for code in ranging.PnRangingCode:
-        for _, row in df.iterrows():
-            for component in [2, 3, 4, 5, 6]:
+        for row in dsn_table_6_raw:
+            row_values = [float(v) for v in row.split()]
+            expected_probability = 10 ** row_values[0]
+            for component, table_val in zip(components, row_values[1:]):
                 corr_coeff = ranging._CORR_COEFF_DSN[code][component]
-                ranging_to_noise_psd = (
-                    10 ** (row[component] / 10) / corr_coeff**2 * u.Hz
-                )
-                integration_time = 1.0 * u.s
-                expected_probability = 10 ** row["logPn"]
+                ranging_to_noise_psd = 10 ** (table_val / 10) / corr_coeff**2 * u.Hz
 
                 params.append(
                     (
