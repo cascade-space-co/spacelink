@@ -44,6 +44,7 @@ renku-sphinx-theme = "^0.5.0"
 sphinx-autodoc-typehints = "^1.25.2"
 wheel = "^0.45.1"
 twine = "^6.1.0"
+pandas = "^2.0.0"
 
 [tool.poetry.group.demo.dependencies]
 jupyter = "^1.0.0"
