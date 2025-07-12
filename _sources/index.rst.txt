@@ -6,6 +6,7 @@ designed specifically for space communications and RF system analysis.
 Developed by `Cascade Space <https://cascade.space>`_,
 SpaceLink provides tools for antenna modeling, RF chain analysis,
 link budget calculations, and noise analysis.
+The source code is available on `GitHub <https://github.com/cascade-space-co/spacelink>`_.
 
 Key Features
 ------------
@@ -36,6 +37,8 @@ For development:
    git clone https://github.com/cascade-space-co/spacelink.git
    cd spacelink
    poetry install
+
+View the source code at the `GitHub Repository <https://github.com/cascade-space-co/spacelink>`_.
 
 Library Structure
 -----------------
