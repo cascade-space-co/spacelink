@@ -100,6 +100,7 @@ Temperature = Annotated[Quantity, u.K]
 Length = Annotated[Quantity, u.m]
 DecibelHertz = Annotated[Quantity, u.dB(u.Hz)]
 Angle = Annotated[Quantity, u.rad]
+Time = Annotated[Quantity, u.s]
 
 
 def enforce_units(func):
