@@ -107,7 +107,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.constants</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">const</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">j0</span><span class="p">,</span> <span class="n">j1</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.integrate</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.special</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Angle</span><span class="p">,</span>
@@ -116,8 +117,20 @@
     <span class="n">Dimensionless</span><span class="p">,</span>
     <span class="n">Frequency</span><span class="p">,</span>
     <span class="n">Distance</span><span class="p">,</span>
+    <span class="n">Time</span><span class="p">,</span>
     <span class="n">enforce_units</span><span class="p">,</span>
 <span class="p">)</span>
+
+
+<div class="viewcode-block" id="PnRangingCode">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.PnRangingCode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PnRangingCode</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of PN ranging code used.&quot;&quot;&quot;</span>
+
+    <span class="n">DSN</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+    <span class="n">CCSDS_T4B</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+    <span class="n">CCSDS_T2B</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span></div>
+
 
 
 <div class="viewcode-block" id="DataModulation">
@@ -130,10 +143,40 @@
 
 
 
-<span class="c1"># The DSN and CCSDS PN ranging codes all have the same length.</span>
-<span class="c1"># [2] Equation (9).</span>
-<span class="c1"># [3] Sections 3.2.2 and 3.2.3.</span>
 <span class="n">CODE_LENGTH</span> <span class="o">=</span> <span class="mi">1_009_470</span>
+<span class="sd">&quot;&quot;&quot;int: The length of the full PN ranging sequence.</span>
+
+<span class="sd">The DSN and CCSDS PN ranging codes all have the same length.</span>
+
+<span class="sd">References</span>
+<span class="sd">----------</span>
+<span class="sd">`[2]`_ Equation (9).</span>
+
+<span class="sd">`[3]`_ Sections 3.2.2 and 3.2.3.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="n">COMPONENT_LENGTHS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="mi">19</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="mi">23</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;dict[int, int]: The lengths of the six components of the PN ranging codes.</span>
+
+<span class="sd">The DSN and CCSDS PN ranging codes all have the same component lengths.</span>
+
+<span class="sd">The key is the component index (1-6).</span>
+<span class="sd">The value is the length of the component in chips.</span>
+
+<span class="sd">References</span>
+<span class="sd">----------</span>
+<span class="sd">`[2]`_ Table 2.</span>
+
+<span class="sd">`[3]`_ Sections 3.2.2 and 3.2.3.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="pn_sequence_range_ambiguity">
@@ -219,7 +262,7 @@
     <span class="k">if</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">DataModulation</span><span class="o">.</span><span class="n">BIPOLAR</span><span class="p">:</span>
         <span class="n">suppression_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="k">elif</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">DataModulation</span><span class="o">.</span><span class="n">SINE_SUBCARRIER</span><span class="p">:</span>
-        <span class="n">suppression_factor</span> <span class="o">=</span> <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">suppression_factor</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid data modulation type: </span><span class="si">{</span><span class="n">modulation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">suppression_factor</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span>
@@ -254,7 +297,7 @@
     <span class="k">if</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">DataModulation</span><span class="o">.</span><span class="n">BIPOLAR</span><span class="p">:</span>
         <span class="n">mod_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="k">elif</span> <span class="n">modulation</span> <span class="o">==</span> <span class="n">DataModulation</span><span class="o">.</span><span class="n">SINE_SUBCARRIER</span><span class="p">:</span>
-        <span class="n">mod_factor</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">j1</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">mod_factor</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">j1</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid data modulation type: </span><span class="si">{</span><span class="n">modulation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mod_factor</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span>
@@ -302,7 +345,7 @@
 <span class="sd">    `[2]`_ Equation (19) for PN ranging uplink, (50) for regenerative downlink.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="o">*</span> <span class="n">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx_data</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span></div>
 
@@ -351,7 +394,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="mi">2</span>
-        <span class="o">*</span> <span class="n">j1</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">*</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">j1</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="o">*</span> <span class="n">_suppression_factor</span><span class="p">(</span><span class="n">mod_idx_data</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span></div>
 
@@ -399,9 +442,148 @@
 <span class="sd">    `[2]`_ Equation (21) for PN ranging uplink, (52) for regenerative downlink.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">j0</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mod_idx_ranging</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="o">*</span> <span class="n">_modulation_factor</span><span class="p">(</span><span class="n">mod_idx_data</span><span class="p">,</span> <span class="n">modulation</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span></div>
+
+
+
+<span class="c1"># Values of the cross-correlation factors R_n given in Tables 3, 4, and 5 of [2].</span>
+<span class="n">_CORR_COEFF_DSN</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># [2] Table 3</span>
+    <span class="n">PnRangingCode</span><span class="o">.</span><span class="n">DSN</span><span class="p">:</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="mf">0.9544</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="mf">0.0456</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="mf">0.0456</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="mf">0.0456</span><span class="p">,</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="mf">0.0456</span><span class="p">,</span>
+        <span class="mi">6</span><span class="p">:</span> <span class="mf">0.0456</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="c1"># [2] Table 4</span>
+    <span class="n">PnRangingCode</span><span class="o">.</span><span class="n">CCSDS_T4B</span><span class="p">:</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="mf">0.9387</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="mf">0.0613</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="mf">0.0613</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="mf">0.0613</span><span class="p">,</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="mf">0.0613</span><span class="p">,</span>
+        <span class="mi">6</span><span class="p">:</span> <span class="mf">0.0613</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="c1"># [2] Table 5</span>
+    <span class="n">PnRangingCode</span><span class="o">.</span><span class="n">CCSDS_T2B</span><span class="p">:</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="mf">0.6274</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="mf">0.2447</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="mf">0.2481</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="mf">0.2490</span><span class="p">,</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="mf">0.2492</span><span class="p">,</span>
+        <span class="mi">6</span><span class="p">:</span> <span class="mf">0.2496</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="pn_component_acquisition_probability">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.pn_component_acquisition_probability">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pn_component_acquisition_probability</span><span class="p">(</span>
+    <span class="n">ranging_to_noise_psd</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">,</span>
+    <span class="n">integration_time</span><span class="p">:</span> <span class="n">Time</span><span class="p">,</span>
+    <span class="n">code</span><span class="p">:</span> <span class="n">PnRangingCode</span><span class="p">,</span>
+    <span class="n">component</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the acquisition probability for one component of the PN ranging code.</span>
+
+<span class="sd">    Successful acquisition means that the correct phase of the component code is</span>
+<span class="sd">    identified by the receiver. The number of possible phases is equal to the component</span>
+<span class="sd">    length.</span>
+
+<span class="sd">    This calculation assumes that the received signal is correlated against all</span>
+<span class="sd">    possible cyclic shifts of the component code in parallel and that the shift with the</span>
+<span class="sd">    maximum correlation output is selected. See `[4]`_ Section 2.6.2 for details.</span>
+
+<span class="sd">    This function uses equation (91) from `[2]`_. `[4]`_ has an equivalent equation in</span>
+<span class="sd">    Section 2.6.3.2, but it uses slightly different values for the cross-correlation</span>
+<span class="sd">    coefficients which leads to slightly different acquisition probabilities.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ranging_to_noise_psd : Frequency</span>
+<span class="sd">        The ranging-to-noise power spectral density :math:`P_R/N_0`.</span>
+<span class="sd">    integration_time : Time</span>
+<span class="sd">        The integration time :math:`T`.</span>
+<span class="sd">    code : PnRangingCode</span>
+<span class="sd">        The PN ranging code type.</span>
+<span class="sd">    component : int</span>
+<span class="sd">        The component index in [1, 6].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Dimensionless</span>
+<span class="sd">        The acquisition probability for the given component.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    `[2]`_ Equation (91).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">comp_len</span> <span class="o">=</span> <span class="n">COMPONENT_LENGTHS</span><span class="p">[</span><span class="n">component</span><span class="p">]</span>
+    <span class="n">corr_coeff</span> <span class="o">=</span> <span class="n">_CORR_COEFF_DSN</span><span class="p">[</span><span class="n">code</span><span class="p">][</span><span class="n">component</span><span class="p">]</span>
+    <span class="n">corr_term</span> <span class="o">=</span> <span class="n">corr_coeff</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">integration_time</span> <span class="o">*</span> <span class="n">ranging_to_noise_psd</span><span class="p">)</span>
+    <span class="n">integral</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span>
+            <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            <span class="o">*</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">erf</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">corr_term</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">comp_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">integral</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span></div>
+
+
+
+<div class="viewcode-block" id="pn_acquisition_probability">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.pn_acquisition_probability">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pn_acquisition_probability</span><span class="p">(</span>
+    <span class="n">ranging_to_noise_psd</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">,</span> <span class="n">integration_time</span><span class="p">:</span> <span class="n">Time</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="n">PnRangingCode</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the overall acquisition probability for the PN ranging code.</span>
+
+<span class="sd">    This is the product of the acquisition probabilities for all components.</span>
+
+<span class="sd">    This calculation assumes that correlations for all component codes are performed in</span>
+<span class="sd">    parallel. See `[4]`_ Section 2.6.2 for details.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ranging_to_noise_psd : Frequency</span>
+<span class="sd">        The ranging-to-noise power spectral density :math:`P_R/N_0`.</span>
+<span class="sd">    integration_time : Time</span>
+<span class="sd">        The integration time :math:`T`.</span>
+<span class="sd">    code : PnRangingCode</span>
+<span class="sd">        The PN ranging code type.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Dimensionless</span>
+<span class="sd">        The overall acquisition probability for the PN ranging code.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    `[2]`_ Equation (90).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="nb">float</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">pn_component_acquisition_probability</span><span class="p">(</span>
+                        <span class="n">ranging_to_noise_psd</span><span class="p">,</span> <span class="n">integration_time</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">component</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span>
+    <span class="p">)</span></div>
 
 </pre></div>
 
