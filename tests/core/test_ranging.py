@@ -211,7 +211,7 @@ def test_data_to_total_power(
     assert_quantity_allclose(data_ratio, expected_data_ratio, rtol=1e-4)
 
 
-def generate_pn_acquisition_test_params():
+def gen_pn_component_acq_prob_test_params():
     """Generate test parameters for pn_component_acquisition_probability."""
 
     # Raw values copied directly from [2] Table 6.
@@ -262,7 +262,7 @@ def generate_pn_acquisition_test_params():
 @pytest.mark.parametrize(
     "ranging_to_noise_psd, integration_time, code, component, expected_probability, "
     "case_description",
-    generate_pn_acquisition_test_params(),
+    gen_pn_component_acq_prob_test_params(),
 )
 def test_pn_component_acquisition_probability(
     ranging_to_noise_psd: Frequency,
@@ -285,58 +285,58 @@ def test_pn_component_acquisition_probability(
     )
 
 
-def generate_pn_acquisition_full_test_params():
-    """Generate test parameters for pn_acquisition_probability using DSN plot data."""
+# In the following dicts keys are T*Pr/N0 in dB and values are acquisition
+# probability.
+ACQ_PROB_DATA_FROM_DSN_PLOTS = {
+    # Extracted from [2] Figure 14 using WebPlotDigitizer 4.7
+    ranging.PnRangingCode.DSN: {
+        30.0: 0.10025,
+        31.0: 0.17544,
+        32.0: 0.29449,
+        33.0: 0.45238,
+        34.0: 0.62907,
+        35.0: 0.78822,
+        36.0: 0.90351,
+        37.0: 0.96617,
+        38.0: 0.99248,
+    },
+    # Extracted from [2] Figure 14 using WebPlotDigitizer 4.7
+    ranging.PnRangingCode.CCSDS_T4B: {
+        30.0: 0.38095,
+        31.0: 0.55138,
+        32.0: 0.72306,
+        33.0: 0.86090,
+        34.0: 0.94486,
+        35.0: 0.98371,
+        36.0: 0.99499,
+        37.0: 1.00000,
+        38.0: 1.00000,
+    },
+    # Extracted from [2] Figure 15 using WebPlotDigitizer 4.7
+    ranging.PnRangingCode.CCSDS_T2B: {
+        16.0: 0.15233,
+        17.0: 0.25799,
+        18.0: 0.40541,
+        19.0: 0.57862,
+        20.0: 0.74816,
+        21.0: 0.87838,
+        22.0: 0.95332,
+        23.0: 0.98771,
+        24.0: 0.99754,
+    },
+}
 
-    # In the following dicts keys are T*Pr/N0 in dB and values are acquisition probability.
-    acq_prob_data_from_dsn_plots = {
-        # Extracted from [2] Figure 14 using WebPlotDigitizer 4.7
-        ranging.PnRangingCode.DSN: {
-            30.0: 0.10025,
-            31.0: 0.17544,
-            32.0: 0.29449,
-            33.0: 0.45238,
-            34.0: 0.62907,
-            35.0: 0.78822,
-            36.0: 0.90351,
-            37.0: 0.96617,
-            38.0: 0.99248,
-        },
-        # Extracted from [2] Figure 14 using WebPlotDigitizer 4.7
-        ranging.PnRangingCode.CCSDS_T4B: {
-            30.0: 0.38095,
-            31.0: 0.55138,
-            32.0: 0.72306,
-            33.0: 0.86090,
-            34.0: 0.94486,
-            35.0: 0.98371,
-            36.0: 0.99499,
-            37.0: 1.00000,
-            38.0: 1.00000,
-        },
-        # Extracted from [2] Figure 15 using WebPlotDigitizer 4.7
-        ranging.PnRangingCode.CCSDS_T2B: {
-            16.0: 0.15233,
-            17.0: 0.25799,
-            18.0: 0.40541,
-            19.0: 0.57862,
-            20.0: 0.74816,
-            21.0: 0.87838,
-            22.0: 0.95332,
-            23.0: 0.98771,
-            24.0: 0.99754,
-        },
-    }
 
+def gen_pn_acq_prob_test_params():
     params = []
-    for code, data in acq_prob_data_from_dsn_plots.items():
+    for code, data in ACQ_PROB_DATA_FROM_DSN_PLOTS.items():
         for snr_db, expected_probability in data.items():
             params.append(
                 (
                     snr_db * u.dBHz,
                     1.0 * u.s,
                     code,
-                    expected_probability,
+                    expected_probability * u.dimensionless,
                     f"{code=}, T*Pr/N0={snr_db} dB, P_acq={expected_probability}",
                 )
             )
@@ -345,17 +345,17 @@ def generate_pn_acquisition_full_test_params():
 
 
 @pytest.mark.parametrize(
-    "ranging_to_noise_psd, integration_time, code, expected_probability, case_description",
-    generate_pn_acquisition_full_test_params(),
+    "ranging_to_noise_psd, integration_time, code, expected_probability, "
+    "case_description",
+    gen_pn_acq_prob_test_params(),
 )
 def test_pn_acquisition_probability(
     ranging_to_noise_psd: DecibelHertz,
     integration_time: Time,
     code: ranging.PnRangingCode,
-    expected_probability: float,
+    expected_probability: Dimensionless,
     case_description: str,
 ):
-    """Test pn_acquisition_probability using data extracted from DSN plots."""
     result = ranging.pn_acquisition_probability(
         ranging_to_noise_psd, integration_time, code
     )
@@ -364,5 +364,48 @@ def test_pn_acquisition_probability(
         result,
         expected_probability,
         atol=5e-3,  # Test values are from plot extraction
+        err_msg=f"Failed for case: {case_description}",
+    )
+
+
+def gen_pn_acq_time_test_params():
+    params = []
+    ranging_to_noise_psd = 30 * u.dBHz
+    for code, data in ACQ_PROB_DATA_FROM_DSN_PLOTS.items():
+        for snr_db, success_probability in data.items():
+            if not 0 < success_probability < 1:
+                continue
+            params.append(
+                (
+                    ranging_to_noise_psd,
+                    success_probability * u.dimensionless,
+                    code,
+                    snr_db * u.dB - ranging_to_noise_psd,
+                    f"{code=}, T*Pr/N0={snr_db} dB, P_acq={success_probability}",
+                )
+            )
+
+    return params
+
+
+@pytest.mark.parametrize(
+    "ranging_to_noise_psd, success_probability, code, expected_time, case_description",
+    gen_pn_acq_time_test_params(),
+)
+def test_pn_acquisition_time(
+    ranging_to_noise_psd: DecibelHertz,
+    success_probability: Dimensionless,
+    code: ranging.PnRangingCode,
+    expected_time: Time,
+    case_description: str,
+):
+    result = ranging.pn_acquisition_time(
+        ranging_to_noise_psd, success_probability, code
+    )
+
+    assert_quantity_allclose(
+        result,
+        expected_time,
+        rtol=5e-2,  # Test values are from plot extraction
         err_msg=f"Failed for case: {case_description}",
     )

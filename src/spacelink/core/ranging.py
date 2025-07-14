@@ -478,3 +478,78 @@ def pn_acquisition_probability(
         )
         * u.dimensionless
     )
+
+
+@enforce_units
+def pn_acquisition_time(
+    ranging_to_noise_psd: Frequency,
+    success_probability: Dimensionless,
+    code: PnRangingCode,
+) -> Time:
+    r"""
+    Compute the acquisition time for the PN ranging code.
+
+    Successful acquisition means that the correct phase of the full PN ranging sequence
+    is identified by the receiver. For the same receiver architecture, higher
+    probability of successs requires either higher :math:`P_R/N_0` or more time.
+
+    This calculation assumes that correlations for all component codes are performed in
+    parallel, which is typical for ground station receivers. `[3]`_ and `[4]`_ refer to
+    this as "station acquisition," though it could also apply to a regenerative
+    transponder that uses the same parallel correlation architecture. The See `[4]`_
+    Section 2.6.2 for details.
+
+    Keep in mind that this only accounts for the acquisition time of a single PN ranging
+    receiver. If a regenerative transponder is used, the ground station receiver's
+    acquisition processing can't begin until the on-board transponder has completed
+    its acquisition processing.
+
+    Parameters
+    ----------
+    ranging_to_noise_psd : Frequency
+        The ranging-to-noise power spectral density :math:`P_R/N_0`.
+    success_probability : Dimensionless
+        The desired probability of successful acquisition.
+    code : PnRangingCode
+        The PN ranging code type.
+
+    Returns
+    -------
+    Time
+        The minimum integration time required to achieve the desired probability of
+        successful acquisition.
+
+    References
+    ----------
+    `[2]`_ Inverse of Equation (90).
+    """
+    if not 0 < success_probability < 1:
+        raise ValueError("Success probability must be between 0 and 1")
+
+    upper_bound = 1000 * u.s  # Default upper bound should cover most cases
+    while True:
+        try:
+            # There's no closed-form solution to Equation (90) or (91) so we need to
+            # use a root-finding algorithm.
+            solution = scipy.optimize.root_scalar(
+                lambda x: (
+                    pn_acquisition_probability(ranging_to_noise_psd, x * u.s, code)
+                    - success_probability
+                ),
+                bracket=(0.0, upper_bound.value),
+            )
+        except ValueError as e:
+            if str(e) == "f(a) and f(b) must have different signs":
+                if upper_bound > 100 * u.h:
+                    raise ValueError(
+                        f"No solution between 0 and {upper_bound.to(u.h):.2f}"
+                    )
+                # The most likely reason for this exception is that the acquisition time
+                # is higher than the upper bound passed to the root-finding algorithm.
+                upper_bound *= 10
+            else:
+                raise e
+        else:
+            break
+
+    return solution.root * u.s
