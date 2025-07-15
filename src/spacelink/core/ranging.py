@@ -526,30 +526,32 @@ def pn_acquisition_time(
     if not 0 < success_probability < 1:
         raise ValueError("Success probability must be between 0 and 1")
 
-    upper_bound = 1000 * u.s  # Default upper bound should cover most cases
-    while True:
-        try:
-            # There's no closed-form solution to Equation (90) or (91) so we need to
-            # use a root-finding algorithm.
-            solution = scipy.optimize.root_scalar(
-                lambda x: (
-                    pn_acquisition_probability(ranging_to_noise_psd, x * u.s, code)
-                    - success_probability
-                ),
-                bracket=(0.0, upper_bound.value),
-            )
-        except ValueError as e:
-            if str(e) == "f(a) and f(b) must have different signs":
-                if upper_bound > 100 * u.h:
-                    raise ValueError(
-                        f"No solution between 0 and {upper_bound.to(u.h):.2f}"
-                    )
-                # The most likely reason for this exception is that the acquisition time
-                # is higher than the upper bound passed to the root-finding algorithm.
-                upper_bound *= 10
-            else:
-                raise e
-        else:
-            break
+    # The following are upper bounds on the expected acquisition time required for the
+    # root finding algorithm. These were found by fitting curves to the acquisition
+    # probability equations and then adding some margin.
+    if code == PnRangingCode.DSN:
+        upper_bound = (
+            2000 + 2166 * -math.log10(1 - success_probability)
+        ) / ranging_to_noise_psd
+    elif code == PnRangingCode.CCSDS_T4B:
+        upper_bound = (
+            1100 + 1198 * -math.log10(1 - success_probability)
+        ) / ranging_to_noise_psd
+    elif code == PnRangingCode.CCSDS_T2B:
+        upper_bound = (
+            100 + 73 * -math.log10(1 - success_probability)
+        ) / ranging_to_noise_psd
+    else:
+        raise ValueError(f"Invalid PN ranging code: {code}")
+
+    # There's no closed-form solution to Equation (90) or (91) so we need to use a
+    # root-finding algorithm.
+    solution = scipy.optimize.root_scalar(
+        lambda int_time: (
+            pn_acquisition_probability(ranging_to_noise_psd, int_time * u.s, code)
+            - success_probability
+        ),
+        bracket=(0.0, upper_bound.value),
+    )
 
     return solution.root * u.s
