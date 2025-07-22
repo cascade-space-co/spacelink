@@ -1,10 +1,16 @@
 """Tests for core antenna calculation functions."""
 
 import pytest
+import numpy as np
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
 
-from spacelink.core.antenna import polarization_loss, dish_gain
+from spacelink.core.antenna import (
+    polarization_loss,
+    dish_gain,
+    Polarization,
+    Handedness,
+)
 from spacelink.core.units import Dimensionless, Length, Frequency, Decibels
 
 """
@@ -76,3 +82,69 @@ def test_dish_gain_invalid_frequency():
         dish_gain(1.0 * u.m, 0 * u.Hz, 0.65 * u.dimensionless)
     with pytest.raises(ValueError, match="Frequency must be positive"):
         dish_gain(1.0 * u.m, -1 * u.GHz, 0.65 * u.dimensionless)
+
+
+@pytest.mark.parametrize(
+    "tilt_angle, axial_ratio, phase_difference, expected_jones",
+    [
+        # Linear polarization along theta
+        (
+            0 * u.rad,
+            np.inf * u.dimensionless,
+            Handedness.LEFT,
+            np.array([1.0, 0.0]),
+        ),
+        # Linear polarization along phi
+        (
+            np.pi / 2 * u.rad,
+            np.inf * u.dimensionless,
+            Handedness.LEFT,
+            np.array([0.0, 1.0]),
+        ),
+        # Linear polarization at 45 degrees
+        (
+            np.pi / 4 * u.rad,
+            np.inf * u.dimensionless,
+            Handedness.LEFT,
+            np.array([1.0, 1.0]) / np.sqrt(2),
+        ),
+        # Left-hand circular polarization
+        (
+            np.pi / 4 * u.rad,
+            1 * u.dimensionless,
+            Handedness.LEFT,
+            np.array([1.0, 1.0j]) / np.sqrt(2),
+        ),
+        # Right-hand circular polarization
+        (
+            np.pi / 4 * u.rad,
+            1 * u.dimensionless,
+            Handedness.RIGHT,
+            np.array([1.0, -1.0j]) / np.sqrt(2),
+        ),
+        # Elliptical polarization
+        (
+            0 * u.rad,
+            2 * u.dimensionless,
+            Handedness.LEFT,
+            np.array([1.0, 0.5j]) / np.sqrt(1.25),
+        ),
+    ],
+)
+def test_polarization_jones_vector(
+    tilt_angle, axial_ratio, phase_difference, expected_jones
+):
+    pol = Polarization(tilt_angle, axial_ratio, phase_difference)
+    np.testing.assert_allclose(pol.jones_vector, expected_jones, atol=1e-10)
+
+
+def test_polarization_factories():
+    lhcp = Polarization.lhcp()
+    rhcp = Polarization.rhcp()
+
+    np.testing.assert_allclose(lhcp.jones_vector, np.array([1.0, 1.0j]) / np.sqrt(2))
+    np.testing.assert_allclose(rhcp.jones_vector, np.array([1.0, -1.0j]) / np.sqrt(2))
+
+    # Orthogonal states should have zero inner product
+    inner_product = np.dot(lhcp.jones_vector.conj(), rhcp.jones_vector)
+    assert abs(inner_product) == pytest.approx(0.0)
