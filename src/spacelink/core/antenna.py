@@ -191,9 +191,10 @@ class AntennaPattern:
         Parameters
         ----------
         theta: Angle
-            1D array of polar angles in [0, pi] radians with shape (N,).
+            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of azimuthal angles in [0, 2*pi) radians with shape (M,).
+            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
+            (M,). Note that the last element must be less than 2π.
         e_theta: Dimensionless
             2D complex array of :math:`E_{\theta}(\theta, \phi)` values with shape [N,
             M] normalized such that the magnitude squared is equal to directivity.
@@ -203,8 +204,8 @@ class AntennaPattern:
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
         """
-        self.phi = phi
         self.theta = theta
+        self.phi = phi
         self.e_theta = e_theta
         self.e_phi = e_phi
         self.rad_efficiency = rad_efficiency
@@ -221,26 +222,32 @@ class AntennaPattern:
         # Functions for interpolating the complex field. Unfortunately
         # RectSphereBivariateSpline doesn't support complex data, so we have to
         # interpolate the real and imaginary parts separately.
-        # TODO: Only need to leave off first/last elements of theta if they are 0 and pi
+        # RectSphereBivariateSpline requires theta to be in the range (0, pi),
+        # excluding the endpoints where spherical coordinates have singularities.
+        theta_start = 1 if np.isclose(theta[0], 0 * u.rad, atol=1e-10) else 0
+        theta_end = -1 if np.isclose(theta[-1], np.pi * u.rad, atol=1e-10) else None
+        theta_slice = self.theta[theta_start:theta_end]
+        e_theta_slice = e_theta[theta_start:theta_end, :]
+        e_phi_slice = e_phi[theta_start:theta_end, :]
         self.e_theta_real_interp = scipy.interpolate.RectSphereBivariateSpline(
-            self.theta[1:-1],
+            theta_slice,
             self.phi,
-            np.real(e_theta[1:-1, :]),
+            np.real(e_theta_slice),
         )
         self.e_theta_imag_interp = scipy.interpolate.RectSphereBivariateSpline(
-            self.theta[1:-1],
+            theta_slice,
             self.phi,
-            np.imag(e_theta[1:-1, :]),
+            np.imag(e_theta_slice),
         )
         self.e_phi_real_interp = scipy.interpolate.RectSphereBivariateSpline(
-            self.theta[1:-1],
+            theta_slice,
             self.phi,
-            np.real(e_phi[1:-1, :]),
+            np.real(e_phi_slice),
         )
         self.e_phi_imag_interp = scipy.interpolate.RectSphereBivariateSpline(
-            self.theta[1:-1],
+            theta_slice,
             self.phi,
-            np.imag(e_phi[1:-1, :]),
+            np.imag(e_phi_slice),
         )
 
     @classmethod
@@ -263,9 +270,10 @@ class AntennaPattern:
         Parameters
         ----------
         theta: Angle
-            1D array of polar angles in [0, pi] radians with shape (N,).
+            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of azimuthal angles in [0, 2*pi) radians with shape (M,).
+            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
+            (M,).
         e_lhcp: Dimensionless
             2D complex array of :math:`E_{\text{LHCP}}(\theta, \phi)` values with shape
             (N, M) normalized such that the magnitude squared is equal to directivity.
@@ -298,9 +306,10 @@ class AntennaPattern:
         Parameters
         ----------
         theta: Angle
-            1D array of polar angles in [0, pi] radians with shape (N,).
+            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of azimuthal angles in [0, 2*pi) radians with shape (M,).
+            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
+            (M,).
         gain_lhcp: Dimensionless
             2D array of LHCP gain with shape (N, M).
         gain_rhcp: Dimensionless
@@ -334,9 +343,10 @@ class AntennaPattern:
         Parameters
         ----------
         theta: Angle
-            1D array of polar angles in [0, pi] radians with shape (N,).
+            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of azimuthal angles in [0, 2*pi) radians with shape (M,).
+            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
+            (M,).
         gain_theta: Dimensionless
             2D array of :math:`\hat{\theta}` gain with shape (N, M).
         gain_phi: Dimensionless
@@ -455,7 +465,7 @@ class AntennaPattern:
         The axial ratio is the ratio of the major to minor axis of the polarization
         ellipse. An axial ratio of 0 dB corresponds to circular polarization, and an
         axial ratio of ∞ corresponds to linear polarization. Elliptical polarizations
-        are found between these two extremes.
+        have axial ratios between these two extremes.
 
         Parameters
         ----------
