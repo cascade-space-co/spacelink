@@ -38,6 +38,7 @@ where:
 * :math:`\lambda` is the wavelength
 """
 
+import enum
 import typing
 
 import astropy.units as u
@@ -124,6 +125,10 @@ def dish_gain(
     return to_dB(gain_linear)
 
 
+class Handedness(enum.Enum):
+    LEFT = enum.auto()
+    RIGHT = enum.auto()
+
 class Polarization:
     """Represents a polarization state."""
 
@@ -132,7 +137,7 @@ class Polarization:
         self,
         tilt_angle: Angle,
         axial_ratio: Dimensionless,
-        phase_difference: Angle,
+        handedness: Handedness,
     ):
         r"""
         Create a polarization state.
@@ -140,34 +145,43 @@ class Polarization:
         Parameters
         ----------
         tilt_angle: Angle
-            Tilt angle of the polarization ellipse, measured in the local tangent plane,
-            relative to :math:`\hat{\theta}`.
+            Tilt angle of the major axis of the polarization ellipse, measured in the
+            local tangent plane, relative to :math:`\hat{\theta}`.
         axial_ratio: Dimensionless
-            Axial ratio of the polarization ellipse.
-        phase_difference: Angle
-            Phase difference between the components along :math:`\hat{\theta}` and
-            :math:`\hat{\phi}`.
+            Ratio of the major to minor axis of the polarization ellipse.
+        handedness: Handedness
+            The direction of rotation of the E-field when looking in the direction of
+            propagation.
         """
+
+        if axial_ratio < 1:
+            raise ValueError("Axial ratio must be ≥ 1 (≥ 0 dB)")
+
         self.tilt_angle = tilt_angle
         self.axial_ratio = axial_ratio
-        self.phase_difference = phase_difference
+        self.handedness = handedness
+
+        sign = -1 if handedness == Handedness.LEFT else 1
         self.jones_vector = np.array(
             [
-                np.cos(tilt_angle),
-                np.exp(1j * phase_difference.value) * np.sin(tilt_angle) / axial_ratio,
+                np.cos(tilt_angle) + sign * 1j * np.sin(tilt_angle) / axial_ratio,
+                np.sin(tilt_angle) - sign * 1j * np.cos(tilt_angle) / axial_ratio,
             ]
         )
+        # Normalize to unit magnitude.
         self.jones_vector /= np.linalg.norm(self.jones_vector)
+        # Rotate such that the first element is real.
+        self.jones_vector *= np.exp(-1j * np.angle(self.jones_vector[0]))
 
     @classmethod
     def lhcp(cls) -> typing.Self:
         """Left-hand circular polarization."""
-        return cls(np.pi / 4 * u.rad, 1 * u.dimensionless, np.pi / 2 * u.rad)
+        return cls(np.pi / 4 * u.rad, 1 * u.dimensionless, Handedness.LEFT)
 
     @classmethod
     def rhcp(cls) -> typing.Self:
         """Right-hand circular polarization."""
-        return cls(np.pi / 4 * u.rad, 1 * u.dimensionless, -np.pi / 2 * u.rad)
+        return cls(np.pi / 4 * u.rad, 1 * u.dimensionless, Handedness.RIGHT)
 
 
 class AntennaPattern:
