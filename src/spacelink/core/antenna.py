@@ -409,7 +409,8 @@ class AntennaPattern:
         Directivity as a function of the E-field in V/m is
 
         .. math::
-            D(\theta, \phi) = \frac{ 4 \pi r^2 |\vec{E}(r, \theta, \phi)|^2 }{2\eta_0 P_\text{rad}}
+            D(\theta, \phi) =
+            \frac{ 4 \pi r^2 |\vec{E}(r, \theta, \phi)|^2 }{2\eta_0 P_\text{rad}}
 
         However, this class uses normalized E-fields since the intent is to represent
         only the relative power and phase of the E-field as a function of direction.
