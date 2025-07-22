@@ -51,6 +51,7 @@ from .units import (
     Dimensionless,
     Frequency,
     Length,
+    SolidAngle,
     wavelength,
     enforce_units,
     to_dB,
@@ -230,23 +231,23 @@ class AntennaPattern:
         e_theta_slice = e_theta[theta_start:theta_end, :]
         e_phi_slice = e_phi[theta_start:theta_end, :]
         self.e_theta_real_interp = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice,
-            self.phi,
+            theta_slice.value,
+            self.phi.value,
             np.real(e_theta_slice),
         )
         self.e_theta_imag_interp = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice,
-            self.phi,
+            theta_slice.value,
+            self.phi.value,
             np.imag(e_theta_slice),
         )
         self.e_phi_real_interp = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice,
-            self.phi,
+            theta_slice.value,
+            self.phi.value,
             np.real(e_phi_slice),
         )
         self.e_phi_imag_interp = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice,
-            self.phi,
+            theta_slice.value,
+            self.phi.value,
             np.imag(e_phi_slice),
         )
 
@@ -321,8 +322,8 @@ class AntennaPattern:
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
         """
-        e_lhcp = np.sqrt(gain_lhcp / rad_efficiency) * np.exp(1j * phase_lhcp)
-        e_rhcp = np.sqrt(gain_rhcp / rad_efficiency) * np.exp(1j * phase_rhcp)
+        e_lhcp = np.sqrt(gain_lhcp / rad_efficiency) * np.exp(1j * phase_lhcp.value)
+        e_rhcp = np.sqrt(gain_rhcp / rad_efficiency) * np.exp(1j * phase_rhcp.value)
         return cls.from_circular_e_field(theta, phi, e_lhcp, e_rhcp, rad_efficiency)
 
     @classmethod
@@ -358,8 +359,8 @@ class AntennaPattern:
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
         """
-        e_theta = np.sqrt(gain_theta / rad_efficiency) * np.exp(1j * phase_theta)
-        e_phi = np.sqrt(gain_phi / rad_efficiency) * np.exp(1j * phase_phi)
+        e_theta = np.sqrt(gain_theta / rad_efficiency) * np.exp(1j * phase_theta.value)
+        e_phi = np.sqrt(gain_phi / rad_efficiency) * np.exp(1j * phase_phi.value)
         return cls(theta, phi, e_theta, e_phi, rad_efficiency)
 
     @enforce_units
@@ -391,7 +392,10 @@ class AntennaPattern:
             theta, phi
         )
         e_jones = np.stack([e_theta, e_phi])
-        return (polarization.jones_vector.conj().T @ e_jones) * u.dimensionless
+        return (
+            np.tensordot(polarization.jones_vector.conj(), e_jones, axes=([0], [0]))
+            * u.dimensionless
+        )
 
     @enforce_units
     def directivity(

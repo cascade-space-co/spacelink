@@ -100,6 +100,7 @@ Temperature = Annotated[Quantity, u.K]
 Length = Annotated[Quantity, u.m]
 DecibelHertz = Annotated[Quantity, u.dB(u.Hz)]
 Angle = Annotated[Quantity, u.rad]
+SolidAngle = Annotated[Quantity, u.sr]
 Time = Annotated[Quantity, u.s]
 
 
