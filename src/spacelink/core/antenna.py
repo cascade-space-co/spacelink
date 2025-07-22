@@ -214,8 +214,10 @@ class AntennaPattern:
         # Surface integral of directivity should be 4π over the whole sphere (or less if
         # the pattern is not defined over the whole sphere). It should never be greater
         # than 4π.
-        dir_surf_int = self._surface_integral(np.abs(e_theta) ** 2 + np.abs(e_phi) ** 2)
-        if dir_surf_int > 1.05 * (4 * np.pi):
+        dir_surf_int = _surface_integral(
+            theta, phi, np.abs(e_theta) ** 2 + np.abs(e_phi) ** 2
+        )
+        if dir_surf_int > 1.05 * (4 * np.pi) * u.sr:
             raise ValueError(
                 f"Surface integral of directivity {dir_surf_int} is greater than 4π."
             )
@@ -493,27 +495,28 @@ class AntennaPattern:
                 * u.dimensionless
             )
 
-    def _surface_integral(self, values: np.ndarray) -> float:
-        r"""
-        Take surface integral over the full pattern.
 
-        If the pattern is defined over the full sphere then this will integrate over
-        the full sphere. Otherwise this will integrate over the solid angle where the
-        pattern is defined, as if the pattern had zero gain (-∞ dBi) in directions
-        where it is not defined.
+def _surface_integral(theta: Angle, phi: Angle, values: Dimensionless) -> SolidAngle:
+    r"""
+    Take surface integral over a spherical surface.
 
-        Parameters
-        ----------
-        values:
-            A 2D array giving the values to be integrated over the full sphere. Must
-            have shape (N, M) where N is the size of theta and M is the size of phi as
-            passed to the constructor.
+    .. math::
+        \int_\phi \int_\theta f(\theta, \phi) \sin(\theta) d\theta d\phi
 
-        Returns
-        -------
-            The result of the surface integral.
-        """
-        delta_theta = np.diff(self.theta)[0]
-        delta_phi = np.diff(self.phi)[0]
-        rings = np.sum(values, axis=1) * delta_phi
-        return np.sum(rings * np.sin(self.theta) * delta_theta)
+    Parameters
+    ----------
+    theta: Angle
+        1D array of equally spaced polar angles with shape (N,).
+    phi: Angle
+        1D array of equally spaced azimuthal angles with shape (M,).
+    values:
+        A 2D array with shape (N, M) giving the values to be integrated.
+
+    Returns
+    -------
+        The result of the surface integral.
+    """
+    delta_theta = np.diff(theta)[0]
+    delta_phi = np.diff(phi)[0]
+    rings = np.sum(values, axis=1) * delta_phi
+    return np.sum(rings * np.sin(theta) * delta_theta)
