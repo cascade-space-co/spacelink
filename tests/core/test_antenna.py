@@ -1,15 +1,18 @@
 """Tests for core antenna calculation functions."""
 
+import math
 import pytest
 import numpy as np
 import astropy.units as u
 from astropy.tests.helper import assert_quantity_allclose
+from dataclasses import dataclass
 
 from spacelink.core.antenna import (
     polarization_loss,
     dish_gain,
     Polarization,
     Handedness,
+    AntennaPattern,
 )
 from spacelink.core.units import Dimensionless, Length, Frequency, Decibels
 
@@ -148,3 +151,162 @@ def test_polarization_factories():
     # Orthogonal states should have zero inner product
     inner_product = np.dot(lhcp.jones_vector.conj(), rhcp.jones_vector)
     assert abs(inner_product) == pytest.approx(0.0)
+
+
+@dataclass
+class AntennaPatternExpectedResults:
+    """Expected results for antenna pattern tests."""
+
+    lhcp_gain: Dimensionless
+    lhcp_directivity: Dimensionless
+    rhcp_gain: Dimensionless
+    rhcp_directivity: Dimensionless
+    theta_directivity: Dimensionless
+    phi_directivity: Dimensionless
+    axial_ratio: Decibels
+
+
+@dataclass
+class AntennaPatternTestCase:
+    """Data structure for antenna pattern test cases."""
+
+    name: str
+    pattern: AntennaPattern
+    expected_results: AntennaPatternExpectedResults
+
+
+def create_antenna_pattern_test_cases():
+    """Create test patterns for different antenna configurations."""
+
+    return [
+        AntennaPatternTestCase(
+            name="isotropic_theta",
+            pattern=AntennaPattern(
+                theta=np.linspace(0, np.pi, 40) * u.rad,
+                phi=np.linspace(0, 2 * np.pi, 50, endpoint=False) * u.rad,
+                e_theta=np.ones((40, 50)) * u.dimensionless,
+                e_phi=np.zeros((40, 50)) * u.dimensionless,
+                rad_efficiency=0.8 * u.dimensionless,
+            ),
+            expected_results=AntennaPatternExpectedResults(
+                lhcp_gain=0.8 * 0.5 * u.dimensionless,
+                lhcp_directivity=0.5 * u.dimensionless,
+                rhcp_gain=0.8 * 0.5 * u.dimensionless,
+                rhcp_directivity=0.5 * u.dimensionless,
+                theta_directivity=1.0 * u.dimensionless,
+                phi_directivity=0.0 * u.dimensionless,
+                axial_ratio=np.inf * u.dB,
+            ),
+        ),
+        AntennaPatternTestCase(
+            name="isotropic_phi",
+            pattern=AntennaPattern(
+                theta=np.linspace(0, np.pi, 30) * u.rad,
+                phi=np.linspace(0, 2 * np.pi, 40, endpoint=False) * u.rad,
+                e_theta=np.zeros((30, 40)) * u.dimensionless,
+                e_phi=np.ones((30, 40)) * u.dimensionless,
+                rad_efficiency=1.0 * u.dimensionless,
+            ),
+            expected_results=AntennaPatternExpectedResults(
+                lhcp_gain=0.5 * u.dimensionless,
+                lhcp_directivity=0.5 * u.dimensionless,
+                rhcp_gain=0.5 * u.dimensionless,
+                rhcp_directivity=0.5 * u.dimensionless,
+                theta_directivity=0.0 * u.dimensionless,
+                phi_directivity=1.0 * u.dimensionless,
+                axial_ratio=np.inf * u.dB,
+            ),
+        ),
+        AntennaPatternTestCase(
+            name="isotropic_lhcp",
+            pattern=AntennaPattern(
+                theta=np.linspace(0, np.pi, 50) * u.rad,
+                phi=np.linspace(0, 2 * np.pi, 60, endpoint=False) * u.rad,
+                e_theta=(1.0 + 0.0j) / np.sqrt(2) * np.ones((50, 60)) * u.dimensionless,
+                e_phi=(0.0 + 1.0j) / np.sqrt(2) * np.ones((50, 60)) * u.dimensionless,
+                rad_efficiency=1.0 * u.dimensionless,
+            ),
+            expected_results=AntennaPatternExpectedResults(
+                lhcp_gain=1.0 * u.dimensionless,
+                lhcp_directivity=1.0 * u.dimensionless,
+                rhcp_gain=0.0 * u.dimensionless,
+                rhcp_directivity=0.0 * u.dimensionless,
+                theta_directivity=0.5 * u.dimensionless,
+                phi_directivity=0.5 * u.dimensionless,
+                axial_ratio=0.0 * u.dB,
+            ),
+        ),
+        AntennaPatternTestCase(
+            name="isotropic_elliptical",
+            pattern=AntennaPattern(
+                theta=np.linspace(0, np.pi, 25) * u.rad,
+                phi=np.linspace(0, 2 * np.pi, 17, endpoint=False) * u.rad,
+                e_theta=1.0 / np.sqrt(5 / 4) * np.ones((25, 17)) * u.dimensionless,
+                e_phi=0.5j / np.sqrt(5 / 4) * np.ones((25, 17)) * u.dimensionless,
+                rad_efficiency=0.7 * u.dimensionless,
+            ),
+            expected_results=AntennaPatternExpectedResults(
+                lhcp_gain=0.7 * 0.9 * u.dimensionless,
+                lhcp_directivity=0.9 * u.dimensionless,
+                rhcp_gain=0.7 * 0.1 * u.dimensionless,
+                rhcp_directivity=0.1 * u.dimensionless,
+                theta_directivity=4 / 5 * u.dimensionless,
+                phi_directivity=1 / 5 * u.dimensionless,
+                axial_ratio=10 * math.log10(2) * u.dB,
+            ),
+        ),
+    ]
+
+
+@pytest.mark.parametrize("test_case", create_antenna_pattern_test_cases())
+def test_antenna_pattern_variations(test_case):
+    """Test various antenna patterns using structured test data."""
+
+    shape_interp = (100, 200)
+    theta_interp = np.linspace(0, np.pi, shape_interp[0]) * u.rad
+    phi_interp = np.linspace(0, 2 * np.pi, shape_interp[1]) * u.rad
+
+    pol_theta = Polarization(0 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
+    pol_phi = Polarization(np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
+
+    assert_quantity_allclose(
+        test_case.pattern.gain(theta_interp, phi_interp, Polarization.lhcp()),
+        test_case.expected_results.lhcp_gain,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        test_case.pattern.directivity(theta_interp, phi_interp, Polarization.lhcp()),
+        test_case.expected_results.lhcp_directivity,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        test_case.pattern.gain(theta_interp, phi_interp, Polarization.rhcp()),
+        test_case.expected_results.rhcp_gain,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        test_case.pattern.directivity(theta_interp, phi_interp, Polarization.rhcp()),
+        test_case.expected_results.rhcp_directivity,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        test_case.pattern.directivity(theta_interp, phi_interp, pol_theta),
+        test_case.expected_results.theta_directivity,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        test_case.pattern.directivity(theta_interp, phi_interp, pol_phi),
+        test_case.expected_results.phi_directivity,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        test_case.pattern.axial_ratio(theta_interp, phi_interp),
+        test_case.expected_results.axial_ratio,
+        atol=1e-10 * u.dB,
+    )
