@@ -128,6 +128,14 @@ def dish_gain(
 
 
 class Handedness(enum.Enum):
+    """Handedness of the polarization ellipse.
+
+    The handedness is the direction of rotation of the E-field. The thumb points in the
+    direction of propagation, and the fingers curl in the direction of the E-field
+    rotation. When looking in the direction of propagation, the E-field rotates counter-
+    clockwise for left-hand polarization and clockwise for right-hand polarization.
+    """
+
     LEFT = enum.auto()
     RIGHT = enum.auto()
 
