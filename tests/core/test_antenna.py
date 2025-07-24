@@ -155,8 +155,12 @@ class TestPolarization:
         lhcp = Polarization.lhcp()
         rhcp = Polarization.rhcp()
 
-        np.testing.assert_allclose(lhcp.jones_vector, np.array([1.0, 1.0j]) / np.sqrt(2))
-        np.testing.assert_allclose(rhcp.jones_vector, np.array([1.0, -1.0j]) / np.sqrt(2))
+        np.testing.assert_allclose(
+            lhcp.jones_vector, np.array([1.0, 1.0j]) / np.sqrt(2)
+        )
+        np.testing.assert_allclose(
+            rhcp.jones_vector, np.array([1.0, -1.0j]) / np.sqrt(2)
+        )
 
         # Orthogonal states should have zero inner product
         inner_product = np.dot(lhcp.jones_vector.conj(), rhcp.jones_vector)
@@ -279,43 +283,53 @@ def test_antenna_pattern_calculations(test_case):
     pol_phi = Polarization(np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
 
     assert_quantity_allclose(
-        test_case.pattern.gain(theta_interp, phi_interp, Polarization.lhcp()),
+        test_case.pattern.gain(
+            theta_interp[:, np.newaxis], phi_interp, Polarization.lhcp()
+        ),
         test_case.expected_results.lhcp_gain,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.directivity(theta_interp, phi_interp, Polarization.lhcp()),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis], phi_interp, Polarization.lhcp()
+        ),
         test_case.expected_results.lhcp_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.gain(theta_interp, phi_interp, Polarization.rhcp()),
+        test_case.pattern.gain(
+            theta_interp[:, np.newaxis], phi_interp, Polarization.rhcp()
+        ),
         test_case.expected_results.rhcp_gain,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.directivity(theta_interp, phi_interp, Polarization.rhcp()),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis], phi_interp, Polarization.rhcp()
+        ),
         test_case.expected_results.rhcp_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.directivity(theta_interp, phi_interp, pol_theta),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis], phi_interp, pol_theta
+        ),
         test_case.expected_results.theta_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.directivity(theta_interp, phi_interp, pol_phi),
+        test_case.pattern.directivity(theta_interp[:, np.newaxis], phi_interp, pol_phi),
         test_case.expected_results.phi_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.axial_ratio(theta_interp, phi_interp),
+        test_case.pattern.axial_ratio(theta_interp[:, np.newaxis], phi_interp),
         test_case.expected_results.axial_ratio,
         atol=1e-10 * u.dB,
     )
@@ -334,24 +348,71 @@ class TestSphericalInterpolator:
         theta = np.linspace(0, np.pi, N) * u.rad
         phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
 
-        gain_db = (
+        gain_db_expected = (
             peak_gain
             * np.sin(theta.value)[:, np.newaxis]  # Taper to 0 dB at poles
             * np.sin(periods * phi.value)
             * u.dB
         )
-        gain = to_linear(gain_db)
 
-        # Downsample by 10 in each dimension
-        interpolator = SphericalInterpolator(
-            theta[::downsample], phi[::downsample], gain[::downsample, ::downsample]
+        theta_decim = np.linspace(0, np.pi, N // downsample) * u.rad
+        phi_decim = np.linspace(0, 2 * np.pi, M // downsample, endpoint=False) * u.rad
+        gain_decim_db = (
+            peak_gain
+            * np.sin(theta_decim.value)[:, np.newaxis]  # Taper to 0 dB at poles
+            * np.sin(periods * phi_decim.value)
+            * u.dB
         )
+        gain_decim = to_linear(gain_decim_db)
+
+        interpolator = SphericalInterpolator(theta_decim, phi_decim, gain_decim)
 
         result = interpolator(theta[:, np.newaxis], phi)
 
         assert result.shape == (N, M)
         assert result.unit == u.dimensionless
-        np.testing.assert_allclose(to_dB(result).value, gain_db.value, atol=0.3)
+        np.testing.assert_allclose(
+            to_dB(result).value, gain_db_expected.value, atol=0.3
+        )
+
+    def test_subset_sphere_interpolation(self):
+        """Test interpolation when values are only provided for a subset of the full sphere."""
+        N = 80
+        M = 100
+        downsample = 4
+        periods = 5  # Number of periods in phi
+        peak_gain = 40.0  # Gain varies between -40 and +40 dBi
+
+        # Create subset of sphere: theta from 30° to 120°, phi from 45° to 270°
+        theta = np.linspace(np.pi / 6, 2 * np.pi / 3, N) * u.rad
+        phi = np.linspace(np.pi / 4, 3 * np.pi / 2, M, endpoint=False) * u.rad
+
+        gain_db = (
+            peak_gain
+            * np.sin(theta.value)[:, np.newaxis]
+            * np.sin(periods * phi.value)
+            * u.dB
+        )
+        gain = to_linear(gain_db)
+
+        interpolator = SphericalInterpolator(
+            theta[::downsample],
+            phi[::downsample],
+            gain[::downsample, ::downsample],
+        )
+
+        result = interpolator(theta[:-downsample, np.newaxis], phi[:-downsample])
+
+        assert result.shape == (N - downsample, M - downsample)
+        assert result.unit == u.dimensionless
+
+        # Loose tolerance because interpolation performance degrades at the edges when
+        # the grid does not span the full circle.
+        np.testing.assert_allclose(
+            to_dB(result).value,
+            gain_db[:-downsample, :-downsample].value,
+            atol=1.2,
+        )
 
     def test_with_zeros(self):
         """Test interpolation when input contains zeros (should use floor value)."""
@@ -373,20 +434,23 @@ class TestSphericalInterpolator:
 
         interpolator = SphericalInterpolator(theta, phi, values, floor=floor)
 
+        # Test upper hemisphere
+        test_theta = np.pi/4 * u.rad
         test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
-        test_theta = np.pi / 4 * np.ones_like(test_phi) * u.rad
-        test_theta_grid, test_phi_grid = np.meshgrid(
-            test_theta, test_phi, indexing="ij"
-        )
-        result = interpolator(test_theta_grid, test_phi_grid)
-        assert result.shape == (100, 100)
+        result = interpolator(test_theta, test_phi)
+        assert result.shape == (100,)
         assert result.unit == unit
-        expected = np.where(
-            test_theta_grid.value < np.pi / 2,
-            np.sin(test_theta_grid.value) * np.exp(1j * test_phi_grid.value),
-            10 ** (floor.value / 10),
-        )
-        np.testing.assert_allclose(result.value, expected, atol=1e-2, rtol=0.02)
+        expected = np.sin(test_theta.value) * np.exp(1j * test_phi.value)
+        np.testing.assert_allclose(result.value, expected, atol=1e-2)
+
+        # Test lower hemisphere
+        test_theta = 3*np.pi/4 * u.rad
+        test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
+        result = interpolator(test_theta, test_phi)
+        assert result.shape == (100,)
+        assert result.unit == unit
+        expected = 10**(floor.value / 10)
+        np.testing.assert_allclose(result.value, expected, atol=1e-10)
 
     def test_phase_continuity(self):
         theta = np.linspace(0, np.pi, 11) * u.rad
@@ -435,7 +499,9 @@ class TestSphericalInterpolator:
         (
             np.linspace(0, np.pi, 100) * u.rad,
             np.linspace(0, 2 * np.pi, 100) * u.rad,
-            np.sin(np.linspace(0, np.pi, 100))[:, np.newaxis] * np.ones(100) * u.dimensionless,
+            np.sin(np.linspace(0, np.pi, 100))[:, np.newaxis]
+            * np.ones(100)
+            * u.dimensionless,
             np.pi**2 * u.sr,
             1e-10 * u.sr,
         ),
@@ -444,7 +510,9 @@ class TestSphericalInterpolator:
         (
             np.linspace(0, np.pi, 100) * u.rad,
             np.linspace(0, 2 * np.pi, 200) * u.rad,
-            (np.cos(np.linspace(0, np.pi, 100))**2)[:, np.newaxis] * np.ones(200) * u.dimensionless,
+            (np.cos(np.linspace(0, np.pi, 100)) ** 2)[:, np.newaxis]
+            * np.ones(200)
+            * u.dimensionless,
             4 * np.pi / 3 * u.sr,
             1e-5 * u.sr,
         ),
@@ -453,34 +521,36 @@ class TestSphericalInterpolator:
         (
             np.linspace(0, np.pi, 127) * u.rad,
             np.linspace(0, 2 * np.pi, 173) * u.rad,
-            np.cos(np.linspace(0, np.pi, 127))[:, np.newaxis] * np.ones(173) * u.dimensionless,
+            np.cos(np.linspace(0, np.pi, 127))[:, np.newaxis]
+            * np.ones(173)
+            * u.dimensionless,
             0 * u.sr,
-            1e-10 * u.sr
+            1e-10 * u.sr,
         ),
         # Test 5: Constant function f(θ,φ) = 1 over a section of the sphere
         # θ ∈ [0, π/2], φ ∈ [0, π/2] - quarter sphere
         # Expected: ∫∫ 1 sin(θ) dθ dφ = π/2
         (
-            np.linspace(0, np.pi/2, 50) * u.rad,
-            np.linspace(0, np.pi/2, 50) * u.rad,
+            np.linspace(0, np.pi / 2, 50) * u.rad,
+            np.linspace(0, np.pi / 2, 50) * u.rad,
             np.ones((50, 50)) * u.dimensionless,
-            np.pi/2 * u.sr,
-            1e-10 * u.sr
+            np.pi / 2 * u.sr,
+            1e-10 * u.sr,
         ),
     ],
 )
 def test_surface_integral(theta, phi, values, expected_result, tol):
     """
     Test the _surface_integral function with known analytical results.
-    
+
     The surface integral is defined as:
     ∫∫ f(θ,φ) sin(θ) dθ dφ
-    
+
     This test uses simple functions with known analytical results.
     """
     from spacelink.core.antenna import _surface_integral
-    
+
     result = _surface_integral(theta, phi, values)
-    
+
     assert result.unit == expected_result.unit
     assert_quantity_allclose(result, expected_result, atol=tol)
