@@ -415,3 +415,71 @@ class TestSphericalInterpolator:
             0.0,
             atol=1e-4,
         )
+
+
+@pytest.mark.parametrize(
+    "theta, phi, values, expected_result, tol",
+    [
+        # Test 1: Constant function f(θ,φ) = 1
+        # Expected: ∫∫ 1 sin(θ) dθ dφ = 4π
+        (
+            np.linspace(0, np.pi, 100) * u.rad,
+            np.linspace(0, 2 * np.pi, 200) * u.rad,
+            np.ones((100, 200)) * u.dimensionless,
+            4 * np.pi * u.sr,
+            1e-10 * u.sr,
+        ),
+        # Test 2: Function f(θ,φ) = sin(θ)
+        # Expected: ∫∫ sin(θ) sin(θ) dθ dφ = ∫∫ sin²(θ) dθ dφ = π²
+        (
+            np.linspace(0, np.pi, 100) * u.rad,
+            np.linspace(0, 2 * np.pi, 100) * u.rad,
+            np.sin(np.linspace(0, np.pi, 100))[:, np.newaxis] * np.ones(100) * u.dimensionless,
+            np.pi**2 * u.sr,
+            1e-10 * u.sr,
+        ),
+        # Test 3: Function f(θ,φ) = cos²(θ) (dipole pattern)
+        # Expected: ∫∫ cos²(θ) sin(θ) dθ dφ = 4π/3
+        (
+            np.linspace(0, np.pi, 100) * u.rad,
+            np.linspace(0, 2 * np.pi, 200) * u.rad,
+            (np.cos(np.linspace(0, np.pi, 100))**2)[:, np.newaxis] * np.ones(200) * u.dimensionless,
+            4 * np.pi / 3 * u.sr,
+            1e-5 * u.sr,
+        ),
+        # Test 4: Function f(θ,φ) = cos(θ)
+        # Expected: ∫∫ cos(θ) sin(θ) dθ dφ = 0
+        (
+            np.linspace(0, np.pi, 127) * u.rad,
+            np.linspace(0, 2 * np.pi, 173) * u.rad,
+            np.cos(np.linspace(0, np.pi, 127))[:, np.newaxis] * np.ones(173) * u.dimensionless,
+            0 * u.sr,
+            1e-10 * u.sr
+        ),
+        # Test 5: Constant function f(θ,φ) = 1 over a section of the sphere
+        # θ ∈ [0, π/2], φ ∈ [0, π/2] - quarter sphere
+        # Expected: ∫∫ 1 sin(θ) dθ dφ = π/2
+        (
+            np.linspace(0, np.pi/2, 50) * u.rad,
+            np.linspace(0, np.pi/2, 50) * u.rad,
+            np.ones((50, 50)) * u.dimensionless,
+            np.pi/2 * u.sr,
+            1e-10 * u.sr
+        ),
+    ],
+)
+def test_surface_integral(theta, phi, values, expected_result, tol):
+    """
+    Test the _surface_integral function with known analytical results.
+    
+    The surface integral is defined as:
+    ∫∫ f(θ,φ) sin(θ) dθ dφ
+    
+    This test uses simple functions with known analytical results.
+    """
+    from spacelink.core.antenna import _surface_integral
+    
+    result = _surface_integral(theta, phi, values)
+    
+    assert result.unit == expected_result.unit
+    assert_quantity_allclose(result, expected_result, atol=tol)
