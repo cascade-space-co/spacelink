@@ -13,8 +13,16 @@ from spacelink.core.antenna import (
     Polarization,
     Handedness,
     AntennaPattern,
+    SphericalInterpolator,
 )
-from spacelink.core.units import Dimensionless, Length, Frequency, Decibels
+from spacelink.core.units import (
+    Dimensionless,
+    Length,
+    Frequency,
+    Decibels,
+    to_dB,
+    to_linear,
+)
 
 """
 This site was used to generate the following test cases:
@@ -310,3 +318,100 @@ def test_antenna_pattern_variations(test_case):
         test_case.expected_results.axial_ratio,
         atol=1e-10 * u.dB,
     )
+
+
+class TestSphericalInterpolator:
+    """Tests for the SphericalInterpolator class."""
+
+    def test_interpolation(self):
+        N = 150
+        M = 200
+        downsample = 5
+        periods = 7  # Number of periods in phi
+        peak_gain = 50.0  # Gain varies between -50 and +50 dBi
+
+        theta = np.linspace(0, np.pi, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+
+        gain_db = (
+            peak_gain
+            * np.sin(theta.value)[:, np.newaxis]  # Taper to 0 dB at poles
+            * np.sin(periods * phi.value)
+            * u.dB
+        )
+        gain = to_linear(gain_db)
+
+        # Downsample by 10 in each dimension
+        interpolator = SphericalInterpolator(
+            theta[::downsample], phi[::downsample], gain[::downsample, ::downsample]
+        )
+
+        result = interpolator(theta[:, np.newaxis], phi)
+
+        assert result.shape == (N, M)
+        assert result.unit == u.dimensionless
+        np.testing.assert_allclose(to_dB(result).value, gain_db.value, atol=0.3)
+
+    def test_with_zeros(self):
+        """Test interpolation when input contains zeros (should use floor value)."""
+        unit = u.K  # Arbitrary unit
+        floor = -100 * u.dB
+        theta = np.linspace(0, np.pi, 20) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 30, endpoint=False) * u.rad
+        theta_grid, phi_grid = np.meshgrid(theta, phi, indexing="ij")
+
+        # Pattern with zeros at theta > π/2
+        values = (
+            np.where(
+                theta_grid.value < np.pi / 2,
+                np.sin(theta_grid.value) * np.exp(1j * phi_grid.value),
+                0,
+            )
+            * unit
+        )
+
+        interpolator = SphericalInterpolator(theta, phi, values, floor=floor)
+
+        test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
+        test_theta = np.pi / 4 * np.ones_like(test_phi) * u.rad
+        test_theta_grid, test_phi_grid = np.meshgrid(
+            test_theta, test_phi, indexing="ij"
+        )
+        result = interpolator(test_theta_grid, test_phi_grid)
+        assert result.shape == (100, 100)
+        assert result.unit == unit
+        expected = np.where(
+            test_theta_grid.value < np.pi / 2,
+            np.sin(test_theta_grid.value) * np.exp(1j * test_phi_grid.value),
+            10 ** (floor.value / 10),
+        )
+        np.testing.assert_allclose(result.value, expected, atol=1e-2, rtol=0.02)
+
+    def test_phase_continuity(self):
+        theta = np.linspace(0, np.pi, 11) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 21, endpoint=False) * u.rad
+
+        # Create a pattern with phase equal to 2*phi. This will cause two wraps from
+        # 2π back to 0, one in the middle of the grid where phi == π and another at the
+        # extreme edges of the grid where phi == 0 and phi == 2π. We expect the
+        # interpolator to handle both of these correctly.
+        values = (
+            np.sin(theta[:, np.newaxis]) * np.exp(1j * 2 * phi.value) * u.dimensionless
+        )
+
+        interpolator = SphericalInterpolator(theta, phi, values)
+
+        test_theta = np.linspace(0.03, np.pi - 0.03, 100) * u.rad
+        test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
+        result = interpolator(test_theta[:, np.newaxis], test_phi)
+
+        assert result.shape == (100, 100)
+        assert result.unit == u.dimensionless
+
+        # Conjugate product avoids problems when comparing angles near 0 and 2π.
+        phase_diff = np.angle(result.value * np.conj(np.exp(1j * 2 * test_phi.value)))
+        np.testing.assert_allclose(
+            phase_diff,
+            0.0,
+            atol=1e-4,
+        )
