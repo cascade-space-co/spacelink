@@ -196,6 +196,23 @@ class SphericalInterpolator:
         values: u.Quantity,
         floor: Decibels = -200 * u.dB,
     ):
+        r"""
+        Create a spherical interpolator.
+
+        Parameters
+        ----------
+        theta: Angle
+            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
+        phi: Angle
+            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
+            (M,). Note that the last element must be less than 2π.
+        values: u.Quantity
+            2D complex array of values with shape [N, M] to interpolate.
+        floor: Decibels
+            Floor value for the magnitude in dB. The interpolation approach used cannot
+            handle 0 values anywhere, so 0s (-∞ dB) are replaced with this prior to
+            interpolation.
+        """
         self.unit = values.unit
 
         # RectSphereBivariateSpline requires theta to be in the range (0, pi),
@@ -238,6 +255,22 @@ class SphericalInterpolator:
         )
 
     def __call__(self, theta: Angle, phi: Angle) -> u.Quantity:
+        r"""
+        Interpolate at the given spherical coordinates.
+
+        Parameters
+        ----------
+        theta: Angle
+            Polar angles.
+        phi: Angle
+            Azimuthal angles with the same shape as theta.
+
+        Returns
+        -------
+        u.Quantity
+            Interpolated values with the same shape as theta and phi. The unit will be
+            the same as the unit of the values Quantity passed to the constructor.
+        """
         mag = 10 ** (self.log_mag(theta.value, phi.value) / 10)
         phase_exp = self.phase_real(theta, phi) + 1j * self.phase_imag(theta, phi)
         phase_exp /= np.abs(phase_exp)  # Re-normalize to remove numerical drift.
