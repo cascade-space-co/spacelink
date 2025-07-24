@@ -129,6 +129,7 @@ class Handedness(enum.Enum):
     LEFT = enum.auto()
     RIGHT = enum.auto()
 
+
 class Polarization:
     """Represents a polarization state."""
 
@@ -184,6 +185,65 @@ class Polarization:
         return cls(np.pi / 4 * u.rad, 1 * u.dimensionless, Handedness.RIGHT)
 
 
+class SphericalInterpolator:
+    """Interpolates a regular grid of complex values in spherical coordinates."""
+
+    @enforce_units
+    def __init__(
+        self,
+        theta: Angle,
+        phi: Angle,
+        values: u.Quantity,
+        floor: Decibels = -200 * u.dB,
+    ):
+        self.unit = values.unit
+
+        # RectSphereBivariateSpline requires theta to be in the range (0, pi),
+        # excluding the endpoints where spherical coordinates have singularities.
+        theta_start = 1 if np.isclose(theta[0], 0 * u.rad, atol=1e-10) else 0
+        theta_end = -1 if np.isclose(theta[-1], np.pi * u.rad, atol=1e-10) else None
+        theta_slice = theta[theta_start:theta_end]
+        values_slice = values[theta_start:theta_end, :]
+
+        with np.errstate(divide="ignore"):
+            values_db = 10 * np.log10(np.abs(values_slice))
+        # Apply a floor because spline interpolation can't handle -inf values anywhere.
+        values_db = np.clip(values_db, floor.value, None)
+
+        # Interpolate magnitude in log-space to avoid numerical stability issues that
+        # can arise when interpolating magnitude or real and imaginary parts separately.
+        self.log_mag = scipy.interpolate.RectSphereBivariateSpline(
+            theta_slice.value,
+            phi.value,
+            values_db,
+        )
+
+        # Interpolate phase as a unit-magnitude complex exponential. This avoids issues
+        # with phase wrapping discontinuities.
+        with np.errstate(invalid="ignore"):
+            phase_exponential = np.where(
+                np.abs(values_slice) == 0,
+                1.0,
+                values_slice / np.abs(values_slice),
+            )
+        self.phase_real = scipy.interpolate.RectSphereBivariateSpline(
+            theta_slice.value,
+            phi.value,
+            np.real(phase_exponential),
+        )
+        self.phase_imag = scipy.interpolate.RectSphereBivariateSpline(
+            theta_slice.value,
+            phi.value,
+            np.imag(phase_exponential),
+        )
+
+    def __call__(self, theta: Angle, phi: Angle) -> u.Quantity:
+        mag = 10 ** (self.log_mag(theta.value, phi.value) / 10)
+        phase_exp = self.phase_real(theta, phi) + 1j * self.phase_imag(theta, phi)
+        phase_exp /= np.abs(phase_exp)  # Re-normalize to remove numerical drift.
+        return mag * phase_exp * self.unit
+
+
 class AntennaPattern:
     """Represents an antenna pattern on a spherical coordinate system."""
 
@@ -231,41 +291,13 @@ class AntennaPattern:
         dir_surf_int = _surface_integral(
             theta, phi, np.abs(e_theta) ** 2 + np.abs(e_phi) ** 2
         )
-        if dir_surf_int > 1.05 * (4 * np.pi) * u.sr:
+        if dir_surf_int > 1.01 * (4 * np.pi) * u.sr:
             raise ValueError(
                 f"Surface integral of directivity {dir_surf_int} is greater than 4π."
             )
 
-        # Functions for interpolating the complex field. Unfortunately
-        # RectSphereBivariateSpline doesn't support complex data, so we have to
-        # interpolate the real and imaginary parts separately.
-        # RectSphereBivariateSpline requires theta to be in the range (0, pi),
-        # excluding the endpoints where spherical coordinates have singularities.
-        theta_start = 1 if np.isclose(theta[0], 0 * u.rad, atol=1e-10) else 0
-        theta_end = -1 if np.isclose(theta[-1], np.pi * u.rad, atol=1e-10) else None
-        theta_slice = self.theta[theta_start:theta_end]
-        e_theta_slice = e_theta[theta_start:theta_end, :]
-        e_phi_slice = e_phi[theta_start:theta_end, :]
-        self.e_theta_real_interp = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice.value,
-            self.phi.value,
-            np.real(e_theta_slice),
-        )
-        self.e_theta_imag_interp = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice.value,
-            self.phi.value,
-            np.imag(e_theta_slice),
-        )
-        self.e_phi_real_interp = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice.value,
-            self.phi.value,
-            np.real(e_phi_slice),
-        )
-        self.e_phi_imag_interp = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice.value,
-            self.phi.value,
-            np.imag(e_phi_slice),
-        )
+        self.e_theta_interp = SphericalInterpolator(theta, phi, e_theta)
+        self.e_phi_interp = SphericalInterpolator(theta, phi, e_phi)
 
     @classmethod
     @enforce_units
@@ -401,15 +433,9 @@ class AntennaPattern:
             Complex E-field values. The E-field is normalized such that the magnitude
             squared is the directivity. Shape is the same as theta and phi.
         """
-        e_theta = self.e_theta_real_interp(theta, phi) + 1j * self.e_theta_imag_interp(
-            theta, phi
-        )
-        e_phi = self.e_phi_real_interp(theta, phi) + 1j * self.e_phi_imag_interp(
-            theta, phi
-        )
-        e_jones = np.stack([e_theta, e_phi])
+        e_jones = self._e_jones(theta, phi)
         return (
-            np.tensordot(polarization.jones_vector.conj(), e_jones, axes=([0], [0]))
+            np.tensordot(polarization.jones_vector.conj(), e_jones, axes=([-1], [-1]))
             * u.dimensionless
         )
 
@@ -500,15 +526,20 @@ class AntennaPattern:
         Decibels
             Axial ratios in decibels with the same shape as theta and phi.
         """
-        mag_lhcp = np.abs(self.e_field(theta, phi, Polarization.lhcp()))
-        mag_rhcp = np.abs(self.e_field(theta, phi, Polarization.rhcp()))
+        e_jones = self._e_jones(theta, phi)
+        coherency_matrix = np.einsum("...i,...j->...ij", e_jones, e_jones.conj())
+        eigvals = np.linalg.eigvalsh(coherency_matrix.real)
+        lambda_min = eigvals[..., 0]
+        lambda_max = eigvals[..., 1]
         # Suppress divide-by-zero warnings.
         with np.errstate(divide="ignore"):
-            return to_dB(
-                np.maximum(mag_lhcp, mag_rhcp)
-                / np.minimum(mag_lhcp, mag_rhcp)
-                * u.dimensionless
-            )
+            return to_dB(np.sqrt(lambda_max / lambda_min) * u.dimensionless)
+
+    @enforce_units
+    def _e_jones(self, theta: Angle, phi: Angle) -> Dimensionless:
+        e_theta = self.e_theta_interp(theta, phi)
+        e_phi = self.e_phi_interp(theta, phi)
+        return np.stack([e_theta, e_phi], axis=-1) * u.dimensionless
 
 
 def _surface_integral(theta: Angle, phi: Angle, values: Dimensionless) -> SolidAngle:
