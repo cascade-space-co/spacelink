@@ -218,10 +218,11 @@ class SphericalInterpolator:
 
         # RectSphereBivariateSpline requires theta to be in the range (0, pi),
         # excluding the endpoints where spherical coordinates have singularities.
+        phi_slice = phi.value
         theta_start = 1 if np.isclose(theta[0], 0 * u.rad, atol=1e-10) else 0
         theta_end = -1 if np.isclose(theta[-1], np.pi * u.rad, atol=1e-10) else None
-        theta_slice = theta[theta_start:theta_end]
-        values_slice = values[theta_start:theta_end, :]
+        theta_slice = theta[theta_start:theta_end].value
+        values_slice = values[theta_start:theta_end, :].value
 
         with np.errstate(divide="ignore"):
             values_db = 10 * np.log10(np.abs(values_slice))
@@ -232,8 +233,8 @@ class SphericalInterpolator:
         # can arise when interpolating magnitude or real and imaginary parts separately.
         self.log_mag = functools.partial(
             scipy.interpolate.RectSphereBivariateSpline(
-                theta_slice.value,
-                phi.value,
+                theta_slice,
+                phi_slice,
                 values_db,
             ),
             grid=False,
@@ -249,16 +250,16 @@ class SphericalInterpolator:
             )
         self.phase_real = functools.partial(
             scipy.interpolate.RectSphereBivariateSpline(
-                theta_slice.value,
-                phi.value,
+                theta_slice,
+                phi_slice,
                 np.real(phase_exponential),
             ),
             grid=False,
         )
         self.phase_imag = functools.partial(
             scipy.interpolate.RectSphereBivariateSpline(
-                theta_slice.value,
-                phi.value,
+                theta_slice,
+                phi_slice,
                 np.imag(phase_exponential),
             ),
             grid=False,
