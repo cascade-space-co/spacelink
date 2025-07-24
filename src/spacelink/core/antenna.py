@@ -39,6 +39,7 @@ where:
 """
 
 import enum
+import functools
 import typing
 
 import astropy.units as u
@@ -229,10 +230,13 @@ class SphericalInterpolator:
 
         # Interpolate magnitude in log-space to avoid numerical stability issues that
         # can arise when interpolating magnitude or real and imaginary parts separately.
-        self.log_mag = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice.value,
-            phi.value,
-            values_db,
+        self.log_mag = functools.partial(
+            scipy.interpolate.RectSphereBivariateSpline(
+                theta_slice.value,
+                phi.value,
+                values_db,
+            ),
+            grid=False,
         )
 
         # Interpolate phase as a unit-magnitude complex exponential. This avoids issues
@@ -243,20 +247,29 @@ class SphericalInterpolator:
                 1.0,
                 values_slice / np.abs(values_slice),
             )
-        self.phase_real = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice.value,
-            phi.value,
-            np.real(phase_exponential),
+        self.phase_real = functools.partial(
+            scipy.interpolate.RectSphereBivariateSpline(
+                theta_slice.value,
+                phi.value,
+                np.real(phase_exponential),
+            ),
+            grid=False,
         )
-        self.phase_imag = scipy.interpolate.RectSphereBivariateSpline(
-            theta_slice.value,
-            phi.value,
-            np.imag(phase_exponential),
+        self.phase_imag = functools.partial(
+            scipy.interpolate.RectSphereBivariateSpline(
+                theta_slice.value,
+                phi.value,
+                np.imag(phase_exponential),
+            ),
+            grid=False,
         )
 
     def __call__(self, theta: Angle, phi: Angle) -> u.Quantity:
         r"""
         Interpolate at the given spherical coordinates.
+
+        Interpolate at points `(theta[i], phi[i]), i=0, ..., len(x)-1`. Standard Numpy
+        broadcasting is obeyed.
 
         Parameters
         ----------
