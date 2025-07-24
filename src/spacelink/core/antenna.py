@@ -208,7 +208,7 @@ class SphericalInterpolator:
             1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
             (M,). Note that the last element must be less than 2π.
         values: u.Quantity
-            2D complex array of values with shape [N, M] to interpolate.
+            2D complex array of values with shape (N, M) to interpolate.
         floor: Decibels
             Floor value for the magnitude in dB. The interpolation approach used cannot
             handle 0 values anywhere, so 0s (-∞ dB) are replaced with this prior to
@@ -281,8 +281,8 @@ class SphericalInterpolator:
         Returns
         -------
         u.Quantity
-            Interpolated values with the same shape as theta and phi. The unit will be
-            the same as the unit of the values Quantity passed to the constructor.
+            Interpolated values. The unit will be the same as the unit of the values
+            Quantity passed to the constructor.
         """
         mag = 10 ** (self.log_mag(theta.value, phi.value) / 10)
         phase_exp = self.phase_real(theta, phi) + 1j * self.phase_imag(theta, phi)
@@ -317,8 +317,8 @@ class AntennaPattern:
             1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
             (M,). Note that the last element must be less than 2π.
         e_theta: Dimensionless
-            2D complex array of :math:`E_{\theta}(\theta, \phi)` values with shape [N,
-            M] normalized such that the magnitude squared is equal to directivity.
+            2D complex array of :math:`E_{\theta}(\theta, \phi)` values with shape (N,
+            M) normalized such that the magnitude squared is equal to directivity.
         e_phi: Dimensionless
             2D complex array of :math:`E_{\phi}(\theta, \phi)` values with shape (N, M)
             normalized such that the magnitude squared is equal to directivity.
@@ -469,7 +469,7 @@ class AntennaPattern:
         theta: Angle
             Polar angles.
         phi: Angle
-            Azimuthal angles with the same shape as theta.
+            Azimuthal angles.
         polarization: Polarization
             Desired polarization state.
 
@@ -477,7 +477,8 @@ class AntennaPattern:
         -------
         Dimensionless
             Complex E-field values. The E-field is normalized such that the magnitude
-            squared is the directivity. Shape is the same as theta and phi.
+            squared is the directivity. Shape is determined by standard Numpy
+            broadcasting rules from the shapes of theta and phi.
         """
         e_jones = self._e_jones(theta, phi)
         return (
@@ -511,14 +512,15 @@ class AntennaPattern:
         theta: Angle
             Polar angles.
         phi: Angle
-            Azimuthal angles with the same shape as theta.
+            Azimuthal angles.
         polarization: Polarization
             Desired polarization state.
 
         Returns
         -------
         Dimensionless
-            Directivity with the same shape as theta and phi.
+            Directivity. Shape is determined by standard Numpy broadcasting rules from
+            the shapes of theta and phi.
         """
         return np.abs(self.e_field(theta, phi, polarization)) ** 2
 
@@ -539,14 +541,15 @@ class AntennaPattern:
         theta: Angle
             Polar angles.
         phi: Angle
-            Azimuthal angles with the same shape as theta.
+            Azimuthal angles.
         polarization: Polarization
             Desired polarization state.
 
         Returns
         -------
         Dimensionless
-            Directivity with the same shape as theta and phi.
+            Gain. Shape is determined by standard Numpy broadcasting rules from the
+            shapes of theta and phi.
         """
         return self.rad_efficiency * self.directivity(theta, phi, polarization)
 
@@ -570,7 +573,8 @@ class AntennaPattern:
         Returns
         -------
         Decibels
-            Axial ratios in decibels with the same shape as theta and phi.
+            Axial ratio. Shape is determined by standard Numpy broadcasting rules from
+            the shapes of theta and phi.
         """
         e_jones = self._e_jones(theta, phi)
         coherency_matrix = np.einsum("...i,...j->...ij", e_jones, e_jones.conj())
