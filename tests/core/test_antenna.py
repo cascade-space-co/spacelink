@@ -435,7 +435,7 @@ class TestSphericalInterpolator:
         interpolator = SphericalInterpolator(theta, phi, values, floor=floor)
 
         # Test upper hemisphere
-        test_theta = np.pi/4 * u.rad
+        test_theta = np.pi / 4 * u.rad
         test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
         result = interpolator(test_theta, test_phi)
         assert result.shape == (100,)
@@ -444,12 +444,12 @@ class TestSphericalInterpolator:
         np.testing.assert_allclose(result.value, expected, atol=1e-2)
 
         # Test lower hemisphere
-        test_theta = 3*np.pi/4 * u.rad
+        test_theta = 3 * np.pi / 4 * u.rad
         test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
         result = interpolator(test_theta, test_phi)
         assert result.shape == (100,)
         assert result.unit == unit
-        expected = 10**(floor.value / 10)
+        expected = 10 ** (floor.value / 10)
         np.testing.assert_allclose(result.value, expected, atol=1e-10)
 
     def test_phase_continuity(self):
