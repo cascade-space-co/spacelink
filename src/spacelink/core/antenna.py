@@ -44,6 +44,7 @@ import typing
 
 import astropy.units as u
 import numpy as np
+import scipy.integrate
 import scipy.interpolate
 
 from .units import (
@@ -613,7 +614,6 @@ def _surface_integral(theta: Angle, phi: Angle, values: Dimensionless) -> SolidA
     -------
         The result of the surface integral.
     """
-    delta_theta = np.diff(theta)[0]
-    delta_phi = np.diff(phi)[0]
-    rings = np.sum(values, axis=1) * delta_phi
-    return np.sum(rings * np.sin(theta) * delta_theta)
+    integrand = values * np.sin(theta[:, np.newaxis])
+    int_phi = scipy.integrate.simpson(integrand, phi, axis=1)
+    return scipy.integrate.simpson(int_phi, theta) * u.sr
