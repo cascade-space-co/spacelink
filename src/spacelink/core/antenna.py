@@ -225,6 +225,18 @@ class SphericalInterpolator:
         """
         self.unit = values.unit
 
+        phi_mod = phi % (2 * np.pi * u.rad)
+        delta_phi = np.diff(phi_mod)[0]  # Assume equal spacing
+        if np.isclose(delta_phi * phi.size, 2 * np.pi * u.rad):
+            self.phi_min = 0 * u.rad
+            self.phi_max = 2 * np.pi * u.rad
+        else:  # phi does not span the full circle
+            self.phi_min = np.min(phi % (2 * np.pi * u.rad))
+            self.phi_max = np.max(phi % (2 * np.pi * u.rad))
+
+        self.theta_min = np.min(theta)
+        self.theta_max = np.max(theta)
+
         # RectSphereBivariateSpline requires theta to be in the range (0, pi),
         # excluding the endpoints where spherical coordinates have singularities.
         phi_slice = phi.value
@@ -274,6 +286,7 @@ class SphericalInterpolator:
             grid=False,
         )
 
+    @enforce_units
     def __call__(self, theta: Angle, phi: Angle) -> u.Quantity:
         r"""
         Interpolate at the given spherical coordinates.
@@ -293,7 +306,18 @@ class SphericalInterpolator:
         u.Quantity
             Interpolated values. The unit will be the same as the unit of the values
             Quantity passed to the constructor.
+
+        Raises
+        ------
+        ValueError
+            If phi or theta are outside the range of the original grid.
         """
+        phi_mod = phi % (2 * np.pi * u.rad)
+        if np.any(phi_mod < self.phi_min) or np.any(phi_mod > self.phi_max):
+            raise ValueError(f"phi must be in [{self.phi_min}, {self.phi_max}]")
+        if np.any(theta < self.theta_min) or np.any(theta > self.theta_max):
+            raise ValueError(f"theta must be in [{self.theta_min}, {self.theta_max}]")
+
         mag = 10 ** (self.log_mag(theta.value, phi.value) / 10)
         phase_exp = self.phase_real(theta, phi) + 1j * self.phase_imag(theta, phi)
         phase_exp /= np.abs(phase_exp)  # Re-normalize to remove numerical drift.
