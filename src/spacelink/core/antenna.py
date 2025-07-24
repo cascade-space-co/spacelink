@@ -49,7 +49,6 @@ import scipy.interpolate
 
 from .units import (
     Angle,
-    DecibelMilliwatts,
     Decibels,
     Dimensionless,
     Frequency,
