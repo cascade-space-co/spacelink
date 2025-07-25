@@ -100,6 +100,7 @@ Temperature = Annotated[Quantity, u.K]
 Length = Annotated[Quantity, u.m]
 DecibelHertz = Annotated[Quantity, u.dB(u.Hz)]
 Angle = Annotated[Quantity, u.rad]
+SolidAngle = Annotated[Quantity, u.sr]
 Time = Annotated[Quantity, u.s]
 
 
@@ -228,7 +229,7 @@ def frequency(wavelength: Wavelength) -> Frequency:
 
 
 @enforce_units
-def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
+def to_dB(x: Dimensionless, *, factor: float = 10.0) -> Decibels:
     r"""
     Convert dimensionless quantity to decibels.
 
@@ -238,20 +239,19 @@ def to_dB(x: Dimensionless, *, factor=10) -> Decibels:
     ----------
     x : Dimensionless
         value to be converted
-    factor : int, optional
+    factor : float, optional
         10 for power quantities, 20 for field quantities
 
     Returns
     -------
     Decibels
     """
-    if x.value <= 0:
-        return float("-inf") * u.dB
-    return factor * np.log10(x.value) * u.dB
+    with np.errstate(divide="ignore"):  # Suppress warnings for np.log10(0)
+        return factor * np.log10(x.value) * u.dB
 
 
 @enforce_units
-def to_linear(x: Decibels, *, factor: float = 10) -> Dimensionless:
+def to_linear(x: Decibels, *, factor: float = 10.0) -> Dimensionless:
     """
     Convert decibels to a linear (dimensionless) ratio.
 
