@@ -105,7 +105,10 @@ if not hasattr(u, "dB_per_K"):  # pragma: no cover
 if not hasattr(u, "dimensionless"):  # pragma: no cover
     u.dimensionless = u.dimensionless_unscaled
 
-Decibels = Annotated[Quantity, u.dB]
+# Using u.dB(1) allows conversion from decibels to u.dimensionless_unscaled. The (1)
+# informs Astropy that the value is decibels relative to 1; without it a bare u.dB has
+# no defined reference point.
+Decibels = Annotated[Quantity, u.dB(1)]
 DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
 DecibelKelvins = Annotated[Quantity, u.dB(u.K)]
@@ -187,21 +190,24 @@ def _wrap_function_with_unit_enforcement(func: FuncOrClass) -> FuncOrClass:
                     continue
 
                 if isinstance(value, Quantity):
-                    # Convert to expected unit
+                    # Units like deg_C are not automatically convertible to/from K
+                    if unit.is_equivalent(u.K, equivalencies=u.temperature()):
+                        equivalencies = u.temperature()
+                    elif value.unit == u.dB:
+                        # Allows conversion from u.dB to u.dimensionless_unscaled as if
+                        # value.unit was u.dB(1)
+                        equivalencies = u.logarithmic()
+                    else:
+                        equivalencies = []
+
                     try:
-                        if unit.is_equivalent(u.K):
-                            converted_value = value.to(
-                                unit, equivalencies=u.temperature()
-                            )
-                        else:
-                            converted_value = value.to(unit)
+                        converted_value = value.to(unit, equivalencies=equivalencies)
                     except u.UnitConversionError as e:
                         raise u.UnitConversionError(
                             f"Parameter '{name}' requires unit compatible with {unit}, "
                             f"but got {value.unit}. Original error: {e}"
                         ) from e
 
-                    # Unit conversion successful
                     bound.arguments[name] = converted_value
 
                 else:
