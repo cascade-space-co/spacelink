@@ -449,6 +449,9 @@ class AntennaPattern:
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
         """
+        if np.any(gain_lhcp < 0) or np.any(gain_rhcp < 0):
+            raise ValueError("Gain must be non-negative")
+
         e_lhcp = np.sqrt(gain_lhcp / rad_efficiency) * np.exp(1j * phase_lhcp.value)
         e_rhcp = np.sqrt(gain_rhcp / rad_efficiency) * np.exp(1j * phase_rhcp.value)
         return cls.from_circular_e_field(theta, phi, e_lhcp, e_rhcp, rad_efficiency)
@@ -486,6 +489,9 @@ class AntennaPattern:
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
         """
+        if np.any(gain_theta < 0) or np.any(gain_phi < 0):
+            raise ValueError("Gain must be non-negative")
+
         e_theta = np.sqrt(gain_theta / rad_efficiency) * np.exp(1j * phase_theta.value)
         e_phi = np.sqrt(gain_phi / rad_efficiency) * np.exp(1j * phase_phi.value)
         return cls(theta, phi, e_theta, e_phi, rad_efficiency)
