@@ -323,8 +323,8 @@ class SphericalInterpolator:
         return mag * phase_exp * self.unit
 
 
-class AntennaPattern:
-    """Represents an antenna pattern on a spherical coordinate system."""
+class RadiationPattern:
+    """Represents an antenna radiation pattern on a spherical coordinate system."""
 
     @enforce_units
     def __init__(
@@ -336,7 +336,7 @@ class AntennaPattern:
         rad_efficiency: Dimensionless,
     ):
         r"""
-        Create an antenna pattern from a set of E-field components.
+        Create a radiation pattern from a set of E-field components.
 
         .. math::
             \vec{E}(\theta, \phi) = E_\theta(\theta, \phi)\hat{\theta}
@@ -389,7 +389,7 @@ class AntennaPattern:
         rad_efficiency: Dimensionless,
     ) -> typing.Self:
         r"""
-        Create an antenna pattern from a set of LHCP/RHCP E-field components.
+        Create a radiation pattern from a set of LHCP/RHCP E-field components.
 
         .. math::
             \vec{E}(\theta, \phi) = E_\text{LHCP}(\theta, \phi)\hat{\text{LHCP}}
@@ -429,7 +429,7 @@ class AntennaPattern:
         rad_efficiency: Dimensionless,
     ) -> typing.Self:
         r"""
-        Create an antenna pattern from circular gain and phase.
+        Create a radiation pattern from circular gain and phase.
 
         Parameters
         ----------
@@ -469,7 +469,7 @@ class AntennaPattern:
         rad_efficiency: Dimensionless,
     ) -> typing.Self:
         r"""
-        Create an antenna pattern from linear gain and phase.
+        Create a radiation pattern from linear gain and phase.
 
         Parameters
         ----------

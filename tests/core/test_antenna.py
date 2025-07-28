@@ -12,7 +12,7 @@ from spacelink.core.antenna import (
     dish_gain,
     Polarization,
     Handedness,
-    AntennaPattern,
+    RadiationPattern,
     SphericalInterpolator,
 )
 from spacelink.core.units import (
@@ -168,8 +168,8 @@ class TestPolarization:
 
 
 @dataclass
-class AntennaPatternExpectedResults:
-    """Expected results for antenna pattern tests."""
+class RadiationPatternExpectedResults:
+    """Expected results for radiation pattern tests."""
 
     lhcp_gain: Dimensionless
     lhcp_directivity: Dimensionless
@@ -181,28 +181,28 @@ class AntennaPatternExpectedResults:
 
 
 @dataclass
-class AntennaPatternTestCase:
-    """Data structure for antenna pattern test cases."""
+class RadiationPatternTestCase:
+    """Data structure for radiation pattern test cases."""
 
     name: str
-    pattern: AntennaPattern
-    expected_results: AntennaPatternExpectedResults
+    pattern: RadiationPattern
+    expected_results: RadiationPatternExpectedResults
 
 
 def create_antenna_pattern_test_cases():
     """Create test patterns for different antenna configurations."""
 
     return [
-        AntennaPatternTestCase(
+        RadiationPatternTestCase(
             name="isotropic_theta",
-            pattern=AntennaPattern(
+            pattern=RadiationPattern(
                 theta=np.linspace(0, np.pi, 40) * u.rad,
                 phi=np.linspace(0, 2 * np.pi, 50, endpoint=False) * u.rad,
                 e_theta=np.ones((40, 50)) * u.dimensionless,
                 e_phi=np.zeros((40, 50)) * u.dimensionless,
                 rad_efficiency=0.8 * u.dimensionless,
             ),
-            expected_results=AntennaPatternExpectedResults(
+            expected_results=RadiationPatternExpectedResults(
                 lhcp_gain=0.8 * 0.5 * u.dimensionless,
                 lhcp_directivity=0.5 * u.dimensionless,
                 rhcp_gain=0.8 * 0.5 * u.dimensionless,
@@ -212,16 +212,16 @@ def create_antenna_pattern_test_cases():
                 axial_ratio=np.inf * u.dB,
             ),
         ),
-        AntennaPatternTestCase(
+        RadiationPatternTestCase(
             name="isotropic_phi",
-            pattern=AntennaPattern(
+            pattern=RadiationPattern(
                 theta=np.linspace(0, np.pi, 30) * u.rad,
                 phi=np.linspace(0, 2 * np.pi, 40, endpoint=False) * u.rad,
                 e_theta=np.zeros((30, 40)) * u.dimensionless,
                 e_phi=np.ones((30, 40)) * u.dimensionless,
                 rad_efficiency=1.0 * u.dimensionless,
             ),
-            expected_results=AntennaPatternExpectedResults(
+            expected_results=RadiationPatternExpectedResults(
                 lhcp_gain=0.5 * u.dimensionless,
                 lhcp_directivity=0.5 * u.dimensionless,
                 rhcp_gain=0.5 * u.dimensionless,
@@ -231,16 +231,16 @@ def create_antenna_pattern_test_cases():
                 axial_ratio=np.inf * u.dB,
             ),
         ),
-        AntennaPatternTestCase(
+        RadiationPatternTestCase(
             name="isotropic_lhcp",
-            pattern=AntennaPattern(
+            pattern=RadiationPattern(
                 theta=np.linspace(0, np.pi, 50) * u.rad,
                 phi=np.linspace(0, 2 * np.pi, 60, endpoint=False) * u.rad,
                 e_theta=(1.0 + 0.0j) / np.sqrt(2) * np.ones((50, 60)) * u.dimensionless,
                 e_phi=(0.0 + 1.0j) / np.sqrt(2) * np.ones((50, 60)) * u.dimensionless,
                 rad_efficiency=1.0 * u.dimensionless,
             ),
-            expected_results=AntennaPatternExpectedResults(
+            expected_results=RadiationPatternExpectedResults(
                 lhcp_gain=1.0 * u.dimensionless,
                 lhcp_directivity=1.0 * u.dimensionless,
                 rhcp_gain=0.0 * u.dimensionless,
@@ -250,16 +250,16 @@ def create_antenna_pattern_test_cases():
                 axial_ratio=0.0 * u.dB,
             ),
         ),
-        AntennaPatternTestCase(
+        RadiationPatternTestCase(
             name="isotropic_elliptical",
-            pattern=AntennaPattern(
+            pattern=RadiationPattern(
                 theta=np.linspace(0, np.pi, 25) * u.rad,
                 phi=np.linspace(0, 2 * np.pi, 17, endpoint=False) * u.rad,
                 e_theta=1.0 / np.sqrt(5 / 4) * np.ones((25, 17)) * u.dimensionless,
                 e_phi=0.5j / np.sqrt(5 / 4) * np.ones((25, 17)) * u.dimensionless,
                 rad_efficiency=0.7 * u.dimensionless,
             ),
-            expected_results=AntennaPatternExpectedResults(
+            expected_results=RadiationPatternExpectedResults(
                 lhcp_gain=0.7 * 0.9 * u.dimensionless,
                 lhcp_directivity=0.9 * u.dimensionless,
                 rhcp_gain=0.7 * 0.1 * u.dimensionless,
