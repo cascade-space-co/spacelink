@@ -631,6 +631,7 @@ class RadiationPattern:
         return np.stack([e_theta, e_phi], axis=-1) * u.dimensionless
 
 
+@enforce_units
 def _surface_integral(theta: Angle, phi: Angle, values: Dimensionless) -> SolidAngle:
     r"""
     Take surface integral over a spherical surface.
