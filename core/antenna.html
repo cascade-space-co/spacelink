@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Antenna Module &mdash; SpaceLink 0.1.3 documentation</title>
+  <title>Antenna Module &mdash; SpaceLink 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=360bc84d"></script>
+        <script src="../_static/documentation_options.js?v=fd825880"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.3
+                0.1.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -129,6 +129,16 @@ it is &gt;40 dB.</p>
 <li><p><span class="math notranslate nohighlight">\(\lambda\)</span> is the wavelength</p></li>
 </ul>
 </section>
+<section id="spherical-coordinate-system">
+<h2>Spherical Coordinate System<a class="headerlink" href="#spherical-coordinate-system" title="Link to this heading"></a></h2>
+<p>This module uses the standard spherical coordinate system with the following
+conventions:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\theta\)</span> is the polar angle measured from the +z axis with range [0, π] radians.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\phi\)</span> is the azimuthal angle measured from the +x axis in the xy-plane with
+range [0, 2π) or [-π, π) radians.</p></li>
+</ul>
+</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="spacelink.core.antenna.polarization_loss">
 <span class="sig-prename descclassname"><span class="pre">spacelink.core.antenna.</span></span><span class="sig-name descname"><span class="pre">polarization_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ar1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#polarization_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.polarization_loss" title="Link to this definition"></a></dt>
@@ -171,6 +181,305 @@ it is &gt;40 dB.</p>
 <dd class="field-even"><p><strong>ValueError</strong> – If frequency is not positive</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.core.antenna.Handedness">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.core.antenna.</span></span><span class="sig-name descname"><span class="pre">Handedness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#Handedness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.Handedness" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Handedness of the polarization ellipse.</p>
+<p>The handedness is the direction of rotation of the E-field. The thumb points in the
+direction of propagation, and the fingers curl in the direction of the E-field
+rotation. When looking in the direction of propagation, the E-field rotates counter-
+clockwise for left-hand polarization and clockwise for right-hand polarization.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.core.antenna.Handedness.LEFT">
+<span class="sig-name descname"><span class="pre">LEFT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#spacelink.core.antenna.Handedness.LEFT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.core.antenna.Handedness.RIGHT">
+<span class="sig-name descname"><span class="pre">RIGHT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#spacelink.core.antenna.Handedness.RIGHT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.core.antenna.Polarization">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.core.antenna.</span></span><span class="sig-name descname"><span class="pre">Polarization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tilt_angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handedness</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#Polarization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.Polarization" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents a polarization state.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.Polarization.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tilt_angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handedness</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#Polarization.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.Polarization.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a polarization state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tilt_angle</strong> (<em>Angle</em>) – Tilt angle of the major axis of the polarization ellipse, measured in the
+local tangent plane, relative to <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>.</p></li>
+<li><p><strong>axial_ratio</strong> (<em>Dimensionless</em>) – Ratio of the major to minor axis of the polarization ellipse.</p></li>
+<li><p><strong>handedness</strong> (<a class="reference internal" href="#spacelink.core.antenna.Handedness" title="spacelink.core.antenna.Handedness"><em>Handedness</em></a>) – The direction of rotation of the E-field when looking in the direction of
+propagation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.Polarization.lhcp">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lhcp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#Polarization.lhcp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.Polarization.lhcp" title="Link to this definition"></a></dt>
+<dd><p>Left-hand circular polarization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.Polarization.rhcp">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rhcp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#Polarization.rhcp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.Polarization.rhcp" title="Link to this definition"></a></dt>
+<dd><p>Right-hand circular polarization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.core.antenna.SphericalInterpolator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.core.antenna.</span></span><span class="sig-name descname"><span class="pre">SphericalInterpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">floor=&lt;Quantity</span> <span class="pre">-200.</span> <span class="pre">dB&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#SphericalInterpolator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.SphericalInterpolator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Interpolates a regular grid of complex values in spherical coordinates.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.SphericalInterpolator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">floor=&lt;Quantity</span> <span class="pre">-200.</span> <span class="pre">dB&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#SphericalInterpolator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.SphericalInterpolator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a spherical interpolator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>Angle</em>) – 1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
+(M,). Note that the last element must be less than 2π.</p></li>
+<li><p><strong>values</strong> (<em>u.Quantity</em>) – 2D complex array of values with shape (N, M) to interpolate.</p></li>
+<li><p><strong>floor</strong> (<em>Decibels</em>) – Floor value for the magnitude in dB. The interpolation approach used cannot
+handle 0 values anywhere, so 0s (-∞ dB) are replaced with this prior to
+interpolation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.core.antenna.RadiationPattern">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.core.antenna.</span></span><span class="sig-name descname"><span class="pre">RadiationPattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.RadiationPattern" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents an antenna radiation pattern on a spherical coordinate system.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.RadiationPattern.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.RadiationPattern.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a radiation pattern from a set of E-field components.</p>
+<div class="math notranslate nohighlight">
+\[\vec{E}(\theta, \phi) = E_\theta(\theta, \phi)\hat{\theta}
++ E_\phi(\theta, \phi)\hat{\phi}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>Angle</em>) – 1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
+(M,). Note that the last element must be less than 2π.</p></li>
+<li><p><strong>e_theta</strong> (<em>Dimensionless</em>) – 2D complex array of <span class="math notranslate nohighlight">\(E_{\theta}(\theta, \phi)\)</span> values with shape (N,
+M) normalized such that the magnitude squared is equal to directivity.</p></li>
+<li><p><strong>e_phi</strong> (<em>Dimensionless</em>) – 2D complex array of <span class="math notranslate nohighlight">\(E_{\phi}(\theta, \phi)\)</span> values with shape (N, M)
+normalized such that the magnitude squared is equal to directivity.</p></li>
+<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in [0, 1].</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.RadiationPattern.from_circular_e_field">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_circular_e_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_lhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_rhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.from_circular_e_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.RadiationPattern.from_circular_e_field" title="Link to this definition"></a></dt>
+<dd><p>Create a radiation pattern from a set of LHCP/RHCP E-field components.</p>
+<div class="math notranslate nohighlight">
+\[\vec{E}(\theta, \phi) = E_\text{LHCP}(\theta, \phi)\hat{\text{LHCP}}
++ E_\text{RHCP}(\theta, \phi)\hat{\text{RHCP}}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>Angle</em>) – 1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
+(M,).</p></li>
+<li><p><strong>e_lhcp</strong> (<em>Dimensionless</em>) – 2D complex array of <span class="math notranslate nohighlight">\(E_{\text{LHCP}}(\theta, \phi)\)</span> values with shape
+(N, M) normalized such that the magnitude squared is equal to directivity.</p></li>
+<li><p><strong>e_rhcp</strong> (<em>Dimensionless</em>) – 2D complex array of <span class="math notranslate nohighlight">\(E_{\text{RHCP}}(\theta, \phi)\)</span> values with shape
+(N, M) normalized such that the magnitude squared is equal to directivity.</p></li>
+<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in [0, 1].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.RadiationPattern.from_circular_gain">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_circular_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_lhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_rhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_lhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_rhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.from_circular_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.RadiationPattern.from_circular_gain" title="Link to this definition"></a></dt>
+<dd><p>Create a radiation pattern from circular gain and phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>Angle</em>) – 1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
+(M,).</p></li>
+<li><p><strong>gain_lhcp</strong> (<em>Dimensionless</em>) – 2D array of LHCP gain with shape (N, M).</p></li>
+<li><p><strong>gain_rhcp</strong> (<em>Dimensionless</em>) – 2D array of RHCP gain with shape (N, M).</p></li>
+<li><p><strong>phase_lhcp</strong> (<em>Angle</em>) – 2D array of LHCP phase angles with shape (N, M).</p></li>
+<li><p><strong>phase_rhcp</strong> (<em>Angle</em>) – 2D array of RHCP phase angles with shape (N, M).</p></li>
+<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in [0, 1].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.RadiationPattern.from_linear_gain">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_linear_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.from_linear_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.RadiationPattern.from_linear_gain" title="Link to this definition"></a></dt>
+<dd><p>Create a radiation pattern from linear gain and phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>Angle</em>) – 1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
+(M,).</p></li>
+<li><p><strong>gain_theta</strong> (<em>Dimensionless</em>) – 2D array of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> gain with shape (N, M).</p></li>
+<li><p><strong>gain_phi</strong> (<em>Dimensionless</em>) – 2D array of <span class="math notranslate nohighlight">\(\hat{\phi}\)</span> gain with shape (N, M).</p></li>
+<li><p><strong>phase_theta</strong> (<em>Angle</em>) – 2D array of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> phase angles with shape (N, M).</p></li>
+<li><p><strong>phase_phi</strong> (<em>Angle</em>) – 2D array of <span class="math notranslate nohighlight">\(\hat{\phi}\)</span> phase angles with shape (N, M).</p></li>
+<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in [0, 1].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.RadiationPattern.e_field">
+<span class="sig-name descname"><span class="pre">e_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarization</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.e_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.RadiationPattern.e_field" title="Link to this definition"></a></dt>
+<dd><p>Normalized complex E-field in the desired polarization state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>Angle</em>) – Polar angles.</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – Azimuthal angles.</p></li>
+<li><p><strong>polarization</strong> (<a class="reference internal" href="#spacelink.core.antenna.Polarization" title="spacelink.core.antenna.Polarization"><em>Polarization</em></a>) – Desired polarization state.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Complex E-field values. The E-field is normalized such that the magnitude
+squared is the directivity. Shape is determined by standard Numpy
+broadcasting rules from the shapes of theta and phi.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dimensionless</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.RadiationPattern.directivity">
+<span class="sig-name descname"><span class="pre">directivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarization</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.directivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.RadiationPattern.directivity" title="Link to this definition"></a></dt>
+<dd><p>Directivity of the antenna.</p>
+<p>Directivity as a function of the E-field in V/m is</p>
+<div class="math notranslate nohighlight">
+\[D(\theta, \phi) =
+\frac{ 4 \pi r^2 |\vec{E}(r, \theta, \phi)|^2 }{2\eta_0 P_\text{rad}}\]</div>
+<p>However, this class uses normalized E-fields since the intent is to represent
+only the relative power and phase of the E-field as a function of direction.
+Thus the directivity is simply</p>
+<div class="math notranslate nohighlight">
+\[D(\theta, \phi) = |\vec{E}(\theta, \phi)|^2\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>Angle</em>) – Polar angles.</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – Azimuthal angles.</p></li>
+<li><p><strong>polarization</strong> (<a class="reference internal" href="#spacelink.core.antenna.Polarization" title="spacelink.core.antenna.Polarization"><em>Polarization</em></a>) – Desired polarization state.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Directivity. Shape is determined by standard Numpy broadcasting rules from
+the shapes of theta and phi.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decibels</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.RadiationPattern.gain">
+<span class="sig-name descname"><span class="pre">gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarization</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.RadiationPattern.gain" title="Link to this definition"></a></dt>
+<dd><p>Gain of the antenna.</p>
+<div class="math notranslate nohighlight">
+\[G(\theta, \phi) = \eta \cdot D(\theta, \phi)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\eta\)</span> is the radiation efficiency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>Angle</em>) – Polar angles.</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – Azimuthal angles.</p></li>
+<li><p><strong>polarization</strong> (<a class="reference internal" href="#spacelink.core.antenna.Polarization" title="spacelink.core.antenna.Polarization"><em>Polarization</em></a>) – Desired polarization state.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Gain. Shape is determined by standard Numpy broadcasting rules from the
+shapes of theta and phi.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decibels</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.core.antenna.RadiationPattern.axial_ratio">
+<span class="sig-name descname"><span class="pre">axial_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.axial_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.antenna.RadiationPattern.axial_ratio" title="Link to this definition"></a></dt>
+<dd><p>Axial ratio of the antenna.</p>
+<p>The axial ratio is the ratio of the major to minor axis of the polarization
+ellipse. An axial ratio of 0 dB corresponds to circular polarization, and an
+axial ratio of ∞ corresponds to linear polarization. Elliptical polarizations
+have axial ratios between these two extremes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>Angle</em>) – Polar angles.</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – Azimuthal angles.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Axial ratio. Shape is determined by standard Numpy broadcasting rules from
+the shapes of theta and phi.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decibels</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

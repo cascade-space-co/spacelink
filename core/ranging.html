@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ranging Module &mdash; SpaceLink 0.1.3 documentation</title>
+  <title>Ranging Module &mdash; SpaceLink 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=360bc84d"></script>
+        <script src="../_static/documentation_options.js?v=fd825880"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.3
+                0.1.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -375,6 +375,42 @@ parallel. See <a class="reference external" href="https://ccsds.org/wp-content/u
 </dl>
 <p class="rubric">References</p>
 <p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf">[2]</a> Equation (90).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spacelink.core.ranging.pn_acquisition_time">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.ranging.</span></span><span class="sig-name descname"><span class="pre">pn_acquisition_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ranging_to_noise_psd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">success_probability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/ranging.html#pn_acquisition_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.ranging.pn_acquisition_time" title="Link to this definition"></a></dt>
+<dd><p>Compute the acquisition time for the PN ranging code.</p>
+<p>Successful acquisition means that the correct phase of the full PN ranging sequence
+is identified by the receiver. For the same receiver architecture, higher
+probability of successs requires either higher <span class="math notranslate nohighlight">\(P_R/N_0\)</span> or more time.</p>
+<p>This calculation assumes that correlations for all component codes are performed in
+parallel, which is typical for ground station receivers. <a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x1b3e1.pdf">[3]</a> and <a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf">[4]</a> refer to
+this as “station acquisition,” though it could also apply to a regenerative
+transponder that uses the same parallel correlation architecture. The See <a class="reference external" href="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf">[4]</a>
+Section 2.6.2 for details.</p>
+<p>Keep in mind that this only accounts for the acquisition time of a single PN ranging
+receiver. If a regenerative transponder is used, the ground station receiver’s
+acquisition processing can’t begin until the on-board transponder has completed
+its acquisition processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ranging_to_noise_psd</strong> (<em>Frequency</em>) – The ranging-to-noise power spectral density <span class="math notranslate nohighlight">\(P_R/N_0\)</span>.</p></li>
+<li><p><strong>success_probability</strong> (<em>Dimensionless</em>) – The desired probability of successful acquisition.</p></li>
+<li><p><strong>code</strong> (<a class="reference internal" href="#spacelink.core.ranging.PnRangingCode" title="spacelink.core.ranging.PnRangingCode"><em>PnRangingCode</em></a>) – The PN ranging code type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The minimum integration time required to achieve the desired probability of
+successful acquisition.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Time</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p><a class="reference external" href="https://deepspace.jpl.nasa.gov/dsndocs/810-005/214/214C.pdf">[2]</a> Inverse of Equation (90).</p>
 </dd></dl>
 
 </section>

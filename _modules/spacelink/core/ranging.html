@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.core.ranging &mdash; SpaceLink 0.1.3 documentation</title>
+  <title>spacelink.core.ranging &mdash; SpaceLink 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=360bc84d"></script>
+        <script src="../../../_static/documentation_options.js?v=fd825880"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.3
+                0.1.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -584,6 +584,86 @@
         <span class="p">)</span>
         <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span>
     <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pn_acquisition_time">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.pn_acquisition_time">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pn_acquisition_time</span><span class="p">(</span>
+    <span class="n">ranging_to_noise_psd</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">,</span>
+    <span class="n">success_probability</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
+    <span class="n">code</span><span class="p">:</span> <span class="n">PnRangingCode</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Time</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the acquisition time for the PN ranging code.</span>
+
+<span class="sd">    Successful acquisition means that the correct phase of the full PN ranging sequence</span>
+<span class="sd">    is identified by the receiver. For the same receiver architecture, higher</span>
+<span class="sd">    probability of successs requires either higher :math:`P_R/N_0` or more time.</span>
+
+<span class="sd">    This calculation assumes that correlations for all component codes are performed in</span>
+<span class="sd">    parallel, which is typical for ground station receivers. `[3]`_ and `[4]`_ refer to</span>
+<span class="sd">    this as &quot;station acquisition,&quot; though it could also apply to a regenerative</span>
+<span class="sd">    transponder that uses the same parallel correlation architecture. The See `[4]`_</span>
+<span class="sd">    Section 2.6.2 for details.</span>
+
+<span class="sd">    Keep in mind that this only accounts for the acquisition time of a single PN ranging</span>
+<span class="sd">    receiver. If a regenerative transponder is used, the ground station receiver&#39;s</span>
+<span class="sd">    acquisition processing can&#39;t begin until the on-board transponder has completed</span>
+<span class="sd">    its acquisition processing.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ranging_to_noise_psd : Frequency</span>
+<span class="sd">        The ranging-to-noise power spectral density :math:`P_R/N_0`.</span>
+<span class="sd">    success_probability : Dimensionless</span>
+<span class="sd">        The desired probability of successful acquisition.</span>
+<span class="sd">    code : PnRangingCode</span>
+<span class="sd">        The PN ranging code type.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Time</span>
+<span class="sd">        The minimum integration time required to achieve the desired probability of</span>
+<span class="sd">        successful acquisition.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    `[2]`_ Inverse of Equation (90).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">success_probability</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Success probability must be between 0 and 1&quot;</span><span class="p">)</span>
+
+    <span class="c1"># The following are upper bounds on the expected acquisition time required for the</span>
+    <span class="c1"># root finding algorithm. These were found by fitting curves to the acquisition</span>
+    <span class="c1"># probability equations and then adding some margin.</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">PnRangingCode</span><span class="o">.</span><span class="n">DSN</span><span class="p">:</span>
+        <span class="n">upper_bound</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mi">2000</span> <span class="o">+</span> <span class="mi">2166</span> <span class="o">*</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">success_probability</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">ranging_to_noise_psd</span>
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">PnRangingCode</span><span class="o">.</span><span class="n">CCSDS_T4B</span><span class="p">:</span>
+        <span class="n">upper_bound</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mi">1100</span> <span class="o">+</span> <span class="mi">1198</span> <span class="o">*</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">success_probability</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">ranging_to_noise_psd</span>
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">PnRangingCode</span><span class="o">.</span><span class="n">CCSDS_T2B</span><span class="p">:</span>
+        <span class="n">upper_bound</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mi">100</span> <span class="o">+</span> <span class="mi">73</span> <span class="o">*</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">success_probability</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">ranging_to_noise_psd</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid PN ranging code: </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># There&#39;s no closed-form solution to Equation (90) or (91) so we need to use a</span>
+    <span class="c1"># root-finding algorithm.</span>
+    <span class="n">solution</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">root_scalar</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">int_time</span><span class="p">:</span> <span class="p">(</span>
+            <span class="n">pn_acquisition_probability</span><span class="p">(</span><span class="n">ranging_to_noise_psd</span><span class="p">,</span> <span class="n">int_time</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+            <span class="o">-</span> <span class="n">success_probability</span>
+        <span class="p">),</span>
+        <span class="n">bracket</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">solution</span><span class="o">.</span><span class="n">root</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span></div>
 
 </pre></div>
 
