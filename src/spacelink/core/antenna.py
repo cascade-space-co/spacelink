@@ -36,6 +36,16 @@ where:
 * :math:`\eta` is the efficiency factor (typically 0.55 to 0.70)
 * :math:`D` is the diameter of the dish
 * :math:`\lambda` is the wavelength
+
+Spherical Coordinate System
+---------------------------
+
+This module uses the standard spherical coordinate system with the following
+conventions:
+
+* :math:`\theta` is the polar angle measured from the +z axis with range [0, π] radians.
+* :math:`\phi` is the azimuthal angle measured from the +x axis in the xy-plane with 
+  range [0, 2π) or [-π, π) radians.
 """
 
 import enum
