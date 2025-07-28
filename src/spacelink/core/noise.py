@@ -63,7 +63,6 @@ from .units import (
     PowerDensity,
     Temperature,
     enforce_units,
-    to_dB,
     to_linear,
 )
 
@@ -187,7 +186,7 @@ def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
         Noise figure in dB
     """
     factor = temperature_to_noise_factor(temperature)
-    return to_dB(factor)
+    return factor.to(u.dB(1))
 
 
 @enforce_units

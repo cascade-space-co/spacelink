@@ -65,12 +65,12 @@ def test_noise_factor_to_temperature():
 
 
 def test_noise_figure_to_temperature():
-    noise_figure = 3.0 * u.dB  # Noise factor ~2.0
+    noise_figure = 3.0 * u.dB(1)  # Noise factor ~2.0
     expected_temp = 290 * u.K
     result = noise.noise_figure_to_temperature(noise_figure)
     assert_quantity_allclose(result, expected_temp, rtol=1e-2)
 
-    noise_figure = 0.0 * u.dB
+    noise_figure = 0.0 * u.dB(1)
     expected_temp = 0 * u.K
     result = noise.noise_figure_to_temperature(noise_figure)
     assert_quantity_allclose(result, expected_temp)
@@ -99,13 +99,13 @@ def test_noise_dBW_conversion(temperature, bandwidth, expected_noise_dBW):
 @pytest.mark.parametrize(
     "temperature, expected_noise_figure",
     [
-        (290 * u.K, 3.0103 * u.dB),
+        (290 * u.K, 3.0103 * u.dB(1)),
     ],
 )
 def test_temperature_to_noise_figure(temperature, expected_noise_figure):
     """Test temperature to noise figure conversion."""
     nf = noise.temperature_to_noise_figure(temperature)
-    assert_quantity_allclose(nf, expected_noise_figure, atol=0.01 * u.dB)
+    assert_quantity_allclose(nf, expected_noise_figure, atol=0.01 * u.dB(1))
 
 
 @pytest.mark.parametrize(

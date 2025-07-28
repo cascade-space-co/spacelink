@@ -12,18 +12,6 @@ where:
 * :math:`c` is the speed of light (299,792,458 m/s)
 * :math:`f` is the frequency in Hz
 
-
-to_dB
------
-
-The conversion to decibels is done using:
-
-.. math::
-   \text{X}_{\text{dB}} = \text{factor} \cdot \log_{10}(x)
-
-The result will have units of dB(input_unit), e.g. dBW, dBK, dBHz, etc.
-For dimensionless input, the result will have unit dB.
-
 to_linear
 ---------
 
@@ -531,28 +519,6 @@ def frequency(wavelength: Wavelength) -> Frequency:
 
 
 @enforce_units
-def to_dB(x: Dimensionless, *, factor: float = 10.0) -> Decibels:
-    r"""
-    Convert dimensionless quantity to decibels.
-
-    Note that for referenced logarithmic units, conversions should
-    be done using the .to(unit) method.
-    Parameters
-    ----------
-    x : Dimensionless
-        value to be converted
-    factor : float, optional
-        10 for power quantities, 20 for field quantities
-
-    Returns
-    -------
-    Decibels
-    """
-    with np.errstate(divide="ignore"):  # Suppress warnings for np.log10(0)
-        return factor * np.log10(x.value) * u.dB
-
-
-@enforce_units
 def to_linear(x: Decibels, *, factor: float = 10.0) -> Dimensionless:
     """
     Convert decibels to a linear (dimensionless) ratio.
@@ -573,14 +539,15 @@ def to_linear(x: Decibels, *, factor: float = 10.0) -> Dimensionless:
 
 
 @enforce_units
-def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
+def return_loss_to_vswr(return_loss: Dimensionless) -> Dimensionless:
     r"""
     Convert a return loss in decibels to voltage standing wave ratio (VSWR).
 
     Parameters
     ----------
-    return_loss : Quantity
-        Return loss in decibels (>= 0). Use float('inf') for a perfect match
+    return_loss : Dimensionless
+        Return loss. Must be >= 1 if provided as dimensionless or >= 0 if provided in
+        decibels. Use np.inf for a perfect match.
 
     Returns
     -------
@@ -590,14 +557,13 @@ def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
     Raises
     ------
     ValueError
-        If return_loss is negative
+        If return_loss is < 0 dB
     """
-    if return_loss.value < 0:
-        raise ValueError(f"return loss must be >= 0 ({return_loss}).")
-    if return_loss.value == float("inf"):
-        return 1.0 * u.dimensionless
-    gamma = to_linear(-return_loss, factor=20)
-    return ((1 + gamma) / (1 - gamma)) * u.dimensionless
+    if np.any(return_loss.value < 1):
+        raise ValueError("Return loss must be >= 1.")
+
+    gamma = 1 / np.sqrt(return_loss)
+    return (1 + gamma) / (1 - gamma)
 
 
 @enforce_units
@@ -608,7 +574,7 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     Parameters
     ----------
     vswr : Quantity
-        VSWR value (> 1). Use 1 for a perfect match (infinite return loss)
+        VSWR value (>= 1). Use 1 for a perfect match (infinite return loss)
 
     Returns
     -------
@@ -620,10 +586,10 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     ValueError
         If vswr is less than 1
     """
-    if vswr < 1.0:
-        raise ValueError(f"VSWR must be >= 1 ({vswr}).")
+    if np.any(vswr < 1.0):
+        raise ValueError("VSWR must be >= 1.")
     gamma = (vswr - 1) / (vswr + 1)
-    return safe_negate(to_dB(gamma, factor=20))
+    return (1 / np.abs(gamma) ** 2).to(u.dB(1))
 
 
 def safe_negate(quantity: Quantity) -> Quantity:

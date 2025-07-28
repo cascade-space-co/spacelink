@@ -87,35 +87,23 @@ def test_invalid_inputs(func, invalid_input, error_type):
 )
 def test_vswr_return_loss_conversions(vswr, return_loss):
     """Test VSWR to return loss and return loss to VSWR conversions."""
-    vswr_result = return_loss_to_vswr(return_loss * u.dB)
+    vswr_result = return_loss_to_vswr(return_loss * u.dB(1))
     assert_quantity_allclose(
         vswr_result, vswr * u.dimensionless, atol=0.01 * u.dimensionless
     )
 
     return_loss_result = vswr_to_return_loss(vswr * u.dimensionless)
-    assert_quantity_allclose(return_loss_result, return_loss * u.dB, atol=0.01 * u.dB)
-
-
-@pytest.mark.parametrize(
-    "input_value, factor, expected",
-    [
-        (100 * u.dimensionless, 10, 20 * u.dB),  # dB for ratios
-        (1000 * u.dimensionless, 10, 30 * u.dB),
-        (10 * u.dimensionless, 20, 20 * u.dB),
-    ],
-)
-def test_to_dB(input_value, factor, expected):
     assert_quantity_allclose(
-        units.to_dB(input_value, factor=factor), expected, atol=0.01 * u.dB
+        return_loss_result, return_loss * u.dB(1), atol=0.01 * u.dB(1)
     )
 
 
 @pytest.mark.parametrize(
     "input_value, factor, expected",
     [
-        (20 * u.dB, 10, 100 * u.dimensionless),
-        (30 * u.dB, 10, 1000 * u.dimensionless),
-        (20 * u.dB, 20, 10 * u.dimensionless),
+        (20 * u.dB(1), 10, 100 * u.dimensionless),
+        (30 * u.dB(1), 10, 1000 * u.dimensionless),
+        (20 * u.dB(1), 20, 10 * u.dimensionless),
     ],
 )
 def test_to_linear(input_value, factor, expected):
@@ -124,7 +112,7 @@ def test_to_linear(input_value, factor, expected):
 
 def test_return_loss_to_vswr_invalid_input():
     with pytest.raises(ValueError):
-        units.return_loss_to_vswr(-1 * u.dB)
+        units.return_loss_to_vswr(-1 * u.dB(1))
 
 
 def test_vswr_to_return_loss_invalid_input():
@@ -141,8 +129,8 @@ def test_vswr_to_return_loss_invalid_input():
         (100 * u.K, 10, 20 * u.dBK),
         (1 * u.Hz, 10, 0 * u.dBHz),
         (1000 * u.Hz, 10, 30 * u.dBHz),
-        (100 * u.dimensionless, 10, 20 * u.dB),
-        (10 * u.dimensionless, 20, 20 * u.dB),
+        (100 * u.dimensionless, 10, 20 * u.dB(1)),
+        (10 * u.dimensionless, 20, 20 * u.dB(1)),
     ],
 )
 def safe_negate(quantity):
