@@ -105,3 +105,19 @@ def test_temperature_to_noise_figure(temperature, expected_noise_figure):
     """Test temperature to noise figure conversion."""
     nf = noise.temperature_to_noise_figure(temperature)
     assert_quantity_allclose(nf, expected_noise_figure, atol=0.01 * u.dB)
+
+
+@pytest.mark.parametrize(
+    "ebno, bitrate, cno",
+    [
+        (10.0 * u.dB(1), 1000 * u.Hz, 40.0 * u.dBHz),  # 10 dB + 30 dBHz = 40 dBHz
+        (5.0 * u.dB(1), 1e6 * u.Hz, 65.0 * u.dBHz),  # 5 dB + 60 dBHz = 65 dBHz
+        (0.0 * u.dB(1), 100 * u.Hz, 20.0 * u.dBHz),  # 0 dB + 20 dBHz = 20 dBHz
+    ],
+)
+def test_ebno_cno_conversions(ebno, bitrate, cno):
+    """Test Eb/N0 to/from C/N0 conversion functions."""
+    cno_result = noise.ebno_to_cno(ebno, bitrate)
+    assert_quantity_allclose(cno_result, cno)
+    ebno_result = noise.cno_to_ebno(cno, bitrate)
+    assert_quantity_allclose(ebno_result, ebno)
