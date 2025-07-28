@@ -283,47 +283,61 @@ def test_antenna_pattern_calculations(test_case):
     pol_phi = Polarization(np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
 
     assert_quantity_allclose(
-        test_case.pattern.gain(
-            theta_interp[:, np.newaxis], phi_interp, Polarization.lhcp()
+        to_linear(
+            test_case.pattern.gain(
+                theta_interp[:, np.newaxis], phi_interp, Polarization.lhcp()
+            )
         ),
         test_case.expected_results.lhcp_gain,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.directivity(
-            theta_interp[:, np.newaxis], phi_interp, Polarization.lhcp()
+        to_linear(
+            test_case.pattern.directivity(
+                theta_interp[:, np.newaxis], phi_interp, Polarization.lhcp()
+            )
         ),
         test_case.expected_results.lhcp_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.gain(
-            theta_interp[:, np.newaxis], phi_interp, Polarization.rhcp()
+        to_linear(
+            test_case.pattern.gain(
+                theta_interp[:, np.newaxis], phi_interp, Polarization.rhcp()
+            )
         ),
         test_case.expected_results.rhcp_gain,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.directivity(
-            theta_interp[:, np.newaxis], phi_interp, Polarization.rhcp()
+        to_linear(
+            test_case.pattern.directivity(
+                theta_interp[:, np.newaxis], phi_interp, Polarization.rhcp()
+            )
         ),
         test_case.expected_results.rhcp_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.directivity(
-            theta_interp[:, np.newaxis], phi_interp, pol_theta
+        to_linear(
+            test_case.pattern.directivity(
+                theta_interp[:, np.newaxis], phi_interp, pol_theta
+            )
         ),
         test_case.expected_results.theta_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        test_case.pattern.directivity(theta_interp[:, np.newaxis], phi_interp, pol_phi),
+        to_linear(
+            test_case.pattern.directivity(
+                theta_interp[:, np.newaxis], phi_interp, pol_phi
+            )
+        ),
         test_case.expected_results.phi_directivity,
         atol=1e-10 * u.dimensionless,
     )

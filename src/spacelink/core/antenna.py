@@ -528,7 +528,7 @@ class RadiationPattern:
     @enforce_units
     def directivity(
         self, theta: Angle, phi: Angle, polarization: Polarization
-    ) -> Dimensionless:
+    ) -> Decibels:
         r"""
         Directivity of the antenna.
 
@@ -557,16 +557,16 @@ class RadiationPattern:
 
         Returns
         -------
-        Dimensionless
+        Decibels
             Directivity. Shape is determined by standard Numpy broadcasting rules from
             the shapes of theta and phi.
         """
-        return np.abs(self.e_field(theta, phi, polarization)) ** 2
+        return to_dB(np.abs(self.e_field(theta, phi, polarization)) ** 2)
 
     @enforce_units
     def gain(
         self, theta: Angle, phi: Angle, polarization: Polarization
-    ) -> Dimensionless:
+    ) -> Decibels:
         r"""
         Gain of the antenna.
 
@@ -586,11 +586,11 @@ class RadiationPattern:
 
         Returns
         -------
-        Dimensionless
+        Decibels
             Gain. Shape is determined by standard Numpy broadcasting rules from the
             shapes of theta and phi.
         """
-        return self.rad_efficiency * self.directivity(theta, phi, polarization)
+        return to_dB(self.rad_efficiency) + self.directivity(theta, phi, polarization)
 
     @enforce_units
     def axial_ratio(self, theta: Angle, phi: Angle) -> Decibels:
