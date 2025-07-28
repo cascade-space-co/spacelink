@@ -44,7 +44,7 @@ This module uses the standard spherical coordinate system with the following
 conventions:
 
 * :math:`\theta` is the polar angle measured from the +z axis with range [0, π] radians.
-* :math:`\phi` is the azimuthal angle measured from the +x axis in the xy-plane with 
+* :math:`\phi` is the azimuthal angle measured from the +x axis in the xy-plane with
   range [0, 2π) or [-π, π) radians.
 """
 
@@ -574,9 +574,7 @@ class RadiationPattern:
         return to_dB(np.abs(self.e_field(theta, phi, polarization)) ** 2)
 
     @enforce_units
-    def gain(
-        self, theta: Angle, phi: Angle, polarization: Polarization
-    ) -> Decibels:
+    def gain(self, theta: Angle, phi: Angle, polarization: Polarization) -> Decibels:
         r"""
         Gain of the antenna.
 
