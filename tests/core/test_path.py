@@ -15,52 +15,56 @@ from spacelink.core.path import aperture_loss, free_space_path_loss, spreading_l
 @pytest.mark.parametrize(
     "distance, frequency, expected_loss",
     [
-        (1.0 * u.km, 1.0 * u.GHz, 92.448 * u.dB),
-        (1000 * u.km, 1.0 * u.GHz, 152.448 * u.dB),
-        (40_000 * u.km, 1.0 * u.GHz, 184.489 * u.dB),
-        (400_000 * u.km, 1.0 * u.GHz, 204.48 * u.dB),
-        (400_000 * u.km, 10.0 * u.GHz, 224.48 * u.dB),
-        (1_000_000 * u.km, 1.0 * u.GHz, 212.44 * u.dB),
-        (1_000_000 * u.km, 10.0 * u.GHz, 232.44 * u.dB),
-        (2_000_000 * u.km, 1.0 * u.GHz, 218.46 * u.dB),
-        (2_000_000 * u.km, 2.0 * u.GHz, 224.48 * u.dB),
-        (2_000_000 * u.km, 2.3 * u.GHz, 225.695 * u.dB),
-        (2_000_000 * u.km, 8.4 * u.GHz, 236.946 * u.dB),
-        (2_000_000 * u.km, 10.0 * u.GHz, 238.46 * u.dB),
+        (1.0 * u.km, 1.0 * u.GHz, 92.448 * u.dB(1)),
+        (1000 * u.km, 1.0 * u.GHz, 152.448 * u.dB(1)),
+        (40_000 * u.km, 1.0 * u.GHz, 184.489 * u.dB(1)),
+        (400_000 * u.km, 1.0 * u.GHz, 204.48 * u.dB(1)),
+        (400_000 * u.km, 10.0 * u.GHz, 224.48 * u.dB(1)),
+        (1_000_000 * u.km, 1.0 * u.GHz, 212.44 * u.dB(1)),
+        (1_000_000 * u.km, 10.0 * u.GHz, 232.44 * u.dB(1)),
+        (2_000_000 * u.km, 1.0 * u.GHz, 218.46 * u.dB(1)),
+        (2_000_000 * u.km, 2.0 * u.GHz, 224.48 * u.dB(1)),
+        (2_000_000 * u.km, 2.3 * u.GHz, 225.695 * u.dB(1)),
+        (2_000_000 * u.km, 8.4 * u.GHz, 236.946 * u.dB(1)),
+        (2_000_000 * u.km, 10.0 * u.GHz, 238.46 * u.dB(1)),
     ],
 )
 def test_free_space_path_loss(distance, frequency, expected_loss):
     """ """
     path_loss = free_space_path_loss(distance, frequency)
-    assert_quantity_allclose(path_loss, expected_loss, atol=0.01 * u.dB)
+    assert_quantity_allclose(path_loss, expected_loss, atol=0.01 * u.dB(1))
 
 
 @pytest.mark.parametrize(
     "distance, expected_loss",
     [
-        (36000 * u.km, 162.12 * u.dB),  # GEO satellite distance
-        (2000 * u.km, 137.01 * u.dB),  # LEO satellite distance
+        (36000 * u.km, 162.12 * u.dB(1)),  # GEO satellite distance
+        (2000 * u.km, 137.01 * u.dB(1)),  # LEO satellite distance
     ],
 )
 def test_spreading_loss(distance, expected_loss):
     """
     TODO: validate
     """
-    assert_quantity_allclose(spreading_loss(distance), expected_loss, atol=0.01 * u.dB)
+    assert_quantity_allclose(
+        spreading_loss(distance), expected_loss, atol=0.01 * u.dB(1)
+    )
 
 
 @pytest.mark.parametrize(
     "frequency, expected_loss",
     [
-        (12 * u.GHz, 43.04 * u.dB),  # High frequency case
-        (2.25 * u.GHz, 28.50 * u.dB),  # Lower frequency case
+        (12 * u.GHz, 43.04 * u.dB(1)),  # High frequency case
+        (2.25 * u.GHz, 28.50 * u.dB(1)),  # Lower frequency case
     ],
 )
 def test_aperture_loss(frequency, expected_loss):
     """
     TODO: validate
     """
-    assert_quantity_allclose(aperture_loss(frequency), expected_loss, atol=0.01 * u.dB)
+    assert_quantity_allclose(
+        aperture_loss(frequency), expected_loss, atol=0.01 * u.dB(1)
+    )
 
 
 @pytest.mark.parametrize(

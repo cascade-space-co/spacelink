@@ -232,19 +232,19 @@ class TestRadiationPatternHFSSImport:
         # Exact-value checks at grid points (should match CSV dB values)
         assert_quantity_allclose(
             pattern.gain(20 * u.deg, 0 * u.deg, polarization=lhcp_pol),
-            -25.0 * u.dB,
+            -25.0 * u.dB(1),
         )
         assert_quantity_allclose(
             pattern.gain(20 * u.deg, 0 * u.deg, polarization=rhcp_pol),
-            -5.0 * u.dB,
+            -5.0 * u.dB(1),
         )
         assert_quantity_allclose(
             pattern.gain(40 * u.deg, 90 * u.deg, polarization=lhcp_pol),
-            -26.5 * u.dB,
+            -26.5 * u.dB(1),
         )
         assert_quantity_allclose(
             pattern.gain(40 * u.deg, 90 * u.deg, polarization=rhcp_pol),
-            -6.5 * u.dB,
+            -6.5 * u.dB(1),
         )
 
     def test_multi_freq(self, tmp_path):
@@ -288,13 +288,13 @@ class TestRadiationPatternHFSSImport:
             pattern.gain(
                 20 * u.deg, 0 * u.deg, frequency=freq_24, polarization=lhcp_pol
             ),
-            -25.0 * u.dB,
+            -25.0 * u.dB(1),
         )
         assert_quantity_allclose(
             pattern.gain(
                 20 * u.deg, 0 * u.deg, frequency=freq_58, polarization=lhcp_pol
             ),
-            -24.0 * u.dB,
+            -24.0 * u.dB(1),
         )
 
     def test_file_not_found(self, tmp_path):
@@ -402,14 +402,14 @@ class TestRadiationPatternHFSSImport:
         lhcp_pol = Polarization.lhcp()
         rhcp_pol = Polarization.rhcp()
         assert_quantity_allclose(
-            pat.gain(20 * u.deg, 0 * u.deg, polarization=lhcp_pol), -13.0 * u.dB
+            pat.gain(20 * u.deg, 0 * u.deg, polarization=lhcp_pol), -13.0 * u.dB(1)
         )
         assert_quantity_allclose(
-            pat.gain(20 * u.deg, 0 * u.deg, polarization=rhcp_pol), -3.0 * u.dB
+            pat.gain(20 * u.deg, 0 * u.deg, polarization=rhcp_pol), -3.0 * u.dB(1)
         )
         assert_quantity_allclose(
-            pat.gain(20 * u.deg, 90 * u.deg, polarization=lhcp_pol), -16.0 * u.dB
+            pat.gain(20 * u.deg, 90 * u.deg, polarization=lhcp_pol), -16.0 * u.dB(1)
         )
         assert_quantity_allclose(
-            pat.gain(20 * u.deg, 90 * u.deg, polarization=rhcp_pol), -6.0 * u.dB
+            pat.gain(20 * u.deg, 90 * u.deg, polarization=rhcp_pol), -6.0 * u.dB(1)
         )

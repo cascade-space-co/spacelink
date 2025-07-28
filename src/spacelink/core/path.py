@@ -44,7 +44,6 @@ from .units import (
     Distance,
     Frequency,
     enforce_units,
-    to_dB,
     wavelength,
 )
 
@@ -64,12 +63,11 @@ def spreading_loss(distance: Distance) -> Decibels:
     Decibels
         Spreading loss in dB (positive value)
     """
-    if distance <= 0 * u.m:
+    if np.any(distance <= 0 * u.m):
         raise ValueError("Distance must be positive")
 
-    # We have to strip the unit here
-    r = distance.to(u.m).value
-    return to_dB(4.0 * np.pi * r**2 * u.dimensionless)
+    r = distance.value
+    return (4.0 * np.pi * r**2 * u.dimensionless).to(u.dB(1))
 
 
 @enforce_units
@@ -87,12 +85,11 @@ def aperture_loss(frequency: Frequency) -> Decibels:
     Decibels
         Aperture loss in dB (positive value)
     """
-    if frequency <= 0 * u.Hz:
+    if np.any(frequency <= 0 * u.Hz):
         raise ValueError("Frequency must be positive")
 
-    # Again stripping the unit here
-    lam = wavelength(frequency).to(u.m).value
-    return to_dB(4.0 * np.pi / (lam**2) * u.dimensionless)
+    lam = wavelength(frequency).value
+    return (4.0 * np.pi / (lam**2) * u.dimensionless).to(u.dB(1))
 
 
 @enforce_units

@@ -300,10 +300,10 @@ def import_hfss_csv(
 
     # Reshape to (n_theta, n_phi, n_freq)
     gain_lhcp = units.to_linear(
-        df_pivoted[gain_lhcp_col].to_numpy().reshape(n_theta, n_phi, n_freq) * u.dB
+        df_pivoted[gain_lhcp_col].to_numpy().reshape(n_theta, n_phi, n_freq) * u.dB(1)
     )
     gain_rhcp = units.to_linear(
-        df_pivoted[gain_rhcp_col].to_numpy().reshape(n_theta, n_phi, n_freq) * u.dB
+        df_pivoted[gain_rhcp_col].to_numpy().reshape(n_theta, n_phi, n_freq) * u.dB(1)
     )
     angle_lhcp = (
         df_pivoted[phase_lhcp_col].to_numpy().reshape(n_theta, n_phi, n_freq) * u.deg
