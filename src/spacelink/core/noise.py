@@ -53,6 +53,7 @@ from astropy.constants import k_B as BOLTZMANN
 import astropy.units as u
 
 from .units import (
+    DecibelHertz,
     Decibels,
     Dimensionless,
     Temperature,
@@ -185,3 +186,43 @@ def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
     """
     factor = temperature_to_noise_factor(temperature)
     return to_dB(factor)
+
+
+@enforce_units
+def ebno_to_cno(ebno: Decibels, bitrate: Frequency) -> DecibelHertz:
+    r"""
+    Convert :math:`E_b/N_0` to :math:`C/N_0`.
+
+    Parameters
+    ----------
+    ebno : Decibels
+        :math:`E_b/N_0`
+    bitrate : Frequency
+        Bitrate
+
+    Returns
+    -------
+    DecibelHertz
+        :math:`C/N_0`
+    """
+    return ebno + bitrate.to(u.dBHz)
+
+
+@enforce_units
+def cno_to_ebno(cno: DecibelHertz, bitrate: Frequency) -> Decibels:
+    r"""
+    Convert :math:`C/N_0` to :math:`E_b/N_0`.
+
+    Parameters
+    ----------
+    cno : DecibelHertz
+        :math:`C/N_0`
+    bitrate : Frequency
+        Bitrate
+
+    Returns
+    -------
+    Decibels
+        :math:`E_b/N_0`
+    """
+    return cno - bitrate.to(u.dBHz)
