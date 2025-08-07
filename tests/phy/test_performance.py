@@ -146,7 +146,7 @@ class TestModePerformance:
 
         # Creating ModePerformance with empty points should raise an exception
         with pytest.raises(IndexError):
-            model = ModePerformance(
+            ModePerformance(
                 modes=[mode],
                 metric=ErrorMetric.BER,
                 points=[],
