@@ -1,0 +1,67 @@
+- id: UNCODED_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes: []
+
+- id: CCSDS_TM_RS255223_I1_CONV12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Reed Solomon (255,223)
+        rate: "223/255"
+        interleaver_depth: 1
+      - name: Convolutional (7,1/2)
+        rate: "1/2"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_RS255223_I2_CONV12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Reed Solomon (255,223)
+        rate: "223/255"
+        interleaver_depth: 2
+      - name: Convolutional (7,1/2)
+        rate: "1/2"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_RS255223_I3_CONV12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Reed Solomon (255,223)
+        rate: "223/255"
+        interleaver_depth: 3
+      - name: Convolutional (7,1/2)
+        rate: "1/2"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_RS255223_I4_CONV12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Reed Solomon (255,223)
+        rate: "223/255"
+        interleaver_depth: 4
+      - name: Convolutional (7,1/2)
+        rate: "1/2"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_RS255223_I5_CONV12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Reed Solomon (255,223)
+        rate: "223/255"
+        interleaver_depth: 5
+      - name: Convolutional (7,1/2)
+        rate: "1/2"
+  ref: CCSDS 131.0-B-5
