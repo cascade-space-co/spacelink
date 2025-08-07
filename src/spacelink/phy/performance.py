@@ -3,6 +3,7 @@ import enum
 import astropy.units as u
 import numpy as np
 import pydantic
+import pydantic.dataclasses
 import scipy.interpolate
 import typing
 
@@ -15,51 +16,11 @@ class ErrorMetric(str, enum.Enum):
     WER = "codeword error rate"
 
 
-class DecoderStage(pydantic.BaseModel):
-    r"""
-    Configuration for a single decoder stage. This can be used to represent any kind of
-    decoding stage, but a demodulation stage or error correction decoding stage are the
-    common cases.
-    
-    It's most relevant to use this class when the performance of the modulation and 
-    coding depends on some property of a stage decoding stage, such as the number of 
-    decoder iterations or the number of soft bits in a soft-decision decoder. In such
-    cases there may be different performance curves for different property values.
-
-    Parameters
-    ----------
-    type : str
-        Type of decoder stage (e.g., 'rs', 'conv', 'ldpc', 'modulation').
-    algorithm : str
-        Name of the decoding algorithm.
-    parameters : dict
-        Additional parameters for the decoder stage. Examples include hard versus soft
-        decision decoding, number of soft bits, number of decoder iterations, etc.
-        Properties of the modulation and coding that affect compatibility between 
-        transmitter and receiver should not be included.
-    """
-    type: str  # e.g., 'rs', 'conv', 'ldpc', 'modulation'
-    algorithm: str
-    parameters: dict[str, typing.Any] = {}
-
-
-class DecoderProfile(pydantic.BaseModel):
-    r"""
-    Configuration profile for a full decoder pipeline.
-
-    Parameters
-    ----------
-    stages : list[DecoderStage]
-        List of decoder stages in processing order.
-    """
-    stages: list[DecoderStage]
-
-
 class ModePerformance(pydantic.BaseModel):
     r"""
     Performance characteristics for specific link modes.
 
-    This class provides methods to convert between Eb/N0 and error rates for given 
+    This class provides methods to convert between Eb/N0 and error rates for given
     modulation and coding schemes.
 
     Parameters
@@ -75,19 +36,11 @@ class ModePerformance(pydantic.BaseModel):
     ref : str, optional
         Reference or source of the performance data (default: "").
     """
+
     modes: list[LinkMode]
-    decoder_profile: DecoderProfile
     metric: ErrorMetric
     points: list[tuple[float, float]]  # (Eb/N0 [dB], error rate)
     ref: str = ""
-
-    @pydantic.field_validator('modes')
-    @classmethod
-    def validate_modes_not_empty(cls, v):
-        """Validate that the modes list contains at least one item."""
-        if not v:
-            raise ValueError("modes list must contain at least one item")
-        return v
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -156,19 +109,18 @@ class ModePerformance(pydantic.BaseModel):
         return self._error_to_ebno_interpolator(np.log10(error_rate.value)) * u.dB
 
     @enforce_units
-    def coding_gain(
-        self, uncoded_model: typing.Self, error_rate: Dimensionless
-    ) -> Decibels:
+    def coding_gain(self, uncoded: typing.Self, error_rate: Dimensionless) -> Decibels:
         r"""
         Calculate the coding gain relative to an uncoded reference.
 
-        The coding gain is the difference in required Eb/N0 between the uncoded and 
+        The coding gain is the difference in required Eb/N0 between the uncoded and
         coded systems at the same error rate.
 
         Parameters
         ----------
-        uncoded_model : ModePerformance
-            Performance model for the uncoded reference system.
+        uncoded : ModePerformance
+            Performance model for the uncoded reference system. Must use the same error
+            metric as this object.
         error_rate : Dimensionless
             Error rate at which to evaluate the coding gain.
 
@@ -177,7 +129,15 @@ class ModePerformance(pydantic.BaseModel):
         Decibels
             Coding gain in decibels or NaN if the error rate is outside the range of
             the available performance data. Same shape as `error_rate`.
+
+        Raises
+        ------
+        ValueError
+            If the uncoded model has a different error metric.
         """
-        uncoded_ebno = uncoded_model.error_rate_to_ebno(error_rate)
+        if uncoded.metric != self.metric:
+            raise ValueError(f"Uncoded metric {uncoded.metric} ≠ {self.metric}.")
+
+        uncoded_ebno = uncoded.error_rate_to_ebno(error_rate)
         coded_ebno = self.error_rate_to_ebno(error_rate)
         return (uncoded_ebno - coded_ebno) * u.dB

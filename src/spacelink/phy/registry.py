@@ -1,7 +1,10 @@
 import yaml
 from spacelink.phy.mode import LinkMode
-from spacelink.phy.performance import ModePerformance, DecoderProfile, ErrorMetric
+from spacelink.phy.performance import ModePerformance, ErrorMetric
 from pathlib import Path
+
+MODES_DIR = Path(__file__).parent / "data/modes"
+PERF_DIR = Path(__file__).parent / "data/perf"
 
 
 class Registry:
@@ -15,11 +18,9 @@ class Registry:
         """
         self.modes: dict[str, LinkMode] = {}
         self.perfs: list[ModePerformance] = []
-        self.perf_index: dict[
-            tuple[str, DecoderProfile, ErrorMetric], ModePerformance
-        ] = {}
+        self.perf_index: dict[tuple[str, ErrorMetric], ModePerformance] = {}
 
-    def load(self, mode_dir: Path, perf_dir: Path) -> None:
+    def load(self, mode_dir: Path = MODES_DIR, perf_dir: Path = PERF_DIR) -> None:
         r"""
         Load link modes and performance data from files.
 
@@ -41,12 +42,10 @@ class Registry:
             with open(file) as f:
                 raw = yaml.safe_load(f)
                 mode_ids = raw["mode_ids"]
-                decoder_profile = DecoderProfile(**raw["decoder_profile"])
                 metric = ErrorMetric(raw["metric"])
 
                 perf = ModePerformance(
                     modes=[self.modes[mode_id] for mode_id in mode_ids],
-                    decoder_profile=decoder_profile,
                     metric=metric,
                     points=raw["points"],
                     ref=raw.get("ref", ""),
@@ -54,21 +53,18 @@ class Registry:
                 self.perfs.append(perf)
 
                 for mode_id in mode_ids:
-                    key = (mode_id, decoder_profile, metric)
-                    self.perf_index[key] = perf
+                    self.perf_index[(mode_id, metric)] = perf
 
     def get_performance(
-        self, mode_id: str, decoder_profile: DecoderProfile, metric: ErrorMetric
+        self, mode_id: str, metric: ErrorMetric
     ) -> ModePerformance:
         r"""
-        Look up the performance object for a given mode, decoder profile, and metric.
+        Look up the performance object for a given mode and metric.
 
         Parameters
         ----------
         mode_id : str
             ID of the link mode.
-        decoder_profile : DecoderProfile
-            Decoder profile.
         metric : ErrorMetric
             Error metric.
 
@@ -77,4 +73,4 @@ class Registry:
         ModePerformance
             Performance object.
         """
-        return self.perf_index[(mode_id, decoder_profile, metric)]
+        return self.perf_index[(mode_id, metric)]
