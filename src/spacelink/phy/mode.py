@@ -7,23 +7,63 @@ from spacelink.core.units import Frequency, enforce_units
 
 
 class Modulation(pydantic.BaseModel):
+    r"""
+    Represents a single modulation scheme.
+
+    Parameters
+    ----------
+    name : str
+        Name of the modulation scheme.
+    bits_per_symbol : int
+        Number of bits per symbol.
+    """
+
     name: str
     bits_per_symbol: int
 
 
 class Code(pydantic.BaseModel):
+    r"""
+    Represents a single forward error correction code.
+
+    Parameters
+    ----------
+    name : str
+        Name of the code.
+    rate : Fraction
+        Code rate.
+    interleaver_depth : int | None
+        Interleaver depth for codes such as Reed Solomon that are commonly paired with
+        an interleaver.
+    """
+
     name: str
     rate: Fraction
     interleaver_depth: int | None = None
 
 
 class CodeChain(pydantic.BaseModel):
+    r"""
+    Represents a chain of forward error correction codes.
+
+    This provides the flexibility to handle concatenated codes such as Reed Solomon
+    paired with convolutional code but also single codes and even the absence of forward
+    error correction.
+
+    Parameters
+    ----------
+    codes : list[Code]
+        List of codes in in encoding order from outermost to innermost code. If no error
+        correction is used the list will be empty.
+    """
+
     codes: list[Code]
 
     @property
     def rate(self) -> Fraction:
         r"""
-        The overall code rate of the code chain.
+        The overall code rate of the chain, which is the product of the individual code
+        rates or 1 if no error correction is used.
 
         Returns
         -------
@@ -34,6 +74,20 @@ class CodeChain(pydantic.BaseModel):
 
 
 class LinkMode(pydantic.BaseModel):
+    r"""
+    Represents a specific combination of modulation and coding.
+
+    Parameters
+    ----------
+    id : str
+        Unique identifier for the link mode.
+    modulation : Modulation
+        Modulation scheme.
+    coding : CodeChain
+        Forward error correction code chain.
+    ref : str, optional
+        Reference or source of the mode definition.
+    """
     id: str
     modulation: Modulation
     coding: CodeChain
