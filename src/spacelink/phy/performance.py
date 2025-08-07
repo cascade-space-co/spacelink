@@ -14,6 +14,7 @@ from spacelink.core.units import Dimensionless, Decibels, enforce_units
 class ErrorMetric(str, enum.Enum):
     BER = "bit error rate"
     WER = "codeword error rate"
+    FER = "frame error rate"
 
 
 class ModePerformance(pydantic.BaseModel):

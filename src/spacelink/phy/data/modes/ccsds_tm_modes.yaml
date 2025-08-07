@@ -65,3 +65,39 @@
       - name: Convolutional (7,1/2)
         rate: "1/2"
   ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_TURBO1784-12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Turbo (1784, 1/2)
+        rate: "1784/3576"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_TURBO1784-13_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Turbo (1784, 1/3)
+        rate: "1784/5364"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_TURBO1784-14_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Turbo (1784, 1/4)
+        rate: "1784/7152"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_TURBO1784-16_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Turbo (1784, 1/6)
+        rate: "1784/10728"
+  ref: CCSDS 131.0-B-5

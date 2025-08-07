@@ -1,0 +1,9 @@
+mode_ids: [CCSDS_TM_TURBO1784-16_BPSK]
+metric: bit error rate
+ref: CCSDS 130.1-G-3 Figure 7-6
+points:
+  - [-0.1, 5.2224e-3]
+  - [0.0, 1.4039e-3]
+  - [0.1, 2.4124e-4]
+  - [0.2, 3.5366e-5]
+  - [0.3, 5.4143e-6]
