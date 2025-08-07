@@ -43,42 +43,42 @@ class TestModePerformance:
         )
 
         # Test exact points
-        assert model.ebno_to_error_rate(0.0 * u.dB).value == pytest.approx(1e-1)
-        assert model.ebno_to_error_rate(1.0 * u.dB).value == pytest.approx(3e-2)
-        assert model.ebno_to_error_rate(2.0 * u.dB).value == pytest.approx(5e-3)
-        assert model.ebno_to_error_rate(3.0 * u.dB).value == pytest.approx(1e-4)
+        assert model.ebn0_to_error_rate(0.0 * u.dB).value == pytest.approx(1e-1)
+        assert model.ebn0_to_error_rate(1.0 * u.dB).value == pytest.approx(3e-2)
+        assert model.ebn0_to_error_rate(2.0 * u.dB).value == pytest.approx(5e-3)
+        assert model.ebn0_to_error_rate(3.0 * u.dB).value == pytest.approx(1e-4)
 
         # Test interpolation
-        ber_1_5 = model.ebno_to_error_rate(1.5 * u.dB).value
+        ber_1_5 = model.ebn0_to_error_rate(1.5 * u.dB).value
         assert 5e-3 < ber_1_5 < 3e-2  # Should be between the values at 1.0 and 2.0
 
         # Test reverse interpolation (exact points)
-        assert model.error_rate_to_ebno(1e-1 * u.dimensionless).value == pytest.approx(
+        assert model.error_rate_to_ebn0(1e-1 * u.dimensionless).value == pytest.approx(
             0.0
         )
-        assert model.error_rate_to_ebno(3e-2 * u.dimensionless).value == pytest.approx(
+        assert model.error_rate_to_ebn0(3e-2 * u.dimensionless).value == pytest.approx(
             1.0
         )
-        assert model.error_rate_to_ebno(5e-3 * u.dimensionless).value == pytest.approx(
+        assert model.error_rate_to_ebn0(5e-3 * u.dimensionless).value == pytest.approx(
             2.0
         )
-        assert model.error_rate_to_ebno(1e-4 * u.dimensionless).value == pytest.approx(
+        assert model.error_rate_to_ebn0(1e-4 * u.dimensionless).value == pytest.approx(
             3.0
         )
 
         # Test reverse interpolation (interpolated value)
-        ebno_1_5 = model.error_rate_to_ebno(ber_1_5 * u.dimensionless).value
-        assert 1.0 < ebno_1_5 < 2.0  # Should be between the values at 1.0 and 2.0
+        ebn0_1_5 = model.error_rate_to_ebn0(ber_1_5 * u.dimensionless).value
+        assert 1.0 < ebn0_1_5 < 2.0  # Should be between the values at 1.0 and 2.0
 
-        # Test array arguments for ebno_to_error_rate
-        ebno_array = np.array([0.0, 1.0, 2.0, 3.0]) * u.dB
-        error_rates = model.ebno_to_error_rate(ebno_array)
+        # Test array arguments for ebn0_to_error_rate
+        ebn0_array = np.array([0.0, 1.0, 2.0, 3.0]) * u.dB
+        error_rates = model.ebn0_to_error_rate(ebn0_array)
         np.testing.assert_allclose(error_rates.value, [1e-1, 3e-2, 5e-3, 1e-4])
 
-        # Test array arguments for error_rate_to_ebno
+        # Test array arguments for error_rate_to_ebn0
         error_rate_array = np.array([1e-1, 3e-2, 5e-3, 1e-4]) * u.dimensionless
-        ebno_values = model.error_rate_to_ebno(error_rate_array)
-        np.testing.assert_allclose(ebno_values.value, [0.0, 1.0, 2.0, 3.0], atol=1e-15)
+        ebn0_values = model.error_rate_to_ebn0(error_rate_array)
+        np.testing.assert_allclose(ebn0_values.value, [0.0, 1.0, 2.0, 3.0], atol=1e-15)
 
     def test_coding_gain(self):
         """Test coding gain calculation functionality."""
@@ -132,10 +132,10 @@ class TestModePerformance:
         )
 
         # Test values beyond range - should return NaN
-        assert np.isnan(model.ebno_to_error_rate(-1.0 * u.dB).value)
-        assert np.isnan(model.ebno_to_error_rate(4.0 * u.dB).value)
-        assert np.isnan(model.error_rate_to_ebno(1e-0 * u.dimensionless).value)
-        assert np.isnan(model.error_rate_to_ebno(1e-5 * u.dimensionless).value)
+        assert np.isnan(model.ebn0_to_error_rate(-1.0 * u.dB).value)
+        assert np.isnan(model.ebn0_to_error_rate(4.0 * u.dB).value)
+        assert np.isnan(model.error_rate_to_ebn0(1e-0 * u.dimensionless).value)
+        assert np.isnan(model.error_rate_to_ebn0(1e-5 * u.dimensionless).value)
 
     def test_empty_model(self):
         """Test behavior with empty points."""

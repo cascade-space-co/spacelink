@@ -49,12 +49,12 @@ class ModePerformance(pydantic.BaseModel):
     def _create_interpolators(self) -> None:
         """Create interpolator objects for efficient reuse."""
         points = np.array(self.points)
-        ebno_values = points[:, 0]
+        ebn0_values = points[:, 0]
         error_rate_values = points[:, 1]
 
         # Create interpolator for Eb/N0 -> error rate
-        self._ebno_to_error_interpolator = scipy.interpolate.PchipInterpolator(
-            ebno_values,
+        self._ebn0_to_error_interpolator = scipy.interpolate.PchipInterpolator(
+            ebn0_values,
             np.log10(error_rate_values),
             extrapolate=False,
         )
@@ -63,34 +63,34 @@ class ModePerformance(pydantic.BaseModel):
         # Need to sort by error rate (ascending) so log values are increasing
         sorted_indices = np.argsort(error_rate_values)
         sorted_error_rates = error_rate_values[sorted_indices]
-        sorted_ebno_values = ebno_values[sorted_indices]
+        sorted_ebn0_values = ebn0_values[sorted_indices]
 
-        self._error_to_ebno_interpolator = scipy.interpolate.PchipInterpolator(
+        self._error_to_ebn0_interpolator = scipy.interpolate.PchipInterpolator(
             np.log10(sorted_error_rates),
-            sorted_ebno_values,
+            sorted_ebn0_values,
             extrapolate=False,
         )
 
     @enforce_units
-    def ebno_to_error_rate(self, ebno: Decibels) -> Dimensionless:
+    def ebn0_to_error_rate(self, ebn0: Decibels) -> Dimensionless:
         r"""
         Find the error rate corresponding to the given Eb/N0.
 
         Parameters
         ----------
-        ebno : Decibels
+        ebn0 : Decibels
             Energy per bit to noise power spectral density ratio :math:`E_b/N_0`.
 
         Returns
         -------
         Dimensionless
             Error rate or NaN if the Eb/N0 is outside the range of available performance
-            data. Same shape as `ebno`.
+            data. Same shape as `ebn0`.
         """
-        return 10.0 ** self._ebno_to_error_interpolator(ebno.value) * u.dimensionless
+        return 10.0 ** self._ebn0_to_error_interpolator(ebn0.value) * u.dimensionless
 
     @enforce_units
-    def error_rate_to_ebno(self, error_rate: Dimensionless) -> Decibels:
+    def error_rate_to_ebn0(self, error_rate: Dimensionless) -> Decibels:
         r"""
         Find Eb/N0 required to achieve the target error rate.
 
@@ -106,7 +106,7 @@ class ModePerformance(pydantic.BaseModel):
             error rate is outside the range of available performance data. Same shape as
             `error_rate`.
         """
-        return self._error_to_ebno_interpolator(np.log10(error_rate.value)) * u.dB
+        return self._error_to_ebn0_interpolator(np.log10(error_rate.value)) * u.dB
 
     @enforce_units
     def coding_gain(self, uncoded: typing.Self, error_rate: Dimensionless) -> Decibels:
@@ -138,6 +138,6 @@ class ModePerformance(pydantic.BaseModel):
         if uncoded.metric != self.metric:
             raise ValueError(f"Uncoded metric {uncoded.metric} ≠ {self.metric}.")
 
-        uncoded_ebno = uncoded.error_rate_to_ebno(error_rate)
-        coded_ebno = self.error_rate_to_ebno(error_rate)
-        return (uncoded_ebno - coded_ebno) * u.dB
+        uncoded_ebn0 = uncoded.error_rate_to_ebn0(error_rate)
+        coded_ebn0 = self.error_rate_to_ebn0(error_rate)
+        return (uncoded_ebn0 - coded_ebn0) * u.dB
