@@ -55,9 +55,7 @@ class Registry:
                 for mode_id in mode_ids:
                     self.perf_index[(mode_id, metric)] = perf
 
-    def get_performance(
-        self, mode_id: str, metric: ErrorMetric
-    ) -> ModePerformance:
+    def get_performance(self, mode_id: str, metric: ErrorMetric) -> ModePerformance:
         r"""
         Look up the performance object for a given mode and metric.
 

@@ -152,7 +152,6 @@ class TestModePerformance:
                 points=[],
             )
 
-
     def test_multiple_modes(self):
         """Test creating ModePerformance with multiple modes."""
         points = [(0.0, 1e-1), (1.0, 3e-2), (2.0, 5e-3), (3.0, 1e-4)]

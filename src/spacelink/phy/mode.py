@@ -52,8 +52,8 @@ class LinkMode(pydantic.BaseModel):
         r"""
         Calculate the information bit rate as a function of the symbol rate.
 
-        The information bit rate refers to the rate of information bits, which are the 
-        input to the first stage of the encoding chain on the transmit end of the link 
+        The information bit rate refers to the rate of information bits, which are the
+        input to the first stage of the encoding chain on the transmit end of the link
         or the output of the last decoding stage on the receive end of the link. This is
         sometimes referred to as the "net bit rate."
 
