@@ -189,13 +189,13 @@ def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
 
 
 @enforce_units
-def ebno_to_cno(ebno: Decibels, bitrate: Frequency) -> DecibelHertz:
+def ebn0_to_cn0(ebn0: Decibels, bitrate: Frequency) -> DecibelHertz:
     r"""
     Convert :math:`E_b/N_0` to :math:`C/N_0`.
 
     Parameters
     ----------
-    ebno : Decibels
+    ebn0 : Decibels
         :math:`E_b/N_0`
     bitrate : Frequency
         Bitrate
@@ -205,17 +205,17 @@ def ebno_to_cno(ebno: Decibels, bitrate: Frequency) -> DecibelHertz:
     DecibelHertz
         :math:`C/N_0`
     """
-    return ebno + bitrate.to(u.dBHz)
+    return ebn0 + bitrate.to(u.dBHz)
 
 
 @enforce_units
-def cno_to_ebno(cno: DecibelHertz, bitrate: Frequency) -> Decibels:
+def cn0_to_ebn0(cn0: DecibelHertz, bitrate: Frequency) -> Decibels:
     r"""
     Convert :math:`C/N_0` to :math:`E_b/N_0`.
 
     Parameters
     ----------
-    cno : DecibelHertz
+    cn0 : DecibelHertz
         :math:`C/N_0`
     bitrate : Frequency
         Bitrate
@@ -225,4 +225,4 @@ def cno_to_ebno(cno: DecibelHertz, bitrate: Frequency) -> Decibels:
     Decibels
         :math:`E_b/N_0`
     """
-    return cno - bitrate.to(u.dBHz)
+    return cn0 - bitrate.to(u.dBHz)
