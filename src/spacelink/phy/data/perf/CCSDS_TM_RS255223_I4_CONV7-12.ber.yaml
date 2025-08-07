@@ -1,6 +1,6 @@
 mode_ids: [CCSDS_TM_RS255223_I4_CONV7-12_BPSK]
 metric: bit error rate
-ref: CCSDS 130.1-G-3 Figure 6-8
+ref: CCSDS 130.1-G-3 Figure 6-7
 points:
   - [1.40, 5.5871e-2]
   - [1.60, 3.7604e-2]
