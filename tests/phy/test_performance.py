@@ -199,3 +199,45 @@ class TestModePerformance:
         # Should raise ValueError when trying to compare different metrics
         with pytest.raises(ValueError):
             ber_model.coding_gain(fer_model, 1e-2 * u.dimensionless)
+
+    def test_unsorted_points_validation(self):
+        """Test that unsorted points are rejected during construction."""
+        modulation = Modulation(name="BPSK", bits_per_symbol=1)
+        coding = CodeChain(codes=[Code(name="uncoded", rate=Fraction(1))])
+        mode = LinkMode(id="TEST", modulation=modulation, coding=coding)
+
+        # Test decreasing order
+        unsorted_points_decreasing = [(3.0, 1e-4), (2.0, 5e-3), (1.0, 3e-2), (0.0, 1e-1)]
+        with pytest.raises(ValueError):
+            ModePerformance(
+                modes=[mode],
+                metric=ErrorMetric.BER,
+                points=unsorted_points_decreasing,
+            )
+
+        # Test mixed order
+        unsorted_points_mixed = [(0.0, 1e-1), (2.0, 5e-3), (1.0, 3e-2), (3.0, 1e-4)]
+        with pytest.raises(ValueError):
+            ModePerformance(
+                modes=[mode],
+                metric=ErrorMetric.BER,
+                points=unsorted_points_mixed,
+            )
+
+        # Test equal Eb/N0 values
+        duplicate_ebn0_points = [(0.0, 1e-1), (1.0, 3e-2), (1.0, 5e-3), (3.0, 1e-4)]
+        with pytest.raises(ValueError):
+            ModePerformance(
+                modes=[mode],
+                metric=ErrorMetric.BER,
+                points=duplicate_ebn0_points,
+            )
+
+        # Test that properly sorted points still work
+        sorted_points = [(0.0, 1e-1), (1.0, 3e-2), (2.0, 5e-3), (3.0, 1e-4)]
+        model = ModePerformance(
+            modes=[mode],
+            metric=ErrorMetric.BER,
+            points=sorted_points,
+        )
+        assert model.points == sorted_points

@@ -52,6 +52,17 @@ class ModePerformance(pydantic.BaseModel):
             raise ValueError("ModePerformance requires at least one data point")
         return v
 
+    @pydantic.field_validator("points")
+    @classmethod
+    def validate_points_sorted(cls, v):
+        if len(v) < 2:
+            return v  # Single point or empty (handled by other validator)
+        
+        ebn0_values = np.array([point[0] for point in v])
+        if not np.all(np.diff(ebn0_values) > 0):
+            raise ValueError("Points must be sorted in strictly increasing Eb/N0 order")
+        return v
+
     def __init__(self, **data):
         super().__init__(**data)
         self._create_interpolators()
@@ -63,14 +74,10 @@ class ModePerformance(pydantic.BaseModel):
         error_rate_values = points[:, 1]
 
         # Create interpolator for Eb/N0 -> error rate
-        # Sort by Eb/N0 for proper interpolation
-        sorted_indices = np.argsort(ebn0_values)
-        sorted_ebn0_values = ebn0_values[sorted_indices]
-        sorted_error_rates = error_rate_values[sorted_indices]
-
+        # Points are guaranteed to be sorted by Eb/N0 due to validation
         self._ebn0_to_error_interpolator = scipy.interpolate.PchipInterpolator(
-            sorted_ebn0_values,
-            np.log10(sorted_error_rates),
+            ebn0_values,
+            np.log10(error_rate_values),
             extrapolate=False,
         )
 
