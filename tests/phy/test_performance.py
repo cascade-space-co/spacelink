@@ -174,3 +174,28 @@ class TestModePerformance:
         assert len(model.modes) == 2
         assert model.modes[0].id == "TEST1"
         assert model.modes[1].id == "TEST2"
+
+    def test_coding_gain_metric_mismatch_error(self):
+        """Test that coding_gain raises ValueError when metrics don't match."""
+        modulation = Modulation(name="BPSK", bits_per_symbol=1)
+        coding = CodeChain(codes=[Code(name="uncoded", rate=Fraction(1))])
+        mode = LinkMode(id="TEST", modulation=modulation, coding=coding)
+
+        points = [(0.0, 1e-1), (1.0, 3e-2), (2.0, 5e-3), (3.0, 1e-4)]
+
+        # Create two models with different error metrics
+        ber_model = ModePerformance(
+            modes=[mode],
+            metric=ErrorMetric.BER,
+            points=points,
+        )
+
+        fer_model = ModePerformance(
+            modes=[mode],
+            metric=ErrorMetric.FER,
+            points=points,
+        )
+
+        # Should raise ValueError when trying to compare different metrics
+        with pytest.raises(ValueError):
+            ber_model.coding_gain(fer_model, 1e-2 * u.dimensionless)

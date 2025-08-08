@@ -88,6 +88,7 @@ class LinkMode(pydantic.BaseModel):
     ref : str, optional
         Reference or source of the mode definition.
     """
+
     id: str
     modulation: Modulation
     coding: CodeChain
