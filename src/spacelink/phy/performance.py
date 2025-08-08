@@ -3,7 +3,6 @@ import enum
 import astropy.units as u
 import numpy as np
 import pydantic
-import pydantic.dataclasses
 import scipy.interpolate
 import typing
 
