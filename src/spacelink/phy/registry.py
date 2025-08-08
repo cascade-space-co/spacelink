@@ -7,6 +7,10 @@ MODES_DIR = Path(__file__).parent / "data/modes"
 PERF_DIR = Path(__file__).parent / "data/perf"
 
 
+class DuplicateRegistryEntryError(Exception):
+    """Raised when duplicate entries are found during registry loading."""
+
+
 class Registry:
     r"""
     Registry of link modes and their performance.
@@ -30,12 +34,21 @@ class Registry:
             Path to the directory containing the link mode files.
         perf_dir : Path
             Path to the directory containing the performance data.
+
+        Raises
+        ------
+        DuplicateRegistryEntryError
+            If duplicate entries are found during loading.
         """
         for file in mode_dir.glob("*.yaml"):
             with open(file) as f:
                 raw = yaml.safe_load(f)
                 for entry in raw:
                     mode = LinkMode(**entry)
+                    if mode.id in self.modes:
+                        raise DuplicateRegistryEntryError(
+                            f"Duplicate mode ID '{mode.id}' found"
+                        )
                     self.modes[mode.id] = mode
 
         for file in perf_dir.glob("*.yaml"):
@@ -53,7 +66,13 @@ class Registry:
                 self.perfs.append(perf)
 
                 for mode_id in mode_ids:
-                    self.perf_index[(mode_id, metric)] = perf
+                    key = (mode_id, metric)
+                    if key in self.perf_index:
+                        raise DuplicateRegistryEntryError(
+                            f"Duplicate performance entry for mode '{mode_id}' "
+                            f"and metric '{metric.value}' found"
+                        )
+                    self.perf_index[key] = perf
 
     def get_performance(self, mode_id: str, metric: ErrorMetric) -> ModePerformance:
         r"""
