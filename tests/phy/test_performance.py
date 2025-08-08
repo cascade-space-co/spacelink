@@ -145,7 +145,7 @@ class TestModePerformance:
         mode = LinkMode(id="TEST", modulation=modulation, coding=coding)
 
         # Creating ModePerformance with empty points should raise an exception
-        with pytest.raises(IndexError):
+        with pytest.raises(ValueError):
             ModePerformance(
                 modes=[mode],
                 metric=ErrorMetric.BER,

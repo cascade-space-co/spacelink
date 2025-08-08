@@ -43,6 +43,13 @@ class ModePerformance(pydantic.BaseModel):
     points: list[tuple[float, float]]  # (Eb/N0 [dB], error rate)
     ref: str = ""
 
+    @pydantic.field_validator('points')
+    @classmethod
+    def validate_points_not_empty(cls, v):
+        if not v:
+            raise ValueError("ModePerformance requires at least one data point")
+        return v
+
     def __init__(self, **data):
         super().__init__(**data)
         self._create_interpolators()
