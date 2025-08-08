@@ -1,0 +1,11 @@
+mode_ids: [CCSDS_TM_RS255223_I3_CONV7-12_BPSK]
+metric: codeword error rate
+ref: CCSDS 130.1-G-3 Figure 6-8
+points:
+- [1.40, 9.6728e-1]
+- [1.60, 9.2020e-1]
+- [1.80, 5.1409e-1]
+- [2.00, 1.4282e-1]
+- [2.20, 1.1396e-2]
+- [2.40, 3.8289e-4]
+- [2.60, 5.8866e-6]
