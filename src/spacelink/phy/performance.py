@@ -47,17 +47,16 @@ class ModePerformance(pydantic.BaseModel):
 
     @pydantic.field_validator("points")
     @classmethod
-    def validate_points_not_empty(cls, v):
-        if not v:
-            raise ValueError("ModePerformance requires at least one data point")
+    def validate_minimum_points(cls, v):
+        if len(v) < 2:
+            raise ValueError(
+                "ModePerformance requires at least two data points for interpolation"
+            )
         return v
 
     @pydantic.field_validator("points")
     @classmethod
     def validate_points_sorted(cls, v):
-        if len(v) < 2:
-            return v  # Single point or empty (handled by other validator)
-
         ebn0_values = np.array([point[0] for point in v])
         if not np.all(np.diff(ebn0_values) > 0):
             raise ValueError("Points must be sorted in strictly increasing Eb/N0 order")
@@ -66,9 +65,6 @@ class ModePerformance(pydantic.BaseModel):
     @pydantic.field_validator("points")
     @classmethod
     def validate_error_values_decreasing(cls, v):
-        if len(v) < 2:
-            return v  # Single point or empty (handled by other validator)
-
         error_values = np.array([point[1] for point in v])
         if not np.all(np.diff(error_values) < 0):
             raise ValueError(

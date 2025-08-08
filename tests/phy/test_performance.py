@@ -137,8 +137,8 @@ class TestModePerformance:
         assert np.isnan(model.error_rate_to_ebn0(1e-0 * u.dimensionless).value)
         assert np.isnan(model.error_rate_to_ebn0(1e-5 * u.dimensionless).value)
 
-    def test_empty_model(self):
-        """Test behavior with empty points."""
+    def test_insufficient_points(self):
+        """Test behavior with insufficient points for interpolation."""
         # Create a minimal LinkMode for testing
         modulation = Modulation(name="BPSK", bits_per_symbol=1)
         coding = CodeChain(codes=[Code(name="uncoded", rate=Fraction(1))])
@@ -150,6 +150,14 @@ class TestModePerformance:
                 modes=[mode],
                 metric=ErrorMetric.BER,
                 points=[],
+            )
+
+        # Creating ModePerformance with single point should also raise an exception
+        with pytest.raises(ValueError):
+            ModePerformance(
+                modes=[mode],
+                metric=ErrorMetric.BER,
+                points=[(1.0, 1e-2)],
             )
 
     def test_multiple_modes(self):
