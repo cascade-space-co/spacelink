@@ -45,7 +45,7 @@ class ModePerformance(pydantic.BaseModel):
     points: list[ErrorCurvePoint]
     ref: str = ""
 
-    @pydantic.field_validator('points')
+    @pydantic.field_validator("points")
     @classmethod
     def validate_points_not_empty(cls, v):
         if not v:
