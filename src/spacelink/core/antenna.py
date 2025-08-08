@@ -50,10 +50,12 @@ conventions:
 
 import enum
 import functools
+import pathlib
 import typing
 
 import astropy.units as u
 import numpy as np
+import pandas as pd
 import scipy.integrate
 import scipy.interpolate
 
@@ -240,8 +242,8 @@ class SphericalInterpolator:
             self.phi_min = 0 * u.rad
             self.phi_max = 2 * np.pi * u.rad
         else:  # phi does not span the full circle
-            self.phi_min = np.min(phi % (2 * np.pi * u.rad))
-            self.phi_max = np.max(phi % (2 * np.pi * u.rad))
+            self.phi_min = np.min(phi_mod)
+            self.phi_max = np.max(phi_mod)
 
         self.theta_min = np.min(theta)
         self.theta_max = np.max(theta)
@@ -505,6 +507,91 @@ class RadiationPattern:
         e_theta = np.sqrt(gain_theta / rad_efficiency) * np.exp(1j * phase_theta.value)
         e_phi = np.sqrt(gain_phi / rad_efficiency) * np.exp(1j * phase_phi.value)
         return cls(theta, phi, e_theta, e_phi, rad_efficiency)
+
+    @classmethod
+    @enforce_units
+    def from_hfss_csv(
+        cls,
+        hfss_csv_path: pathlib.Path,
+        carrier_frequency: Frequency,
+        rad_efficiency: Dimensionless,
+    ) -> typing.Self:
+        """
+        Create a radiation pattern from an HFSS exported CSV file.
+
+        This expects the CSV file to contain the following columns in any order:
+        - Freq [GHz]
+        - Theta [deg]
+        - Phi [deg]
+        - dB(RealizedGainLHCP) []
+        - dB(RealizedGainRHCP) []
+        - ang_deg(rELHCP) [deg]
+        - ang_deg(rERHCP) [deg]
+
+        Any other columns will be ignored. There must be exactly one header row with the
+        column names.
+
+        The Theta and Phi values must form a regular grid.
+
+        Parameters
+        ----------
+        hfss_csv_path: pathlib.Path
+            Path to the HFSS CSV file.
+        carrier_frequency: Frequency
+            Pattern data corresponding to this carrier frequency will be imported from
+            the CSV file. Only a single frequency is currently supported.
+        rad_efficiency: Dimensionless
+            Radiation efficiency :math:`\eta` in [0, 1].
+        """
+        df = pd.read_csv(hfss_csv_path)
+        df_one_freq = df[df["Freq [GHz]"] == carrier_frequency.to(u.GHz).value]
+
+        df_one_freq = df_one_freq.sort_values(["Theta [deg]", "Phi [deg]"])
+
+        # Extract arrays of unique theta and phi values
+        theta = np.sort(df_one_freq["Theta [deg]"].unique()) * u.deg
+        phi = np.sort(df_one_freq["Phi [deg]"].unique()) * u.deg
+
+        # Create 2D arrays with shape (N_theta, N_phi)
+        gain_lhcp = units.to_linear(
+            df_one_freq.pivot(
+                index="Theta [deg]",
+                columns="Phi [deg]",
+                values="dB(RealizedGainLHCP) []",
+            ).values
+            * u.dB
+        )
+        gain_rhcp = units.to_linear(
+            df_one_freq.pivot(
+                index="Theta [deg]",
+                columns="Phi [deg]",
+                values="dB(RealizedGainRHCP) []",
+            ).values
+            * u.dB
+        )
+        angle_lhcp = (
+            df_one_freq.pivot(
+                index="Theta [deg]", columns="Phi [deg]", values="ang_deg(rELHCP) [deg]"
+            ).values
+            * u.deg
+        )
+        angle_rhcp = (
+            df_one_freq.pivot(
+                index="Theta [deg]", columns="Phi [deg]", values="ang_deg(rERHCP) [deg]"
+            ).values
+            * u.deg
+        )
+
+        # TODO: Automatically handle exclusion of the last phi value if it wraps around
+        return cls.from_circular_gain(
+            theta,
+            phi[:-1],
+            gain_lhcp[:, :-1],
+            gain_rhcp[:, :-1],
+            angle_lhcp[:, :-1],
+            angle_rhcp[:, :-1],
+            rad_efficiency=rad_efficiency,
+        )
 
     @enforce_units
     def e_field(
