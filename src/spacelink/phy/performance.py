@@ -54,9 +54,14 @@ class ModePerformance(pydantic.BaseModel):
         error_rate_values = points[:, 1]
 
         # Create interpolator for Eb/N0 -> error rate
+        # Sort by Eb/N0 for proper interpolation
+        sorted_indices = np.argsort(ebn0_values)
+        sorted_ebn0_values = ebn0_values[sorted_indices]
+        sorted_error_rates = error_rate_values[sorted_indices]
+
         self._ebn0_to_error_interpolator = scipy.interpolate.PchipInterpolator(
-            ebn0_values,
-            np.log10(error_rate_values),
+            sorted_ebn0_values,
+            np.log10(sorted_error_rates),
             extrapolate=False,
         )
 
