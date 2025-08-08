@@ -11,6 +11,9 @@ from spacelink.phy.mode import LinkMode
 from spacelink.core.units import Dimensionless, Decibels, enforce_units
 
 
+ErrorCurvePoint = tuple[float, float]  # (Eb/N0 [dB], error rate)
+
+
 class ErrorMetric(str, enum.Enum):
     BER = "bit error rate"
     WER = "codeword error rate"
@@ -32,15 +35,15 @@ class ModePerformance(pydantic.BaseModel):
         Configuration for the decoder stages.
     metric : ErrorMetric
         Type of error metric (bit error rate, codeword error rate, etc.).
-    points : list[tuple[float, float]]
-        List of (Eb/N0 [dB], error rate) data points for interpolation.
+    points : list[ErrorCurvePoint]
+        List of error rate curve data points for interpolation.
     ref : str, optional
         Reference or source of the performance data (default: "").
     """
 
     modes: list[LinkMode]
     metric: ErrorMetric
-    points: list[tuple[float, float]]  # (Eb/N0 [dB], error rate)
+    points: list[ErrorCurvePoint]
     ref: str = ""
 
     @pydantic.field_validator('points')
