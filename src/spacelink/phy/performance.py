@@ -141,4 +141,4 @@ class ModePerformance(pydantic.BaseModel):
 
         uncoded_ebn0 = uncoded.error_rate_to_ebn0(error_rate)
         coded_ebn0 = self.error_rate_to_ebn0(error_rate)
-        return (uncoded_ebn0 - coded_ebn0) * u.dB
+        return uncoded_ebn0 - coded_ebn0

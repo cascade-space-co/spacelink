@@ -114,7 +114,7 @@ class TestModePerformance:
         # Test array arguments for coding_gain
         error_rate_array = np.array([1e-3, 1e-2, 1e-1]) * u.dimensionless
         gains = coded_model.coding_gain(uncoded_model, error_rate_array)
-        np.testing.assert_allclose(gains.value, [1.0, 2.0, 3.0])
+        np.testing.assert_allclose(gains, np.array([1.0, 2.0, 3.0]) * u.dB)
 
     def test_edge_cases(self):
         """Test edge cases for interpolation."""
