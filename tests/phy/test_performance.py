@@ -87,7 +87,7 @@ class TestModePerformance:
         mode = LinkMode(id="TEST", modulation=modulation, coding=coding)
 
         # Create a "coded" model with better performance
-        coded_points = [(0.0, 1e-3), (1.0, 1e-2), (2.0, 1e-1), (3.0, 1e-0)]
+        coded_points = [(0.0, 1e-0), (1.0, 1e-1), (2.0, 1e-2), (3.0, 1e-3)]
         coded_model = ModePerformance(
             modes=[mode],
             metric=ErrorMetric.BER,
@@ -95,24 +95,24 @@ class TestModePerformance:
         )
 
         # Create an "uncoded" model with worse performance (offset by 1, 2, 3, 4 dB)
-        uncoded_points = [(1.0, 1e-3), (3.0, 1e-2), (5.0, 1e-1), (7.0, 1e-0)]
+        uncoded_points = [(1.0, 1e-0), (3.0, 1e-1), (5.0, 1e-2), (7.0, 1e-3)]
         uncoded_model = ModePerformance(
             modes=[mode],
             metric=ErrorMetric.BER,
             points=uncoded_points,
         )
 
-        gain_1e3 = coded_model.coding_gain(uncoded_model, 1e-3 * u.dimensionless)
-        assert gain_1e3.value == pytest.approx(1.0)
-
-        gain_1e2 = coded_model.coding_gain(uncoded_model, 1e-2 * u.dimensionless)
-        assert gain_1e2.value == pytest.approx(2.0)
+        gain_1e0 = coded_model.coding_gain(uncoded_model, 1e-0 * u.dimensionless)
+        assert gain_1e0.value == pytest.approx(1.0)
 
         gain_1e1 = coded_model.coding_gain(uncoded_model, 1e-1 * u.dimensionless)
-        assert gain_1e1.value == pytest.approx(3.0)
+        assert gain_1e1.value == pytest.approx(2.0)
+
+        gain_1e2 = coded_model.coding_gain(uncoded_model, 1e-2 * u.dimensionless)
+        assert gain_1e2.value == pytest.approx(3.0)
 
         # Test array arguments for coding_gain
-        error_rate_array = np.array([1e-3, 1e-2, 1e-1]) * u.dimensionless
+        error_rate_array = np.array([1e-0, 1e-1, 1e-2]) * u.dimensionless
         gains = coded_model.coding_gain(uncoded_model, error_rate_array)
         np.testing.assert_allclose(gains, np.array([1.0, 2.0, 3.0]) * u.dB)
 
@@ -207,7 +207,12 @@ class TestModePerformance:
         mode = LinkMode(id="TEST", modulation=modulation, coding=coding)
 
         # Test decreasing order
-        unsorted_points_decreasing = [(3.0, 1e-4), (2.0, 5e-3), (1.0, 3e-2), (0.0, 1e-1)]
+        unsorted_points_decreasing = [
+            (3.0, 1e-4),
+            (2.0, 5e-3),
+            (1.0, 3e-2),
+            (0.0, 1e-1),
+        ]
         with pytest.raises(ValueError):
             ModePerformance(
                 modes=[mode],
@@ -241,3 +246,36 @@ class TestModePerformance:
             points=sorted_points,
         )
         assert model.points == sorted_points
+
+    def test_non_decreasing_error_values_validation(self):
+        """Test that non-decreasing error values are rejected during construction."""
+        modulation = Modulation(name="BPSK", bits_per_symbol=1)
+        coding = CodeChain(codes=[Code(name="uncoded", rate=Fraction(1))])
+        mode = LinkMode(id="TEST", modulation=modulation, coding=coding)
+
+        # Test increasing error values (should be decreasing)
+        increasing_error_points = [(0.0, 1e-4), (1.0, 3e-3), (2.0, 5e-2), (3.0, 1e-1)]
+        with pytest.raises(ValueError):
+            ModePerformance(
+                modes=[mode],
+                metric=ErrorMetric.BER,
+                points=increasing_error_points,
+            )
+
+        # Test constant error values
+        constant_error_points = [(0.0, 1e-2), (1.0, 1e-2), (2.0, 1e-2), (3.0, 1e-2)]
+        with pytest.raises(ValueError):
+            ModePerformance(
+                modes=[mode],
+                metric=ErrorMetric.BER,
+                points=constant_error_points,
+            )
+
+        # Test mixed non-monotonic error values
+        mixed_error_points = [(0.0, 1e-1), (1.0, 3e-2), (2.0, 5e-2), (3.0, 1e-4)]
+        with pytest.raises(ValueError):
+            ModePerformance(
+                modes=[mode],
+                metric=ErrorMetric.BER,
+                points=mixed_error_points,
+            )
