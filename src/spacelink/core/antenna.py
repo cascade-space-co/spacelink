@@ -240,8 +240,8 @@ class SphericalInterpolator:
             self.phi_min = 0 * u.rad
             self.phi_max = 2 * np.pi * u.rad
         else:  # phi does not span the full circle
-            self.phi_min = np.min(phi % (2 * np.pi * u.rad))
-            self.phi_max = np.max(phi % (2 * np.pi * u.rad))
+            self.phi_min = np.min(phi_mod)
+            self.phi_max = np.max(phi_mod)
 
         self.theta_min = np.min(theta)
         self.theta_max = np.max(theta)
@@ -367,7 +367,30 @@ class RadiationPattern:
             normalized such that the magnitude squared is equal to directivity.
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
+
+        Raises
+        ------
+        ValueError
+            If theta or phi are not in [0, pi], or if theta or phi are not sorted in
+            strictly increasing order, or if theta or phi are not equally spaced, or if
+            phi does not cover less than 2π radians.
+        ValueError
+            If the surface integral of the directivity is greater than 4π.
         """
+
+        if not np.all(theta >= 0 * u.rad) or not np.all(theta <= np.pi * u.rad):
+            raise ValueError("theta must be in [0, pi]")
+        if not np.all(np.diff(theta) > 0):
+            raise ValueError("theta must be sorted in strictly increasing order")
+        if not np.all(np.diff(phi) > 0):
+            raise ValueError("phi must be sorted in strictly increasing order")
+        if not np.allclose(np.diff(theta), np.diff(theta)[0]):
+            raise ValueError("theta must be equally spaced")
+        if not np.allclose(np.diff(phi), np.diff(phi)[0]):
+            raise ValueError("phi must be equally spaced")
+        if (phi[-1] - phi[0]) >= 2 * np.pi * u.rad:
+            raise ValueError("phi must cover less than 2π radians")
+
         self.theta = theta
         self.phi = phi
         self.e_theta = e_theta

@@ -390,7 +390,6 @@ class TestSphericalInterpolator:
         )
 
     def test_subset_sphere_interpolation(self):
-        """Test interpolation when values are only provided for a subset of the full sphere."""
         N = 80
         M = 100
         downsample = 4
@@ -568,3 +567,99 @@ def test_surface_integral(theta, phi, values, expected_result, tol):
 
     assert result.unit == expected_result.unit
     assert_quantity_allclose(result, expected_result, atol=tol)
+
+
+class TestRadiationPatternValidation:
+    """Tests for RadiationPattern constructor validation checks."""
+
+    def test_theta_range_validation(self):
+        """Test that theta values must be in [0, pi]."""
+        phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
+        e_theta = np.ones((5, 10)) * u.dimensionless
+        e_phi = np.zeros((5, 10)) * u.dimensionless
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Test theta < 0
+        theta_negative = np.linspace(-0.1, np.pi, 5) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta_negative, phi, e_theta, e_phi, rad_efficiency)
+
+        # Test theta > pi
+        theta_too_large = np.linspace(0, np.pi + 0.1, 5) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta_too_large, phi, e_theta, e_phi, rad_efficiency)
+
+    def test_theta_sorting_validation(self):
+        """Test that theta must be sorted in strictly increasing order."""
+        phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
+        e_theta = np.ones((5, 10)) * u.dimensionless
+        e_phi = np.zeros((5, 10)) * u.dimensionless
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Test unsorted theta
+        theta_unsorted = np.array([0, 0.5, 0.3, 1.0, 1.5]) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta_unsorted, phi, e_theta, e_phi, rad_efficiency)
+
+        # Test repeated theta values
+        theta_repeated = np.array([0, 0.5, 0.5, 1.0, 1.5]) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta_repeated, phi, e_theta, e_phi, rad_efficiency)
+
+    def test_phi_sorting_validation(self):
+        """Test that phi must be sorted in strictly increasing order."""
+        theta = np.linspace(0, np.pi, 5) * u.rad
+        e_theta = np.ones((5, 5)) * u.dimensionless
+        e_phi = np.zeros((5, 5)) * u.dimensionless
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Test unsorted phi
+        phi_unsorted = np.array([0, 1.0, 0.5, 2.0, 3.0]) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi_unsorted, e_theta, e_phi, rad_efficiency)
+
+        # Test repeated phi values
+        phi_repeated = np.array([0, 1.0, 1.0, 2.0, 3.0]) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi_repeated, e_theta, e_phi, rad_efficiency)
+
+    def test_theta_spacing_validation(self):
+        """Test that theta must be equally spaced."""
+        phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
+        e_theta = np.ones((5, 10)) * u.dimensionless
+        e_phi = np.zeros((5, 10)) * u.dimensionless
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Test unequally spaced theta
+        theta_unequal = np.array([0, 0.5, 1.2, 2.0, 3.0]) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta_unequal, phi, e_theta, e_phi, rad_efficiency)
+
+    def test_phi_spacing_validation(self):
+        """Test that phi must be equally spaced."""
+        theta = np.linspace(0, np.pi, 5) * u.rad
+        e_theta = np.ones((5, 5)) * u.dimensionless
+        e_phi = np.zeros((5, 5)) * u.dimensionless
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Test unequally spaced phi
+        phi_unequal = np.array([0, 0.5, 1.2, 2.0, 3.0]) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi_unequal, e_theta, e_phi, rad_efficiency)
+
+    def test_phi_coverage_validation(self):
+        """Test that phi must cover less than 2π radians."""
+        theta = np.linspace(0, np.pi, 5) * u.rad
+        e_theta = np.ones((5, 10)) * u.dimensionless
+        e_phi = np.zeros((5, 10)) * u.dimensionless
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Test phi covering exactly 2π
+        phi_full_circle = np.linspace(0, 2 * np.pi, 10) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi_full_circle, e_theta, e_phi, rad_efficiency)
+
+        # Test phi covering more than 2π
+        phi_too_much = np.linspace(0, 2.5 * np.pi, 10) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi_too_much, e_theta, e_phi, rad_efficiency)
