@@ -75,8 +75,10 @@ The documentation includes API references and technical guides.
 
 To build the documentation locally:
 ```bash
-poetry run sphinx-build -b html docs/source docs/build
+poetry run sphinx-build -b html docs/source docs/build/html
 ```
+
+Then open `docs/build/html/index.html` in your browser.
 
 ## Contributing
 

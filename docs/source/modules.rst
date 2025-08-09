@@ -12,3 +12,4 @@ SpaceLink Modules
    :caption: Module Documentation:
 
    core/index
+   phy/index
