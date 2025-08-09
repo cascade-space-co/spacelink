@@ -24,6 +24,7 @@ from spacelink.core.units import (
     to_dB,
     to_linear,
 )
+from spacelink.core import pattern_io
 
 """
 This site was used to generate the following test cases:
@@ -667,7 +668,6 @@ class TestRadiationPatternValidation:
 
 
 class TestRadiationPatternHFSSImport:
-    """Tests for RadiationPattern.from_hfss_csv factory method."""
 
     def test_hfss_csv_import_success(self, tmp_path):
         """Test successful import of HFSS CSV file."""
@@ -699,8 +699,10 @@ class TestRadiationPatternHFSSImport:
         csv_file.write_text(csv_content)
 
         # Import pattern at 2.4 GHz
-        pattern = RadiationPattern.from_hfss_csv(
-            csv_file, 2.4 * u.GHz, 0.8 * u.dimensionless
+        pattern = pattern_io.import_hfss_csv(
+            csv_file,
+            carrier_frequency=2.4 * u.GHz,
+            rad_efficiency=0.8 * u.dimensionless,
         )
 
         # Verify basic properties
@@ -761,8 +763,10 @@ class TestRadiationPatternHFSSImport:
         csv_file = tmp_path / "test_360.csv"
         csv_file.write_text(csv_content)
 
-        pattern = RadiationPattern.from_hfss_csv(
-            csv_file, 2.4 * u.GHz, 1.0 * u.dimensionless
+        pattern = pattern_io.import_hfss_csv(
+            csv_file,
+            carrier_frequency=2.4 * u.GHz,
+            rad_efficiency=1.0 * u.dimensionless,
         )
 
         # Should have 4 phi values (0, 90, 180, 270), redundant 360 removed
@@ -792,8 +796,10 @@ class TestRadiationPatternHFSSImport:
 
         # Request frequency not in file - should raise an error
         with pytest.raises(ValueError):
-            RadiationPattern.from_hfss_csv(
-                csv_file, 5.8 * u.GHz, 1.0 * u.dimensionless  # Not in CSV
+            pattern_io.import_hfss_csv(
+                csv_file,
+                carrier_frequency=5.8 * u.GHz,
+                rad_efficiency=1.0 * u.dimensionless,
             )
 
     def test_hfss_csv_file_not_found(self, tmp_path):
@@ -801,8 +807,10 @@ class TestRadiationPatternHFSSImport:
         nonexistent_file = tmp_path / "does_not_exist.csv"
 
         with pytest.raises(FileNotFoundError):
-            RadiationPattern.from_hfss_csv(
-                nonexistent_file, 2.4 * u.GHz, 1.0 * u.dimensionless
+            pattern_io.import_hfss_csv(
+                nonexistent_file,
+                carrier_frequency=2.4 * u.GHz,
+                rad_efficiency=1.0 * u.dimensionless,
             )
 
     def test_hfss_csv_missing_columns(self, tmp_path):
@@ -824,4 +832,8 @@ class TestRadiationPatternHFSSImport:
         csv_file.write_text(csv_content)
 
         with pytest.raises(KeyError):
-            RadiationPattern.from_hfss_csv(csv_file, 2.4 * u.GHz, 1.0 * u.dimensionless)
+            pattern_io.import_hfss_csv(
+                csv_file,
+                carrier_frequency=2.4 * u.GHz,
+                rad_efficiency=1.0 * u.dimensionless,
+            )
