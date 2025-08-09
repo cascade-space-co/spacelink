@@ -50,6 +50,7 @@ conventions:
 
 import enum
 import functools
+import pathlib
 import typing
 
 import astropy.units as u
@@ -505,6 +506,59 @@ class RadiationPattern:
         e_theta = np.sqrt(gain_theta / rad_efficiency) * np.exp(1j * phase_theta.value)
         e_phi = np.sqrt(gain_phi / rad_efficiency) * np.exp(1j * phase_phi.value)
         return cls(theta, phi, e_theta, e_phi, rad_efficiency)
+
+    @classmethod
+    def from_npz(cls, filename: pathlib.Path) -> typing.Self:
+        """
+        Load a radiation pattern from a NumPy NPZ file.
+
+        Parameters
+        ----------
+        filename : pathlib.Path
+            Path to the NPZ file containing the radiation pattern data.
+
+        Returns
+        -------
+        RadiationPattern
+            A new RadiationPattern object reconstructed from the saved data.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the specified file does not exist.
+        KeyError
+            If required keys are missing from the NPZ file.
+        """
+        path = filename
+        data = np.load(path)
+
+        # Reconstruct arrays with proper units
+        theta = data["theta"] * u.rad
+        phi = data["phi"] * u.rad
+        e_theta = data["e_theta"] * u.dimensionless
+        e_phi = data["e_phi"] * u.dimensionless
+        rad_efficiency = data["rad_efficiency"] * u.dimensionless
+
+        return cls(theta, phi, e_theta, e_phi, rad_efficiency)
+
+    def to_npz(self, filename: pathlib.Path) -> None:
+        """
+        Save the radiation pattern data to a NumPy NPZ file.
+
+        Parameters
+        ----------
+        filename : pathlib.Path
+            Path to the output NPZ file.
+        """
+        np.savez_compressed(
+            filename,
+            theta=self.theta.to(u.rad).value,
+            phi=self.phi.to(u.rad).value,
+            e_theta=self.e_theta.value,
+            e_phi=self.e_phi.value,
+            rad_efficiency=self.rad_efficiency.value,
+            allow_pickle=False,
+        )
 
     @enforce_units
     def e_field(
