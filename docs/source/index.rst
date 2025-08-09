@@ -43,6 +43,7 @@ View the source code at the `GitHub Repository <https://github.com/cascade-space
 Library Structure
 -----------------
 * **Core**: Fundamental calculations, units, constants, and validation logic with minimal dependencies
+* **PHY**: Physical-layer definitions including modulation/coding link modes, performance curves, and a registry backed by YAML data
 
 .. toctree::
    :maxdepth: 2

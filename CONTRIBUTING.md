@@ -15,6 +15,15 @@ We welcome bugfixes, new features, documentation, and tests.
 2. Clone the repo and run `poetry install --with dev`.
 3. Run tests with `poetry run pytest`.
 
+### Building Documentation
+- Build the Sphinx docs locally:
+
+  ```bash
+  poetry run sphinx-build -b html docs/source docs/build/html
+  ```
+
+- Then open `docs/build/html/index.html` in a browser.
+
 ### Coding Standards
 - Use Black for formatting: `poetry run black .`
 - Use Flake8 for linting: `poetry run flake8 .`
