@@ -29,6 +29,7 @@ import astropy.constants as const
 import numpy as np
 import scipy.integrate
 import scipy.special
+import scipy.optimize
 
 from .units import (
     Angle,
