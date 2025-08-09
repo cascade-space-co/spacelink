@@ -1,0 +1,103 @@
+- id: UNCODED_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes: []
+
+- id: CCSDS_TM_RS255223_I1_CONV7-12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Reed Solomon (255,223)
+        rate: "223/255"
+        interleaver_depth: 1
+      - name: Convolutional (7,1/2)
+        rate: "1/2"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_RS255223_I2_CONV7-12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Reed Solomon (255,223)
+        rate: "223/255"
+        interleaver_depth: 2
+      - name: Convolutional (7,1/2)
+        rate: "1/2"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_RS255223_I3_CONV7-12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Reed Solomon (255,223)
+        rate: "223/255"
+        interleaver_depth: 3
+      - name: Convolutional (7,1/2)
+        rate: "1/2"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_RS255223_I4_CONV7-12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Reed Solomon (255,223)
+        rate: "223/255"
+        interleaver_depth: 4
+      - name: Convolutional (7,1/2)
+        rate: "1/2"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_RS255223_I5_CONV7-12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Reed Solomon (255,223)
+        rate: "223/255"
+        interleaver_depth: 5
+      - name: Convolutional (7,1/2)
+        rate: "1/2"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_TURBO1784-12_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Turbo (1784, 1/2)
+        rate: "1784/3576"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_TURBO1784-13_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Turbo (1784, 1/3)
+        rate: "1784/5364"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_TURBO1784-14_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Turbo (1784, 1/4)
+        rate: "1784/7152"
+  ref: CCSDS 131.0-B-5
+- id: CCSDS_TM_TURBO1784-16_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes:
+      - name: Turbo (1784, 1/6)
+        rate: "1784/10728"
+  ref: CCSDS 131.0-B-5
