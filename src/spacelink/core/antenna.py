@@ -539,7 +539,7 @@ class RadiationPattern:
         carrier_frequency: Frequency,
         rad_efficiency: Dimensionless,
     ) -> typing.Self:
-        """
+        r"""
         Create a radiation pattern from an HFSS exported CSV file.
 
         This expects the CSV file to contain the following columns in any order:
@@ -576,7 +576,11 @@ class RadiationPattern:
         phase_rhcp_col = "ang_deg(rERHCP) [deg]"
 
         df = pd.read_csv(hfss_csv_path)
-        df_one_freq = df[df[freq_col] == carrier_frequency.to(u.GHz).value]
+        target_freq = carrier_frequency.to(u.GHz).value
+        df_one_freq = df[np.isclose(df[freq_col], target_freq)]
+
+        if df_one_freq.empty:
+            raise ValueError(f"No data found for frequency {carrier_frequency}")
 
         df_one_freq = df_one_freq.sort_values([theta_col, phi_col])
 
@@ -585,7 +589,7 @@ class RadiationPattern:
         phi = np.sort(df_one_freq[phi_col].unique()) * u.deg
 
         # Create 2D arrays with shape (N_theta, N_phi)
-        gain_lhcp = units.to_linear(
+        gain_lhcp = to_linear(
             df_one_freq.pivot(
                 index=theta_col,
                 columns=phi_col,
@@ -593,7 +597,7 @@ class RadiationPattern:
             ).values
             * u.dB
         )
-        gain_rhcp = units.to_linear(
+        gain_rhcp = to_linear(
             df_one_freq.pivot(
                 index=theta_col,
                 columns=phi_col,
