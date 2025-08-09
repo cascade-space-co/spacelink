@@ -566,53 +566,69 @@ class RadiationPattern:
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
         """
-        df = pd.read_csv(hfss_csv_path)
-        df_one_freq = df[df["Freq [GHz]"] == carrier_frequency.to(u.GHz).value]
+        # Define column name constants
+        freq_col = "Freq [GHz]"
+        theta_col = "Theta [deg]"
+        phi_col = "Phi [deg]"
+        gain_lhcp_col = "dB(RealizedGainLHCP) []"
+        gain_rhcp_col = "dB(RealizedGainRHCP) []"
+        phase_lhcp_col = "ang_deg(rELHCP) [deg]"
+        phase_rhcp_col = "ang_deg(rERHCP) [deg]"
 
-        df_one_freq = df_one_freq.sort_values(["Theta [deg]", "Phi [deg]"])
+        df = pd.read_csv(hfss_csv_path)
+        df_one_freq = df[df[freq_col] == carrier_frequency.to(u.GHz).value]
+
+        df_one_freq = df_one_freq.sort_values([theta_col, phi_col])
 
         # Extract arrays of unique theta and phi values
-        theta = np.sort(df_one_freq["Theta [deg]"].unique()) * u.deg
-        phi = np.sort(df_one_freq["Phi [deg]"].unique()) * u.deg
+        theta = np.sort(df_one_freq[theta_col].unique()) * u.deg
+        phi = np.sort(df_one_freq[phi_col].unique()) * u.deg
 
         # Create 2D arrays with shape (N_theta, N_phi)
         gain_lhcp = units.to_linear(
             df_one_freq.pivot(
-                index="Theta [deg]",
-                columns="Phi [deg]",
-                values="dB(RealizedGainLHCP) []",
+                index=theta_col,
+                columns=phi_col,
+                values=gain_lhcp_col,
             ).values
             * u.dB
         )
         gain_rhcp = units.to_linear(
             df_one_freq.pivot(
-                index="Theta [deg]",
-                columns="Phi [deg]",
-                values="dB(RealizedGainRHCP) []",
+                index=theta_col,
+                columns=phi_col,
+                values=gain_rhcp_col,
             ).values
             * u.dB
         )
         angle_lhcp = (
             df_one_freq.pivot(
-                index="Theta [deg]", columns="Phi [deg]", values="ang_deg(rELHCP) [deg]"
+                index=theta_col, columns=phi_col, values=phase_lhcp_col
             ).values
             * u.deg
         )
         angle_rhcp = (
             df_one_freq.pivot(
-                index="Theta [deg]", columns="Phi [deg]", values="ang_deg(rERHCP) [deg]"
+                index=theta_col, columns=phi_col, values=phase_rhcp_col
             ).values
             * u.deg
         )
 
-        # TODO: Automatically handle exclusion of the last phi value if it wraps around
+        # HFSS exports often have phi = 0 and 360 degrees which means the last phi
+        # value is redundant with the first. In that case we drop the redundant phi
+        # values.
+        if np.isclose(phi[-1] - phi[0], 360 * u.deg):
+            phi_last_idx = -1
+        else:
+            phi_last_idx = None
+
         return cls.from_circular_gain(
             theta,
-            phi[:-1],
-            gain_lhcp[:, :-1],
-            gain_rhcp[:, :-1],
-            angle_lhcp[:, :-1],
-            angle_rhcp[:, :-1],
+            phi[:phi_last_idx],
+            gain_lhcp[:, :phi_last_idx],
+            gain_rhcp[:, :phi_last_idx],
+            angle_lhcp[:, :phi_last_idx],
+            angle_rhcp[:, :phi_last_idx],
             rad_efficiency=rad_efficiency,
         )
 
