@@ -24,6 +24,7 @@ from spacelink.core.units import (
     to_linear,
 )
 
+
 """
 This site was used to generate the following test cases:
 https://phillipmfeldman.org/Engineering/pol_mismatch_loss.html
