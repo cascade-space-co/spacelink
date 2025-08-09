@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.core.noise &mdash; SpaceLink 0.1.4 documentation</title>
+  <title>spacelink.core.noise &mdash; SpaceLink 0.1.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=fd825880"></script>
+        <script src="../../../_static/documentation_options.js?v=59fadc99"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.4
+                0.1.5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -133,6 +133,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DecibelHertz</span><span class="p">,</span>
     <span class="n">Decibels</span><span class="p">,</span>
     <span class="n">Dimensionless</span><span class="p">,</span>
     <span class="n">Temperature</span><span class="p">,</span>
@@ -282,6 +283,52 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">factor</span> <span class="o">=</span> <span class="n">temperature_to_noise_factor</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">to_dB</span><span class="p">(</span><span class="n">factor</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ebn0_to_cn0">
+<a class="viewcode-back" href="../../../core/noise.html#spacelink.core.noise.ebn0_to_cn0">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ebn0_to_cn0</span><span class="p">(</span><span class="n">ebn0</span><span class="p">:</span> <span class="n">Decibels</span><span class="p">,</span> <span class="n">bitrate</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DecibelHertz</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert :math:`E_b/N_0` to :math:`C/N_0`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ebn0 : Decibels</span>
+<span class="sd">        :math:`E_b/N_0`</span>
+<span class="sd">    bitrate : Frequency</span>
+<span class="sd">        Bitrate</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    DecibelHertz</span>
+<span class="sd">        :math:`C/N_0`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ebn0</span> <span class="o">+</span> <span class="n">bitrate</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">dBHz</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="cn0_to_ebn0">
+<a class="viewcode-back" href="../../../core/noise.html#spacelink.core.noise.cn0_to_ebn0">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cn0_to_ebn0</span><span class="p">(</span><span class="n">cn0</span><span class="p">:</span> <span class="n">DecibelHertz</span><span class="p">,</span> <span class="n">bitrate</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert :math:`C/N_0` to :math:`E_b/N_0`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cn0 : DecibelHertz</span>
+<span class="sd">        :math:`C/N_0`</span>
+<span class="sd">    bitrate : Frequency</span>
+<span class="sd">        Bitrate</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Decibels</span>
+<span class="sd">        :math:`E_b/N_0`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cn0</span> <span class="o">-</span> <span class="n">bitrate</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">dBHz</span><span class="p">)</span></div>
 
 </pre></div>
 
