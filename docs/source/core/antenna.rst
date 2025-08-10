@@ -1,5 +1,5 @@
 Antenna Module
-===================
+==============
 
 
 .. automodule:: spacelink.core.antenna
