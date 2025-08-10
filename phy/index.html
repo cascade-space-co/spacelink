@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PHY Modules &mdash; SpaceLink 0.1.6 documentation</title>
+  <title>PHY Modules &mdash; SpaceLink 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.6
+                0.1.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -53,17 +53,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../core/index.html">Core Modules</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">PHY Modules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#example">Example</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="mode.html">Mode Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="performance.html">Performance Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="registry.html">Registry Module</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../core/index.html">Core Modules</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PHY Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mode.html">Mode Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html">Performance Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry.html">Registry Module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
@@ -83,7 +77,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
       <li class="breadcrumb-item active">PHY Modules</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/phy/index.rst.txt" rel="nofollow"> View page source</a>
@@ -96,15 +89,15 @@
              
   <section id="phy-modules">
 <h1>PHY Modules<a class="headerlink" href="#phy-modules" title="Link to this heading"></a></h1>
-<p>The PHY subpackage provides physical-layer constructs for link analysis:</p>
+<p>The <strong>PHY</strong> subpackage provides physical-layer constructs for link analysis, enabling comprehensive modeling of communication system performance. These modules build upon the <strong>Core</strong> subpackage to provide higher-level abstractions for link mode definitions and performance analysis.</p>
+<p><strong>Available Modules:</strong></p>
 <ul class="simple">
-<li><p>Link modes combining modulation and coding</p></li>
-<li><p>Performance curves (Eb/N0 vs. error rate) and coding gain</p></li>
-<li><p>A registry that loads modes and performance data from YAML files</p></li>
+<li><p><strong>mode</strong>: Link mode definitions combining modulation schemes and forward error correction coding chains with support for concatenated codes and interleaving</p></li>
+<li><p><strong>performance</strong>: Performance curves (Eb/N0 vs. error rate) and coding gain calculations with interpolation support for BER, WER, and FER metrics</p></li>
+<li><p><strong>registry</strong>: A registry system that loads modes and performance data from YAML files for easy configuration management and data persistence</p></li>
 </ul>
-<section id="example">
-<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
-<p>Load a predefined BPSK mode with concatenated coding (outer RS(255,223) with interleaver depth 5, inner convolutional rate 1/2) from the built-in registry.</p>
+<p><strong>Example:</strong></p>
+<p>Load a predefined BPSK mode with concatenated coding (outer RS(255,223) with interleaver depth 5, inner convolutional rate 1/2) from the built-in registry:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.performance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorMetric</span>
 
@@ -146,7 +139,6 @@
 </li>
 </ul>
 </div>
-</section>
 </section>
 
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ranging Module &mdash; SpaceLink 0.1.6 documentation</title>
+  <title>Ranging Module &mdash; SpaceLink 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.6
+                0.1.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -53,22 +53,39 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="index.html#key-modules">Key Modules</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="units.html">Units Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="noise.html">Noise Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="path.html">Path Module</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Ranging Module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="units.html">Units Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html">Noise Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html">Path Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Ranging Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.PnRangingCode"><code class="docutils literal notranslate"><span class="pre">PnRangingCode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.core.ranging.PnRangingCode.DSN"><code class="docutils literal notranslate"><span class="pre">PnRangingCode.DSN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.core.ranging.PnRangingCode.CCSDS_T4B"><code class="docutils literal notranslate"><span class="pre">PnRangingCode.CCSDS_T4B</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.core.ranging.PnRangingCode.CCSDS_T2B"><code class="docutils literal notranslate"><span class="pre">PnRangingCode.CCSDS_T2B</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.DataModulation"><code class="docutils literal notranslate"><span class="pre">DataModulation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.core.ranging.DataModulation.BIPOLAR"><code class="docutils literal notranslate"><span class="pre">DataModulation.BIPOLAR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.core.ranging.DataModulation.SINE_SUBCARRIER"><code class="docutils literal notranslate"><span class="pre">DataModulation.SINE_SUBCARRIER</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.CODE_LENGTH"><code class="docutils literal notranslate"><span class="pre">CODE_LENGTH</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.COMPONENT_LENGTHS"><code class="docutils literal notranslate"><span class="pre">COMPONENT_LENGTHS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.pn_sequence_range_ambiguity"><code class="docutils literal notranslate"><span class="pre">pn_sequence_range_ambiguity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.chip_snr"><code class="docutils literal notranslate"><span class="pre">chip_snr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.carrier_to_total_power"><code class="docutils literal notranslate"><span class="pre">carrier_to_total_power()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.ranging_to_total_power"><code class="docutils literal notranslate"><span class="pre">ranging_to_total_power()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.data_to_total_power"><code class="docutils literal notranslate"><span class="pre">data_to_total_power()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.pn_component_acquisition_probability"><code class="docutils literal notranslate"><span class="pre">pn_component_acquisition_probability()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.pn_acquisition_probability"><code class="docutils literal notranslate"><span class="pre">pn_acquisition_probability()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.ranging.pn_acquisition_time"><code class="docutils literal notranslate"><span class="pre">pn_acquisition_time()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
 </ul>
 
@@ -86,7 +103,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
           <li class="breadcrumb-item"><a href="index.html">Core Modules</a></li>
       <li class="breadcrumb-item active">Ranging Module</li>
       <li class="wy-breadcrumbs-aside">
@@ -98,9 +114,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-spacelink.core.ranging">
-<span id="ranging-module"></span><h1>Ranging Module<a class="headerlink" href="#module-spacelink.core.ranging" title="Link to this heading"></a></h1>
-<p>Calculations related to two-way sequential or pseudo-noise (PN) radiometric ranging.</p>
+  <section id="ranging-module">
+<h1>Ranging Module<a class="headerlink" href="#ranging-module" title="Link to this heading"></a></h1>
+<p>The <strong>ranging</strong> module provides ranging and timing analysis capabilities for space communications systems.</p>
+<p id="module-spacelink.core.ranging">Calculations related to two-way sequential or pseudo-noise (PN) radiometric ranging.</p>
 <p>This module provides functions for calculating range ambiguity and power allocations
 between residual carrier and modulated components.</p>
 <p class="rubric">References</p>

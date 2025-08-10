@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Units Module &mdash; SpaceLink 0.1.6 documentation</title>
+  <title>Units Module &mdash; SpaceLink 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.6
+                0.1.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -53,22 +53,23 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="index.html#key-modules">Key Modules</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Units Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="noise.html">Noise Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="path.html">Path Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Units Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#wavelength">Wavelength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#to-db">to_dB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#to-linear">to_linear</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#return-loss-to-vswr">Return Loss to VSWR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vswr-to-return-loss">VSWR to Return Loss</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html">Noise Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html">Path Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
 </ul>
 
@@ -86,7 +87,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
           <li class="breadcrumb-item"><a href="index.html">Core Modules</a></li>
       <li class="breadcrumb-item active">Units Module</li>
       <li class="wy-breadcrumbs-aside">
@@ -98,8 +98,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-spacelink.core.units">
-<span id="units-module"></span><h1>Units Module<a class="headerlink" href="#module-spacelink.core.units" title="Link to this heading"></a></h1>
+  <section id="units-module">
+<h1>Units Module<a class="headerlink" href="#units-module" title="Link to this heading"></a></h1>
+<p>The <strong>units</strong> module provides comprehensive unit handling and conversion utilities for RF system analysis, built on top of the Astropy units system.</p>
 <section id="wavelength">
 <h2>Wavelength<a class="headerlink" href="#wavelength" title="Link to this heading"></a></h2>
 <p>The relationship between wavelength and frequency is given by:</p>
@@ -154,8 +155,8 @@ For dimensionless input, the result will have unit dB.</p>
 </ul>
 </section>
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.units.enforce_units">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">enforce_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#enforce_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.enforce_units" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">enforce_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#enforce_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Decorator to enforce the units specified in function parameter type annotations.</p>
 <p>This decorator enforces some unit consistency rules for function parameters that
 annotated with one of the <code class="docutils literal notranslate"><span class="pre">Annotated</span></code> types in this module:</p>
@@ -190,8 +191,8 @@ tedious unit conversion logic out of the function body.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.units.wavelength">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">wavelength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#wavelength"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.wavelength" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">wavelength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#wavelength"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert frequency to wavelength.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -210,8 +211,8 @@ tedious unit conversion logic out of the function body.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.units.frequency">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#frequency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.frequency" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#frequency"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert wavelength to frequency.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -230,8 +231,8 @@ tedious unit conversion logic out of the function body.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.units.to_dB">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">to_dB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#to_dB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.to_dB" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">to_dB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#to_dB"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert dimensionless quantity to decibels.</p>
 <p>Note that for referenced logarithmic units, conversions should
 be done using the .to(unit) method.
@@ -249,8 +250,8 @@ be done using the .to(unit) method.
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.units.to_linear">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">to_linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#to_linear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.to_linear" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">to_linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#to_linear"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert decibels to a linear (dimensionless) ratio.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -266,8 +267,8 @@ be done using the .to(unit) method.
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.units.return_loss_to_vswr">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">return_loss_to_vswr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_loss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#return_loss_to_vswr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.return_loss_to_vswr" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">return_loss_to_vswr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_loss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#return_loss_to_vswr"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert a return loss in decibels to voltage standing wave ratio (VSWR).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -286,8 +287,8 @@ be done using the .to(unit) method.
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.units.vswr_to_return_loss">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">vswr_to_return_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vswr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#vswr_to_return_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.vswr_to_return_loss" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">vswr_to_return_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vswr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#vswr_to_return_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert voltage standing wave ratio (VSWR) to return loss in decibels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -306,8 +307,8 @@ be done using the .to(unit) method.
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.units.safe_negate">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">safe_negate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#safe_negate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.units.safe_negate" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">safe_negate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#safe_negate"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Safely negate a dB or function unit quantity, preserving the unit.
 Astropy does not allow direct negation of function units (like dB).</p>
 <dl class="field-list simple">

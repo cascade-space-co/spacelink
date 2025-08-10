@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pattern I/O Module &mdash; SpaceLink 0.1.6 documentation</title>
+  <title>Pattern I/O Module &mdash; SpaceLink 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.6
+                0.1.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -53,22 +53,21 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="index.html#key-modules">Key Modules</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="units.html">Units Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Pattern I/O Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="noise.html">Noise Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="path.html">Path Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="units.html">Units Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Pattern I/O Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.pattern_io.load_radiation_pattern_npz"><code class="docutils literal notranslate"><span class="pre">load_radiation_pattern_npz()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.pattern_io.save_radiation_pattern_npz"><code class="docutils literal notranslate"><span class="pre">save_radiation_pattern_npz()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.core.pattern_io.import_hfss_csv"><code class="docutils literal notranslate"><span class="pre">import_hfss_csv()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html">Noise Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html">Path Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
 </ul>
 
@@ -86,7 +85,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
           <li class="breadcrumb-item"><a href="index.html">Core Modules</a></li>
       <li class="breadcrumb-item active">Pattern I/O Module</li>
       <li class="wy-breadcrumbs-aside">
@@ -98,9 +96,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-spacelink.core.pattern_io">
-<span id="pattern-i-o-module"></span><h1>Pattern I/O Module<a class="headerlink" href="#module-spacelink.core.pattern_io" title="Link to this heading"></a></h1>
-<dl class="py function">
+  <section id="pattern-i-o-module">
+<h1>Pattern I/O Module<a class="headerlink" href="#pattern-i-o-module" title="Link to this heading"></a></h1>
+<p>The <strong>pattern_io</strong> module provides utilities for reading and writing antenna radiation pattern data in various formats.</p>
+<dl class="py function" id="module-spacelink.core.pattern_io">
 <dt class="sig sig-object py" id="spacelink.core.pattern_io.load_radiation_pattern_npz">
 <span class="sig-prename descclassname"><span class="pre">spacelink.core.pattern_io.</span></span><span class="sig-name descname"><span class="pre">load_radiation_pattern_npz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/pattern_io.html#load_radiation_pattern_npz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.pattern_io.load_radiation_pattern_npz" title="Link to this definition"></a></dt>
 <dd><p>Load a radiation pattern from a NumPy NPZ file or file-like object.</p>
@@ -114,7 +113,7 @@ files, databases, or in-memory buffers.</p>
 <dd class="field-even"><p>A new RadiationPattern object reconstructed from the saved data.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="antenna.html#spacelink.core.antenna.RadiationPattern" title="spacelink.core.antenna.RadiationPattern">RadiationPattern</a></p>
+<dd class="field-odd"><p>RadiationPattern</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -132,7 +131,7 @@ files, databases, or in-memory buffers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pattern</strong> (<a class="reference internal" href="antenna.html#spacelink.core.antenna.RadiationPattern" title="spacelink.core.antenna.RadiationPattern"><em>RadiationPattern</em></a>) – The radiation pattern to save.</p></li>
+<li><p><strong>pattern</strong> (<em>RadiationPattern</em>) – The radiation pattern to save.</p></li>
 <li><p><strong>destination</strong> (<em>pathlib.Path</em><em> or </em><em>file-like object</em>) – Path to the output NPZ file, or a file-like object (such as BytesIO)
 to write NPZ data to. This allows saving to files, databases, or
 in-memory buffers.</p></li>
@@ -172,7 +171,7 @@ the CSV file. Only a single frequency is currently supported.</p></li>
 <dd class="field-even"><p>Radiation pattern constructed from the CSV.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="antenna.html#spacelink.core.antenna.RadiationPattern" title="spacelink.core.antenna.RadiationPattern">RadiationPattern</a></p>
+<dd class="field-odd"><p>RadiationPattern</p>
 </dd>
 </dl>
 </dd></dl>

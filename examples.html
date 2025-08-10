@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage Examples &mdash; SpaceLink 0.1.6 documentation</title>
+  <title>Usage Examples &mdash; SpaceLink 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="_static/documentation_options.js?v=ca7ad2ea"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.6
+                0.1.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -51,9 +51,12 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="modules.html">SpaceLink Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core/index.html">Core Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="phy/index.html">PHY Modules</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#coming-soon">Coming Soon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jupyter-notebooks">Jupyter Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#theory-and-background">Theory and Background</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-examples">Running Examples</a></li>
 </ul>
 </li>
 </ul>
@@ -84,8 +87,37 @@
              
   <section id="usage-examples">
 <h1>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading"></a></h1>
-<section id="coming-soon">
-<h2>Coming Soon<a class="headerlink" href="#coming-soon" title="Link to this heading"></a></h2>
+<p>This section provides practical examples demonstrating how to use the SpaceLink library for various space communications analysis tasks.</p>
+<section id="jupyter-notebooks">
+<h2>Jupyter Notebooks<a class="headerlink" href="#jupyter-notebooks" title="Link to this heading"></a></h2>
+<p>The examples are provided as Jupyter notebooks in the <code class="docutils literal notranslate"><span class="pre">notebooks/</span></code> directory:</p>
+<ul class="simple">
+<li><p><strong>Link Budget Analysis</strong> (<code class="docutils literal notranslate"><span class="pre">examples/leo_link_budget.ipynb</span></code>): Complete LEO satellite link budget calculation</p></li>
+<li><p><strong>Modulation and Coding</strong> (<code class="docutils literal notranslate"><span class="pre">examples/modulation_and_coding.ipynb</span></code>): Performance analysis of different modulation schemes</p></li>
+</ul>
+</section>
+<section id="theory-and-background">
+<h2>Theory and Background<a class="headerlink" href="#theory-and-background" title="Link to this heading"></a></h2>
+<p>For theoretical background and detailed explanations, see the notebooks in <code class="docutils literal notranslate"><span class="pre">notebooks/theory/</span></code>:</p>
+<ul class="simple">
+<li><p><strong>Antenna Theory</strong> (<code class="docutils literal notranslate"><span class="pre">theory/antenna.ipynb</span></code>): Antenna modeling and polarization analysis</p></li>
+<li><p><strong>Noise Analysis</strong> (<code class="docutils literal notranslate"><span class="pre">theory/noise.ipynb</span></code>): Thermal noise and SNR calculations</p></li>
+<li><p><strong>Path Analysis</strong> (<code class="docutils literal notranslate"><span class="pre">theory/path.ipynb</span></code>): Free space path loss and link budget fundamentals</p></li>
+<li><p><strong>Ranging</strong> (<code class="docutils literal notranslate"><span class="pre">theory/ranging.ipynb</span></code>): Timing and ranging calculations</p></li>
+<li><p><strong>Units and Conversions</strong> (<code class="docutils literal notranslate"><span class="pre">theory/units.ipynb</span></code>): Unit handling and conversions</p></li>
+</ul>
+</section>
+<section id="running-examples">
+<h2>Running Examples<a class="headerlink" href="#running-examples" title="Link to this heading"></a></h2>
+<p>To run the examples, first ensure you have the development dependencies installed:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="w"> </span>dev
+</pre></div>
+</div>
+<p>Then start Jupyter notebook using Poetry:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>run<span class="w"> </span>jupyter<span class="w"> </span>notebook
+</pre></div>
+</div>
+<p>All examples use the SpaceLink library and include detailed explanations of the underlying theory and implementation.</p>
 </section>
 </section>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Path Module &mdash; SpaceLink 0.1.6 documentation</title>
+  <title>Path Module &mdash; SpaceLink 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.6
+                0.1.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -53,22 +53,22 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="index.html#key-modules">Key Modules</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="units.html">Units Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="noise.html">Noise Module</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Path Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="units.html">Units Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html">Noise Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Path Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-friis-transmission-equation">The Friis Transmission Equation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#loss-components">Loss Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spreading-loss">Spreading Loss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#aperture-loss">Aperture Loss</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
 </ul>
 
@@ -86,7 +86,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
           <li class="breadcrumb-item"><a href="index.html">Core Modules</a></li>
       <li class="breadcrumb-item active">Path Module</li>
       <li class="wy-breadcrumbs-aside">
@@ -100,10 +99,9 @@
              
   <section id="path-module">
 <h1>Path Module<a class="headerlink" href="#path-module" title="Link to this heading"></a></h1>
-<section id="module-spacelink.core.path">
-<span id="module-reference"></span><h2>Module Reference<a class="headerlink" href="#module-spacelink.core.path" title="Link to this heading"></a></h2>
+<p>The <strong>path</strong> module provides path loss calculations for radio communications, including free space path loss, spreading loss, and aperture loss analysis.</p>
 <section id="the-friis-transmission-equation">
-<h3>The Friis Transmission Equation<a class="headerlink" href="#the-friis-transmission-equation" title="Link to this heading"></a></h3>
+<h2>The Friis Transmission Equation<a class="headerlink" href="#the-friis-transmission-equation" title="Link to this heading"></a></h2>
 <p>The complete Friis transmission equation is:</p>
 <div class="math notranslate nohighlight">
 \[P_r = P_t G_t G_r \left(\frac{\lambda}{4\pi d}\right)^2\]</div>
@@ -118,23 +116,23 @@
 </ul>
 </section>
 <section id="loss-components">
-<h3>Loss Components<a class="headerlink" href="#loss-components" title="Link to this heading"></a></h3>
+<h2>Loss Components<a class="headerlink" href="#loss-components" title="Link to this heading"></a></h2>
 <div class="math notranslate nohighlight">
 \[\text{FSPL} = \underbrace{(4\pi d^2)}_{\text{Spreading Loss}} \times\
 \underbrace{\left(\frac{4\pi}{\lambda^2}\right)}_{\text{Aperture Loss}}\]</div>
 </section>
 <section id="spreading-loss">
-<h3>Spreading Loss<a class="headerlink" href="#spreading-loss" title="Link to this heading"></a></h3>
+<h2>Spreading Loss<a class="headerlink" href="#spreading-loss" title="Link to this heading"></a></h2>
 <p>The spreading loss is the loss due to spherical spreading of the plane wave.</p>
 </section>
 <section id="aperture-loss">
-<h3>Aperture Loss<a class="headerlink" href="#aperture-loss" title="Link to this heading"></a></h3>
+<h2>Aperture Loss<a class="headerlink" href="#aperture-loss" title="Link to this heading"></a></h2>
 <p>The aperture loss is the loss due to the effective aperture of the antenna.
 The aperture loss term is actually the effective aperture of an ideal isotropic antenna.</p>
 </section>
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.path.spreading_loss">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.path.</span></span><span class="sig-name descname"><span class="pre">spreading_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/path.html#spreading_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.path.spreading_loss" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.path.</span></span><span class="sig-name descname"><span class="pre">spreading_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/path.html#spreading_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Calculate the spreading loss in decibels (positive value).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -150,8 +148,8 @@ The aperture loss term is actually the effective aperture of an ideal isotropic 
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.path.aperture_loss">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.path.</span></span><span class="sig-name descname"><span class="pre">aperture_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/path.html#aperture_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.path.aperture_loss" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.path.</span></span><span class="sig-name descname"><span class="pre">aperture_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/path.html#aperture_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Calculate the aperture loss in decibels (positive value).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -167,8 +165,8 @@ The aperture loss term is actually the effective aperture of an ideal isotropic 
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.path.free_space_path_loss">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.path.</span></span><span class="sig-name descname"><span class="pre">free_space_path_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/path.html#free_space_path_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.path.free_space_path_loss" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.path.</span></span><span class="sig-name descname"><span class="pre">free_space_path_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/path.html#free_space_path_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Calculate the free space path loss in decibels (positive value).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -186,7 +184,6 @@ The aperture loss term is actually the effective aperture of an ideal isotropic 
 </dl>
 </dd></dl>
 
-</section>
 </section>
 
 

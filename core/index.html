@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Core Modules &mdash; SpaceLink 0.1.6 documentation</title>
+  <title>Core Modules &mdash; SpaceLink 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -26,7 +26,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Units Module" href="units.html" />
-    <link rel="prev" title="SpaceLink Modules" href="../modules.html" /> 
+    <link rel="prev" title="Welcome to SpaceLink’s documentation!" href="../index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.6
+                0.1.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -53,22 +53,16 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Core Modules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#key-modules">Key Modules</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="units.html">Units Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="noise.html">Noise Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="path.html">Path Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Core Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units.html">Units Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise.html">Noise Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html">Path Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
 </ul>
 
@@ -86,7 +80,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
       <li class="breadcrumb-item active">Core Modules</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/core/index.rst.txt" rel="nofollow"> View page source</a>
@@ -99,16 +92,15 @@
              
   <section id="core-modules">
 <h1>Core Modules<a class="headerlink" href="#core-modules" title="Link to this heading"></a></h1>
-<p>The Core subpackage provides fundamental calculations, units, constants, and validation logic for radio frequency applications. These modules form the foundation of SpaceLink and are designed to be used both directly and by the higher-level Components subpackage.</p>
-<section id="key-modules">
-<h2>Key Modules<a class="headerlink" href="#key-modules" title="Link to this heading"></a></h2>
+<p>The <strong>Core</strong> subpackage provides fundamental calculations, units, constants, and validation logic for radio frequency applications. These modules form the foundation of SpaceLink and are designed to be used both directly and by the higher-level <strong>PHY</strong> subpackage.</p>
+<p><strong>Available Modules:</strong></p>
 <ul class="simple">
-<li><p><strong>units</strong>: Defines unit types, conversion functions, and utilities for working with RF quantities</p></li>
-<li><p><strong>antenna</strong>: Antenna calculations including polarization loss, dish gain, polarization utilities, radiation patterns, and spherical interpolation</p></li>
-<li><p><strong>pattern_io</strong>: I/O operations for antenna radiation patterns</p></li>
-<li><p><strong>noise</strong>: Noise power and density calculations, conversions between noise temperature, noise figure/factor, and Eb/N0 ↔ C/N0</p></li>
-<li><p><strong>path</strong>: Path loss calculations for radio communications, including free space path loss</p></li>
-<li><p><strong>ranging</strong>: Two-way sequential and PN radiometric ranging, including acquisition probability/time and power allocation among carrier, ranging, and data</p></li>
+<li><p><strong>units</strong>: Defines unit types, conversion functions, and utilities for working with RF quantities including wavelength/frequency conversions, dB/linear conversions, VSWR calculations, and unit enforcement decorators</p></li>
+<li><p><strong>antenna</strong>: Antenna calculations including polarization loss, dish gain, polarization utilities, radiation patterns, and spherical interpolation with support for circular and linear polarization</p></li>
+<li><p><strong>pattern_io</strong>: I/O operations for antenna radiation patterns with support for various file formats</p></li>
+<li><p><strong>noise</strong>: Noise power and density calculations, conversions between noise temperature, noise figure/factor, and Eb/N0 ↔ C/N0 relationships</p></li>
+<li><p><strong>path</strong>: Path loss calculations for radio communications, including free space path loss, spreading loss, and aperture loss calculations</p></li>
+<li><p><strong>ranging</strong>: Two-way sequential and PN radiometric ranging, including acquisition probability/time calculations and power allocation among carrier, ranging, and data signals</p></li>
 </ul>
 <div class="toctree-wrapper compound">
 <ul>
@@ -118,26 +110,12 @@
 <li class="toctree-l2"><a class="reference internal" href="units.html#to-linear">to_linear</a></li>
 <li class="toctree-l2"><a class="reference internal" href="units.html#return-loss-to-vswr">Return Loss to VSWR</a></li>
 <li class="toctree-l2"><a class="reference internal" href="units.html#vswr-to-return-loss">VSWR to Return Loss</a></li>
-<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.enforce_units"><code class="docutils literal notranslate"><span class="pre">enforce_units()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.wavelength"><code class="docutils literal notranslate"><span class="pre">wavelength()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.frequency"><code class="docutils literal notranslate"><span class="pre">frequency()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.to_dB"><code class="docutils literal notranslate"><span class="pre">to_dB()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.to_linear"><code class="docutils literal notranslate"><span class="pre">to_linear()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.return_loss_to_vswr"><code class="docutils literal notranslate"><span class="pre">return_loss_to_vswr()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.vswr_to_return_loss"><code class="docutils literal notranslate"><span class="pre">vswr_to_return_loss()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="units.html#spacelink.core.units.safe_negate"><code class="docutils literal notranslate"><span class="pre">safe_negate()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="antenna.html">Antenna Module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="antenna.html#polarization-loss">Polarization Loss</a></li>
 <li class="toctree-l2"><a class="reference internal" href="antenna.html#dish-gain">Dish Gain</a></li>
 <li class="toctree-l2"><a class="reference internal" href="antenna.html#spherical-coordinate-system">Spherical Coordinate System</a></li>
-<li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.polarization_loss"><code class="docutils literal notranslate"><span class="pre">polarization_loss()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.dish_gain"><code class="docutils literal notranslate"><span class="pre">dish_gain()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.Handedness"><code class="docutils literal notranslate"><span class="pre">Handedness</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.Polarization"><code class="docutils literal notranslate"><span class="pre">Polarization</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.SphericalInterpolator"><code class="docutils literal notranslate"><span class="pre">SphericalInterpolator</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.RadiationPattern"><code class="docutils literal notranslate"><span class="pre">RadiationPattern</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a><ul>
@@ -150,18 +128,13 @@
 <li class="toctree-l2"><a class="reference internal" href="noise.html#noise-power">Noise Power</a></li>
 <li class="toctree-l2"><a class="reference internal" href="noise.html#noise-figure-factor-modeling">Noise Figure / Factor Modeling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="noise.html#noise-temperature-and-snr">Noise temperature and SNR</a></li>
-<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.noise_power"><code class="docutils literal notranslate"><span class="pre">noise_power()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.noise_power_density"><code class="docutils literal notranslate"><span class="pre">noise_power_density()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.temperature_to_noise_factor"><code class="docutils literal notranslate"><span class="pre">temperature_to_noise_factor()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.noise_factor_to_temperature"><code class="docutils literal notranslate"><span class="pre">noise_factor_to_temperature()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.noise_figure_to_temperature"><code class="docutils literal notranslate"><span class="pre">noise_figure_to_temperature()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.temperature_to_noise_figure"><code class="docutils literal notranslate"><span class="pre">temperature_to_noise_figure()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.ebn0_to_cn0"><code class="docutils literal notranslate"><span class="pre">ebn0_to_cn0()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="noise.html#spacelink.core.noise.cn0_to_ebn0"><code class="docutils literal notranslate"><span class="pre">cn0_to_ebn0()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="path.html">Path Module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="path.html#module-spacelink.core.path">Module Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html#the-friis-transmission-equation">The Friis Transmission Equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html#loss-components">Loss Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html#spreading-loss">Spreading Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html#aperture-loss">Aperture Loss</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ranging.html">Ranging Module</a><ul>
@@ -182,13 +155,12 @@
 </ul>
 </div>
 </section>
-</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../modules.html" class="btn btn-neutral float-left" title="SpaceLink Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to SpaceLink’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="units.html" class="btn btn-neutral float-right" title="Units Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

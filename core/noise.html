@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Noise Module &mdash; SpaceLink 0.1.6 documentation</title>
+  <title>Noise Module &mdash; SpaceLink 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.6
+                0.1.7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -53,22 +53,21 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="index.html#key-modules">Key Modules</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="units.html">Units Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Noise Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="path.html">Path Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="units.html">Units Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Noise Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#noise-power">Noise Power</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#noise-figure-factor-modeling">Noise Figure / Factor Modeling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#noise-temperature-and-snr">Noise temperature and SNR</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="path.html">Path Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
 </ul>
 
@@ -86,7 +85,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
           <li class="breadcrumb-item"><a href="index.html">Core Modules</a></li>
       <li class="breadcrumb-item active">Noise Module</li>
       <li class="wy-breadcrumbs-aside">
@@ -98,8 +96,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-spacelink.core.noise">
-<span id="noise-module"></span><h1>Noise Module<a class="headerlink" href="#module-spacelink.core.noise" title="Link to this heading"></a></h1>
+  <section id="noise-module">
+<h1>Noise Module<a class="headerlink" href="#noise-module" title="Link to this heading"></a></h1>
+<p>The <strong>noise</strong> module provides comprehensive noise analysis capabilities for RF system design, including thermal noise calculations, noise figure conversions, and SNR analysis.</p>
 <section id="noise-power">
 <h2>Noise Power<a class="headerlink" href="#noise-power" title="Link to this heading"></a></h2>
 <p>The thermal noise power for a given bandwidth and temperature is:</p>
@@ -138,8 +137,8 @@ SNR through the amplifier chain, best practice is to model the noise power separ
 signal power and then compute the SNR at the output.</p>
 </section>
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.noise.noise_power">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature=&lt;Quantity</span> <span class="pre">290.</span> <span class="pre">K&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.noise_power" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature=&lt;Quantity</span> <span class="pre">290.</span> <span class="pre">K&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Calculate the thermal noise power for a given bandwidth and temperature.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -158,8 +157,8 @@ signal power and then compute the SNR at the output.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.noise.noise_power_density">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_power_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_power_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.noise_power_density" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_power_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_power_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Calculate the noise power density for a given temperature.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -175,8 +174,8 @@ signal power and then compute the SNR at the output.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.noise.temperature_to_noise_factor">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">temperature_to_noise_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#temperature_to_noise_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.temperature_to_noise_factor" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">temperature_to_noise_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#temperature_to_noise_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert noise temperature to noise factor (linear).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -192,8 +191,8 @@ signal power and then compute the SNR at the output.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.noise.noise_factor_to_temperature">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_factor_to_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_factor_to_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.noise_factor_to_temperature" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_factor_to_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_factor_to_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert noise factor (linear) to noise temperature.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -209,8 +208,8 @@ signal power and then compute the SNR at the output.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.noise.noise_figure_to_temperature">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_figure_to_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_figure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_figure_to_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.noise_figure_to_temperature" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_figure_to_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_figure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_figure_to_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert noise figure (in dB) to noise temperature (in Kelvin).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -226,8 +225,8 @@ signal power and then compute the SNR at the output.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.noise.temperature_to_noise_figure">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">temperature_to_noise_figure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#temperature_to_noise_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.temperature_to_noise_figure" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">temperature_to_noise_figure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#temperature_to_noise_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert noise temperature in Kelvin to noise figure in dB.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -243,8 +242,8 @@ signal power and then compute the SNR at the output.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.noise.ebn0_to_cn0">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">ebn0_to_cn0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ebn0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bitrate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#ebn0_to_cn0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.ebn0_to_cn0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">ebn0_to_cn0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ebn0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bitrate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#ebn0_to_cn0"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert <span class="math notranslate nohighlight">\(E_b/N_0\)</span> to <span class="math notranslate nohighlight">\(C/N_0\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -263,8 +262,8 @@ signal power and then compute the SNR at the output.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="spacelink.core.noise.cn0_to_ebn0">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">cn0_to_ebn0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cn0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bitrate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#cn0_to_ebn0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.noise.cn0_to_ebn0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">cn0_to_ebn0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cn0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bitrate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#cn0_to_ebn0"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert <span class="math notranslate nohighlight">\(C/N_0\)</span> to <span class="math notranslate nohighlight">\(E_b/N_0\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
