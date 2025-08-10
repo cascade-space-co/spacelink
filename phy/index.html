@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHY Modules &mdash; SpaceLink 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/phy/index.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Mode Module" href="mode.html" />
+    <link rel="prev" title="Ranging Module" href="../core/ranging.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core/index.html">Core Modules</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">PHY Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mode.html">Mode Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="performance.html">Performance Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="registry.html">Registry Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
+      <li class="breadcrumb-item active">PHY Modules</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/phy/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="phy-modules">
+<h1>PHY Modules<a class="headerlink" href="#phy-modules" title="Link to this heading"></a></h1>
+<p>The PHY subpackage provides physical-layer constructs for link analysis:</p>
+<ul class="simple">
+<li><p>Link modes combining modulation and coding</p></li>
+<li><p>Performance curves (Eb/N0 vs. error rate) and coding gain</p></li>
+<li><p>A registry that loads modes and performance data from YAML files</p></li>
+</ul>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<p>Load a predefined BPSK mode with concatenated coding (outer RS(255,223) with interleaver depth 5, inner convolutional rate 1/2) from the built-in registry.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.performance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorMetric</span>
+
+<span class="c1"># Load built-in modes and performance data</span>
+<span class="n">reg</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">()</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>  <span class="c1"># uses packaged YAML under spacelink/phy/data</span>
+
+<span class="c1"># Print available mode IDs</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+<span class="c1"># Fetch the desired mode by ID</span>
+<span class="n">mode_id</span> <span class="o">=</span> <span class="s2">&quot;CCSDS_TM_RS255223_I5_CONV7-12_BPSK&quot;</span>
+<span class="n">mode</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">modes</span><span class="p">[</span><span class="n">mode_id</span><span class="p">]</span>
+
+<span class="c1"># Inspect the loaded configuration</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mode</span><span class="o">.</span><span class="n">modulation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mode</span><span class="o">.</span><span class="n">coding</span><span class="o">.</span><span class="n">rate</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mode</span><span class="o">.</span><span class="n">info_bits_per_symbol</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mode.html">Mode Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mode.html#spacelink.phy.mode.Modulation"><code class="docutils literal notranslate"><span class="pre">Modulation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mode.html#spacelink.phy.mode.Code"><code class="docutils literal notranslate"><span class="pre">Code</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mode.html#spacelink.phy.mode.CodeChain"><code class="docutils literal notranslate"><span class="pre">CodeChain</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mode.html#spacelink.phy.mode.LinkMode"><code class="docutils literal notranslate"><span class="pre">LinkMode</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#spacelink.phy.performance.ErrorMetric"><code class="docutils literal notranslate"><span class="pre">ErrorMetric</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#spacelink.phy.performance.ModePerformance"><code class="docutils literal notranslate"><span class="pre">ModePerformance</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="registry.html">Registry Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#spacelink.phy.registry.DuplicateRegistryEntryError"><code class="docutils literal notranslate"><span class="pre">DuplicateRegistryEntryError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#spacelink.phy.registry.Registry"><code class="docutils literal notranslate"><span class="pre">Registry</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../core/ranging.html" class="btn btn-neutral float-left" title="Ranging Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mode.html" class="btn btn-neutral float-right" title="Mode Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

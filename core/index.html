@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Core Modules &mdash; SpaceLink 0.1.5 documentation</title>
+  <title>Core Modules &mdash; SpaceLink 0.1.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=59fadc99"></script>
+        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.5
+                0.1.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -58,6 +58,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#key-modules">Key Modules</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="units.html">Units Module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="antenna.html">Antenna Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="noise.html">Noise Module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="path.html">Path Module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ranging.html">Ranging Module</a></li>
@@ -65,6 +66,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../phy/index.html">PHY Modules</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
@@ -102,10 +104,11 @@
 <h2>Key Modules<a class="headerlink" href="#key-modules" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><strong>units</strong>: Defines unit types, conversion functions, and utilities for working with RF quantities</p></li>
-<li><p><strong>antenna</strong>: Antenna calculations including dish gain and polarization loss</p></li>
-<li><p><strong>noise</strong>: Functions for noise calculations, including conversions between noise figure and temperature</p></li>
+<li><p><strong>antenna</strong>: Antenna calculations including polarization loss, dish gain, polarization utilities, radiation patterns, and spherical interpolation</p></li>
+<li><p><strong>pattern_io</strong>: I/O operations for antenna radiation patterns</p></li>
+<li><p><strong>noise</strong>: Noise power and density calculations, conversions between noise temperature, noise figure/factor, and Eb/N0 ↔ C/N0</p></li>
 <li><p><strong>path</strong>: Path loss calculations for radio communications, including free space path loss</p></li>
-<li><p><strong>ranging</strong>: Functions for ranging and distance calculations</p></li>
+<li><p><strong>ranging</strong>: Two-way sequential and PN radiometric ranging, including acquisition probability/time and power allocation among carrier, ranging, and data</p></li>
 </ul>
 <div class="toctree-wrapper compound">
 <ul>
@@ -135,6 +138,12 @@
 <li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.Polarization"><code class="docutils literal notranslate"><span class="pre">Polarization</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.SphericalInterpolator"><code class="docutils literal notranslate"><span class="pre">SphericalInterpolator</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="antenna.html#spacelink.core.antenna.RadiationPattern"><code class="docutils literal notranslate"><span class="pre">RadiationPattern</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pattern_io.html">Pattern I/O Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pattern_io.html#spacelink.core.pattern_io.load_radiation_pattern_npz"><code class="docutils literal notranslate"><span class="pre">load_radiation_pattern_npz()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pattern_io.html#spacelink.core.pattern_io.save_radiation_pattern_npz"><code class="docutils literal notranslate"><span class="pre">save_radiation_pattern_npz()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="pattern_io.html#spacelink.core.pattern_io.import_hfss_csv"><code class="docutils literal notranslate"><span class="pre">import_hfss_csv()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="noise.html">Noise Module</a><ul>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spacelink.phy.mode &mdash; SpaceLink 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/_modules/spacelink/phy/mode.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SpaceLink Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">spacelink.phy.mode</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for spacelink.phy.mode</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fractions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fraction</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pydantic</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.core.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frequency</span><span class="p">,</span> <span class="n">enforce_units</span>
+
+
+<div class="viewcode-block" id="Modulation">
+<a class="viewcode-back" href="../../../phy/mode.html#spacelink.phy.mode.Modulation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Modulation</span><span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a single modulation scheme.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the modulation scheme.</span>
+<span class="sd">    bits_per_symbol : int</span>
+<span class="sd">        Number of bits per symbol.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">bits_per_symbol</span><span class="p">:</span> <span class="nb">int</span></div>
+
+
+
+<div class="viewcode-block" id="Code">
+<a class="viewcode-back" href="../../../phy/mode.html#spacelink.phy.mode.Code">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Code</span><span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a single forward error correction code.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the code.</span>
+<span class="sd">    rate : Fraction</span>
+<span class="sd">        Code rate.</span>
+<span class="sd">    interleaver_depth : int | None</span>
+<span class="sd">        Interleaver depth for codes such as Reed Solomon that are commonly paired with</span>
+<span class="sd">        an interleaver.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">rate</span><span class="p">:</span> <span class="n">Fraction</span>
+    <span class="n">interleaver_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="CodeChain">
+<a class="viewcode-back" href="../../../phy/mode.html#spacelink.phy.mode.CodeChain">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CodeChain</span><span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a chain of forward error correction codes.</span>
+
+<span class="sd">    This provides the flexibility to handle concatenated codes such as Reed Solomon</span>
+<span class="sd">    paired with convolutional code but also single codes and even the absence of forward</span>
+<span class="sd">    error correction.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    codes : list[Code]</span>
+<span class="sd">        List of codes in in encoding order from outermost to innermost code. If no error</span>
+<span class="sd">        correction is used the list will be empty.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">codes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Code</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fraction</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The overall code rate of the chain, which is the product of the individual code</span>
+<span class="sd">        rates or 1 if no error correction is used.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Fraction</span>
+<span class="sd">            Code rate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">((</span><span class="n">code</span><span class="o">.</span><span class="n">rate</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">codes</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="LinkMode">
+<a class="viewcode-back" href="../../../phy/mode.html#spacelink.phy.mode.LinkMode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinkMode</span><span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a specific combination of modulation and coding.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    id : str</span>
+<span class="sd">        Unique identifier for the link mode.</span>
+<span class="sd">    modulation : Modulation</span>
+<span class="sd">        Modulation scheme.</span>
+<span class="sd">    coding : CodeChain</span>
+<span class="sd">        Forward error correction code chain.</span>
+<span class="sd">    ref : str, optional</span>
+<span class="sd">        Reference or source of the mode definition.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">modulation</span><span class="p">:</span> <span class="n">Modulation</span>
+    <span class="n">coding</span><span class="p">:</span> <span class="n">CodeChain</span>
+    <span class="n">ref</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">info_bits_per_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fraction</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">modulation</span><span class="o">.</span><span class="n">bits_per_symbol</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">coding</span><span class="o">.</span><span class="n">rate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">channel_bits_per_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">modulation</span><span class="o">.</span><span class="n">bits_per_symbol</span>
+
+<div class="viewcode-block" id="LinkMode.info_bit_rate">
+<a class="viewcode-back" href="../../../phy/mode.html#spacelink.phy.mode.LinkMode.info_bit_rate">[docs]</a>
+    <span class="nd">@enforce_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">info_bit_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol_rate_hz</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Frequency</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the information bit rate as a function of the symbol rate.</span>
+
+<span class="sd">        The information bit rate refers to the rate of information bits, which are the</span>
+<span class="sd">        input to the first stage of the encoding chain on the transmit end of the link</span>
+<span class="sd">        or the output of the last decoding stage on the receive end of the link. This is</span>
+<span class="sd">        sometimes referred to as the &quot;net bit rate.&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        symbol_rate_hz : Frequency</span>
+<span class="sd">            Symbol rate.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Frequency</span>
+<span class="sd">            Bit rate in Hertz.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">symbol_rate_hz</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_bits_per_symbol</span></div>
+
+
+<div class="viewcode-block" id="LinkMode.symbol_rate">
+<a class="viewcode-back" href="../../../phy/mode.html#spacelink.phy.mode.LinkMode.symbol_rate">[docs]</a>
+    <span class="nd">@enforce_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">symbol_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_bit_rate</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Frequency</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the symbol rate as a function of the information bit rate.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        info_bit_rate : Frequency</span>
+<span class="sd">            Information bit rate.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Frequency</span>
+<span class="sd">            Symbol rate in Hertz.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">info_bit_rate</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_bits_per_symbol</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

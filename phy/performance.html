@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Module &mdash; SpaceLink 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/phy/performance.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Registry Module" href="registry.html" />
+    <link rel="prev" title="Mode Module" href="mode.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core/index.html">Core Modules</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">PHY Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#example">Example</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mode.html">Mode Module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Performance Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="registry.html">Registry Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
+          <li class="breadcrumb-item"><a href="index.html">PHY Modules</a></li>
+      <li class="breadcrumb-item active">Performance Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/phy/performance.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-spacelink.phy.performance">
+<span id="performance-module"></span><h1>Performance Module<a class="headerlink" href="#module-spacelink.phy.performance" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ErrorMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.performance.</span></span><span class="sig-name descname"><span class="pre">ErrorMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ErrorMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ErrorMetric" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ErrorMetric.BER">
+<span class="sig-name descname"><span class="pre">BER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'bit</span> <span class="pre">error</span> <span class="pre">rate'</span></em><a class="headerlink" href="#spacelink.phy.performance.ErrorMetric.BER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ErrorMetric.WER">
+<span class="sig-name descname"><span class="pre">WER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'codeword</span> <span class="pre">error</span> <span class="pre">rate'</span></em><a class="headerlink" href="#spacelink.phy.performance.ErrorMetric.WER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ErrorMetric.FER">
+<span class="sig-name descname"><span class="pre">FER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'frame</span> <span class="pre">error</span> <span class="pre">rate'</span></em><a class="headerlink" href="#spacelink.phy.performance.ErrorMetric.FER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.performance.</span></span><span class="sig-name descname"><span class="pre">ModePerformance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="mode.html#spacelink.phy.mode.LinkMode" title="spacelink.phy.mode.LinkMode"><span class="pre">LinkMode</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><span class="pre">ErrorMetric</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Performance characteristics for specific link modes.</p>
+<p>This class provides methods to convert between Eb/N0 and error rates for given
+modulation and coding schemes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>modes</strong> (<em>list</em><em>[</em><a class="reference internal" href="mode.html#spacelink.phy.mode.LinkMode" title="spacelink.phy.mode.LinkMode"><em>LinkMode</em></a><em>]</em>) – The link mode configurations.</p></li>
+<li><p><strong>decoder_profile</strong> (<em>DecoderProfile</em>) – Configuration for the decoder stages.</p></li>
+<li><p><strong>metric</strong> (<a class="reference internal" href="#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><em>ErrorMetric</em></a>) – Type of error metric (bit error rate, codeword error rate, etc.).</p></li>
+<li><p><strong>points</strong> (<em>list</em><em>[</em><em>ErrorCurvePoint</em><em>]</em>) – List of error rate curve data points for interpolation.</p></li>
+<li><p><strong>ref</strong> (<em>str</em><em>, </em><em>optional</em>) – Reference or source of the performance data (default: “”).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.modes">
+<span class="sig-name descname"><span class="pre">modes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="mode.html#spacelink.phy.mode.LinkMode" title="spacelink.phy.mode.LinkMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkMode</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.modes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.metric">
+<span class="sig-name descname"><span class="pre">metric</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorMetric</span></code></a></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.metric" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.points">
+<span class="sig-name descname"><span class="pre">points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.points" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.ref">
+<span class="sig-name descname"><span class="pre">ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.ref" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.validate_minimum_points">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_minimum_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.validate_minimum_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.validate_minimum_points" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.validate_points_sorted">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_points_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.validate_points_sorted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.validate_points_sorted" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.validate_error_values_decreasing">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_error_values_decreasing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.validate_error_values_decreasing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.validate_error_values_decreasing" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.ebn0_to_error_rate">
+<span class="sig-name descname"><span class="pre">ebn0_to_error_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ebn0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.ebn0_to_error_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.ebn0_to_error_rate" title="Link to this definition"></a></dt>
+<dd><p>Find the error rate corresponding to the given Eb/N0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ebn0</strong> (<em>Decibels</em>) – Energy per bit to noise power spectral density ratio <span class="math notranslate nohighlight">\(E_b/N_0\)</span>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Error rate or NaN if the Eb/N0 is outside the range of available performance
+data. Same shape as <cite>ebn0</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dimensionless</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.error_rate_to_ebn0">
+<span class="sig-name descname"><span class="pre">error_rate_to_ebn0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.error_rate_to_ebn0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.error_rate_to_ebn0" title="Link to this definition"></a></dt>
+<dd><p>Find Eb/N0 required to achieve the target error rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>error_rate</strong> (<em>Dimensionless</em>) – Target error rate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Required Eb/N0 in decibels to achieve the target error rate or NaN if the
+error rate is outside the range of available performance data. Same shape as
+<cite>error_rate</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decibels</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.coding_gain">
+<span class="sig-name descname"><span class="pre">coding_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uncoded</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.coding_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.coding_gain" title="Link to this definition"></a></dt>
+<dd><p>Calculate the coding gain relative to an uncoded reference.</p>
+<p>The coding gain is the difference in required Eb/N0 between the uncoded and
+coded systems at the same error rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uncoded</strong> (<a class="reference internal" href="#spacelink.phy.performance.ModePerformance" title="spacelink.phy.performance.ModePerformance"><em>ModePerformance</em></a>) – Performance model for the uncoded reference system. Must use the same error
+metric as this object.</p></li>
+<li><p><strong>error_rate</strong> (<em>Dimensionless</em>) – Error rate at which to evaluate the coding gain.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Coding gain in decibels or NaN if the error rate is outside the range of
+the available performance data. Same shape as <cite>error_rate</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decibels</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the uncoded model has a different error metric.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mode.html" class="btn btn-neutral float-left" title="Mode Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="registry.html" class="btn btn-neutral float-right" title="Registry Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

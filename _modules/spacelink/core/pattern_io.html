@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spacelink.core.pattern_io &mdash; SpaceLink 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/_modules/spacelink/core/pattern_io.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SpaceLink Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">spacelink.core.pattern_io</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for spacelink.core.pattern_io</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">antenna</span> <span class="k">as</span> <span class="n">antenna</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">units</span>
+
+
+<div class="viewcode-block" id="load_radiation_pattern_npz">
+<a class="viewcode-back" href="../../../core/pattern_io.html#spacelink.core.pattern_io.load_radiation_pattern_npz">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_radiation_pattern_npz</span><span class="p">(</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">antenna</span><span class="o">.</span><span class="n">RadiationPattern</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a radiation pattern from a NumPy NPZ file or file-like object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    source : pathlib.Path or file-like object</span>
+<span class="sd">        Path to the NPZ file containing the radiation pattern data, or a file-like</span>
+<span class="sd">        object (such as BytesIO) containing NPZ data. This allows loading from</span>
+<span class="sd">        files, databases, or in-memory buffers.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RadiationPattern</span>
+<span class="sd">        A new RadiationPattern object reconstructed from the saved data.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    FileNotFoundError</span>
+<span class="sd">        If the specified file does not exist (when source is a path).</span>
+<span class="sd">    KeyError</span>
+<span class="sd">        If required keys are missing from the NPZ file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+
+    <span class="c1"># Reconstruct arrays with proper units</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;theta&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;phi&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span>
+    <span class="n">e_theta</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;e_theta&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span>
+    <span class="n">e_phi</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;e_phi&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span>
+    <span class="n">rad_efficiency</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;rad_efficiency&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span>
+
+    <span class="k">return</span> <span class="n">antenna</span><span class="o">.</span><span class="n">RadiationPattern</span><span class="p">(</span>
+        <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
+        <span class="n">phi</span><span class="o">=</span><span class="n">phi</span><span class="p">,</span>
+        <span class="n">e_theta</span><span class="o">=</span><span class="n">e_theta</span><span class="p">,</span>
+        <span class="n">e_phi</span><span class="o">=</span><span class="n">e_phi</span><span class="p">,</span>
+        <span class="n">rad_efficiency</span><span class="o">=</span><span class="n">rad_efficiency</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="save_radiation_pattern_npz">
+<a class="viewcode-back" href="../../../core/pattern_io.html#spacelink.core.pattern_io.save_radiation_pattern_npz">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_radiation_pattern_npz</span><span class="p">(</span>
+    <span class="n">pattern</span><span class="p">:</span> <span class="n">antenna</span><span class="o">.</span><span class="n">RadiationPattern</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save the radiation pattern data to a NumPy NPZ file or file-like object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pattern : RadiationPattern</span>
+<span class="sd">        The radiation pattern to save.</span>
+<span class="sd">    destination : pathlib.Path or file-like object</span>
+<span class="sd">        Path to the output NPZ file, or a file-like object (such as BytesIO)</span>
+<span class="sd">        to write NPZ data to. This allows saving to files, databases, or</span>
+<span class="sd">        in-memory buffers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savez_compressed</span><span class="p">(</span>
+        <span class="n">destination</span><span class="p">,</span>
+        <span class="n">theta</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">theta</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="n">phi</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="n">e_theta</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">e_theta</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="n">e_phi</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">e_phi</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="n">rad_efficiency</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">rad_efficiency</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="import_hfss_csv">
+<a class="viewcode-back" href="../../../core/pattern_io.html#spacelink.core.pattern_io.import_hfss_csv">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">import_hfss_csv</span><span class="p">(</span>
+    <span class="n">hfss_csv_path</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">carrier_frequency</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Frequency</span><span class="p">,</span>
+    <span class="n">rad_efficiency</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Dimensionless</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">antenna</span><span class="o">.</span><span class="n">RadiationPattern</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a radiation pattern from an HFSS exported CSV file.</span>
+
+<span class="sd">    This expects the CSV file to contain the following columns in any order:</span>
+<span class="sd">    - Freq [GHz]</span>
+<span class="sd">    - Theta [deg]</span>
+<span class="sd">    - Phi [deg]</span>
+<span class="sd">    - dB(RealizedGainLHCP) []</span>
+<span class="sd">    - dB(RealizedGainRHCP) []</span>
+<span class="sd">    - ang_deg(rELHCP) [deg]</span>
+<span class="sd">    - ang_deg(rERHCP) [deg]</span>
+
+<span class="sd">    Any other columns will be ignored. There must be exactly one header row with the</span>
+<span class="sd">    column names.</span>
+
+<span class="sd">    The Theta and Phi values must form a regular grid.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    hfss_csv_path: pathlib.Path</span>
+<span class="sd">        Path to the HFSS CSV file.</span>
+<span class="sd">    carrier_frequency: Frequency</span>
+<span class="sd">        Pattern data corresponding to this carrier frequency will be imported from</span>
+<span class="sd">        the CSV file. Only a single frequency is currently supported.</span>
+<span class="sd">    rad_efficiency: Dimensionless</span>
+<span class="sd">        Radiation efficiency :math:`\eta` in [0, 1].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RadiationPattern</span>
+<span class="sd">        Radiation pattern constructed from the CSV.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Define column name constants</span>
+    <span class="n">freq_col</span> <span class="o">=</span> <span class="s2">&quot;Freq [GHz]&quot;</span>
+    <span class="n">theta_col</span> <span class="o">=</span> <span class="s2">&quot;Theta [deg]&quot;</span>
+    <span class="n">phi_col</span> <span class="o">=</span> <span class="s2">&quot;Phi [deg]&quot;</span>
+    <span class="n">gain_lhcp_col</span> <span class="o">=</span> <span class="s2">&quot;dB(RealizedGainLHCP) []&quot;</span>
+    <span class="n">gain_rhcp_col</span> <span class="o">=</span> <span class="s2">&quot;dB(RealizedGainRHCP) []&quot;</span>
+    <span class="n">phase_lhcp_col</span> <span class="o">=</span> <span class="s2">&quot;ang_deg(rELHCP) [deg]&quot;</span>
+    <span class="n">phase_rhcp_col</span> <span class="o">=</span> <span class="s2">&quot;ang_deg(rERHCP) [deg]&quot;</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">hfss_csv_path</span><span class="p">)</span>
+    <span class="n">target_freq</span> <span class="o">=</span> <span class="n">carrier_frequency</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">GHz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">df_one_freq</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">freq_col</span><span class="p">],</span> <span class="n">target_freq</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">df_one_freq</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No data found for frequency </span><span class="si">{</span><span class="n">carrier_frequency</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">df_one_freq</span> <span class="o">=</span> <span class="n">df_one_freq</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="n">theta_col</span><span class="p">,</span> <span class="n">phi_col</span><span class="p">])</span>
+
+    <span class="c1"># Extract arrays of unique theta and phi values</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">df_one_freq</span><span class="p">[</span><span class="n">theta_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">df_one_freq</span><span class="p">[</span><span class="n">phi_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+
+    <span class="c1"># Create 2D arrays with shape (N_theta, N_phi)</span>
+    <span class="n">gain_lhcp</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">to_linear</span><span class="p">(</span>
+        <span class="n">df_one_freq</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">theta_col</span><span class="p">,</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">phi_col</span><span class="p">,</span>
+            <span class="n">values</span><span class="o">=</span><span class="n">gain_lhcp_col</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span>
+    <span class="p">)</span>
+    <span class="n">gain_rhcp</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">to_linear</span><span class="p">(</span>
+        <span class="n">df_one_freq</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">theta_col</span><span class="p">,</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">phi_col</span><span class="p">,</span>
+            <span class="n">values</span><span class="o">=</span><span class="n">gain_rhcp_col</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span>
+    <span class="p">)</span>
+    <span class="n">angle_lhcp</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df_one_freq</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">theta_col</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">phi_col</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">phase_lhcp_col</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+    <span class="p">)</span>
+    <span class="n">angle_rhcp</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df_one_freq</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">theta_col</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">phi_col</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">phase_rhcp_col</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+    <span class="p">)</span>
+
+    <span class="c1"># HFSS exports often have phi = 0 and 360 degrees which means the last phi</span>
+    <span class="c1"># value is redundant with the first. In that case we drop the redundant phi</span>
+    <span class="c1"># values.</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">phi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">phi</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">360</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">):</span>
+        <span class="n">phi_last_idx</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">phi_last_idx</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">antenna</span><span class="o">.</span><span class="n">RadiationPattern</span><span class="o">.</span><span class="n">from_circular_gain</span><span class="p">(</span>
+        <span class="n">theta</span><span class="p">,</span>
+        <span class="n">phi</span><span class="p">[:</span><span class="n">phi_last_idx</span><span class="p">],</span>
+        <span class="n">gain_lhcp</span><span class="p">[:,</span> <span class="p">:</span><span class="n">phi_last_idx</span><span class="p">],</span>
+        <span class="n">gain_rhcp</span><span class="p">[:,</span> <span class="p">:</span><span class="n">phi_last_idx</span><span class="p">],</span>
+        <span class="n">angle_lhcp</span><span class="p">[:,</span> <span class="p">:</span><span class="n">phi_last_idx</span><span class="p">],</span>
+        <span class="n">angle_rhcp</span><span class="p">[:,</span> <span class="p">:</span><span class="n">phi_last_idx</span><span class="p">],</span>
+        <span class="n">rad_efficiency</span><span class="o">=</span><span class="n">rad_efficiency</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

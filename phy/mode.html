@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mode Module &mdash; SpaceLink 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../_static/fonts.css?v=5583d106" />
+
+  
+    <link rel="canonical" href="https://cascade-space-co.github.io/spacelink/phy/mode.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Performance Module" href="performance.html" />
+    <link rel="prev" title="PHY Modules" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpaceLink
+          </a>
+              <div class="version">
+                0.1.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">SpaceLink Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core/index.html">Core Modules</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">PHY Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#example">Example</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Mode Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="performance.html">Performance Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="registry.html">Registry Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Usage Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpaceLink</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">SpaceLink Modules</a></li>
+          <li class="breadcrumb-item"><a href="index.html">PHY Modules</a></li>
+      <li class="breadcrumb-item active">Mode Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/phy/mode.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-spacelink.phy.mode">
+<span id="mode-module"></span><h1>Mode Module<a class="headerlink" href="#module-spacelink.phy.mode" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.phy.mode.Modulation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.mode.</span></span><span class="sig-name descname"><span class="pre">Modulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/mode.html#Modulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.mode.Modulation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Represents a single modulation scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the modulation scheme.</p></li>
+<li><p><strong>bits_per_symbol</strong> (<em>int</em>) – Number of bits per symbol.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.Modulation.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#spacelink.phy.mode.Modulation.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.Modulation.bits_per_symbol">
+<span class="sig-name descname"><span class="pre">bits_per_symbol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#spacelink.phy.mode.Modulation.bits_per_symbol" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.Modulation.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#spacelink.phy.mode.Modulation.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.phy.mode.Code">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.mode.</span></span><span class="sig-name descname"><span class="pre">Code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/mode.html#Code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.mode.Code" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Represents a single forward error correction code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the code.</p></li>
+<li><p><strong>rate</strong> (<em>Fraction</em>) – Code rate.</p></li>
+<li><p><strong>interleaver_depth</strong> (<em>int</em><em> | </em><em>None</em>) – Interleaver depth for codes such as Reed Solomon that are commonly paired with
+an interleaver.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.Code.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#spacelink.phy.mode.Code.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.Code.rate">
+<span class="sig-name descname"><span class="pre">rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Fraction</span></code></em><a class="headerlink" href="#spacelink.phy.mode.Code.rate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.Code.interleaver_depth">
+<span class="sig-name descname"><span class="pre">interleaver_depth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#spacelink.phy.mode.Code.interleaver_depth" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.Code.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#spacelink.phy.mode.Code.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.phy.mode.CodeChain">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.mode.</span></span><span class="sig-name descname"><span class="pre">CodeChain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/mode.html#CodeChain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.mode.CodeChain" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Represents a chain of forward error correction codes.</p>
+<p>This provides the flexibility to handle concatenated codes such as Reed Solomon
+paired with convolutional code but also single codes and even the absence of forward
+error correction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>codes</strong> (<em>list</em><em>[</em><a class="reference internal" href="#spacelink.phy.mode.Code" title="spacelink.phy.mode.Code"><em>Code</em></a><em>]</em>) – List of codes in in encoding order from outermost to innermost code. If no error
+correction is used the list will be empty.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.CodeChain.codes">
+<span class="sig-name descname"><span class="pre">codes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="#spacelink.phy.mode.Code" title="spacelink.phy.mode.Code"><code class="xref py py-class docutils literal notranslate"><span class="pre">Code</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#spacelink.phy.mode.CodeChain.codes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spacelink.phy.mode.CodeChain.rate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span></em><a class="headerlink" href="#spacelink.phy.mode.CodeChain.rate" title="Link to this definition"></a></dt>
+<dd><p>The overall code rate of the chain, which is the product of the individual code
+rates or 1 if no error correction is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Code rate.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Fraction</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.CodeChain.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#spacelink.phy.mode.CodeChain.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.phy.mode.LinkMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.mode.</span></span><span class="sig-name descname"><span class="pre">LinkMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/mode.html#LinkMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.mode.LinkMode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Represents a specific combination of modulation and coding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>str</em>) – Unique identifier for the link mode.</p></li>
+<li><p><strong>modulation</strong> (<a class="reference internal" href="#spacelink.phy.mode.Modulation" title="spacelink.phy.mode.Modulation"><em>Modulation</em></a>) – Modulation scheme.</p></li>
+<li><p><strong>coding</strong> (<a class="reference internal" href="#spacelink.phy.mode.CodeChain" title="spacelink.phy.mode.CodeChain"><em>CodeChain</em></a>) – Forward error correction code chain.</p></li>
+<li><p><strong>ref</strong> (<em>str</em><em>, </em><em>optional</em>) – Reference or source of the mode definition.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.LinkMode.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#spacelink.phy.mode.LinkMode.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.LinkMode.modulation">
+<span class="sig-name descname"><span class="pre">modulation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#spacelink.phy.mode.Modulation" title="spacelink.phy.mode.Modulation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Modulation</span></code></a></em><a class="headerlink" href="#spacelink.phy.mode.LinkMode.modulation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.LinkMode.coding">
+<span class="sig-name descname"><span class="pre">coding</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#spacelink.phy.mode.CodeChain" title="spacelink.phy.mode.CodeChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">CodeChain</span></code></a></em><a class="headerlink" href="#spacelink.phy.mode.LinkMode.coding" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.LinkMode.ref">
+<span class="sig-name descname"><span class="pre">ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#spacelink.phy.mode.LinkMode.ref" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spacelink.phy.mode.LinkMode.info_bits_per_symbol">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">info_bits_per_symbol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span></em><a class="headerlink" href="#spacelink.phy.mode.LinkMode.info_bits_per_symbol" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spacelink.phy.mode.LinkMode.channel_bits_per_symbol">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">channel_bits_per_symbol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spacelink.phy.mode.LinkMode.channel_bits_per_symbol" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.mode.LinkMode.info_bit_rate">
+<span class="sig-name descname"><span class="pre">info_bit_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbol_rate_hz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/mode.html#LinkMode.info_bit_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.mode.LinkMode.info_bit_rate" title="Link to this definition"></a></dt>
+<dd><p>Calculate the information bit rate as a function of the symbol rate.</p>
+<p>The information bit rate refers to the rate of information bits, which are the
+input to the first stage of the encoding chain on the transmit end of the link
+or the output of the last decoding stage on the receive end of the link. This is
+sometimes referred to as the “net bit rate.”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>symbol_rate_hz</strong> (<em>Frequency</em>) – Symbol rate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Bit rate in Hertz.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Frequency</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.mode.LinkMode.symbol_rate">
+<span class="sig-name descname"><span class="pre">symbol_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_bit_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/mode.html#LinkMode.symbol_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.mode.LinkMode.symbol_rate" title="Link to this definition"></a></dt>
+<dd><p>Calculate the symbol rate as a function of the information bit rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info_bit_rate</strong> (<em>Frequency</em>) – Information bit rate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Symbol rate in Hertz.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Frequency</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.mode.LinkMode.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#spacelink.phy.mode.LinkMode.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="PHY Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="performance.html" class="btn btn-neutral float-right" title="Performance Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Cascade Space.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

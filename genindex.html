@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; SpaceLink 0.1.5 documentation</title>
+  <title>Index &mdash; SpaceLink 0.1.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=59fadc99"></script>
+        <script src="_static/documentation_options.js?v=6e0256f3"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.5
+                0.1.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -89,6 +89,7 @@
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -110,6 +111,10 @@
 </li>
         <li><a href="core/antenna.html#spacelink.core.antenna.SphericalInterpolator.__init__">(spacelink.core.antenna.SphericalInterpolator method)</a>
 </li>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.__init__">(spacelink.phy.performance.ModePerformance method)</a>
+</li>
+        <li><a href="phy/registry.html#spacelink.phy.registry.Registry.__init__">(spacelink.phy.registry.Registry method)</a>
+</li>
       </ul></li>
   </ul></td>
 </tr></table>
@@ -129,7 +134,13 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ErrorMetric.BER">BER (spacelink.phy.performance.ErrorMetric attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/ranging.html#spacelink.core.ranging.DataModulation.BIPOLAR">BIPOLAR (spacelink.core.ranging.DataModulation attribute)</a>
+</li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.Modulation.bits_per_symbol">bits_per_symbol (spacelink.phy.mode.Modulation attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -143,13 +154,25 @@
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.PnRangingCode.CCSDS_T4B">CCSDS_T4B (spacelink.core.ranging.PnRangingCode attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.channel_bits_per_symbol">channel_bits_per_symbol (spacelink.phy.mode.LinkMode property)</a>
+</li>
       <li><a href="core/ranging.html#spacelink.core.ranging.chip_snr">chip_snr() (in module spacelink.core.ranging)</a>
 </li>
       <li><a href="core/noise.html#spacelink.core.noise.cn0_to_ebn0">cn0_to_ebn0() (in module spacelink.core.noise)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/mode.html#spacelink.phy.mode.Code">Code (class in spacelink.phy.mode)</a>
+</li>
       <li><a href="core/ranging.html#spacelink.core.ranging.CODE_LENGTH">CODE_LENGTH (in module spacelink.core.ranging)</a>
+</li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.CodeChain">CodeChain (class in spacelink.phy.mode)</a>
+</li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.CodeChain.codes">codes (spacelink.phy.mode.CodeChain attribute)</a>
+</li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.coding">coding (spacelink.phy.mode.LinkMode attribute)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.coding_gain">coding_gain() (spacelink.phy.performance.ModePerformance method)</a>
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.COMPONENT_LENGTHS">COMPONENT_LENGTHS (in module spacelink.core.ranging)</a>
 </li>
@@ -163,13 +186,15 @@
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.DataModulation">DataModulation (class in spacelink.core.ranging)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/antenna.html#spacelink.core.antenna.RadiationPattern.directivity">directivity() (spacelink.core.antenna.RadiationPattern method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/antenna.html#spacelink.core.antenna.dish_gain">dish_gain() (in module spacelink.core.antenna)</a>
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.PnRangingCode.DSN">DSN (spacelink.core.ranging.PnRangingCode attribute)</a>
+</li>
+      <li><a href="phy/registry.html#spacelink.phy.registry.DuplicateRegistryEntryError">DuplicateRegistryEntryError</a>
 </li>
   </ul></td>
 </tr></table>
@@ -179,11 +204,17 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/antenna.html#spacelink.core.antenna.RadiationPattern.e_field">e_field() (spacelink.core.antenna.RadiationPattern method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/noise.html#spacelink.core.noise.ebn0_to_cn0">ebn0_to_cn0() (in module spacelink.core.noise)</a>
 </li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.ebn0_to_error_rate">ebn0_to_error_rate() (spacelink.phy.performance.ModePerformance method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/units.html#spacelink.core.units.enforce_units">enforce_units() (in module spacelink.core.units)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.error_rate_to_ebn0">error_rate_to_ebn0() (spacelink.phy.performance.ModePerformance method)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ErrorMetric">ErrorMetric (class in spacelink.phy.performance)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -191,6 +222,8 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ErrorMetric.FER">FER (spacelink.phy.performance.ErrorMetric attribute)</a>
+</li>
       <li><a href="core/path.html#spacelink.core.path.free_space_path_loss">free_space_path_loss() (in module spacelink.core.path)</a>
 </li>
       <li><a href="core/units.html#spacelink.core.units.frequency">frequency() (in module spacelink.core.units)</a>
@@ -212,6 +245,10 @@
       <li><a href="core/antenna.html#spacelink.core.antenna.RadiationPattern.gain">gain() (spacelink.core.antenna.RadiationPattern method)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/registry.html#spacelink.phy.registry.Registry.get_performance">get_performance() (spacelink.phy.registry.Registry method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="H">H</h2>
@@ -222,20 +259,68 @@
   </ul></td>
 </tr></table>
 
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.id">id (spacelink.phy.mode.LinkMode attribute)</a>
+</li>
+      <li><a href="core/pattern_io.html#spacelink.core.pattern_io.import_hfss_csv">import_hfss_csv() (in module spacelink.core.pattern_io)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.info_bit_rate">info_bit_rate() (spacelink.phy.mode.LinkMode method)</a>
+</li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.info_bits_per_symbol">info_bits_per_symbol (spacelink.phy.mode.LinkMode property)</a>
+</li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.Code.interleaver_depth">interleaver_depth (spacelink.phy.mode.Code attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/antenna.html#spacelink.core.antenna.Handedness.LEFT">LEFT (spacelink.core.antenna.Handedness attribute)</a>
 </li>
+      <li><a href="core/antenna.html#spacelink.core.antenna.Polarization.lhcp">lhcp() (spacelink.core.antenna.Polarization class method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="core/antenna.html#spacelink.core.antenna.Polarization.lhcp">lhcp() (spacelink.core.antenna.Polarization class method)</a>
+      <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode">LinkMode (class in spacelink.phy.mode)</a>
+</li>
+      <li><a href="phy/registry.html#spacelink.phy.registry.Registry.load">load() (spacelink.phy.registry.Registry method)</a>
+</li>
+      <li><a href="core/pattern_io.html#spacelink.core.pattern_io.load_radiation_pattern_npz">load_radiation_pattern_npz() (in module spacelink.core.pattern_io)</a>
 </li>
   </ul></td>
 </tr></table>
 
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.metric">metric (spacelink.phy.performance.ModePerformance attribute)</a>
+</li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.Code.model_config">model_config (spacelink.phy.mode.Code attribute)</a>
+
+      <ul>
+        <li><a href="phy/mode.html#spacelink.phy.mode.CodeChain.model_config">(spacelink.phy.mode.CodeChain attribute)</a>
+</li>
+        <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.model_config">(spacelink.phy.mode.LinkMode attribute)</a>
+</li>
+        <li><a href="phy/mode.html#spacelink.phy.mode.Modulation.model_config">(spacelink.phy.mode.Modulation attribute)</a>
+</li>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.model_config">(spacelink.phy.performance.ModePerformance attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance">ModePerformance (class in spacelink.phy.performance)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.modes">modes (spacelink.phy.performance.ModePerformance attribute)</a>
+</li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.Modulation">Modulation (class in spacelink.phy.mode)</a>
+</li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.modulation">modulation (spacelink.phy.mode.LinkMode attribute)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     module
@@ -247,9 +332,17 @@
 </li>
         <li><a href="core/path.html#module-spacelink.core.path">spacelink.core.path</a>
 </li>
+        <li><a href="core/pattern_io.html#module-spacelink.core.pattern_io">spacelink.core.pattern_io</a>
+</li>
         <li><a href="core/ranging.html#module-spacelink.core.ranging">spacelink.core.ranging</a>
 </li>
         <li><a href="core/units.html#module-spacelink.core.units">spacelink.core.units</a>
+</li>
+        <li><a href="phy/mode.html#module-spacelink.phy.mode">spacelink.phy.mode</a>
+</li>
+        <li><a href="phy/performance.html#module-spacelink.phy.performance">spacelink.phy.performance</a>
+</li>
+        <li><a href="phy/registry.html#module-spacelink.phy.registry">spacelink.phy.registry</a>
 </li>
       </ul></li>
   </ul></td>
@@ -258,12 +351,18 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="core/noise.html#spacelink.core.noise.noise_factor_to_temperature">noise_factor_to_temperature() (in module spacelink.core.noise)</a>
+      <li><a href="phy/mode.html#spacelink.phy.mode.Code.name">name (spacelink.phy.mode.Code attribute)</a>
+
+      <ul>
+        <li><a href="phy/mode.html#spacelink.phy.mode.Modulation.name">(spacelink.phy.mode.Modulation attribute)</a>
 </li>
-      <li><a href="core/noise.html#spacelink.core.noise.noise_figure_to_temperature">noise_figure_to_temperature() (in module spacelink.core.noise)</a>
+      </ul></li>
+      <li><a href="core/noise.html#spacelink.core.noise.noise_factor_to_temperature">noise_factor_to_temperature() (in module spacelink.core.noise)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core/noise.html#spacelink.core.noise.noise_figure_to_temperature">noise_figure_to_temperature() (in module spacelink.core.noise)</a>
+</li>
       <li><a href="core/noise.html#spacelink.core.noise.noise_power">noise_power() (in module spacelink.core.noise)</a>
 </li>
       <li><a href="core/noise.html#spacelink.core.noise.noise_power_density">noise_power_density() (in module spacelink.core.noise)</a>
@@ -280,11 +379,13 @@
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.pn_component_acquisition_probability">pn_component_acquisition_probability() (in module spacelink.core.ranging)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/ranging.html#spacelink.core.ranging.pn_sequence_range_ambiguity">pn_sequence_range_ambiguity() (in module spacelink.core.ranging)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/ranging.html#spacelink.core.ranging.PnRangingCode">PnRangingCode (class in spacelink.core.ranging)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.points">points (spacelink.phy.performance.ModePerformance attribute)</a>
 </li>
       <li><a href="core/antenna.html#spacelink.core.antenna.Polarization">Polarization (class in spacelink.core.antenna)</a>
 </li>
@@ -300,8 +401,22 @@
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.ranging_to_total_power">ranging_to_total_power() (in module spacelink.core.ranging)</a>
 </li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.Code.rate">rate (spacelink.phy.mode.Code attribute)</a>
+
+      <ul>
+        <li><a href="phy/mode.html#spacelink.phy.mode.CodeChain.rate">(spacelink.phy.mode.CodeChain property)</a>
+</li>
+      </ul></li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.ref">ref (spacelink.phy.mode.LinkMode attribute)</a>
+
+      <ul>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.ref">(spacelink.phy.performance.ModePerformance attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/registry.html#spacelink.phy.registry.Registry">Registry (class in spacelink.phy.registry)</a>
+</li>
       <li><a href="core/units.html#spacelink.core.units.return_loss_to_vswr">return_loss_to_vswr() (in module spacelink.core.units)</a>
 </li>
       <li><a href="core/antenna.html#spacelink.core.antenna.Polarization.rhcp">rhcp() (spacelink.core.antenna.Polarization class method)</a>
@@ -315,6 +430,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/units.html#spacelink.core.units.safe_negate">safe_negate() (in module spacelink.core.units)</a>
+</li>
+      <li><a href="core/pattern_io.html#spacelink.core.pattern_io.save_radiation_pattern_npz">save_radiation_pattern_npz() (in module spacelink.core.pattern_io)</a>
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.DataModulation.SINE_SUBCARRIER">SINE_SUBCARRIER (spacelink.core.ranging.DataModulation attribute)</a>
 </li>
@@ -339,8 +456,13 @@
         <li><a href="core/path.html#module-spacelink.core.path">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    spacelink.core.pattern_io
+
+      <ul>
+        <li><a href="core/pattern_io.html#module-spacelink.core.pattern_io">module</a>
+</li>
+      </ul></li>
       <li>
     spacelink.core.ranging
 
@@ -348,6 +470,8 @@
         <li><a href="core/ranging.html#module-spacelink.core.ranging">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     spacelink.core.units
 
@@ -355,9 +479,32 @@
         <li><a href="core/units.html#module-spacelink.core.units">module</a>
 </li>
       </ul></li>
+      <li>
+    spacelink.phy.mode
+
+      <ul>
+        <li><a href="phy/mode.html#module-spacelink.phy.mode">module</a>
+</li>
+      </ul></li>
+      <li>
+    spacelink.phy.performance
+
+      <ul>
+        <li><a href="phy/performance.html#module-spacelink.phy.performance">module</a>
+</li>
+      </ul></li>
+      <li>
+    spacelink.phy.registry
+
+      <ul>
+        <li><a href="phy/registry.html#module-spacelink.phy.registry">module</a>
+</li>
+      </ul></li>
       <li><a href="core/antenna.html#spacelink.core.antenna.SphericalInterpolator">SphericalInterpolator (class in spacelink.core.antenna)</a>
 </li>
       <li><a href="core/path.html#spacelink.core.path.spreading_loss">spreading_loss() (in module spacelink.core.path)</a>
+</li>
+      <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.symbol_rate">symbol_rate() (spacelink.phy.mode.LinkMode method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -381,6 +528,14 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.validate_error_values_decreasing">validate_error_values_decreasing() (spacelink.phy.performance.ModePerformance class method)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.validate_minimum_points">validate_minimum_points() (spacelink.phy.performance.ModePerformance class method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.validate_points_sorted">validate_points_sorted() (spacelink.phy.performance.ModePerformance class method)</a>
+</li>
       <li><a href="core/units.html#spacelink.core.units.vswr_to_return_loss">vswr_to_return_loss() (in module spacelink.core.units)</a>
 </li>
   </ul></td>
@@ -390,6 +545,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/units.html#spacelink.core.units.wavelength">wavelength() (in module spacelink.core.units)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ErrorMetric.WER">WER (spacelink.phy.performance.ErrorMetric attribute)</a>
 </li>
   </ul></td>
 </tr></table>
