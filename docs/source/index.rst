@@ -17,6 +17,7 @@ Key Features
 * **Noise Calculations**: Calculate system noise temperature, noise figure, and related parameters
 * **Space Communications**: Built-in support for satellite link analysis with path loss and atmospheric effects
 * **Unit-Aware Calculations**: All calculations use proper units through the Astropy units system
+* **Physical Layer Support**: Link mode definitions with modulation, coding, and performance curves for comprehensive link analysis
 
 Getting Started
 ---------------
@@ -42,6 +43,9 @@ View the source code at the `GitHub Repository <https://github.com/cascade-space
 
 Library Structure
 -----------------
+
+SpaceLink is organized into two main subpackages:
+
 * **Core**: Fundamental calculations, units, constants, and validation logic with minimal dependencies
 * **PHY**: Physical-layer definitions including modulation/coding link modes, performance curves, and a registry backed by YAML data
 
@@ -49,7 +53,8 @@ Library Structure
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+   core/index
+   phy/index
    examples
 
 Indices and tables
@@ -58,5 +63,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-.. |Contributor Covenant| image:: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg :target: code_of_conduct.md
