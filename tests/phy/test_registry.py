@@ -3,7 +3,11 @@ import pytest
 import tempfile
 import yaml
 
-from spacelink.phy.registry import Registry, DuplicateRegistryEntryError
+from spacelink.phy.registry import (
+    Registry,
+    DuplicateRegistryEntryError,
+    NoRegistryFilesError,
+)
 from spacelink.phy.performance import ErrorMetric
 
 
@@ -155,7 +159,7 @@ class TestRegistry:
                 yaml.dump(mode_data2, f)
 
             registry = Registry()
-            registry.load(modes_dir, perf_dir)
+            registry.load(modes_dir, perf_dir=None)
 
             # Test that Registry correctly loads from multiple files
             assert len(registry.modes) == 2
@@ -269,3 +273,75 @@ class TestRegistry:
 
             with pytest.raises(DuplicateRegistryEntryError):
                 registry.load(modes_dir, perf_dir)
+
+    def test_load_with_no_mode_files(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            modes_dir = temp_path / "modes"
+            perf_dir = temp_path / "perf"
+            modes_dir.mkdir()
+            perf_dir.mkdir()
+
+            # Create only a performance file, no mode files
+            perf_data = {
+                "mode_ids": ["TEST_MODE"],
+                "metric": "bit error rate",
+                "points": [[0.0, 1e-1]],
+            }
+            with open(perf_dir / "perf.yaml", "w") as f:
+                yaml.dump(perf_data, f)
+
+            registry = Registry()
+
+            with pytest.raises(NoRegistryFilesError):
+                registry.load(modes_dir, perf_dir)
+
+    def test_load_with_no_performance_files(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            modes_dir = temp_path / "modes"
+            perf_dir = temp_path / "perf"
+            modes_dir.mkdir()
+            perf_dir.mkdir()
+
+            # Create only a mode file, no performance files
+            mode_data = [
+                {
+                    "id": "TEST_MODE",
+                    "modulation": {"name": "BPSK", "bits_per_symbol": 1},
+                    "coding": {"codes": []},
+                }
+            ]
+            with open(modes_dir / "modes.yaml", "w") as f:
+                yaml.dump(mode_data, f)
+
+            registry = Registry()
+
+            with pytest.raises(NoRegistryFilesError):
+                registry.load(modes_dir, perf_dir)
+
+    def test_load_with_perf_dir_none(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            modes_dir = temp_path / "modes"
+            modes_dir.mkdir()
+
+            # Create only a mode file
+            mode_data = [
+                {
+                    "id": "TEST_MODE",
+                    "modulation": {"name": "BPSK", "bits_per_symbol": 1},
+                    "coding": {"codes": []},
+                }
+            ]
+            with open(modes_dir / "modes.yaml", "w") as f:
+                yaml.dump(mode_data, f)
+
+            registry = Registry()
+            registry.load(modes_dir, perf_dir=None)
+
+            # Should load modes but not performance data
+            assert len(registry.modes) == 1
+            assert "TEST_MODE" in registry.modes
+            assert len(registry.perfs) == 0
+            assert len(registry.perf_index) == 0
