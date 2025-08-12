@@ -69,6 +69,7 @@ from .units import (
     to_dB,
     to_linear,
     safe_negate,
+    Temperature,
 )
 
 
@@ -686,3 +687,46 @@ def _surface_integral(theta: Angle, phi: Angle, values: Dimensionless) -> SolidA
     integrand = values * np.sin(theta[:, np.newaxis])
     int_phi = scipy.integrate.simpson(integrand, phi, axis=1)
     return scipy.integrate.simpson(int_phi, theta) * u.sr
+
+@enforce_units
+def gain_from_g_over_t(g_over_t: Decibels, temperature: Temperature) -> Decibels:
+    r"""
+    Gain in dB from the ratio of gain to the noise and temperature.
+
+    Parameters
+    ----------
+    g_over_t: Decibels
+        Ratio of gain to the noise
+    temperature: Temperature
+        Tin Kelvin.
+    
+    Returns
+    -------
+    Decibels
+        Gain in dB.
+    """
+    if temperature < 0 * u.K:
+        raise ValueError("Temperature must be positive")
+    
+    return g_over_t + to_dB(temperature / u.K)
+
+
+@enforce_units
+def temperature_from_g_over_t(g_over_t: Decibels, gain: Decibels) -> Temperature:
+    r"""
+    Calculate the temperature in Kelvin from ratio of gain to the noise.
+
+    Parameters
+    ----------
+    g_over_t: Decibels
+        Ratio of gain to the noise.
+    gain: Decibels
+        Gain in dB.
+
+    Returns
+    -------
+    Temperature
+        Temperature in Kelvin.
+    """
+    delta_db = (gain.value - g_over_t.value) * u.dB
+    return to_linear(delta_db, factor=10) * u.K
