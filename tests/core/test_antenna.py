@@ -169,6 +169,10 @@ class TestPolarization:
         inner_product = np.dot(lhcp.jones_vector.conj(), rhcp.jones_vector)
         assert abs(inner_product) == pytest.approx(0.0)
 
+    def test_invalid_axial_ratio_raises(self):
+        with pytest.raises(ValueError):
+            Polarization(0 * u.rad, 0.5 * u.dimensionless, Handedness.LEFT)
+
 
 @dataclass
 class RadiationPatternExpectedResults:
@@ -497,6 +501,22 @@ class TestSphericalInterpolator:
             atol=1e-4,
         )
 
+    def test_out_of_bounds_theta_phi_raise(self):
+        # Create subset grids so bounds checking is meaningful
+        theta = np.linspace(0.2 * np.pi, 0.8 * np.pi, 10) * u.rad
+        phi = np.linspace(0.25 * np.pi, 1.25 * np.pi, 12, endpoint=False) * u.rad
+        values = np.ones((10, 12)) * u.dimensionless
+
+        interpolator = SphericalInterpolator(theta, phi, values)
+
+        # phi below range (after modulo) → error
+        with pytest.raises(ValueError):
+            interpolator(theta[0], (0.0 * u.rad))
+
+        # theta above range → error
+        with pytest.raises(ValueError):
+            interpolator(0.95 * np.pi * u.rad, phi[0])
+
 
 class TestDefaultPolarization:
     def _simple_pattern(self, default_pol=None) -> RadiationPattern:
@@ -748,6 +768,50 @@ class TestRadiationPatternValidation:
         phi_too_much = np.linspace(0, 2.5 * np.pi, 10) * u.rad
         with pytest.raises(ValueError):
             RadiationPattern(theta, phi_too_much, e_theta, e_phi, rad_efficiency)
+
+    def test_surface_integral_exceeds_4pi_raises(self):
+        # Construct fields whose directivity integrates to > 4π
+        theta = np.linspace(0, np.pi, 10) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
+        scale = np.sqrt(2.0)
+        e_theta = scale * np.ones((10, 12)) * u.dimensionless
+        e_phi = np.zeros((10, 12)) * u.dimensionless
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi, e_theta, e_phi, 1.0 * u.dimensionless)
+
+    def test_factories_negative_gain_raise(self):
+        theta = np.linspace(0, np.pi, 6) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 7, endpoint=False) * u.rad
+
+        # Circular gain negative
+        gain_l = np.ones((6, 7)) * u.dimensionless
+        gain_r = np.ones((6, 7)) * u.dimensionless
+        gain_l[0, 0] = -1 * u.dimensionless
+        with pytest.raises(ValueError):
+            RadiationPattern.from_circular_gain(
+                theta,
+                phi,
+                gain_l,
+                gain_r,
+                np.zeros((6, 7)) * u.rad,
+                np.zeros((6, 7)) * u.rad,
+                1.0 * u.dimensionless,
+            )
+
+        # Linear gain negative
+        g_th = np.ones((6, 7)) * u.dimensionless
+        g_ph = np.ones((6, 7)) * u.dimensionless
+        g_ph[0, 0] = -1 * u.dimensionless
+        with pytest.raises(ValueError):
+            RadiationPattern.from_linear_gain(
+                theta,
+                phi,
+                g_th,
+                g_ph,
+                np.zeros((6, 7)) * u.rad,
+                np.zeros((6, 7)) * u.rad,
+                1.0 * u.dimensionless,
+            )
 
 
 def test_gain_from_g_over_t():
