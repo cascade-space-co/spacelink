@@ -344,6 +344,7 @@ class RadiationPattern:
         e_theta: Dimensionless,
         e_phi: Dimensionless,
         rad_efficiency: Dimensionless,
+        default_polarization: Polarization | None = None,
     ):
         r"""
         Create a radiation pattern from a set of E-field components.
@@ -367,6 +368,9 @@ class RadiationPattern:
             normalized such that the magnitude squared is equal to directivity.
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
+        default_polarization: Polarization | None
+            Optional default polarization used when instance methods are called without
+            an explicit polarization.
 
         Raises
         ------
@@ -396,6 +400,7 @@ class RadiationPattern:
         self.e_theta = e_theta
         self.e_phi = e_phi
         self.rad_efficiency = rad_efficiency
+        self.default_polarization = default_polarization
 
         # Surface integral of directivity should be 4π over the whole sphere (or less if
         # the pattern is not defined over the whole sphere). It should never be greater
@@ -420,6 +425,7 @@ class RadiationPattern:
         e_lhcp: Dimensionless,
         e_rhcp: Dimensionless,
         rad_efficiency: Dimensionless,
+        default_polarization: Polarization | None = None,
     ) -> typing.Self:
         r"""
         Create a radiation pattern from a set of LHCP/RHCP E-field components.
@@ -443,11 +449,21 @@ class RadiationPattern:
             (N, M) normalized such that the magnitude squared is equal to directivity.
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
+        default_polarization: Polarization | None
+            Optional default polarization used when instance methods are called without
+            an explicit polarization.
         """
         # Change of basis from LHCP/RHCP to theta/phi.
         e_theta = 1 / np.sqrt(2) * (e_lhcp + e_rhcp)
         e_phi = 1j / np.sqrt(2) * (e_lhcp - e_rhcp)
-        return cls(theta, phi, e_theta, e_phi, rad_efficiency)
+        return cls(
+            theta,
+            phi,
+            e_theta,
+            e_phi,
+            rad_efficiency,
+            default_polarization=default_polarization,
+        )
 
     @classmethod
     @enforce_units
@@ -460,6 +476,7 @@ class RadiationPattern:
         phase_lhcp: Angle,
         phase_rhcp: Angle,
         rad_efficiency: Dimensionless,
+        default_polarization: Polarization | None = None,
     ) -> typing.Self:
         r"""
         Create a radiation pattern from circular gain and phase.
@@ -481,13 +498,23 @@ class RadiationPattern:
             2D array of RHCP phase angles with shape (N, M).
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
+        default_polarization: Polarization | None
+            Optional default polarization used when instance methods are called without
+            an explicit polarization.
         """
         if np.any(gain_lhcp < 0) or np.any(gain_rhcp < 0):
             raise ValueError("Gain must be non-negative")
 
         e_lhcp = np.sqrt(gain_lhcp / rad_efficiency) * np.exp(1j * phase_lhcp.value)
         e_rhcp = np.sqrt(gain_rhcp / rad_efficiency) * np.exp(1j * phase_rhcp.value)
-        return cls.from_circular_e_field(theta, phi, e_lhcp, e_rhcp, rad_efficiency)
+        return cls.from_circular_e_field(
+            theta,
+            phi,
+            e_lhcp,
+            e_rhcp,
+            rad_efficiency,
+            default_polarization=default_polarization,
+        )
 
     @classmethod
     @enforce_units
@@ -500,6 +527,7 @@ class RadiationPattern:
         phase_theta: Angle,
         phase_phi: Angle,
         rad_efficiency: Dimensionless,
+        default_polarization: Polarization | None = None,
     ) -> typing.Self:
         r"""
         Create a radiation pattern from linear gain and phase.
@@ -521,17 +549,27 @@ class RadiationPattern:
             2D array of :math:`\hat{\phi}` phase angles with shape (N, M).
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
+        default_polarization: Polarization | None
+            Optional default polarization used when instance methods are called without
+            an explicit polarization.
         """
         if np.any(gain_theta < 0) or np.any(gain_phi < 0):
             raise ValueError("Gain must be non-negative")
 
         e_theta = np.sqrt(gain_theta / rad_efficiency) * np.exp(1j * phase_theta.value)
         e_phi = np.sqrt(gain_phi / rad_efficiency) * np.exp(1j * phase_phi.value)
-        return cls(theta, phi, e_theta, e_phi, rad_efficiency)
+        return cls(
+            theta,
+            phi,
+            e_theta,
+            e_phi,
+            rad_efficiency,
+            default_polarization=default_polarization,
+        )
 
     @enforce_units
     def e_field(
-        self, theta: Angle, phi: Angle, polarization: Polarization
+        self, theta: Angle, phi: Angle, polarization: Polarization | None = None
     ) -> Dimensionless:
         r"""
         Normalized complex E-field in the desired polarization state.
@@ -542,8 +580,9 @@ class RadiationPattern:
             Polar angles.
         phi: Angle
             Azimuthal angles.
-        polarization: Polarization
-            Desired polarization state.
+        polarization: Polarization | None
+            Desired polarization state. If None, uses the instance's
+            `default_polarization` if set; otherwise raises ValueError.
 
         Returns
         -------
@@ -552,15 +591,21 @@ class RadiationPattern:
             squared is the directivity. Shape is determined by standard Numpy
             broadcasting rules from the shapes of theta and phi.
         """
+        pol = polarization if polarization is not None else self.default_polarization
+        if pol is None:
+            raise ValueError(
+                "Polarization must be provided or a default_polarization must be set "
+                "on the RadiationPattern."
+            )
         e_jones = self._e_jones(theta, phi)
         return (
-            np.tensordot(polarization.jones_vector.conj(), e_jones, axes=([-1], [-1]))
+            np.tensordot(pol.jones_vector.conj(), e_jones, axes=([-1], [-1]))
             * u.dimensionless
         )
 
     @enforce_units
     def directivity(
-        self, theta: Angle, phi: Angle, polarization: Polarization
+        self, theta: Angle, phi: Angle, polarization: Polarization | None = None
     ) -> Decibels:
         r"""
         Directivity of the antenna.
@@ -585,8 +630,9 @@ class RadiationPattern:
             Polar angles.
         phi: Angle
             Azimuthal angles.
-        polarization: Polarization
-            Desired polarization state.
+        polarization: Polarization | None
+            Desired polarization state. If None, uses the instance's
+            `default_polarization` if set; otherwise raises ValueError.
 
         Returns
         -------
@@ -597,7 +643,9 @@ class RadiationPattern:
         return to_dB(np.abs(self.e_field(theta, phi, polarization)) ** 2)
 
     @enforce_units
-    def gain(self, theta: Angle, phi: Angle, polarization: Polarization) -> Decibels:
+    def gain(
+        self, theta: Angle, phi: Angle, polarization: Polarization | None = None
+    ) -> Decibels:
         r"""
         Gain of the antenna.
 
@@ -612,8 +660,9 @@ class RadiationPattern:
             Polar angles.
         phi: Angle
             Azimuthal angles.
-        polarization: Polarization
-            Desired polarization state.
+        polarization: Polarization | None
+            Desired polarization state. If None, uses the instance's
+            `default_polarization` if set; otherwise raises ValueError.
 
         Returns
         -------
