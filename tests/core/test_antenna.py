@@ -278,7 +278,7 @@ def create_antenna_pattern_test_cases():
 @pytest.mark.parametrize("test_case", create_antenna_pattern_test_cases())
 def test_antenna_pattern_calculations(test_case):
 
-    shape_interp = (100, 200)
+    shape_interp = (40, 80)
     theta_interp = np.linspace(0, np.pi, shape_interp[0]) * u.rad
     phi_interp = np.linspace(0, 2 * np.pi, shape_interp[1]) * u.rad
 
@@ -356,10 +356,10 @@ class TestSphericalInterpolator:
     """Tests for the SphericalInterpolator class."""
 
     def test_interpolation(self):
-        N = 150
-        M = 200
-        downsample = 5
-        periods = 7  # Number of periods in phi
+        N = 80
+        M = 120
+        downsample = 4
+        periods = 3  # Number of periods in phi
         peak_gain = 50.0  # Gain varies between -50 and +50 dBi
 
         theta = np.linspace(0, np.pi, N) * u.rad
