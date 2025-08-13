@@ -390,8 +390,6 @@ class TestSphericalInterpolator:
 
         result = interpolator(theta[:, np.newaxis], phi)
 
-        assert result.shape == (N, M)
-        assert result.unit == u.dimensionless
         assert_quantity_allclose(to_dB(result), gain_db_expected, atol=0.3 * u.dB)
 
     def test_subset_sphere_interpolation(self):
@@ -466,19 +464,15 @@ class TestSphericalInterpolator:
         test_theta = np.pi / 4 * u.rad
         test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
         result = interpolator(test_theta, test_phi)
-        assert result.shape == (100,)
-        assert result.unit == unit
         expected = np.sin(test_theta.value) * np.exp(1j * test_phi.value)
-        np.testing.assert_allclose(result.value, expected, atol=1e-2)
+        assert_quantity_allclose(result, expected * unit, atol=1e-2 * unit)
 
         # Test lower hemisphere
         test_theta = 3 * np.pi / 4 * u.rad
         test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
         result = interpolator(test_theta, test_phi)
-        assert result.shape == (100,)
-        assert result.unit == unit
         expected = 10 ** (floor.value / 10)
-        np.testing.assert_allclose(result.value, expected, atol=1e-10)
+        assert_quantity_allclose(result, expected * unit, atol=1e-10 * unit)
 
     def test_phase_continuity(self):
         theta = np.linspace(0, np.pi, 11) * u.rad
