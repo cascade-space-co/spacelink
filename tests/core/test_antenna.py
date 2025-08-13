@@ -814,6 +814,140 @@ class TestRadiationPatternValidation:
             )
 
 
+class TestRadiationPatternFactoryConstructors:
+    def _grid(self):
+        # Avoid endpoints to match interpolator constraints
+        N, M = 12, 16
+        theta = np.linspace(0.1, np.pi - 0.1, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+        return theta, phi
+
+    def test_from_circular_e_field(self):
+        theta, phi = self._grid()
+        # Non-trivial phase across phi, constant over theta
+        e_lhcp = (
+            np.exp(1j * phi.value)[np.newaxis, :] * np.ones((theta.size, 1))
+        ) * u.dimensionless
+        e_rhcp = np.zeros((theta.size, phi.size)) * u.dimensionless
+
+        pat = RadiationPattern.from_circular_e_field(
+            theta=theta,
+            phi=phi,
+            e_lhcp=e_lhcp,
+            e_rhcp=e_rhcp,
+            rad_efficiency=0.65 * u.dimensionless,
+        )
+
+        pol_lhcp = Polarization.lhcp()
+        pol_rhcp = Polarization.rhcp()
+        pol_theta = Polarization(0 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
+        pol_phi = Polarization(
+            np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT
+        )
+
+        # LHCP directivity should be 1, RHCP should be 0, linear components 0.5 and 0.5
+        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_lhcp))
+        dir_rhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_rhcp))
+        dir_theta = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_theta))
+        dir_phi = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_phi))
+
+        assert_quantity_allclose(dir_lhcp, 1.0 * u.dimensionless)
+        assert_quantity_allclose(
+            dir_rhcp, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
+        )
+        assert_quantity_allclose(dir_theta, 0.5 * u.dimensionless)
+        assert_quantity_allclose(dir_phi, 0.5 * u.dimensionless)
+
+        # Gain should be eta * directivity (in linear)
+        gain_lhcp = to_linear(pat.gain(theta[:, np.newaxis], phi, pol_lhcp))
+        assert_quantity_allclose(gain_lhcp, 0.65 * dir_lhcp)
+
+        # Phase of LHCP e-field should match exp(1j*phi)
+        e_l = pat.e_field(theta[:, np.newaxis], phi, pol_lhcp)
+        phase_err = np.angle(e_l.value * np.exp(-1j * phi.value))
+        np.testing.assert_allclose(phase_err, 0.0, atol=1e-10)
+
+    def test_from_circular_gain(self):
+        theta, phi = self._grid()
+        gain_lhcp = 0.25 * np.ones((theta.size, phi.size)) * u.dimensionless
+        gain_rhcp = np.zeros((theta.size, phi.size)) * u.dimensionless
+        # Give LHCP a varying phase; directivity is phase-independent
+        phase_lhcp = (
+            np.linspace(0, 2 * np.pi, phi.size)[np.newaxis, :]
+            * np.ones((theta.size, 1))
+            * u.rad
+        )
+        phase_rhcp = np.zeros((theta.size, phi.size)) * u.rad
+
+        pat = RadiationPattern.from_circular_gain(
+            theta=theta,
+            phi=phi,
+            gain_lhcp=gain_lhcp,
+            gain_rhcp=gain_rhcp,
+            phase_lhcp=phase_lhcp,
+            phase_rhcp=phase_rhcp,
+            rad_efficiency=0.75 * u.dimensionless,
+        )
+
+        pol_lhcp = Polarization.lhcp()
+        pol_rhcp = Polarization.rhcp()
+        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_lhcp))
+        dir_rhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_rhcp))
+        assert_quantity_allclose(dir_lhcp, (0.25 / 0.75) * u.dimensionless)
+        assert_quantity_allclose(
+            dir_rhcp, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
+        )
+        gain_lhcp = to_linear(pat.gain(theta[:, np.newaxis], phi, pol_lhcp))
+        assert_quantity_allclose(gain_lhcp, 0.75 * dir_lhcp)
+
+        # Phase of LHCP e-field should match provided phase_lhcp
+        e_l = pat.e_field(theta[:, np.newaxis], phi, pol_lhcp)
+        phase_err = np.angle(e_l.value * np.exp(-1j * phase_lhcp.value))
+        np.testing.assert_allclose(phase_err, 0.0, atol=1e-10)
+
+    def test_from_linear_gain(self):
+        theta, phi = self._grid()
+        # Choose gain equal to eta so resulting directivity is 1
+        gain_theta = 0.6 * np.ones((theta.size, phi.size)) * u.dimensionless
+        gain_phi = np.zeros((theta.size, phi.size)) * u.dimensionless
+        # Non-trivial phase that varies in theta
+        phase_theta = theta[:, np.newaxis]
+        phase_phi = np.zeros((theta.size, phi.size)) * u.rad
+
+        pat = RadiationPattern.from_linear_gain(
+            theta=theta,
+            phi=phi,
+            gain_theta=gain_theta,
+            gain_phi=gain_phi,
+            phase_theta=phase_theta,
+            phase_phi=phase_phi,
+            rad_efficiency=0.6 * u.dimensionless,
+        )
+
+        pol_theta = Polarization(0 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
+        pol_phi = Polarization(
+            np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT
+        )
+        pol_lhcp = Polarization.lhcp()
+        dir_theta = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_theta))
+        dir_phi = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_phi))
+        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_lhcp))
+        assert_quantity_allclose(dir_theta, 1.0 * u.dimensionless)
+        assert_quantity_allclose(
+            dir_phi, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
+        )
+        assert_quantity_allclose(dir_lhcp, 0.5 * u.dimensionless)
+        gain_theta_lin = to_linear(pat.gain(theta[:, np.newaxis], phi, pol_theta))
+        gain_lhcp_lin = to_linear(pat.gain(theta[:, np.newaxis], phi, pol_lhcp))
+        assert_quantity_allclose(gain_theta_lin, 0.6 * dir_theta)
+        assert_quantity_allclose(gain_lhcp_lin, 0.6 * dir_lhcp)
+
+        # Phase of theta-polarized e-field should match phase_theta
+        e_th = pat.e_field(theta[:, np.newaxis], phi, pol_theta)
+        phase_err = np.angle(e_th.value * np.exp(-1j * phase_theta.value))
+        np.testing.assert_allclose(phase_err, 0.0, atol=1e-10)
+
+
 def test_gain_from_g_over_t():
     # Test where temp is exactly 1 K
     gain = gain_from_g_over_t(10 * u.dB_per_K, 1 * u.K)
