@@ -111,12 +111,18 @@ def test_modulation_factor(
 def test_pn_acquisition_time_invalid_inputs():
     # success_probability out of bounds
     with pytest.raises(ValueError):
-        ranging.pn_acquisition_time(30.0 * u.dBHz, 0.0 * u.dimensionless, ranging.PnRangingCode.DSN)
+        ranging.pn_acquisition_time(
+            30.0 * u.dBHz, 0.0 * u.dimensionless, ranging.PnRangingCode.DSN
+        )
     with pytest.raises(ValueError):
-        ranging.pn_acquisition_time(30.0 * u.dBHz, 1.0 * u.dimensionless, ranging.PnRangingCode.DSN)
+        ranging.pn_acquisition_time(
+            30.0 * u.dBHz, 1.0 * u.dimensionless, ranging.PnRangingCode.DSN
+        )
+
     # invalid code
     class _BadCode:
         pass
+
     with pytest.raises(ValueError):
         ranging.pn_acquisition_time(30.0 * u.dBHz, 0.5 * u.dimensionless, _BadCode())
 

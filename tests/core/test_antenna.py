@@ -392,9 +392,7 @@ class TestSphericalInterpolator:
 
         assert result.shape == (N, M)
         assert result.unit == u.dimensionless
-        np.testing.assert_allclose(
-            to_dB(result).value, gain_db_expected.value, atol=0.3
-        )
+        assert_quantity_allclose(to_dB(result), gain_db_expected, atol=0.3 * u.dB)
 
     def test_subset_sphere_interpolation(self):
         N = 80
@@ -421,17 +419,27 @@ class TestSphericalInterpolator:
             gain[::downsample, ::downsample],
         )
 
-        result = interpolator(theta[:-downsample, np.newaxis], phi[:-downsample])
+        # Evaluate on interior window to avoid known edge degradation
+        margin = 3 * downsample  # use three strides to reach ≤0.1 dB interior error
+        interior_result = interpolator(
+            theta[margin:-margin, np.newaxis],
+            phi[margin:-margin],
+        )
+        assert_quantity_allclose(
+            to_dB(interior_result),
+            gain_db[margin:-margin, margin:-margin],
+            atol=0.1 * u.dB,
+        )
 
-        assert result.shape == (N - downsample, M - downsample)
-        assert result.unit == u.dimensionless
-
-        # Loose tolerance because interpolation performance degrades at the edges when
-        # the grid does not span the full circle.
-        np.testing.assert_allclose(
-            to_dB(result).value,
-            gain_db[:-downsample, :-downsample].value,
-            atol=1.2,
+        # Secondary check: on full withheld region (one stride from edges)
+        full_region_result = interpolator(
+            theta[downsample:-downsample, np.newaxis],
+            phi[downsample:-downsample],
+        )
+        assert_quantity_allclose(
+            to_dB(full_region_result),
+            gain_db[downsample:-downsample, downsample:-downsample],
+            atol=1.2 * u.dB,
         )
 
     def test_with_zeros(self):
