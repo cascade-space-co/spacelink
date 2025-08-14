@@ -669,19 +669,21 @@ class TestRadiationPatternValidation:
 
 
 def test_gain_from_g_over_t():
-    """where temp is exectly 1 K"""
-    gain = gain_from_g_over_t(10 * u.dB, 1 * u.K)
+    """Test gain calculation from G/T ratio."""
+    # Test where temp is exactly 1 K
+    gain = gain_from_g_over_t(10 * u.dB_per_K, 1 * u.K)
     assert_quantity_allclose(gain, 10 * u.dB)
 
-    """ test where temp is greater than 1 K """
-    gain_100_K = gain_from_g_over_t(10 * u.dB, 100 * u.K)
+    # Test where temp is greater than 1 K
+    gain_100_K = gain_from_g_over_t(10 * u.dB_per_K, 100 * u.K)
     assert_quantity_allclose(gain_100_K, 30 * u.dB)
 
-    """ test for negative temperature """
+    # Test for negative temperature
     with pytest.raises(ValueError):
-        gain_from_g_over_t(10 * u.dB, -1 * u.K)
+        gain_from_g_over_t(10 * u.dB_per_K, -1 * u.K)
 
 
 def test_temperature_from_g_over_t():
-    temperature = temperature_from_g_over_t(10 * u.dB, 20 * u.dB)
+    """Test temperature calculation from G/T ratio."""
+    temperature = temperature_from_g_over_t(10 * u.dB_per_K, 20 * u.dB)
     assert_quantity_allclose(temperature, 10 * u.K)

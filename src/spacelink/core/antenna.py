@@ -70,6 +70,7 @@ from .units import (
     to_linear,
     safe_negate,
     Temperature,
+    Decibels_over_temperature,
 )
 
 
@@ -690,16 +691,19 @@ def _surface_integral(theta: Angle, phi: Angle, values: Dimensionless) -> SolidA
 
 
 @enforce_units
-def gain_from_g_over_t(g_over_t: Decibels, temperature: Temperature) -> Decibels:
+def gain_from_g_over_t(g_over_t: Decibels_over_temperature, temperature: Temperature) -> Decibels:
     r"""
     Gain in dB from the ratio of gain to the noise and temperature.
 
+    The formula used is:
+    G = G/T + 10*log10(T)
+
     Parameters
     ----------
-    g_over_t: Decibels
-        Ratio of gain to the noise
+    g_over_t: Decibels_over_temperature 
+        Ratio of gain to the noise (G/T in dB/K)
     temperature: Temperature
-        Tin Kelvin.
+        Temperature in Kelvin.
 
     Returns
     -------
@@ -709,17 +713,21 @@ def gain_from_g_over_t(g_over_t: Decibels, temperature: Temperature) -> Decibels
     if temperature < 0 * u.K:
         raise ValueError("Temperature must be positive")
 
-    return g_over_t + to_dB(temperature / u.K)
+    # Calculate 10*log10(T)
+    log_temp = to_dB(temperature.value * u.dimensionless, factor=10)
+    
+    # G = G/T + 10*log10(T)
+    return g_over_t + log_temp
 
 
 @enforce_units
-def temperature_from_g_over_t(g_over_t: Decibels, gain: Decibels) -> Temperature:
+def temperature_from_g_over_t(g_over_t: Decibels_over_temperature, gain: Decibels) -> Temperature:
     r"""
     Calculate the temperature in Kelvin from ratio of gain to the noise.
 
     Parameters
     ----------
-    g_over_t: Decibels
+    g_over_t: Decibels_over_temperature 
         Ratio of gain to the noise.
     gain: Decibels
         Gain in dB.
@@ -729,5 +737,5 @@ def temperature_from_g_over_t(g_over_t: Decibels, gain: Decibels) -> Temperature
     Temperature
         Temperature in Kelvin.
     """
-    delta_db = (gain.value - g_over_t.value) * u.dB
+    delta_db = (gain- g_over_t)
     return to_linear(delta_db, factor=10) * u.K
