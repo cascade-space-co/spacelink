@@ -70,7 +70,7 @@ from .units import (
     to_linear,
     safe_negate,
     Temperature,
-    Decibels_over_temperature,
+    DecibelPerKelvin,
 )
 
 
@@ -691,7 +691,9 @@ def _surface_integral(theta: Angle, phi: Angle, values: Dimensionless) -> SolidA
 
 
 @enforce_units
-def gain_from_g_over_t(g_over_t: Decibels_over_temperature, temperature: Temperature) -> Decibels:
+def gain_from_g_over_t(
+    g_over_t: DecibelPerKelvin, temperature: Temperature
+) -> Decibels:
     r"""
     Gain in dB from the ratio of gain to the noise and temperature.
 
@@ -700,7 +702,7 @@ def gain_from_g_over_t(g_over_t: Decibels_over_temperature, temperature: Tempera
 
     Parameters
     ----------
-    g_over_t: Decibels_over_temperature 
+    g_over_t: DecibelPerKelvin
         Ratio of gain to the noise (G/T in dB/K)
     temperature: Temperature
         Temperature in Kelvin.
@@ -713,21 +715,19 @@ def gain_from_g_over_t(g_over_t: Decibels_over_temperature, temperature: Tempera
     if temperature < 0 * u.K:
         raise ValueError("Temperature must be positive")
 
-    # Calculate 10*log10(T)
-    log_temp = to_dB(temperature.value * u.dimensionless, factor=10)
-    
-    # G = G/T + 10*log10(T)
-    return g_over_t + log_temp
+    return g_over_t.value * u.dB + to_dB(temperature / u.K)
 
 
 @enforce_units
-def temperature_from_g_over_t(g_over_t: Decibels_over_temperature, gain: Decibels) -> Temperature:
+def temperature_from_g_over_t(
+    g_over_t: DecibelPerKelvin, gain: Decibels
+) -> Temperature:
     r"""
     Calculate the temperature in Kelvin from ratio of gain to the noise.
 
     Parameters
     ----------
-    g_over_t: Decibels_over_temperature 
+    g_over_t: DecibelPerKelvin
         Ratio of gain to the noise.
     gain: Decibels
         Gain in dB.
@@ -737,5 +737,5 @@ def temperature_from_g_over_t(g_over_t: Decibels_over_temperature, gain: Decibel
     Temperature
         Temperature in Kelvin.
     """
-    delta_db = (gain- g_over_t)
+    delta_db = gain - g_over_t.value * u.dB
     return to_linear(delta_db, factor=10) * u.K

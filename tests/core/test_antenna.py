@@ -669,7 +669,6 @@ class TestRadiationPatternValidation:
 
 
 def test_gain_from_g_over_t():
-    """Test gain calculation from G/T ratio."""
     # Test where temp is exactly 1 K
     gain = gain_from_g_over_t(10 * u.dB_per_K, 1 * u.K)
     assert_quantity_allclose(gain, 10 * u.dB)
@@ -684,6 +683,6 @@ def test_gain_from_g_over_t():
 
 
 def test_temperature_from_g_over_t():
-    """Test temperature calculation from G/T ratio."""
+    # Test temperature calculation from G/T ratio
     temperature = temperature_from_g_over_t(10 * u.dB_per_K, 20 * u.dB)
     assert_quantity_allclose(temperature, 10 * u.K)
