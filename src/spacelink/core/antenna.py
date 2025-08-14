@@ -697,15 +697,12 @@ def gain_from_g_over_t(
     r"""
     Antenna gain from G/T and system noise temperature
 
-    The formula used is:
-    G = G/T + 10*log10(T)
-
     Parameters
     ----------
     g_over_t: DecibelPerKelvin
         Ratio of gain to the noise (G/T in dB/K)
     temperature: Temperature
-        Temperature in Kelvin.
+        System noise temperature
 
     Returns
     -------
