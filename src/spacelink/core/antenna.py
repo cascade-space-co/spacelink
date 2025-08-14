@@ -695,7 +695,7 @@ def gain_from_g_over_t(
     g_over_t: DecibelPerKelvin, temperature: Temperature
 ) -> Decibels:
     r"""
-    Gain in dB from the ratio of gain to the noise and temperature.
+    Antenna gain from G/T and system noise temperature
 
     The formula used is:
     G = G/T + 10*log10(T)
@@ -735,7 +735,7 @@ def temperature_from_g_over_t(
     Returns
     -------
     Temperature
-        Temperature in Kelvin.
+        System noise temperature
     """
-    delta_db = gain - g_over_t.value * u.dB
-    return to_linear(delta_db, factor=10) * u.K
+    delta_db = gain - g_over_t
+    return np.power(10, delta_db.value / 10) * u.K
