@@ -712,7 +712,8 @@ def gain_from_g_over_t(
     if temperature < 0 * u.K:
         raise ValueError("Temperature must be positive")
 
-    return g_over_t.value * u.dB + to_dB(temperature / u.K)
+    gain = g_over_t + temperature.to(u.dBK)
+    return gain.to(u.dB)
 
 
 @enforce_units
@@ -734,5 +735,4 @@ def temperature_from_g_over_t(
     Temperature
         System noise temperature
     """
-    delta_db = gain - g_over_t
-    return np.power(10, delta_db.value / 10) * u.K
+    return (gain - g_over_t).to(u.K)
