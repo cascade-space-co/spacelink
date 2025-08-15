@@ -213,8 +213,8 @@ class ComplexInterpolator:
     def __init__(
         self,
         theta: Angle,
-        frequency: Frequency | None,
         phi: Angle,
+        frequency: Frequency | None,
         values: u.Quantity,
         floor: Decibels = -200 * u.dB,
     ):
@@ -224,9 +224,10 @@ class ComplexInterpolator:
         Parameters
         ----------
         theta: Angle
-            1D array of strictly increasing polar angles in [0, pi] radians with shape (N,).
+            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of strictly increasing azimuthal angles with shape (M,).
+            1D array of equally spaced azimuthal angles with shape (M,). The span must
+            be less than 2π radians.
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
         values: Quantity
@@ -240,28 +241,41 @@ class ComplexInterpolator:
             interpolation.
         """
         self.unit = values.unit
+        values = values.value
+        self._is_3d = frequency is not None
 
-        phi_wrapped = phi % (2 * np.pi * u.rad)
-        theta_grid = theta.value
-        phi_grid = phi_wrapped.value
-        freq_grid = None if frequency is None else frequency.to(u.Hz).value
+        phi = phi % (2 * np.pi * u.rad)
 
-        values_arr = values.value
         if frequency is None:
-            values_arr = values_arr[:, :, np.newaxis]
-            freq_grid = np.array([0.0])  # Dummy frequency for 2D case
+            values = values[:, :, np.newaxis]
+            frequency = np.array([0.0]) * u.Hz  # Dummy frequency for 2D case
+
+        delta_phi = np.diff(phi)[0]  # Assume equal spacing
+        full_circle = delta_phi * phi.size >= 2 * np.pi * u.rad - (delta_phi / 2)
+
+        if full_circle:
+            # Pad phi with a wrap-around columns so interpolation works at the 2π wrap
+            # boundary.
+            phi = np.concatenate(
+                [
+                    [phi[-1] - 2 * np.pi * u.rad],
+                    phi,
+                    [phi[0] + 2 * np.pi * u.rad],
+                ]
+            )
+            values = np.concatenate([values[:, -1:, :], values, values[:, :1, :]], axis=1)
 
         with np.errstate(divide="ignore", invalid="ignore"):
-            mag_db = 10.0 * np.log10(np.clip(np.abs(values_arr), floor.value, None))
+            mag_db = np.clip(10.0 * np.log10(np.abs(values)), floor.value, None)
 
         with np.errstate(invalid="ignore"):
             phase_exponential = np.where(
-                np.abs(values_arr) == 0,
+                np.abs(values) == 0,
                 1.0,
-                values_arr / np.abs(values_arr),
+                values / np.abs(values),
             )
 
-        grid = (theta_grid, phi_grid, freq_grid)
+        grid = (theta.value, phi.value, frequency.value)
         self.log_mag = scipy.interpolate.RegularGridInterpolator(
             grid, mag_db, method="linear", bounds_error=True
         )
@@ -271,7 +285,6 @@ class ComplexInterpolator:
         self.phase_imag = scipy.interpolate.RegularGridInterpolator(
             grid, np.imag(phase_exponential), method="linear", bounds_error=True
         )
-        self._is_3d = frequency is not None
 
     @enforce_units
     def __call__(
@@ -346,9 +359,10 @@ class RadiationPattern:
         Parameters
         ----------
         theta: Angle
-            1D array of strictly increasing polar angles in [0, pi] radians with shape (N,).
+            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of strictly increasing azimuthal angles with shape (M,).
+            1D array of equally spaced azimuthal angles with shape (M,). The span must
+            be less than 2π radians.
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
             If None, the pattern is treated as frequency-invariant and 2D over
@@ -383,7 +397,7 @@ class RadiationPattern:
         ValueError
             If the surface integral of the directivity is greater than 4π.
         """
-        self._validate_inputs(theta, phi, e_theta, e_phi, frequency)
+        self._validate_constructor_args(theta, phi, e_theta, e_phi, frequency)
         self.theta = theta
         self.phi = phi
         self.frequency = frequency
@@ -395,12 +409,17 @@ class RadiationPattern:
 
         self._validate_surface_integral()
 
-        self._e_theta_interp = ComplexInterpolator(theta, phi, e_theta, frequency)
-        self._e_phi_interp = ComplexInterpolator(theta, phi, e_phi, frequency)
+        self._e_theta_interp = ComplexInterpolator(theta, phi, frequency, e_theta)
+        self._e_phi_interp = ComplexInterpolator(theta, phi, frequency, e_phi)
 
-    def _validate_inputs(self, theta, phi, e_theta, e_phi, frequencies):
-        """Validate input parameters."""
-        # Basic monotonicity and range checks
+    def _validate_constructor_args(
+        self,
+        theta: Angle,
+        phi: Angle,
+        e_theta: Dimensionless,
+        e_phi: Dimensionless,
+        frequency: Frequency | None,
+    ):
         if not np.all(theta >= 0 * u.rad) or not np.all(theta <= np.pi * u.rad):
             raise ValueError("theta must be in [0, pi]")
         if not np.all(np.diff(theta) > 0 * u.rad):
@@ -409,14 +428,21 @@ class RadiationPattern:
             raise ValueError("phi must be strictly increasing")
         if (phi[-1] - phi[0]) >= 2 * np.pi * u.rad:
             raise ValueError("phi must cover less than 2π radians")
+        # Enforce equal spacing for theta and phi
+        theta_step = np.diff(theta.to(u.rad).value)
+        phi_step = np.diff(phi.to(u.rad).value)
+        if theta_step.size > 0 and not np.allclose(theta_step, theta_step[0]):
+            raise ValueError("theta must be equally spaced")
+        if phi_step.size > 0 and not np.allclose(phi_step, phi_step[0]):
+            raise ValueError("phi must be equally spaced")
 
-        if frequencies is not None:
-            if np.size(frequencies) == 0:
+        if frequency is not None:
+            if np.size(frequency) == 0:
                 raise ValueError("frequencies must have length >= 1")
-            if not np.all(np.diff(frequencies) > 0 * u.Hz):
+            if not np.all(np.diff(frequency) > 0 * u.Hz):
                 raise ValueError("frequencies must be strictly increasing")
             # Shape checks for 3D
-            expected_shape = (theta.size, phi.size, frequencies.size)
+            expected_shape = (theta.size, phi.size, frequency.size)
             if e_theta.shape != expected_shape or e_phi.shape != expected_shape:
                 raise ValueError(
                     f"e_theta/e_phi must have shape {expected_shape}, "
@@ -471,23 +497,23 @@ class RadiationPattern:
         Parameters
         ----------
         theta: Angle
-            1D array of strictly increasing polar angles in [0, pi] radians with shape 
-            (N,).
+            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of strictly increasing azimuthal angles with shape (M,).
+            1D array of equally spaced azimuthal angles with shape (M,). The span must
+            be less than 2π radians.
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
             If None, the pattern is treated as frequency-invariant and 2D over
             (theta, phi).
         e_lhcp: Dimensionless
-            Complex array of :math:`E_{\text{LHCP}}(\theta, \phi[, f])` values 
-            normalized such that the magnitude squared is equal to directivity. The 
+            Complex array of :math:`E_{\text{LHCP}}(\theta, \phi[, f])` values
+            normalized such that the magnitude squared is equal to directivity. The
             required shape depends on whether ``frequency`` is provided:
             - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         e_rhcp: Dimensionless
-            Complex array of :math:`E_{\text{RHCP}}(\theta, \phi[, f])` values 
-            normalized such that the magnitude squared is equal to directivity. The 
+            Complex array of :math:`E_{\text{RHCP}}(\theta, \phi[, f])` values
+            normalized such that the magnitude squared is equal to directivity. The
             required shape depends on whether ``frequency`` is provided:
             - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
@@ -535,10 +561,10 @@ class RadiationPattern:
         Parameters
         ----------
         theta: Angle
-            1D array of strictly increasing polar angles in [0, pi] radians with shape 
-            (N,).
+            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of strictly increasing azimuthal angles with shape (M,).
+            1D array of equally spaced azimuthal angles with shape (M,). The span must
+            be less than 2π radians.
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
             If None, the pattern is treated as frequency-invariant and 2D over
@@ -609,10 +635,10 @@ class RadiationPattern:
         Parameters
         ----------
         theta: Angle
-            1D array of strictly increasing polar angles in [0, pi] radians with shape
-            (N,).
+            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of strictly increasing azimuthal angles with shape (M,).
+            1D array of equally spaced azimuthal angles with shape (M,). The span must
+            be less than 2π radians.
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
             If None, the pattern is treated as frequency-invariant and 2D over

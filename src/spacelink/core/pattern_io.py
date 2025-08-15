@@ -98,7 +98,6 @@ def save_radiation_pattern_npz(
 def import_hfss_csv(
     hfss_csv_path: pathlib.Path,
     *,
-    carrier_frequency: units.Frequency,
     rad_efficiency: units.Dimensionless,
 ) -> antenna.RadiationPattern:
     r"""
@@ -122,9 +121,6 @@ def import_hfss_csv(
     ----------
     hfss_csv_path: pathlib.Path
         Path to the HFSS CSV file.
-    carrier_frequency: Frequency
-        Pattern data corresponding to this carrier frequency will be imported from
-        the CSV file. Only a single frequency is currently supported.
     rad_efficiency: Dimensionless
         Radiation efficiency :math:`\eta` in [0, 1].
 
@@ -143,62 +139,65 @@ def import_hfss_csv(
     phase_rhcp_col = "ang_deg(rERHCP) [deg]"
 
     df = pd.read_csv(hfss_csv_path)
-    target_freq = carrier_frequency.to(u.GHz).value
-    df_one_freq = df[np.isclose(df[freq_col], target_freq)]
+    df = df.sort_values([freq_col, theta_col, phi_col])
 
-    if df_one_freq.empty:
-        raise ValueError(f"No data found for frequency {carrier_frequency}")
-
-    df_one_freq = df_one_freq.sort_values([theta_col, phi_col])
-
-    # Extract arrays of unique theta and phi values
-    theta = np.sort(df_one_freq[theta_col].unique()) * u.deg
-    phi = np.sort(df_one_freq[phi_col].unique()) * u.deg
-
-    # Create 2D arrays with shape (N_theta, N_phi)
-    gain_lhcp = units.to_linear(
-        df_one_freq.pivot(
-            index=theta_col,
-            columns=phi_col,
-            values=gain_lhcp_col,
-        ).values
-        * u.dB
-    )
-    gain_rhcp = units.to_linear(
-        df_one_freq.pivot(
-            index=theta_col,
-            columns=phi_col,
-            values=gain_rhcp_col,
-        ).values
-        * u.dB
-    )
-    angle_lhcp = (
-        df_one_freq.pivot(
-            index=theta_col, columns=phi_col, values=phase_lhcp_col
-        ).values
-        * u.deg
-    )
-    angle_rhcp = (
-        df_one_freq.pivot(
-            index=theta_col, columns=phi_col, values=phase_rhcp_col
-        ).values
-        * u.deg
-    )
+    # Axes
+    theta = np.sort(df[theta_col].unique()) * u.deg
+    phi = np.sort(df[phi_col].unique()) * u.deg
+    frequencies = (np.sort(df[freq_col].unique()) * u.GHz).to(u.Hz)
 
     # HFSS exports often have phi = 0 and 360 degrees which means the last phi
     # value is redundant with the first. In that case we drop the redundant phi
     # values.
     if np.isclose(phi[-1] - phi[0], 360 * u.deg):
-        phi_last_idx: typing.Optional[int] = -1
-    else:
-        phi_last_idx = None
+        phi = phi[:-1]
+
+    # Drop redundant phi rows before pivoting
+    df = df[df[phi_col].isin(phi.to_value(u.deg))]
+
+    n_theta = theta.size
+    n_phi = phi.size
+    n_freq = frequencies.size
+
+    # Single pivot across all value columns, then reindex once
+    index_target = pd.MultiIndex.from_product(
+        [theta.to_value(u.deg), phi.to_value(u.deg)], names=[theta_col, phi_col]
+    )
+    value_cols = [gain_lhcp_col, gain_rhcp_col, phase_lhcp_col, phase_rhcp_col]
+    columns_target = pd.MultiIndex.from_product(
+        [value_cols, frequencies.to_value(u.GHz)]
+    )
+
+    df_pivoted = pd.pivot_table(
+        df,
+        index=[theta_col, phi_col],
+        columns=freq_col,
+        values=value_cols,
+        aggfunc="first",
+    )
+    df_pivoted = df_pivoted.reindex(index=index_target, columns=columns_target)
+
+    # Reshape to (n_theta, n_phi, n_freq)
+    gain_lhcp = units.to_linear(
+        df_pivoted[gain_lhcp_col].to_numpy().reshape(n_theta, n_phi, n_freq) * u.dB
+    )
+    gain_rhcp = units.to_linear(
+        df_pivoted[gain_rhcp_col].to_numpy().reshape(n_theta, n_phi, n_freq) * u.dB
+    )
+    angle_lhcp = (
+        df_pivoted[phase_lhcp_col].to_numpy().reshape(n_theta, n_phi, n_freq) * u.deg
+    )
+    angle_rhcp = (
+        df_pivoted[phase_rhcp_col].to_numpy().reshape(n_theta, n_phi, n_freq) * u.deg
+    )
 
     return antenna.RadiationPattern.from_circular_gain(
         theta,
-        phi[:phi_last_idx],
-        gain_lhcp[:, :phi_last_idx],
-        gain_rhcp[:, :phi_last_idx],
-        angle_lhcp[:, :phi_last_idx],
-        angle_rhcp[:, :phi_last_idx],
-        rad_efficiency=rad_efficiency,
+        phi,
+        frequencies,
+        gain_lhcp,
+        gain_rhcp,
+        angle_lhcp,
+        angle_rhcp,
+        rad_efficiency,
     )
