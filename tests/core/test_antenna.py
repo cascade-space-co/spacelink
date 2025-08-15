@@ -440,6 +440,41 @@ class TestComplexInterpolator:
             atol=0.2 * u.dB,
         )
 
+    def test_frequency_dependent_interpolation(self):
+        """Test 3D interpolation over theta, phi, and frequency."""
+        N = 40
+        M = 48
+        K = 10
+        downsample = 2
+        theta = np.linspace(0, np.pi, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+        frequency = (np.arange(K) + 1) * u.GHz
+
+        # Amplitude scales with frequency, phase rotates with frequency
+        theta_grid, phi_grid, freq_grid = np.meshgrid(
+            theta, phi, frequency, indexing="ij"
+        )
+        amplitude = freq_grid.to_value(u.GHz) * (1 + np.sin(theta_grid).value)
+        phase = phi_grid.value + 0.5 * freq_grid.value
+        values = amplitude * np.exp(1j * phase) * u.dimensionless
+
+        interpolator = ComplexInterpolator(
+            theta[::downsample],
+            phi[::downsample],
+            frequency[::downsample],
+            values[::downsample, ::downsample, ::downsample],
+        )
+
+        result = interpolator(
+            theta[:-downsample, np.newaxis, np.newaxis],
+            phi[:, np.newaxis],
+            frequency[:-downsample],
+        )
+
+        assert_quantity_allclose(
+            result, values[:-downsample, :, :-downsample], rtol=0.2
+        )
+
     def test_with_zeros(self):
         """Test interpolation when input contains zeros (should use floor value)."""
         unit = u.K  # Arbitrary unit

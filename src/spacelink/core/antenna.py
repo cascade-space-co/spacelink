@@ -326,7 +326,7 @@ class ComplexInterpolator:
         points = (
             theta.value,
             (phi % (2 * np.pi * u.rad)).value,
-            frequency.to(u.Hz).value,
+            frequency.value,
         )
 
         mag = 10 ** (self.log_mag(points) / 10)
