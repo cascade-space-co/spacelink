@@ -556,6 +556,19 @@ class TestComplexInterpolator:
         with pytest.raises(ValueError):
             interpolator(0.95 * np.pi * u.rad, phi[0])
 
+    def test_3d_interpolator_requires_frequency(self):
+        """Test that 3D interpolator raises error when called without frequency."""
+        theta = np.linspace(0, np.pi, 10) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
+        frequency = np.array([1.0, 2.0]) * u.GHz
+        values = np.ones((10, 12, 2)) * u.dimensionless
+
+        interpolator = ComplexInterpolator(theta, phi, frequency, values)
+
+        # Calling 3D interpolator without frequency should raise error
+        with pytest.raises(ValueError):
+            interpolator(theta[0], phi[0])
+
 
 class TestDefaultPolarization:
     def _simple_pattern(self, default_pol=None) -> RadiationPattern:
@@ -579,15 +592,21 @@ class TestDefaultPolarization:
         phi = np.linspace(0, 2 * np.pi, 9, endpoint=False) * u.rad
 
         # Compare explicit vs default for e_field, directivity, gain
-        e_explicit = pattern.e_field(theta[:, np.newaxis], phi, Polarization.lhcp())
+        e_explicit = pattern.e_field(
+            theta[:, np.newaxis], phi, polarization=Polarization.lhcp()
+        )
         e_default = pattern.e_field(theta[:, np.newaxis], phi)
         assert_quantity_allclose(e_default, e_explicit)
 
-        d_explicit = pattern.directivity(theta[:, np.newaxis], phi, Polarization.lhcp())
+        d_explicit = pattern.directivity(
+            theta[:, np.newaxis], phi, polarization=Polarization.lhcp()
+        )
         d_default = pattern.directivity(theta[:, np.newaxis], phi)
         assert_quantity_allclose(d_default, d_explicit)
 
-        g_explicit = pattern.gain(theta[:, np.newaxis], phi, Polarization.lhcp())
+        g_explicit = pattern.gain(
+            theta[:, np.newaxis], phi, polarization=Polarization.lhcp()
+        )
         g_default = pattern.gain(theta[:, np.newaxis], phi)
         assert_quantity_allclose(g_default, g_explicit)
 
@@ -822,6 +841,65 @@ class TestRadiationPatternValidation:
         e_phi = np.zeros((10, 12)) * u.dimensionless
         with pytest.raises(ValueError):
             RadiationPattern(theta, phi, None, e_theta, e_phi, 1.0 * u.dimensionless)
+
+    def test_surface_integral_validation_3d_exceeds_4pi(self):
+        """Test surface integral validation for 3D patterns that exceed 4π."""
+        theta = np.linspace(0, np.pi, 6) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 8, endpoint=False) * u.rad
+        frequency = np.array([1.0, 2.0]) * u.GHz
+
+        # Create 3D fields whose directivity exceeds 4π at some frequency
+        scale = np.sqrt(2.0)
+        e_theta_3d = scale * np.ones((6, 8, 2)) * u.dimensionless
+        e_phi_3d = np.zeros((6, 8, 2)) * u.dimensionless
+
+        with pytest.raises(ValueError):
+            RadiationPattern(
+                theta, phi, frequency, e_theta_3d, e_phi_3d, 1.0 * u.dimensionless
+            )
+
+    def test_3d_frequency_validation(self):
+        """Test validation errors for 3D frequency-dependent patterns."""
+        theta = np.linspace(0, np.pi, 5) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 6, endpoint=False) * u.rad
+        e_theta_3d = np.ones((5, 6, 3)) * u.dimensionless
+        e_phi_3d = np.zeros((5, 6, 3)) * u.dimensionless
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Empty frequency array
+        with pytest.raises(ValueError):
+            RadiationPattern(
+                theta, phi, np.array([]) * u.GHz, e_theta_3d, e_phi_3d, rad_efficiency
+            )
+
+        # Non-increasing frequency values
+        frequency_decreasing = np.array([3.0, 2.0, 1.0]) * u.GHz
+        with pytest.raises(ValueError):
+            RadiationPattern(
+                theta, phi, frequency_decreasing, e_theta_3d, e_phi_3d, rad_efficiency
+            )
+
+        # Wrong 3D array shape
+        frequency = np.array([1.0, 2.0, 3.0]) * u.GHz
+        e_theta_wrong_shape = (
+            np.ones((5, 6, 2)) * u.dimensionless
+        )  # Wrong frequency dimension
+        with pytest.raises(ValueError):
+            RadiationPattern(
+                theta, phi, frequency, e_theta_wrong_shape, e_phi_3d, rad_efficiency
+            )
+
+    def test_2d_array_shape_validation(self):
+        """Test validation error for wrong 2D array shapes."""
+        theta = np.linspace(0, np.pi, 5) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 6, endpoint=False) * u.rad
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Wrong 2D array shape
+        e_theta_wrong = np.ones((4, 6)) * u.dimensionless  # Wrong theta dimension
+        e_phi = np.zeros((5, 6)) * u.dimensionless
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi, None, e_theta_wrong, e_phi, rad_efficiency)
 
     def test_factories_negative_gain_raise(self):
         theta = np.linspace(0, np.pi, 6) * u.rad
