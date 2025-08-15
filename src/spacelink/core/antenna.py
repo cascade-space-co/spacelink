@@ -462,15 +462,19 @@ class RadiationPattern:
     def _validate_surface_integral(self):
         """Validate that surface integral of directivity is ≤ 4π."""
         total_directivity = np.abs(self.e_theta) ** 2 + np.abs(self.e_phi) ** 2
-        dir_surf_int = _surface_integral(self.theta, self.phi, total_directivity)
 
         if self.frequency is not None:
-            if np.any(dir_surf_int > 1.01 * (4 * np.pi) * u.sr):
-                max_idx = np.argmax(dir_surf_int.value)
-                raise ValueError(
-                    f"Surface integral of directivity {dir_surf_int[max_idx]} at index {max_idx} is greater than 4π."
-                )
+            for freq, freq_slice in zip(
+                self.frequency, np.moveaxis(total_directivity, -1, 0)
+            ):
+                dir_surf_int = _surface_integral(self.theta, self.phi, freq_slice)
+                if dir_surf_int > 1.01 * (4 * np.pi) * u.sr:
+                    raise ValueError(
+                        f"Surface integral of directivity {dir_surf_int} at {freq} is "
+                        "greater than 4π."
+                    )
         else:
+            dir_surf_int = _surface_integral(self.theta, self.phi, total_directivity)
             if dir_surf_int > 1.01 * (4 * np.pi) * u.sr:
                 raise ValueError(
                     f"Surface integral of directivity {dir_surf_int} is greater than 4π."
