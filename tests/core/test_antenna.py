@@ -14,6 +14,8 @@ from spacelink.core.antenna import (
     Handedness,
     RadiationPattern,
     SphericalInterpolator,
+    gain_from_g_over_t,
+    temperature_from_g_over_t,
 )
 from spacelink.core.units import (
     Dimensionless,
@@ -664,3 +666,23 @@ class TestRadiationPatternValidation:
         phi_too_much = np.linspace(0, 2.5 * np.pi, 10) * u.rad
         with pytest.raises(ValueError):
             RadiationPattern(theta, phi_too_much, e_theta, e_phi, rad_efficiency)
+
+
+def test_gain_from_g_over_t():
+    # Test where temp is exactly 1 K
+    gain = gain_from_g_over_t(10 * u.dB_per_K, 1 * u.K)
+    assert_quantity_allclose(gain, 10 * u.dB)
+
+    # Test where temp is greater than 1 K
+    gain_100_K = gain_from_g_over_t(10 * u.dB_per_K, 100 * u.K)
+    assert_quantity_allclose(gain_100_K, 30 * u.dB)
+
+    # Test for negative temperature
+    with pytest.raises(ValueError):
+        gain_from_g_over_t(10 * u.dB_per_K, -1 * u.K)
+
+
+def test_temperature_from_g_over_t():
+    # Test temperature calculation from G/T ratio
+    temperature = temperature_from_g_over_t(10 * u.dB_per_K, 20 * u.dB)
+    assert_quantity_allclose(temperature, 10 * u.K)

@@ -82,6 +82,8 @@ if not hasattr(u, "dBm"):  # pragma: no cover
     u.dBm = u.dB(u.mW)
 if not hasattr(u, "dBK"):  # pragma: no cover
     u.dBK = u.dB(u.K)
+if not hasattr(u, "dB_per_K"):  # pragma: no cover
+    u.dB_per_K = u.dB(1 / u.K)
 
 if not hasattr(u, "dimensionless"):  # pragma: no cover
     u.dimensionless = u.dimensionless_unscaled
@@ -90,6 +92,7 @@ Decibels = Annotated[Quantity, u.dB]
 DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
 DecibelKelvins = Annotated[Quantity, u.dB(u.K)]
+DecibelPerKelvin = Annotated[Quantity, u.dB(1 / u.K)]
 Power = Annotated[Quantity, u.W]
 PowerDensity = Annotated[Quantity, u.W / u.Hz]
 Frequency = Annotated[Quantity, u.Hz]

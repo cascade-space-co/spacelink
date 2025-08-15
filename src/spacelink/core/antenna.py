@@ -69,6 +69,8 @@ from .units import (
     to_dB,
     to_linear,
     safe_negate,
+    Temperature,
+    DecibelPerKelvin,
 )
 
 
@@ -686,3 +688,51 @@ def _surface_integral(theta: Angle, phi: Angle, values: Dimensionless) -> SolidA
     integrand = values * np.sin(theta[:, np.newaxis])
     int_phi = scipy.integrate.simpson(integrand, phi, axis=1)
     return scipy.integrate.simpson(int_phi, theta) * u.sr
+
+
+@enforce_units
+def gain_from_g_over_t(
+    g_over_t: DecibelPerKelvin, temperature: Temperature
+) -> Decibels:
+    r"""
+    Antenna gain from G/T and system noise temperature
+
+    Parameters
+    ----------
+    g_over_t: DecibelPerKelvin
+        Ratio of gain to the noise (G/T in dB/K)
+    temperature: Temperature
+        System noise temperature
+
+    Returns
+    -------
+    Decibels
+        Gain in dB.
+    """
+    if temperature < 0 * u.K:
+        raise ValueError("Temperature must be positive")
+
+    gain = g_over_t + temperature.to(u.dBK)
+    return gain.to(u.dB)
+
+
+@enforce_units
+def temperature_from_g_over_t(
+    g_over_t: DecibelPerKelvin, gain: Decibels
+) -> Temperature:
+    r"""
+    Calculate the temperature in Kelvin from ratio of gain to the noise.
+
+    Parameters
+    ----------
+    g_over_t: DecibelPerKelvin
+        Ratio of gain to the noise.
+    gain: Decibels
+        Gain in dB.
+
+    Returns
+    -------
+    Temperature
+        System noise temperature
+    """
+    return (gain - g_over_t).to(u.K)
