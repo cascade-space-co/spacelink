@@ -206,29 +206,34 @@ class Polarization:
         return cls(np.pi / 4 * u.rad, 1 * u.dimensionless, Handedness.RIGHT)
 
 
-class SphericalInterpolator:
-    """Interpolates a regular grid of complex values in spherical coordinates."""
+class ComplexInterpolator:
+    """Interpolates complex values using log-magnitude and unit-phase components."""
 
     @enforce_units
     def __init__(
         self,
         theta: Angle,
+        frequency: Frequency | None,
         phi: Angle,
         values: u.Quantity,
         floor: Decibels = -200 * u.dB,
     ):
         r"""
-        Create a spherical interpolator.
+        Create a complex interpolator.
 
         Parameters
         ----------
         theta: Angle
-            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
+            1D array of strictly increasing polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
-            (M,). Note that the last element must be less than 2π.
-        values: u.Quantity
-            2D complex array of values with shape (N, M) to interpolate.
+            1D array of strictly increasing azimuthal angles with shape (M,).
+        frequency: Frequency | None
+            Optional 1D array of strictly increasing frequencies with shape (K,).
+        values: Quantity
+            Complex array of values to interpolate. The required shape depends on
+            whether ``frequencies`` is provided:
+            - If ``frequencies is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         floor: Decibels
             Floor value for the magnitude in dB. The interpolation approach used cannot
             handle 0 values anywhere, so 0s (-∞ dB) are replaced with this prior to
@@ -236,102 +241,83 @@ class SphericalInterpolator:
         """
         self.unit = values.unit
 
-        phi_mod = phi % (2 * np.pi * u.rad)
-        delta_phi = np.diff(phi_mod)[0]  # Assume equal spacing
-        if np.isclose(delta_phi * phi.size, 2 * np.pi * u.rad):
-            self.phi_min = 0 * u.rad
-            self.phi_max = 2 * np.pi * u.rad
-        else:  # phi does not span the full circle
-            self.phi_min = np.min(phi_mod)
-            self.phi_max = np.max(phi_mod)
+        phi_wrapped = phi % (2 * np.pi * u.rad)
+        theta_grid = theta.value
+        phi_grid = phi_wrapped.value
+        freq_grid = None if frequency is None else frequency.to(u.Hz).value
 
-        self.theta_min = np.min(theta)
-        self.theta_max = np.max(theta)
+        values_arr = values.value
+        if frequency is None:
+            values_arr = values_arr[:, :, np.newaxis]
+            freq_grid = np.array([0.0])  # Dummy frequency for 2D case
 
-        # RectSphereBivariateSpline requires theta to be in the range (0, pi),
-        # excluding the endpoints where spherical coordinates have singularities.
-        phi_slice = phi.value
-        theta_start = 1 if np.isclose(theta[0], 0 * u.rad, atol=1e-10) else 0
-        theta_end = -1 if np.isclose(theta[-1], np.pi * u.rad, atol=1e-10) else None
-        theta_slice = theta[theta_start:theta_end].value
-        values_slice = values[theta_start:theta_end, :].value
+        with np.errstate(divide="ignore", invalid="ignore"):
+            mag_db = 10.0 * np.log10(np.clip(np.abs(values_arr), floor.value, None))
 
-        with np.errstate(divide="ignore"):
-            values_db = 10 * np.log10(np.abs(values_slice))
-        # Apply a floor because spline interpolation can't handle -inf values anywhere.
-        values_db = np.clip(values_db, floor.value, None)
-
-        # Interpolate magnitude in log-space to avoid numerical stability issues that
-        # can arise when interpolating magnitude or real and imaginary parts separately.
-        self.log_mag = functools.partial(
-            scipy.interpolate.RectSphereBivariateSpline(
-                theta_slice,
-                phi_slice,
-                values_db,
-            ),
-            grid=False,
-        )
-
-        # Interpolate phase as a unit-magnitude complex exponential. This avoids issues
-        # with phase wrapping discontinuities.
         with np.errstate(invalid="ignore"):
             phase_exponential = np.where(
-                np.abs(values_slice) == 0,
+                np.abs(values_arr) == 0,
                 1.0,
-                values_slice / np.abs(values_slice),
+                values_arr / np.abs(values_arr),
             )
-        self.phase_real = functools.partial(
-            scipy.interpolate.RectSphereBivariateSpline(
-                theta_slice,
-                phi_slice,
-                np.real(phase_exponential),
-            ),
-            grid=False,
+
+        grid = (theta_grid, phi_grid, freq_grid)
+        self.log_mag = scipy.interpolate.RegularGridInterpolator(
+            grid, mag_db, method="linear", bounds_error=True
         )
-        self.phase_imag = functools.partial(
-            scipy.interpolate.RectSphereBivariateSpline(
-                theta_slice,
-                phi_slice,
-                np.imag(phase_exponential),
-            ),
-            grid=False,
+        self.phase_real = scipy.interpolate.RegularGridInterpolator(
+            grid, np.real(phase_exponential), method="linear", bounds_error=True
         )
+        self.phase_imag = scipy.interpolate.RegularGridInterpolator(
+            grid, np.imag(phase_exponential), method="linear", bounds_error=True
+        )
+        self._is_3d = frequency is not None
 
     @enforce_units
-    def __call__(self, theta: Angle, phi: Angle) -> u.Quantity:
+    def __call__(
+        self, theta: Angle, phi: Angle, frequency: Frequency | None = None
+    ) -> Dimensionless:
         r"""
-        Interpolate at the given spherical coordinates.
-
-        Interpolate at points `(theta[i], phi[i]), i=0, ..., len(x)-1`. Standard Numpy
-        broadcasting is obeyed.
+        Interpolate at the given coordinates.
 
         Parameters
         ----------
         theta: Angle
             Polar angles.
         phi: Angle
-            Azimuthal angles with the same shape as theta.
+            Azimuthal angles.
+        frequency: Frequency | None
+            Desired frequency. For 2D interpolators (constructed without frequencies),
+            this argument is ignored.
 
         Returns
         -------
-        u.Quantity
+        Quantity
             Interpolated values. The unit will be the same as the unit of the values
-            Quantity passed to the constructor.
+            Quantity passed to the constructor. Shape is determined by standard Numpy
+            broadcasting rules from the shapes of theta, phi, and frequency.
 
         Raises
         ------
         ValueError
-            If phi or theta are outside the range of the original grid.
+            If phi, theta, or frequency are outside the range of the original grid.
         """
-        phi_mod = phi % (2 * np.pi * u.rad)
-        if np.any(phi_mod < self.phi_min) or np.any(phi_mod > self.phi_max):
-            raise ValueError(f"phi must be in [{self.phi_min}, {self.phi_max}]")
-        if np.any(theta < self.theta_min) or np.any(theta > self.theta_max):
-            raise ValueError(f"theta must be in [{self.theta_min}, {self.theta_max}]")
+        if self._is_3d:
+            if frequency is None:
+                raise ValueError("Frequency must be provided for 3D interpolators")
+        else:
+            frequency = 0.0 * u.Hz
 
-        mag = 10 ** (self.log_mag(theta.value, phi.value) / 10)
-        phase_exp = self.phase_real(theta, phi) + 1j * self.phase_imag(theta, phi)
-        phase_exp /= np.abs(phase_exp)  # Re-normalize to remove numerical drift.
+        points = (
+            theta.value,
+            (phi % (2 * np.pi * u.rad)).value,
+            frequency.to(u.Hz).value,
+        )
+
+        mag = 10 ** (self.log_mag(points) / 10)
+        phase_exp = self.phase_real(points) + 1j * self.phase_imag(points)
+        phase_exp /= np.abs(phase_exp)  # Re-normalize to remove numerical drift
+
         return mag * phase_exp * self.unit
 
 
@@ -343,80 +329,124 @@ class RadiationPattern:
         self,
         theta: Angle,
         phi: Angle,
+        frequency: Frequency | None,
         e_theta: Dimensionless,
         e_phi: Dimensionless,
         rad_efficiency: Dimensionless,
         default_polarization: Polarization | None = None,
+        default_frequency: Frequency | None = None,
     ):
         r"""
         Create a radiation pattern from a set of E-field components.
 
         .. math::
-            \vec{E}(\theta, \phi) = E_\theta(\theta, \phi)\hat{\theta}
-            + E_\phi(\theta, \phi)\hat{\phi}
+            \vec{E}(\theta, \phi, f) = E_\theta(\theta, \phi, f)\hat{\theta}
+            + E_\phi(\theta, \phi, f)\hat{\phi}
 
         Parameters
         ----------
         theta: Angle
-            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
+            1D array of strictly increasing polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
-            (M,). Note that the last element must be less than 2π.
+            1D array of strictly increasing azimuthal angles with shape (M,).
+        frequency: Frequency | None
+            Optional 1D array of strictly increasing frequencies with shape (K,).
+            If None, the pattern is treated as frequency-invariant and 2D over
+            (theta, phi).
         e_theta: Dimensionless
-            2D complex array of :math:`E_{\theta}(\theta, \phi)` values with shape (N,
-            M) normalized such that the magnitude squared is equal to directivity.
+            Complex array of :math:`E_{\theta}(\theta, \phi[, f])` values normalized
+            such that the magnitude squared is equal to directivity. The required
+            shape depends on whether ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         e_phi: Dimensionless
-            2D complex array of :math:`E_{\phi}(\theta, \phi)` values with shape (N, M)
-            normalized such that the magnitude squared is equal to directivity.
+            Complex array of :math:`E_{\phi}(\theta, \phi[, f])` values normalized
+            such that the magnitude squared is equal to directivity. The required
+            shape depends on whether ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
         default_polarization: Polarization | None
             Optional default polarization used when instance methods are called without
             an explicit polarization.
+        default_frequency: Frequency | None
+            Optional default frequency used when instance methods are called without an
+            explicit frequency.
 
         Raises
         ------
         ValueError
-            If theta or phi are not in [0, pi], or if theta or phi are not sorted in
-            strictly increasing order, or if theta or phi are not equally spaced, or if
-            phi does not cover less than 2π radians.
+            If theta is not in [0, pi], if phi spans more than 2π radians, or if
+            theta/phi/frequencies are not strictly increasing, or if inputs are outside
+            allowed ranges.
         ValueError
             If the surface integral of the directivity is greater than 4π.
         """
-
-        if not np.all(theta >= 0 * u.rad) or not np.all(theta <= np.pi * u.rad):
-            raise ValueError("theta must be in [0, pi]")
-        if not np.all(np.diff(theta) > 0):
-            raise ValueError("theta must be sorted in strictly increasing order")
-        if not np.all(np.diff(phi) > 0):
-            raise ValueError("phi must be sorted in strictly increasing order")
-        if not np.allclose(np.diff(theta), np.diff(theta)[0]):
-            raise ValueError("theta must be equally spaced")
-        if not np.allclose(np.diff(phi), np.diff(phi)[0]):
-            raise ValueError("phi must be equally spaced")
-        if (phi[-1] - phi[0]) >= 2 * np.pi * u.rad:
-            raise ValueError("phi must cover less than 2π radians")
-
+        self._validate_inputs(theta, phi, e_theta, e_phi, frequency)
         self.theta = theta
         self.phi = phi
+        self.frequency = frequency
         self.e_theta = e_theta
         self.e_phi = e_phi
         self.rad_efficiency = rad_efficiency
         self.default_polarization = default_polarization
+        self.default_frequency = default_frequency
 
-        # Surface integral of directivity should be 4π over the whole sphere (or less if
-        # the pattern is not defined over the whole sphere). It should never be greater
-        # than 4π.
-        dir_surf_int = _surface_integral(
-            theta, phi, np.abs(e_theta) ** 2 + np.abs(e_phi) ** 2
-        )
-        if dir_surf_int > 1.01 * (4 * np.pi) * u.sr:
-            raise ValueError(
-                f"Surface integral of directivity {dir_surf_int} is greater than 4π."
-            )
+        self._validate_surface_integral()
 
-        self.e_theta_interp = SphericalInterpolator(theta, phi, e_theta)
-        self.e_phi_interp = SphericalInterpolator(theta, phi, e_phi)
+        self._e_theta_interp = ComplexInterpolator(theta, phi, e_theta, frequency)
+        self._e_phi_interp = ComplexInterpolator(theta, phi, e_phi, frequency)
+
+    def _validate_inputs(self, theta, phi, e_theta, e_phi, frequencies):
+        """Validate input parameters."""
+        # Basic monotonicity and range checks
+        if not np.all(theta >= 0 * u.rad) or not np.all(theta <= np.pi * u.rad):
+            raise ValueError("theta must be in [0, pi]")
+        if not np.all(np.diff(theta) > 0 * u.rad):
+            raise ValueError("theta must be strictly increasing")
+        if not np.all(np.diff(phi) > 0 * u.rad):
+            raise ValueError("phi must be strictly increasing")
+        if (phi[-1] - phi[0]) >= 2 * np.pi * u.rad:
+            raise ValueError("phi must cover less than 2π radians")
+
+        if frequencies is not None:
+            if np.size(frequencies) == 0:
+                raise ValueError("frequencies must have length >= 1")
+            if not np.all(np.diff(frequencies) > 0 * u.Hz):
+                raise ValueError("frequencies must be strictly increasing")
+            # Shape checks for 3D
+            expected_shape = (theta.size, phi.size, frequencies.size)
+            if e_theta.shape != expected_shape or e_phi.shape != expected_shape:
+                raise ValueError(
+                    f"e_theta/e_phi must have shape {expected_shape}, "
+                    f"got {e_theta.shape} and {e_phi.shape}"
+                )
+        else:
+            # Shape checks for 2D
+            expected_shape_2d = (theta.size, phi.size)
+            if e_theta.shape != expected_shape_2d or e_phi.shape != expected_shape_2d:
+                raise ValueError(
+                    f"e_theta/e_phi must have shape {expected_shape_2d}, "
+                    f"got {e_theta.shape} and {e_phi.shape}"
+                )
+
+    def _validate_surface_integral(self):
+        """Validate that surface integral of directivity is ≤ 4π."""
+        total_directivity = np.abs(self.e_theta) ** 2 + np.abs(self.e_phi) ** 2
+        dir_surf_int = _surface_integral(self.theta, self.phi, total_directivity)
+
+        if self.frequency is not None:
+            if np.any(dir_surf_int > 1.01 * (4 * np.pi) * u.sr):
+                max_idx = np.argmax(dir_surf_int.value)
+                raise ValueError(
+                    f"Surface integral of directivity {dir_surf_int[max_idx]} at index {max_idx} is greater than 4π."
+                )
+        else:
+            if dir_surf_int > 1.01 * (4 * np.pi) * u.sr:
+                raise ValueError(
+                    f"Surface integral of directivity {dir_surf_int} is greater than 4π."
+                )
 
     @classmethod
     @enforce_units
@@ -424,36 +454,51 @@ class RadiationPattern:
         cls,
         theta: Angle,
         phi: Angle,
+        frequency: Frequency | None,
         e_lhcp: Dimensionless,
         e_rhcp: Dimensionless,
         rad_efficiency: Dimensionless,
         default_polarization: Polarization | None = None,
+        default_frequency: Frequency | None = None,
     ) -> typing.Self:
         r"""
         Create a radiation pattern from a set of LHCP/RHCP E-field components.
 
         .. math::
-            \vec{E}(\theta, \phi) = E_\text{LHCP}(\theta, \phi)\hat{\text{LHCP}}
-            + E_\text{RHCP}(\theta, \phi)\hat{\text{RHCP}}
+            \vec{E}(\theta, \phi, f) = E_\text{LHCP}(\theta, \phi, f)\hat{\text{LHCP}}
+            + E_\text{RHCP}(\theta, \phi, f)\hat{\text{RHCP}}
 
         Parameters
         ----------
         theta: Angle
-            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
+            1D array of strictly increasing polar angles in [0, pi] radians with shape 
+            (N,).
         phi: Angle
-            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
-            (M,).
+            1D array of strictly increasing azimuthal angles with shape (M,).
+        frequency: Frequency | None
+            Optional 1D array of strictly increasing frequencies with shape (K,).
+            If None, the pattern is treated as frequency-invariant and 2D over
+            (theta, phi).
         e_lhcp: Dimensionless
-            2D complex array of :math:`E_{\text{LHCP}}(\theta, \phi)` values with shape
-            (N, M) normalized such that the magnitude squared is equal to directivity.
+            Complex array of :math:`E_{\text{LHCP}}(\theta, \phi[, f])` values 
+            normalized such that the magnitude squared is equal to directivity. The 
+            required shape depends on whether ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         e_rhcp: Dimensionless
-            2D complex array of :math:`E_{\text{RHCP}}(\theta, \phi)` values with shape
-            (N, M) normalized such that the magnitude squared is equal to directivity.
+            Complex array of :math:`E_{\text{RHCP}}(\theta, \phi[, f])` values 
+            normalized such that the magnitude squared is equal to directivity. The 
+            required shape depends on whether ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
         default_polarization: Polarization | None
             Optional default polarization used when instance methods are called without
             an explicit polarization.
+        default_frequency: Frequency | None
+            Optional default frequency used when instance methods are called without an
+            explicit frequency.
         """
         # Change of basis from LHCP/RHCP to theta/phi.
         e_theta = 1 / np.sqrt(2) * (e_lhcp + e_rhcp)
@@ -461,10 +506,12 @@ class RadiationPattern:
         return cls(
             theta,
             phi,
+            frequency,
             e_theta,
             e_phi,
             rad_efficiency,
-            default_polarization=default_polarization,
+            default_polarization,
+            default_frequency,
         )
 
     @classmethod
@@ -473,12 +520,14 @@ class RadiationPattern:
         cls,
         theta: Angle,
         phi: Angle,
+        frequency: Frequency | None,
         gain_lhcp: Dimensionless,
         gain_rhcp: Dimensionless,
         phase_lhcp: Angle,
         phase_rhcp: Angle,
         rad_efficiency: Dimensionless,
         default_polarization: Polarization | None = None,
+        default_frequency: Frequency | None = None,
     ) -> typing.Self:
         r"""
         Create a radiation pattern from circular gain and phase.
@@ -486,23 +535,42 @@ class RadiationPattern:
         Parameters
         ----------
         theta: Angle
-            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
+            1D array of strictly increasing polar angles in [0, pi] radians with shape 
+            (N,).
         phi: Angle
-            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
-            (M,).
+            1D array of strictly increasing azimuthal angles with shape (M,).
+        frequency: Frequency | None
+            Optional 1D array of strictly increasing frequencies with shape (K,).
+            If None, the pattern is treated as frequency-invariant and 2D over
+            (theta, phi).
         gain_lhcp: Dimensionless
-            2D array of LHCP gain with shape (N, M).
+            Array of LHCP gain values. The required shape depends on whether
+            ``frequencies`` is provided:
+            - If ``frequencies is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         gain_rhcp: Dimensionless
-            2D array of RHCP gain with shape (N, M).
+            Array of RHCP gain values. The required shape depends on whether
+            ``frequencies`` is provided:
+            - If ``frequencies is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         phase_lhcp: Angle
-            2D array of LHCP phase angles with shape (N, M).
+            Array of LHCP phase angles. The required shape depends on whether
+            ``frequencies`` is provided:
+            - If ``frequencies is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         phase_rhcp: Angle
-            2D array of RHCP phase angles with shape (N, M).
+            Array of RHCP phase angles. The required shape depends on whether
+            ``frequencies`` is provided:
+            - If ``frequencies is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
         default_polarization: Polarization | None
             Optional default polarization used when instance methods are called without
             an explicit polarization.
+        default_frequency: Frequency | None
+            Optional default frequency used when instance methods are called without an
+            explicit frequency.
         """
         if np.any(gain_lhcp < 0) or np.any(gain_rhcp < 0):
             raise ValueError("Gain must be non-negative")
@@ -512,10 +580,12 @@ class RadiationPattern:
         return cls.from_circular_e_field(
             theta,
             phi,
+            frequency,
             e_lhcp,
             e_rhcp,
             rad_efficiency,
-            default_polarization=default_polarization,
+            default_polarization,
+            default_frequency,
         )
 
     @classmethod
@@ -524,12 +594,14 @@ class RadiationPattern:
         cls,
         theta: Angle,
         phi: Angle,
+        frequency: Frequency | None,
         gain_theta: Dimensionless,
         gain_phi: Dimensionless,
         phase_theta: Angle,
         phase_phi: Angle,
         rad_efficiency: Dimensionless,
         default_polarization: Polarization | None = None,
+        default_frequency: Frequency | None = None,
     ) -> typing.Self:
         r"""
         Create a radiation pattern from linear gain and phase.
@@ -537,23 +609,46 @@ class RadiationPattern:
         Parameters
         ----------
         theta: Angle
-            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
+            1D array of strictly increasing polar angles in [0, pi] radians with shape
+            (N,).
         phi: Angle
-            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
-            (M,).
+            1D array of strictly increasing azimuthal angles with shape (M,).
+        frequency: Frequency | None
+            Optional 1D array of strictly increasing frequencies with shape (K,).
+            If None, the pattern is treated as frequency-invariant and 2D over
+            (theta, phi).
         gain_theta: Dimensionless
-            2D array of :math:`\hat{\theta}` gain with shape (N, M).
+            Array of :math:`\hat{\theta}` gain values. The required shape depends on
+            whether ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         gain_phi: Dimensionless
-            2D array of :math:`\hat{\phi}` gain with shape (N, M).
+            Array of :math:`\hat{\phi}` gain values. The required shape depends on
+            whether ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         phase_theta: Angle
-            2D array of :math:`\hat{\theta}` phase angles with shape (N, M).
+            Array of :math:`\hat{\theta}` phase angles. The required shape depends on
+            whether ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         phase_phi: Angle
-            2D array of :math:`\hat{\phi}` phase angles with shape (N, M).
+            Array of :math:`\hat{\phi}` phase angles. The required shape depends on
+            whether ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
+            - Else: shape ``(N, M, K)``
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
         default_polarization: Polarization | None
             Optional default polarization used when instance methods are called without
             an explicit polarization.
+        frequency: Frequency | None
+            Optional 1D array of strictly increasing frequencies with shape (K,).
+            If None, the pattern is treated as frequency-invariant and 2D over
+            (theta, phi).
+        default_frequency: Frequency | None
+            Optional default frequency used when instance methods are called without an
+            explicit frequency.
         """
         if np.any(gain_theta < 0) or np.any(gain_phi < 0):
             raise ValueError("Gain must be non-negative")
@@ -563,15 +658,21 @@ class RadiationPattern:
         return cls(
             theta,
             phi,
+            frequency,
             e_theta,
             e_phi,
             rad_efficiency,
-            default_polarization=default_polarization,
+            default_polarization,
+            default_frequency,
         )
 
     @enforce_units
     def e_field(
-        self, theta: Angle, phi: Angle, polarization: Polarization | None = None
+        self,
+        theta: Angle,
+        phi: Angle,
+        frequency: Frequency | None = None,
+        polarization: Polarization | None = None,
     ) -> Dimensionless:
         r"""
         Normalized complex E-field in the desired polarization state.
@@ -582,6 +683,10 @@ class RadiationPattern:
             Polar angles.
         phi: Angle
             Azimuthal angles.
+        frequency: Frequency | None
+            Desired frequency. If None, uses the instance's `default_frequency` if set;
+            otherwise raises ValueError. For 2D patterns (constructed without
+            ``frequencies``), this argument is ignored.
         polarization: Polarization | None
             Desired polarization state. If None, uses the instance's
             `default_polarization` if set; otherwise raises ValueError.
@@ -599,7 +704,14 @@ class RadiationPattern:
                 "Polarization must be provided or a default_polarization must be set "
                 "on the RadiationPattern."
             )
-        e_jones = self._e_jones(theta, phi)
+        # Get frequency (None for 2D patterns, actual frequency for 3D)
+        freq = frequency if frequency is not None else self.default_frequency
+        if self.frequency is not None and freq is None:
+            raise ValueError(
+                "Frequency must be provided or a default_frequency must be set on the "
+                "RadiationPattern."
+            )
+        e_jones = self._e_jones(theta, phi, freq)
         return (
             np.tensordot(pol.jones_vector.conj(), e_jones, axes=([-1], [-1]))
             * u.dimensionless
@@ -607,7 +719,11 @@ class RadiationPattern:
 
     @enforce_units
     def directivity(
-        self, theta: Angle, phi: Angle, polarization: Polarization | None = None
+        self,
+        theta: Angle,
+        phi: Angle,
+        frequency: Frequency | None = None,
+        polarization: Polarization | None = None,
     ) -> Decibels:
         r"""
         Directivity of the antenna.
@@ -632,6 +748,10 @@ class RadiationPattern:
             Polar angles.
         phi: Angle
             Azimuthal angles.
+        frequency: Frequency | None
+            Desired frequency. If None, uses the instance's `default_frequency` if set;
+            otherwise raises ValueError. For 2D patterns (constructed without
+            ``frequencies``), this argument is ignored.
         polarization: Polarization | None
             Desired polarization state. If None, uses the instance's
             `default_polarization` if set; otherwise raises ValueError.
@@ -642,11 +762,15 @@ class RadiationPattern:
             Directivity. Shape is determined by standard Numpy broadcasting rules from
             the shapes of theta and phi.
         """
-        return to_dB(np.abs(self.e_field(theta, phi, polarization)) ** 2)
+        return to_dB(np.abs(self.e_field(theta, phi, frequency, polarization)) ** 2)
 
     @enforce_units
     def gain(
-        self, theta: Angle, phi: Angle, polarization: Polarization | None = None
+        self,
+        theta: Angle,
+        phi: Angle,
+        frequency: Frequency | None = None,
+        polarization: Polarization | None = None,
     ) -> Decibels:
         r"""
         Gain of the antenna.
@@ -662,6 +786,10 @@ class RadiationPattern:
             Polar angles.
         phi: Angle
             Azimuthal angles.
+        frequency: Frequency | None
+            Desired frequency. If None, uses the instance's `default_frequency` if set;
+            otherwise raises ValueError. For 2D patterns (constructed without
+            ``frequencies``), this argument is ignored.
         polarization: Polarization | None
             Desired polarization state. If None, uses the instance's
             `default_polarization` if set; otherwise raises ValueError.
@@ -672,10 +800,14 @@ class RadiationPattern:
             Gain. Shape is determined by standard Numpy broadcasting rules from the
             shapes of theta and phi.
         """
-        return to_dB(self.rad_efficiency) + self.directivity(theta, phi, polarization)
+        return to_dB(self.rad_efficiency) + self.directivity(
+            theta, phi, frequency, polarization
+        )
 
     @enforce_units
-    def axial_ratio(self, theta: Angle, phi: Angle) -> Decibels:
+    def axial_ratio(
+        self, theta: Angle, phi: Angle, frequency: Frequency | None = None
+    ) -> Decibels:
         r"""
         Axial ratio of the antenna.
 
@@ -690,6 +822,10 @@ class RadiationPattern:
             Polar angles.
         phi: Angle
             Azimuthal angles.
+        frequency: Frequency | None
+            Desired frequency. If None, uses the instance's `default_frequency` if set;
+            otherwise raises ValueError. For 2D patterns (constructed without
+            ``frequencies``), this argument is ignored.
 
         Returns
         -------
@@ -697,7 +833,13 @@ class RadiationPattern:
             Axial ratio. Shape is determined by standard Numpy broadcasting rules from
             the shapes of theta and phi.
         """
-        e_jones = self._e_jones(theta, phi)
+        # Get frequency (None for 2D patterns, actual frequency for 3D)
+        freq = frequency if frequency is not None else self.default_frequency
+        if self.frequency is not None and freq is None:
+            raise ValueError(
+                "Frequency must be provided or a default_frequency must be set on the RadiationPattern."
+            )
+        e_jones = self._e_jones(theta, phi, freq)
         coherency_matrix = np.einsum("...i,...j->...ij", e_jones, e_jones.conj())
         eigvals = np.linalg.eigvalsh(coherency_matrix.real)
         lambda_min = eigvals[..., 0]
@@ -707,10 +849,12 @@ class RadiationPattern:
             return to_dB(np.sqrt(lambda_max / lambda_min) * u.dimensionless)
 
     @enforce_units
-    def _e_jones(self, theta: Angle, phi: Angle) -> Dimensionless:
-        e_theta = self.e_theta_interp(theta, phi)
-        e_phi = self.e_phi_interp(theta, phi)
-        return np.stack([e_theta, e_phi], axis=-1) * u.dimensionless
+    def _e_jones(
+        self, theta: Angle, phi: Angle, frequency: Frequency | None
+    ) -> Dimensionless:
+        e_theta_vals = self._e_theta_interp(theta, phi, frequency)
+        e_phi_vals = self._e_phi_interp(theta, phi, frequency)
+        return np.stack([e_theta_vals, e_phi_vals], axis=-1)
 
 
 @enforce_units
