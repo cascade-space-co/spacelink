@@ -296,7 +296,7 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.gain(
-                theta_interp[:, np.newaxis], phi_interp, Polarization.lhcp()
+                theta_interp[:, np.newaxis], phi_interp, polarization=Polarization.lhcp()
             )
         ),
         test_case.expected_results.lhcp_gain,
@@ -306,7 +306,7 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, Polarization.lhcp()
+                theta_interp[:, np.newaxis], phi_interp, polarization=Polarization.lhcp()
             )
         ),
         test_case.expected_results.lhcp_directivity,
@@ -316,7 +316,7 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.gain(
-                theta_interp[:, np.newaxis], phi_interp, Polarization.rhcp()
+                theta_interp[:, np.newaxis], phi_interp, polarization=Polarization.rhcp()
             )
         ),
         test_case.expected_results.rhcp_gain,
@@ -326,7 +326,7 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, Polarization.rhcp()
+                theta_interp[:, np.newaxis], phi_interp, polarization=Polarization.rhcp()
             )
         ),
         test_case.expected_results.rhcp_directivity,
@@ -336,7 +336,7 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, pol_theta
+                theta_interp[:, np.newaxis], phi_interp, polarization=pol_theta
             )
         ),
         test_case.expected_results.theta_directivity,
@@ -346,7 +346,7 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, pol_phi
+                theta_interp[:, np.newaxis], phi_interp, polarization=pol_phi
             )
         ),
         test_case.expected_results.phi_directivity,
@@ -523,6 +523,7 @@ class TestDefaultPolarization:
         return RadiationPattern(
             theta=theta,
             phi=phi,
+            frequency=None,
             e_theta=e_theta,
             e_phi=e_phi,
             rad_efficiency=0.8 * u.dimensionless,
@@ -569,6 +570,7 @@ class TestDefaultPolarization:
         pat_circ = RadiationPattern.from_circular_e_field(
             theta=theta,
             phi=phi,
+            frequency=None,
             e_lhcp=e_lhcp,
             e_rhcp=e_rhcp,
             rad_efficiency=1.0 * u.dimensionless,
@@ -585,6 +587,7 @@ class TestDefaultPolarization:
         pat_lin = RadiationPattern.from_linear_gain(
             theta=theta,
             phi=phi,
+            frequency=None,
             gain_theta=gain_theta,
             gain_phi=gain_phi,
             phase_theta=phase_theta,
@@ -787,13 +790,14 @@ class TestRadiationPatternValidation:
         gain_l[0, 0] = -1 * u.dimensionless
         with pytest.raises(ValueError):
             RadiationPattern.from_circular_gain(
-                theta,
-                phi,
-                gain_l,
-                gain_r,
-                np.zeros((6, 7)) * u.rad,
-                np.zeros((6, 7)) * u.rad,
-                1.0 * u.dimensionless,
+                theta=theta,
+                phi=phi,
+                frequency=None,
+                gain_lhcp=gain_l,
+                gain_rhcp=gain_r,
+                phase_lhcp=np.zeros((6, 7)) * u.rad,
+                phase_rhcp=np.zeros((6, 7)) * u.rad,
+                rad_efficiency=1.0 * u.dimensionless,
             )
 
         # Linear gain negative
@@ -802,13 +806,14 @@ class TestRadiationPatternValidation:
         g_ph[0, 0] = -1 * u.dimensionless
         with pytest.raises(ValueError):
             RadiationPattern.from_linear_gain(
-                theta,
-                phi,
-                g_th,
-                g_ph,
-                np.zeros((6, 7)) * u.rad,
-                np.zeros((6, 7)) * u.rad,
-                1.0 * u.dimensionless,
+                theta=theta,
+                phi=phi,
+                frequency=None,
+                gain_theta=g_th,
+                gain_phi=g_ph,
+                phase_theta=np.zeros((6, 7)) * u.rad,
+                phase_phi=np.zeros((6, 7)) * u.rad,
+                rad_efficiency=1.0 * u.dimensionless,
             )
 
 
@@ -831,6 +836,7 @@ class TestRadiationPatternFactoryConstructors:
         pat = RadiationPattern.from_circular_e_field(
             theta=theta,
             phi=phi,
+            frequency=None,
             e_lhcp=e_lhcp,
             e_rhcp=e_rhcp,
             rad_efficiency=0.65 * u.dimensionless,
@@ -844,10 +850,10 @@ class TestRadiationPatternFactoryConstructors:
         )
 
         # LHCP directivity should be 1, RHCP should be 0, linear components 0.5 and 0.5
-        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_lhcp))
-        dir_rhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_rhcp))
-        dir_theta = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_theta))
-        dir_phi = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_phi))
+        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp))
+        dir_rhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp))
+        dir_theta = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta))
+        dir_phi = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi))
 
         assert_quantity_allclose(dir_lhcp, 1.0 * u.dimensionless)
         assert_quantity_allclose(
@@ -857,11 +863,11 @@ class TestRadiationPatternFactoryConstructors:
         assert_quantity_allclose(dir_phi, 0.5 * u.dimensionless)
 
         # Gain should be eta * directivity (in linear)
-        gain_lhcp = to_linear(pat.gain(theta[:, np.newaxis], phi, pol_lhcp))
+        gain_lhcp = to_linear(pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp))
         assert_quantity_allclose(gain_lhcp, 0.65 * dir_lhcp)
 
         # Phase of LHCP e-field should match exp(1j*phi)
-        e_l = pat.e_field(theta[:, np.newaxis], phi, pol_lhcp)
+        e_l = pat.e_field(theta[:, np.newaxis], phi, polarization=pol_lhcp)
         phase_err = np.angle(e_l.value * np.exp(-1j * phi.value))
         np.testing.assert_allclose(phase_err, 0.0, atol=1e-10)
 
@@ -880,6 +886,7 @@ class TestRadiationPatternFactoryConstructors:
         pat = RadiationPattern.from_circular_gain(
             theta=theta,
             phi=phi,
+            frequency=None,
             gain_lhcp=gain_lhcp,
             gain_rhcp=gain_rhcp,
             phase_lhcp=phase_lhcp,
@@ -889,17 +896,17 @@ class TestRadiationPatternFactoryConstructors:
 
         pol_lhcp = Polarization.lhcp()
         pol_rhcp = Polarization.rhcp()
-        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_lhcp))
-        dir_rhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_rhcp))
+        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp))
+        dir_rhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp))
         assert_quantity_allclose(dir_lhcp, (0.25 / 0.75) * u.dimensionless)
         assert_quantity_allclose(
             dir_rhcp, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
         )
-        gain_lhcp = to_linear(pat.gain(theta[:, np.newaxis], phi, pol_lhcp))
+        gain_lhcp = to_linear(pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp))
         assert_quantity_allclose(gain_lhcp, 0.75 * dir_lhcp)
 
         # Phase of LHCP e-field should match provided phase_lhcp
-        e_l = pat.e_field(theta[:, np.newaxis], phi, pol_lhcp)
+        e_l = pat.e_field(theta[:, np.newaxis], phi, polarization=pol_lhcp)
         phase_err = np.angle(e_l.value * np.exp(-1j * phase_lhcp.value))
         np.testing.assert_allclose(phase_err, 0.0, atol=1e-10)
 
@@ -915,6 +922,7 @@ class TestRadiationPatternFactoryConstructors:
         pat = RadiationPattern.from_linear_gain(
             theta=theta,
             phi=phi,
+            frequency=None,
             gain_theta=gain_theta,
             gain_phi=gain_phi,
             phase_theta=phase_theta,
@@ -927,21 +935,21 @@ class TestRadiationPatternFactoryConstructors:
             np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT
         )
         pol_lhcp = Polarization.lhcp()
-        dir_theta = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_theta))
-        dir_phi = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_phi))
-        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, pol_lhcp))
+        dir_theta = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta))
+        dir_phi = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi))
+        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp))
         assert_quantity_allclose(dir_theta, 1.0 * u.dimensionless)
         assert_quantity_allclose(
             dir_phi, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
         )
         assert_quantity_allclose(dir_lhcp, 0.5 * u.dimensionless)
-        gain_theta_lin = to_linear(pat.gain(theta[:, np.newaxis], phi, pol_theta))
-        gain_lhcp_lin = to_linear(pat.gain(theta[:, np.newaxis], phi, pol_lhcp))
+        gain_theta_lin = to_linear(pat.gain(theta[:, np.newaxis], phi, polarization=pol_theta))
+        gain_lhcp_lin = to_linear(pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp))
         assert_quantity_allclose(gain_theta_lin, 0.6 * dir_theta)
         assert_quantity_allclose(gain_lhcp_lin, 0.6 * dir_lhcp)
 
         # Phase of theta-polarized e-field should match phase_theta
-        e_th = pat.e_field(theta[:, np.newaxis], phi, pol_theta)
+        e_th = pat.e_field(theta[:, np.newaxis], phi, polarization=pol_theta)
         phase_err = np.angle(e_th.value * np.exp(-1j * phase_theta.value))
         np.testing.assert_allclose(phase_err, 0.0, atol=1e-10)
 
