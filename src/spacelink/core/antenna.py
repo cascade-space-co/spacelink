@@ -263,7 +263,9 @@ class ComplexInterpolator:
                     [phi[0] + 2 * np.pi * u.rad],
                 ]
             )
-            values = np.concatenate([values[:, -1:, :], values, values[:, :1, :]], axis=1)
+            values = np.concatenate(
+                [values[:, -1:, :], values, values[:, :1, :]], axis=1
+            )
 
         with np.errstate(divide="ignore", invalid="ignore"):
             mag_db = np.clip(10.0 * np.log10(np.abs(values)), floor.value, None)

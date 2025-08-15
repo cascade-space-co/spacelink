@@ -296,7 +296,9 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.gain(
-                theta_interp[:, np.newaxis], phi_interp, polarization=Polarization.lhcp()
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.lhcp(),
             )
         ),
         test_case.expected_results.lhcp_gain,
@@ -306,7 +308,9 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, polarization=Polarization.lhcp()
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.lhcp(),
             )
         ),
         test_case.expected_results.lhcp_directivity,
@@ -316,7 +320,9 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.gain(
-                theta_interp[:, np.newaxis], phi_interp, polarization=Polarization.rhcp()
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.rhcp(),
             )
         ),
         test_case.expected_results.rhcp_gain,
@@ -326,7 +332,9 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, polarization=Polarization.rhcp()
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.rhcp(),
             )
         ),
         test_case.expected_results.rhcp_directivity,
@@ -850,10 +858,18 @@ class TestRadiationPatternFactoryConstructors:
         )
 
         # LHCP directivity should be 1, RHCP should be 0, linear components 0.5 and 0.5
-        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp))
-        dir_rhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp))
-        dir_theta = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta))
-        dir_phi = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi))
+        dir_lhcp = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        )
+        dir_rhcp = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp)
+        )
+        dir_theta = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta)
+        )
+        dir_phi = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi)
+        )
 
         assert_quantity_allclose(dir_lhcp, 1.0 * u.dimensionless)
         assert_quantity_allclose(
@@ -863,7 +879,9 @@ class TestRadiationPatternFactoryConstructors:
         assert_quantity_allclose(dir_phi, 0.5 * u.dimensionless)
 
         # Gain should be eta * directivity (in linear)
-        gain_lhcp = to_linear(pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp))
+        gain_lhcp = to_linear(
+            pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        )
         assert_quantity_allclose(gain_lhcp, 0.65 * dir_lhcp)
 
         # Phase of LHCP e-field should match exp(1j*phi)
@@ -896,13 +914,19 @@ class TestRadiationPatternFactoryConstructors:
 
         pol_lhcp = Polarization.lhcp()
         pol_rhcp = Polarization.rhcp()
-        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp))
-        dir_rhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp))
+        dir_lhcp = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        )
+        dir_rhcp = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp)
+        )
         assert_quantity_allclose(dir_lhcp, (0.25 / 0.75) * u.dimensionless)
         assert_quantity_allclose(
             dir_rhcp, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
         )
-        gain_lhcp = to_linear(pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp))
+        gain_lhcp = to_linear(
+            pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        )
         assert_quantity_allclose(gain_lhcp, 0.75 * dir_lhcp)
 
         # Phase of LHCP e-field should match provided phase_lhcp
@@ -935,16 +959,26 @@ class TestRadiationPatternFactoryConstructors:
             np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT
         )
         pol_lhcp = Polarization.lhcp()
-        dir_theta = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta))
-        dir_phi = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi))
-        dir_lhcp = to_linear(pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp))
+        dir_theta = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta)
+        )
+        dir_phi = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi)
+        )
+        dir_lhcp = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        )
         assert_quantity_allclose(dir_theta, 1.0 * u.dimensionless)
         assert_quantity_allclose(
             dir_phi, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
         )
         assert_quantity_allclose(dir_lhcp, 0.5 * u.dimensionless)
-        gain_theta_lin = to_linear(pat.gain(theta[:, np.newaxis], phi, polarization=pol_theta))
-        gain_lhcp_lin = to_linear(pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp))
+        gain_theta_lin = to_linear(
+            pat.gain(theta[:, np.newaxis], phi, polarization=pol_theta)
+        )
+        gain_lhcp_lin = to_linear(
+            pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        )
         assert_quantity_allclose(gain_theta_lin, 0.6 * dir_theta)
         assert_quantity_allclose(gain_lhcp_lin, 0.6 * dir_lhcp)
 
