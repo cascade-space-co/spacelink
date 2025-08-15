@@ -11,6 +11,10 @@ class DuplicateRegistryEntryError(Exception):
     """Raised when duplicate entries are found during registry loading."""
 
 
+class NoRegistryFilesError(Exception):
+    """Raised when no YAML files are found in the specified directories."""
+
+
 class Registry:
     r"""
     Registry of link modes and their performance.
@@ -24,7 +28,9 @@ class Registry:
         self.perfs: list[ModePerformance] = []
         self.perf_index: dict[tuple[str, ErrorMetric], ModePerformance] = {}
 
-    def load(self, mode_dir: Path = MODES_DIR, perf_dir: Path = PERF_DIR) -> None:
+    def load(
+        self, mode_dir: Path = MODES_DIR, perf_dir: Path | None = PERF_DIR
+    ) -> None:
         r"""
         Load link modes and performance data from files.
 
@@ -32,15 +38,25 @@ class Registry:
         ----------
         mode_dir : Path
             Path to the directory containing the link mode files.
-        perf_dir : Path
-            Path to the directory containing the performance data.
+        perf_dir : Path | None, optional
+            Path to the directory containing the performance data. If None, no
+            performance data will be loaded.
 
         Raises
         ------
         DuplicateRegistryEntryError
             If duplicate entries are found during loading.
+        NoRegistryFilesError
+            If no YAML files are found in the specified directories.
         """
-        for file in mode_dir.glob("*.yaml"):
+        mode_files = list(mode_dir.glob("*.yaml"))
+
+        if not mode_files:
+            raise NoRegistryFilesError(
+                f"No YAML files found in mode directory '{mode_dir}'"
+            )
+
+        for file in mode_files:
             with open(file) as f:
                 raw = yaml.safe_load(f)
                 for entry in raw:
@@ -51,7 +67,17 @@ class Registry:
                         )
                     self.modes[mode.id] = mode
 
-        for file in perf_dir.glob("*.yaml"):
+        if perf_dir is None:
+            return
+
+        perf_files = list(perf_dir.glob("*.yaml"))
+
+        if not perf_files:
+            raise NoRegistryFilesError(
+                f"No YAML files found in performance directory '{perf_dir}'"
+            )
+
+        for file in perf_files:
             with open(file) as f:
                 raw = yaml.safe_load(f)
                 mode_ids = raw["mode_ids"]
