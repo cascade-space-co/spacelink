@@ -16,9 +16,10 @@ from spacelink.core.antenna import (
     SphericalInterpolator,
     gain_from_g_over_t,
     temperature_from_g_over_t,
-    cn0_from__g_over_t,
+    cn0_from_g_over_t,
 )
 from spacelink.core.units import (
+    DecibelHertz,
     Dimensionless,
     Length,
     Frequency,
@@ -693,8 +694,7 @@ def test_cn0_from_g_over_t():
     # Test CN0 calculation from signal power and G/T
     signal_power = -85.0 * u.dBW
     g_on_t = 30.0 * u.dB_per_K
-    cn0 = cn0_from__g_over_t(signal_power, g_on_t)
-    # Expected result: ~173.6 dB-Hz
-    assert_quantity_allclose(cn0, 173.6 * u.dB, atol=0.1 * u.dB)
+    cn0 = cn0_from_g_over_t(signal_power, g_on_t)
+    assert_quantity_allclose(cn0, 173.6 * u.dBHz, rtol=0.1)
 
 
