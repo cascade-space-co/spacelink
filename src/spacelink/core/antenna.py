@@ -232,8 +232,8 @@ class ComplexInterpolator:
             Optional 1D array of strictly increasing frequencies with shape (K,).
         values: Quantity
             Complex array of values to interpolate. The required shape depends on
-            whether ``frequencies`` is provided:
-            - If ``frequencies is None``: shape ``(N, M)``
+            whether ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         floor: Decibels
             Floor value for the magnitude in dB. The interpolation approach used cannot
@@ -302,7 +302,7 @@ class ComplexInterpolator:
         phi: Angle
             Azimuthal angles.
         frequency: Frequency | None
-            Desired frequency. For 2D interpolators (constructed without frequencies),
+            Desired frequency. For 2D interpolators (constructed without ``frequency``),
             this argument is ignored.
 
         Returns
@@ -394,7 +394,7 @@ class RadiationPattern:
         ------
         ValueError
             If theta is not in [0, pi], if phi spans more than 2π radians, or if
-            theta/phi/frequencies are not strictly increasing, or if inputs are outside
+            theta/phi/frequency are not strictly increasing, or if inputs are outside
             allowed ranges.
         ValueError
             If the surface integral of the directivity is greater than 4π.
@@ -440,9 +440,9 @@ class RadiationPattern:
 
         if frequency is not None:
             if np.size(frequency) == 0:
-                raise ValueError("frequencies must have length >= 1")
+                raise ValueError("frequency must have length >= 1")
             if not np.all(np.diff(frequency) > 0 * u.Hz):
-                raise ValueError("frequencies must be strictly increasing")
+                raise ValueError("frequency must be strictly increasing")
             # Shape checks for 3D
             expected_shape = (theta.size, phi.size, frequency.size)
             if e_theta.shape != expected_shape or e_phi.shape != expected_shape:
@@ -577,23 +577,23 @@ class RadiationPattern:
             (theta, phi).
         gain_lhcp: Dimensionless
             Array of LHCP gain values. The required shape depends on whether
-            ``frequencies`` is provided:
-            - If ``frequencies is None``: shape ``(N, M)``
+            ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         gain_rhcp: Dimensionless
             Array of RHCP gain values. The required shape depends on whether
-            ``frequencies`` is provided:
-            - If ``frequencies is None``: shape ``(N, M)``
+            ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         phase_lhcp: Angle
             Array of LHCP phase angles. The required shape depends on whether
-            ``frequencies`` is provided:
-            - If ``frequencies is None``: shape ``(N, M)``
+            ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         phase_rhcp: Angle
             Array of RHCP phase angles. The required shape depends on whether
-            ``frequencies`` is provided:
-            - If ``frequencies is None``: shape ``(N, M)``
+            ``frequency`` is provided:
+            - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in [0, 1].
@@ -674,10 +674,6 @@ class RadiationPattern:
         default_polarization: Polarization | None
             Optional default polarization used when instance methods are called without
             an explicit polarization.
-        frequency: Frequency | None
-            Optional 1D array of strictly increasing frequencies with shape (K,).
-            If None, the pattern is treated as frequency-invariant and 2D over
-            (theta, phi).
         default_frequency: Frequency | None
             Optional default frequency used when instance methods are called without an
             explicit frequency.
@@ -718,7 +714,7 @@ class RadiationPattern:
         frequency: Frequency | None
             Desired frequency. If None, uses the instance's `default_frequency` if set;
             otherwise raises ValueError. For 2D patterns (constructed without
-            ``frequencies``), this argument is ignored.
+            ``frequency``), this argument is ignored.
         polarization: Polarization | None
             Desired polarization state. If None, uses the instance's
             `default_polarization` if set; otherwise raises ValueError.
@@ -783,7 +779,7 @@ class RadiationPattern:
         frequency: Frequency | None
             Desired frequency. If None, uses the instance's `default_frequency` if set;
             otherwise raises ValueError. For 2D patterns (constructed without
-            ``frequencies``), this argument is ignored.
+            ``frequency``), this argument is ignored.
         polarization: Polarization | None
             Desired polarization state. If None, uses the instance's
             `default_polarization` if set; otherwise raises ValueError.
@@ -821,7 +817,7 @@ class RadiationPattern:
         frequency: Frequency | None
             Desired frequency. If None, uses the instance's `default_frequency` if set;
             otherwise raises ValueError. For 2D patterns (constructed without
-            ``frequencies``), this argument is ignored.
+            ``frequency``), this argument is ignored.
         polarization: Polarization | None
             Desired polarization state. If None, uses the instance's
             `default_polarization` if set; otherwise raises ValueError.
@@ -857,7 +853,7 @@ class RadiationPattern:
         frequency: Frequency | None
             Desired frequency. If None, uses the instance's `default_frequency` if set;
             otherwise raises ValueError. For 2D patterns (constructed without
-            ``frequencies``), this argument is ignored.
+            ``frequency``), this argument is ignored.
 
         Returns
         -------
