@@ -736,3 +736,23 @@ def temperature_from_g_over_t(
         System noise temperature
     """
     return (gain - g_over_t).to(u.K)
+
+@enforce_units
+def cn0_from__g_over_t(signal_power: u.dBW, g_over_t: DecibelPerKelvin) -> u.dB:
+    """
+    Calculate the carrier-to-noise ratio (CN0) in dB from signal power and G/T.
+
+    Parameters
+    ----------
+    signal_power: u.dBW
+        Signal power in dBW
+    g_over_t: u.dBPerKelvin
+        G/T in dB/K
+
+    Returns
+    -------
+    u.dB
+        CN0 in dB
+    """
+    boltzmann = 1.380649 * (10**-23)
+    return signal_power - g_over_t - boltzmann
