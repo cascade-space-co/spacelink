@@ -743,7 +743,9 @@ def temperature_from_g_over_t(
 
 
 @enforce_units
-def cn0_from_g_over_t(signal_power: DecibelWatts, g_over_t: DecibelPerKelvin) -> DecibelHertz:
+def cn0_from_g_over_t(
+    signal_power: DecibelWatts, g_over_t: DecibelPerKelvin
+) -> DecibelHertz:
     r"""
     Calculate the carrier-to-noise ratio (CN0) in dB from signal power and G/T.
 

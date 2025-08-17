@@ -106,6 +106,7 @@ Angle = Annotated[Quantity, u.rad]
 SolidAngle = Annotated[Quantity, u.sr]
 Time = Annotated[Quantity, u.s]
 
+
 def enforce_units(func):
     """
     Decorator to enforce the units specified in function parameter type annotations.
