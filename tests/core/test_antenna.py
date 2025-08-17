@@ -777,4 +777,4 @@ def test_cn0_from_g_over_t():
     signal_power = -85.0 * u.dBW
     g_on_t = 30.0 * u.dB_per_K
     cn0 = cn0_from_g_over_t(signal_power, g_on_t)
-    assert_quantity_allclose(cn0, 173.6 * u.dBHz, rtol=0.1)
+    assert_quantity_allclose(cn0, 173.6 * u.dBHz, rtol=0.0001)
