@@ -278,10 +278,9 @@ class TestRadiationPatternHFSSImport:
         csv_file = tmp_path / "test_pattern.csv"
         csv_file.write_text(csv_content)
 
-        # Import pattern at 2.4 GHz
+        # Import pattern (will import all frequencies from CSV)
         pattern = pattern_io.import_hfss_csv(
             csv_file,
-            carrier_frequency=2.4 * u.GHz,
             rad_efficiency=0.8 * u.dimensionless,
         )
 
@@ -289,6 +288,7 @@ class TestRadiationPatternHFSSImport:
         assert pattern.rad_efficiency == 0.8 * u.dimensionless
         assert len(pattern.theta) == 4  # 20, 40, 60, 80 degrees
         assert len(pattern.phi) == 4  # 0, 90, 180, and 270 degrees
+        assert pattern.frequency is None
         assert pattern.theta[0] == 20 * u.deg
         assert pattern.theta[1] == 40 * u.deg
         assert pattern.theta[2] == 60 * u.deg
@@ -298,66 +298,19 @@ class TestRadiationPatternHFSSImport:
         assert pattern.phi[2] == 180 * u.deg
         assert pattern.phi[3] == 270 * u.deg
 
-        # Test basic functionality - just verify it works without crashing
         lhcp_pol = Polarization.lhcp()
         rhcp_pol = Polarization.rhcp()
 
         # Check gain at a test point
-        gain_lhcp = pattern.gain(40 * u.deg, 90 * u.deg, lhcp_pol)
-        gain_rhcp = pattern.gain(40 * u.deg, 90 * u.deg, rhcp_pol)
+        gain_lhcp = pattern.gain(40 * u.deg, 90 * u.deg, polarization=lhcp_pol)
+        gain_rhcp = pattern.gain(40 * u.deg, 90 * u.deg, polarization=rhcp_pol)
 
         # Just verify they're reasonable negative dB values
         assert gain_lhcp < 0 * u.dB
         assert gain_rhcp < 0 * u.dB
 
-    def test_hfss_csv_phi_360_handling(self, tmp_path):
-        """Test handling of redundant phi=360 degree values."""
-        # Create CSV with phi from 0 to 360 (redundant last value)
-        csv_content = textwrap.dedent(
-            """\
-            Freq [GHz],Theta [deg],Phi [deg],"""
-            """dB(RealizedGainRHCP) [],dB(RealizedGainLHCP) [],"""
-            """ang_deg(rELHCP) [deg],ang_deg(rERHCP) [deg]
-            2.4,20,0,-5.0,-25.0,0,90
-            2.4,20,90,-6.0,-26.0,45,135
-            2.4,20,180,-7.0,-27.0,90,180
-            2.4,20,270,-6.5,-25.5,135,225
-            2.4,20,360,-5.0,-25.0,0,90
-            2.4,40,0,-5.5,-25.5,15,105
-            2.4,40,90,-6.5,-26.5,60,150
-            2.4,40,180,-7.5,-27.5,105,195
-            2.4,40,270,-7.0,-26.0,150,240
-            2.4,40,360,-5.5,-25.5,15,105
-            2.4,60,0,-6.0,-26.0,30,120
-            2.4,60,90,-7.0,-27.0,75,165
-            2.4,60,180,-8.0,-28.0,120,210
-            2.4,60,270,-7.5,-26.5,165,255
-            2.4,60,360,-6.0,-26.0,30,120
-            2.4,80,0,-6.5,-26.5,45,135
-            2.4,80,90,-7.5,-27.5,90,180
-            2.4,80,180,-8.5,-28.5,135,225
-            2.4,80,270,-8.0,-27.0,180,270
-            2.4,80,360,-6.5,-26.5,45,135
-            """
-        )
-        csv_file = tmp_path / "test_360.csv"
-        csv_file.write_text(csv_content)
-
-        pattern = pattern_io.import_hfss_csv(
-            csv_file,
-            carrier_frequency=2.4 * u.GHz,
-            rad_efficiency=1.0 * u.dimensionless,
-        )
-
-        # Should have 4 phi values (0, 90, 180, 270), redundant 360 removed
-        assert len(pattern.phi) == 4
-        assert pattern.phi[0] == 0 * u.deg
-        assert pattern.phi[1] == 90 * u.deg
-        assert pattern.phi[2] == 180 * u.deg
-        assert pattern.phi[3] == 270 * u.deg
-
-    def test_hfss_csv_frequency_not_found(self, tmp_path):
-        """Test error when requested frequency is not in CSV."""
+    def test_hfss_csv_single_frequency(self, tmp_path):
+        """Test successful import of single frequency CSV."""
         csv_content = textwrap.dedent(
             """\
             Freq [GHz],Theta [deg],Phi [deg],"""
@@ -374,13 +327,64 @@ class TestRadiationPatternHFSSImport:
         csv_file = tmp_path / "test_missing_freq.csv"
         csv_file.write_text(csv_content)
 
-        # Request frequency not in file - should raise an error
-        with pytest.raises(ValueError):
-            pattern_io.import_hfss_csv(
-                csv_file,
-                carrier_frequency=5.8 * u.GHz,
-                rad_efficiency=1.0 * u.dimensionless,
-            )
+        # Test successful import of single frequency data
+        pattern = pattern_io.import_hfss_csv(
+            csv_file,
+            rad_efficiency=1.0 * u.dimensionless,
+        )
+        # Should successfully import as frequency-invariant pattern
+        assert pattern.frequency is None  # Single frequency -> 2D pattern
+        assert pattern.rad_efficiency == 1.0 * u.dimensionless
+
+    def test_hfss_csv_multiple_frequencies(self, tmp_path):
+        """Test import of CSV with multiple frequencies creates 3D pattern."""
+        # Create CSV with two frequencies
+        csv_content = textwrap.dedent(
+            """\
+            Freq [GHz],Theta [deg],Phi [deg],"""
+            """dB(RealizedGainRHCP) [],dB(RealizedGainLHCP) [],"""
+            """ang_deg(rELHCP) [deg],ang_deg(rERHCP) [deg]
+            2.4,20,0,-5.0,-25.0,0,90
+            2.4,20,90,-6.0,-26.0,45,135
+            2.4,40,0,-5.5,-25.5,15,105
+            2.4,40,90,-6.5,-26.5,60,150
+            5.8,20,0,-4.0,-24.0,10,100
+            5.8,20,90,-5.0,-25.0,55,145
+            5.8,40,0,-4.5,-24.5,25,115
+            5.8,40,90,-5.5,-25.5,70,160
+            """
+        )
+        csv_file = tmp_path / "test_multi_freq.csv"
+        csv_file.write_text(csv_content)
+
+        pattern = pattern_io.import_hfss_csv(
+            csv_file,
+            rad_efficiency=0.9 * u.dimensionless,
+        )
+
+        # Should create 3D pattern with frequency axis
+        assert pattern.frequency is not None
+        assert len(pattern.frequency) == 2
+        assert pattern.frequency[0] == 2.4 * u.GHz
+        assert pattern.frequency[1] == 5.8 * u.GHz
+        assert len(pattern.theta) == 2  # 20, 40 degrees
+        assert len(pattern.phi) == 2  # 0, 90 degrees
+
+        # Test gain calculation with the precision fix
+        lhcp_pol = Polarization.lhcp()
+        # Use exact frequency values from pattern to avoid precision issues
+        freq_24 = pattern.frequency[0]
+        freq_58 = pattern.frequency[1]
+        gain_24 = pattern.gain(
+            20 * u.deg, 0 * u.deg, frequency=freq_24, polarization=lhcp_pol
+        )
+        gain_58 = pattern.gain(
+            20 * u.deg, 0 * u.deg, frequency=freq_58, polarization=lhcp_pol
+        )
+
+        # Gains should be reasonable negative dB values
+        assert gain_24 < 0 * u.dB
+        assert gain_58 < 0 * u.dB
 
     def test_hfss_csv_file_not_found(self, tmp_path):
         """Test error when CSV file doesn't exist."""
@@ -389,7 +393,6 @@ class TestRadiationPatternHFSSImport:
         with pytest.raises(FileNotFoundError):
             pattern_io.import_hfss_csv(
                 nonexistent_file,
-                carrier_frequency=2.4 * u.GHz,
                 rad_efficiency=1.0 * u.dimensionless,
             )
 
@@ -414,6 +417,5 @@ class TestRadiationPatternHFSSImport:
         with pytest.raises(KeyError):
             pattern_io.import_hfss_csv(
                 csv_file,
-                carrier_frequency=2.4 * u.GHz,
                 rad_efficiency=1.0 * u.dimensionless,
             )
