@@ -36,19 +36,21 @@ def load_radiation_pattern_npz(
     """
     data = np.load(source)
 
-    # Reconstruct arrays with proper units
-    theta = data["theta"] * u.rad
-    phi = data["phi"] * u.rad
-    e_theta = data["e_theta"] * u.dimensionless
-    e_phi = data["e_phi"] * u.dimensionless
-    rad_efficiency = data["rad_efficiency"] * u.dimensionless
+    default_polarization = None
+    if data["has_default_polarization"]:
+        default_polarization = antenna.Polarization(
+            tilt_angle=data["default_pol_tilt_angle"] * u.rad,
+            axial_ratio=data["default_pol_axial_ratio"] * u.dimensionless,
+            handedness=antenna.Handedness[str(data["default_pol_handedness"])],
+        )
 
     return antenna.RadiationPattern(
-        theta=theta,
-        phi=phi,
-        e_theta=e_theta,
-        e_phi=e_phi,
-        rad_efficiency=rad_efficiency,
+        theta=data["theta"] * u.rad,
+        phi=data["phi"] * u.rad,
+        e_theta=data["e_theta"] * u.dimensionless,
+        e_phi=data["e_phi"] * u.dimensionless,
+        rad_efficiency=data["rad_efficiency"] * u.dimensionless,
+        default_polarization=default_polarization,
     )
 
 
@@ -67,14 +69,29 @@ def save_radiation_pattern_npz(
         to write NPZ data to. This allows saving to files, databases, or
         in-memory buffers.
     """
+    data_dict = {
+        "theta": pattern.theta.to(u.rad).value,
+        "phi": pattern.phi.to(u.rad).value,
+        "e_theta": pattern.e_theta.value,
+        "e_phi": pattern.e_phi.value,
+        "rad_efficiency": pattern.rad_efficiency.value,
+        "has_default_polarization": pattern.default_polarization is not None,
+    }
+
+    if pattern.default_polarization is not None:
+        pol = pattern.default_polarization
+        data_dict.update(
+            {
+                "default_pol_tilt_angle": pol.tilt_angle.to(u.rad).value,
+                "default_pol_axial_ratio": pol.axial_ratio.value,
+                "default_pol_handedness": pol.handedness.name,
+            }
+        )
+
     np.savez_compressed(
         destination,
-        theta=pattern.theta.to(u.rad).value,
-        phi=pattern.phi.to(u.rad).value,
-        e_theta=pattern.e_theta.value,
-        e_phi=pattern.e_phi.value,
-        rad_efficiency=pattern.rad_efficiency.value,
         allow_pickle=False,
+        **data_dict,
     )
 
 

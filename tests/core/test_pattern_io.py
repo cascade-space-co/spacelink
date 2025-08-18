@@ -9,7 +9,7 @@ import astropy.units as u
 import numpy as np
 import pytest
 
-from spacelink.core.antenna import RadiationPattern, Polarization
+from spacelink.core.antenna import RadiationPattern, Polarization, Handedness
 from spacelink.core import pattern_io
 
 
@@ -35,6 +35,56 @@ def test_radiation_pattern_npz_roundtrip():
         np.testing.assert_array_equal(loaded.e_theta, original.e_theta)
         np.testing.assert_array_equal(loaded.e_phi, original.e_phi)
         np.testing.assert_array_equal(loaded.rad_efficiency, original.rad_efficiency)
+        assert loaded.default_polarization is None
+
+
+def test_radiation_pattern_npz_roundtrip_with_polarization():
+    """Test saving and loading RadiationPattern with default_polarization set."""
+    # Create a test pattern with a default polarization
+    theta = np.linspace(0, np.pi, 8) * u.rad
+    phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
+    e_theta = (0.6 + 0.4j) * np.ones((8, 12)) * u.dimensionless
+    e_phi = (0.3 - 0.2j) * np.ones((8, 12)) * u.dimensionless
+    rad_efficiency = 0.9 * u.dimensionless
+
+    # Create a custom polarization
+    default_pol = Polarization(
+        tilt_angle=30 * u.deg,
+        axial_ratio=2.5 * u.dimensionless,
+        handedness=Handedness.LEFT,
+    )
+
+    original = RadiationPattern(
+        theta, phi, e_theta, e_phi, rad_efficiency, default_polarization=default_pol
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        npz_path = pathlib.Path(tmpdir) / "test_pattern_with_pol.npz"
+        pattern_io.save_radiation_pattern_npz(original, npz_path)
+        assert npz_path.exists()
+        loaded = pattern_io.load_radiation_pattern_npz(npz_path)
+
+        # Test basic arrays
+        np.testing.assert_array_equal(loaded.theta, original.theta)
+        np.testing.assert_array_equal(loaded.phi, original.phi)
+        np.testing.assert_array_equal(loaded.e_theta, original.e_theta)
+        np.testing.assert_array_equal(loaded.e_phi, original.e_phi)
+        np.testing.assert_array_equal(loaded.rad_efficiency, original.rad_efficiency)
+
+        # Test polarization was preserved
+        assert loaded.default_polarization is not None
+        assert (
+            loaded.default_polarization.tilt_angle
+            == original.default_polarization.tilt_angle
+        )
+        assert (
+            loaded.default_polarization.axial_ratio
+            == original.default_polarization.axial_ratio
+        )
+        assert (
+            loaded.default_polarization.handedness
+            == original.default_polarization.handedness
+        )
 
 
 def test_radiation_pattern_from_npz_missing_file():
@@ -86,6 +136,7 @@ def test_radiation_pattern_npz_roundtrip_filelike():
     np.testing.assert_array_equal(loaded.e_theta, original.e_theta)
     np.testing.assert_array_equal(loaded.e_phi, original.e_phi)
     np.testing.assert_array_equal(loaded.rad_efficiency, original.rad_efficiency)
+    assert loaded.default_polarization is None
 
 
 class TestRadiationPatternHFSSImport:
