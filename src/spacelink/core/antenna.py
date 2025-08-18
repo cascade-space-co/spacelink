@@ -718,6 +718,7 @@ class RadiationPattern:
         self,
         theta: Angle,
         phi: Angle,
+        *,
         frequency: Frequency | None = None,
         polarization: Polarization | None = None,
     ) -> Dimensionless:
@@ -769,6 +770,7 @@ class RadiationPattern:
         self,
         theta: Angle,
         phi: Angle,
+        *,
         frequency: Frequency | None = None,
         polarization: Polarization | None = None,
     ) -> Decibels:
@@ -809,13 +811,19 @@ class RadiationPattern:
             Directivity. Shape is determined by standard Numpy broadcasting rules from
             the shapes of theta and phi.
         """
-        return to_dB(np.abs(self.e_field(theta, phi, frequency, polarization)) ** 2)
+        return to_dB(
+            np.abs(
+                self.e_field(theta, phi, frequency=frequency, polarization=polarization)
+            )
+            ** 2
+        )
 
     @enforce_units
     def gain(
         self,
         theta: Angle,
         phi: Angle,
+        *,
         frequency: Frequency | None = None,
         polarization: Polarization | None = None,
     ) -> Decibels:
@@ -848,12 +856,16 @@ class RadiationPattern:
             shapes of theta and phi.
         """
         return to_dB(self.rad_efficiency) + self.directivity(
-            theta, phi, frequency, polarization
+            theta, phi, frequency=frequency, polarization=polarization
         )
 
     @enforce_units
     def axial_ratio(
-        self, theta: Angle, phi: Angle, frequency: Frequency | None = None
+        self,
+        theta: Angle,
+        phi: Angle,
+        *,
+        frequency: Frequency | None = None,
     ) -> Decibels:
         r"""
         Axial ratio of the antenna.
