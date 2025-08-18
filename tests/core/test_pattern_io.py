@@ -22,7 +22,7 @@ def test_radiation_pattern_npz_roundtrip():
     e_phi = (0.2 - 0.5j) * np.ones((10, 15)) * u.dimensionless
     rad_efficiency = 0.75 * u.dimensionless
 
-    original = RadiationPattern(theta, phi, e_theta, e_phi, rad_efficiency)
+    original = RadiationPattern(theta, phi, None, e_theta, e_phi, rad_efficiency)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         npz_path = pathlib.Path(tmpdir) / "test_pattern.npz"
@@ -55,7 +55,13 @@ def test_radiation_pattern_npz_roundtrip_with_polarization():
     )
 
     original = RadiationPattern(
-        theta, phi, e_theta, e_phi, rad_efficiency, default_polarization=default_pol
+        theta,
+        phi,
+        None,
+        e_theta,
+        e_phi,
+        rad_efficiency,
+        default_polarization=default_pol,
     )
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -116,7 +122,7 @@ def test_radiation_pattern_npz_roundtrip_filelike():
     e_phi = (0.3 - 0.6j) * np.ones((8, 12)) * u.dimensionless
     rad_efficiency = 0.85 * u.dimensionless
 
-    original = RadiationPattern(theta, phi, e_theta, e_phi, rad_efficiency)
+    original = RadiationPattern(theta, phi, None, e_theta, e_phi, rad_efficiency)
 
     # Test with BytesIO (simulates database BLOB storage)
     buffer = io.BytesIO()
@@ -137,6 +143,108 @@ def test_radiation_pattern_npz_roundtrip_filelike():
     np.testing.assert_array_equal(loaded.e_phi, original.e_phi)
     np.testing.assert_array_equal(loaded.rad_efficiency, original.rad_efficiency)
     assert loaded.default_polarization is None
+    assert loaded.frequency is None
+    assert loaded.default_frequency is None
+
+
+def test_radiation_pattern_npz_roundtrip_3d():
+    """Test saving and loading 3D RadiationPattern with frequency."""
+    # Create a 3D test pattern
+    theta = np.linspace(0, np.pi, 6) * u.rad
+    phi = np.linspace(0, 2 * np.pi, 8, endpoint=False) * u.rad
+    frequency = np.array([2.4, 5.8, 10.0]) * u.GHz
+    e_theta = (0.8 + 0.3j) * np.ones((6, 8, 3)) * u.dimensionless
+    e_phi = (0.2 - 0.5j) * np.ones((6, 8, 3)) * u.dimensionless
+    rad_efficiency = 0.75 * u.dimensionless
+    default_frequency = 2.4 * u.GHz
+
+    original = RadiationPattern(
+        theta,
+        phi,
+        frequency,
+        e_theta,
+        e_phi,
+        rad_efficiency,
+        default_frequency=default_frequency,
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        npz_path = pathlib.Path(tmpdir) / "test_pattern_3d.npz"
+        pattern_io.save_radiation_pattern_npz(original, npz_path)
+        assert npz_path.exists()
+        loaded = pattern_io.load_radiation_pattern_npz(npz_path)
+
+        np.testing.assert_array_equal(loaded.theta, original.theta)
+        np.testing.assert_array_equal(loaded.phi, original.phi)
+        np.testing.assert_array_equal(loaded.frequency, original.frequency)
+        np.testing.assert_array_equal(loaded.e_theta, original.e_theta)
+        np.testing.assert_array_equal(loaded.e_phi, original.e_phi)
+        np.testing.assert_array_equal(loaded.rad_efficiency, original.rad_efficiency)
+        np.testing.assert_array_equal(
+            loaded.default_frequency, original.default_frequency
+        )
+        assert loaded.default_polarization is None
+
+
+def test_radiation_pattern_npz_roundtrip_3d_with_polarization():
+    """Test saving and loading 3D RadiationPattern with frequency and polarization."""
+    # Create a 3D test pattern with default polarization
+    theta = np.linspace(0, np.pi, 5) * u.rad
+    phi = np.linspace(0, 2 * np.pi, 7, endpoint=False) * u.rad
+    frequency = np.array([1.0, 2.0]) * u.GHz
+    e_theta = (0.6 + 0.4j) * np.ones((5, 7, 2)) * u.dimensionless
+    e_phi = (0.3 - 0.2j) * np.ones((5, 7, 2)) * u.dimensionless
+    rad_efficiency = 0.9 * u.dimensionless
+
+    # Create a custom polarization
+    default_pol = Polarization(
+        tilt_angle=45 * u.deg,
+        axial_ratio=1.5 * u.dimensionless,
+        handedness=Handedness.RIGHT,
+    )
+
+    original = RadiationPattern(
+        theta,
+        phi,
+        frequency,
+        e_theta,
+        e_phi,
+        rad_efficiency,
+        default_polarization=default_pol,
+        default_frequency=1.5 * u.GHz,
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        npz_path = pathlib.Path(tmpdir) / "test_pattern_3d_pol.npz"
+        pattern_io.save_radiation_pattern_npz(original, npz_path)
+        assert npz_path.exists()
+        loaded = pattern_io.load_radiation_pattern_npz(npz_path)
+
+        # Test basic arrays
+        np.testing.assert_array_equal(loaded.theta, original.theta)
+        np.testing.assert_array_equal(loaded.phi, original.phi)
+        np.testing.assert_array_equal(loaded.frequency, original.frequency)
+        np.testing.assert_array_equal(loaded.e_theta, original.e_theta)
+        np.testing.assert_array_equal(loaded.e_phi, original.e_phi)
+        np.testing.assert_array_equal(loaded.rad_efficiency, original.rad_efficiency)
+        np.testing.assert_array_equal(
+            loaded.default_frequency, original.default_frequency
+        )
+
+        # Test polarization was preserved
+        assert loaded.default_polarization is not None
+        assert (
+            loaded.default_polarization.tilt_angle
+            == original.default_polarization.tilt_angle
+        )
+        assert (
+            loaded.default_polarization.axial_ratio
+            == original.default_polarization.axial_ratio
+        )
+        assert (
+            loaded.default_polarization.handedness
+            == original.default_polarization.handedness
+        )
 
 
 class TestRadiationPatternHFSSImport:

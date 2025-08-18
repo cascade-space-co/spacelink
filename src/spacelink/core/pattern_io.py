@@ -37,20 +37,30 @@ def load_radiation_pattern_npz(
     data = np.load(source)
 
     default_polarization = None
-    if data["has_default_polarization"]:
+    if data.get("has_default_polarization", False):
         default_polarization = antenna.Polarization(
             tilt_angle=data["default_pol_tilt_angle"] * u.rad,
             axial_ratio=data["default_pol_axial_ratio"] * u.dimensionless,
             handedness=antenna.Handedness[str(data["default_pol_handedness"])],
         )
 
+    frequency = None
+    if data.get("has_frequency", False):
+        frequency = data["frequency"] * u.Hz
+
+    default_frequency = None
+    if data.get("has_default_frequency", False):
+        default_frequency = data["default_frequency"] * u.Hz
+
     return antenna.RadiationPattern(
         theta=data["theta"] * u.rad,
         phi=data["phi"] * u.rad,
+        frequency=frequency,
         e_theta=data["e_theta"] * u.dimensionless,
         e_phi=data["e_phi"] * u.dimensionless,
         rad_efficiency=data["rad_efficiency"] * u.dimensionless,
         default_polarization=default_polarization,
+        default_frequency=default_frequency,
     )
 
 
@@ -76,6 +86,8 @@ def save_radiation_pattern_npz(
         "e_phi": pattern.e_phi.value,
         "rad_efficiency": pattern.rad_efficiency.value,
         "has_default_polarization": pattern.default_polarization is not None,
+        "has_frequency": pattern.frequency is not None,
+        "has_default_frequency": pattern.default_frequency is not None,
     }
 
     if pattern.default_polarization is not None:
@@ -87,6 +99,12 @@ def save_radiation_pattern_npz(
                 "default_pol_handedness": pol.handedness.name,
             }
         )
+
+    if pattern.frequency is not None:
+        data_dict["frequency"] = pattern.frequency.to(u.Hz).value
+
+    if pattern.default_frequency is not None:
+        data_dict["default_frequency"] = pattern.default_frequency.to(u.Hz).value
 
     np.savez_compressed(
         destination,
