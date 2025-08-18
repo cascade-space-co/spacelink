@@ -230,8 +230,9 @@ class ComplexInterpolator:
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
         values: Quantity
-            Complex array of values to interpolate. The required shape depends on
-            whether ``frequency`` is provided:
+            Complex array of values to interpolate. This should be in linear-scale (not
+            log-scale like u.dB). The required shape depends on whether ``frequency`` is
+            provided:
             - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         floor: Quantity | None
