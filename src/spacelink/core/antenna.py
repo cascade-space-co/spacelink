@@ -449,21 +449,20 @@ class RadiationPattern:
         frequency: Frequency | None,
         rad_efficiency: Dimensionless,
     ):
+        theta_step = np.diff(theta)
+        phi_step = np.diff(phi)
         if not np.all(theta >= 0 * u.rad) or not np.all(theta <= np.pi * u.rad):
             raise ValueError("theta must be in [0, pi]")
-        if not np.all(np.diff(theta) > 0 * u.rad):
+        if not np.all(theta_step > 0 * u.rad):
             raise ValueError("theta must be strictly increasing")
-        if not np.all(np.diff(phi) > 0 * u.rad):
+        if not np.all(phi_step > 0 * u.rad):
             raise ValueError("phi must be strictly increasing")
-        if (phi[-1] - phi[0]) >= 2 * np.pi * u.rad:
-            raise ValueError("phi must cover less than 2π radians")
-        # Enforce equal spacing for theta and phi
-        theta_step = np.diff(theta.to(u.rad).value)
-        phi_step = np.diff(phi.to(u.rad).value)
         if theta_step.size > 0 and not np.allclose(theta_step, theta_step[0]):
             raise ValueError("theta must be equally spaced")
         if phi_step.size > 0 and not np.allclose(phi_step, phi_step[0]):
             raise ValueError("phi must be equally spaced")
+        if (phi[-1] - phi[0]) > (2 * np.pi * u.rad + 0.5 * phi_step[0]):
+            raise ValueError("phi must not span more than 2π radians")
 
         if frequency is not None:
             if np.size(frequency) == 0:

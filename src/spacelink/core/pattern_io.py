@@ -146,15 +146,6 @@ def import_hfss_csv(
     phi = np.sort(df[phi_col].unique()) * u.deg
     frequencies = (np.sort(df[freq_col].unique()) * u.GHz).to(u.Hz)
 
-    # HFSS exports often have phi = 0 and 360 degrees which means the last phi
-    # value is redundant with the first. In that case we drop the redundant phi
-    # values.
-    if np.isclose(phi[-1] - phi[0], 360 * u.deg):
-        phi = phi[:-1]
-
-    # Drop redundant phi rows before pivoting
-    df = df[df[phi_col].isin(phi.to_value(u.deg))]
-
     n_theta = theta.size
     n_phi = phi.size
     n_freq = frequencies.size
