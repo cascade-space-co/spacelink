@@ -67,7 +67,8 @@ where:
 
 from functools import wraps
 from inspect import signature
-from typing import get_type_hints, get_args, get_origin, Annotated
+from typing import get_type_hints, get_args, get_origin, Annotated, Union, Any
+import types
 import astropy.units as u
 import astropy.constants as constants
 from astropy.units import Quantity
@@ -105,6 +106,42 @@ DecibelHertz = Annotated[Quantity, u.dB(u.Hz)]
 Angle = Annotated[Quantity, u.rad]
 SolidAngle = Annotated[Quantity, u.sr]
 Time = Annotated[Quantity, u.s]
+
+
+def _extract_annotated_from_hint(hint: Any) -> tuple[type, u.Unit] | None:
+    """
+    Extract Annotated type and unit from a type hint, handling optional parameters.
+
+    Parameters
+    ----------
+    hint : Any
+        Type hint that may be Annotated directly or a Union containing Annotated
+
+    Returns
+    -------
+    tuple[type, u.Unit] | None
+        (quantity_type, unit) if Annotated type found, None otherwise
+    """
+    if hint is None:
+        return None
+
+    # Check if hint is directly Annotated
+    if get_origin(hint) is Annotated:
+        args = get_args(hint)
+        if len(args) >= 2:
+            return args[0], args[1]
+
+    # Check if hint is a Union (including PEP 604 X | Y syntax)
+    origin = get_origin(hint)
+    if origin is Union or (hasattr(types, "UnionType") and origin is types.UnionType):
+        # Look through union arguments for Annotated types
+        for arg in get_args(hint):
+            if get_origin(arg) is Annotated:
+                annotated_args = get_args(arg)
+                if len(annotated_args) >= 2:
+                    return annotated_args[0], annotated_args[1]
+
+    return None
 
 
 def enforce_units(func):
@@ -152,9 +189,14 @@ def enforce_units(func):
 
         for name, value in bound.arguments.items():
             hint = hints.get(name)
-            # Check if hint is Annotated
-            if hint and get_origin(hint) is Annotated:
-                _, unit = get_args(hint)  # Use _ for quantity_type if not needed
+            annotated_info = _extract_annotated_from_hint(hint)
+
+            if annotated_info is not None:
+                _, unit = annotated_info
+
+                # Handle None values for optional parameters
+                if value is None:
+                    continue
 
                 if isinstance(value, Quantity):
                     # Convert to expected unit
