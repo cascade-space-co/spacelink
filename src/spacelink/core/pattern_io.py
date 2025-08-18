@@ -113,6 +113,7 @@ def save_radiation_pattern_npz(
     )
 
 
+@units.enforce_units
 def import_hfss_csv(
     hfss_csv_path: pathlib.Path,
     *,
@@ -140,7 +141,7 @@ def import_hfss_csv(
     hfss_csv_path: pathlib.Path
         Path to the HFSS CSV file.
     rad_efficiency: Dimensionless
-        Radiation efficiency :math:`\eta` in [0, 1].
+        Radiation efficiency :math:`\eta` in (0, 1].
 
     Returns
     -------
@@ -148,6 +149,16 @@ def import_hfss_csv(
         Radiation pattern constructed from the CSV. If the CSV contains only a single
         frequency the pattern will be created without a frequency axis (it will be
         frequency-invariant).
+
+    Raises
+    ------
+    FileNotFoundError
+        If the CSV file does not exist.
+    KeyError
+        If required columns are missing from the CSV.
+    ValueError
+        If duplicate (Freq, Theta, Phi) grid rows are present or if the CSV does not
+        form a complete regular grid (NaNs detected after pivoting and reindexing).
     """
     # Define column name constants
     freq_col = "Freq [GHz]"
@@ -160,6 +171,14 @@ def import_hfss_csv(
 
     df = pd.read_csv(hfss_csv_path)
     df = df.sort_values([freq_col, theta_col, phi_col])
+
+    # Validate that there are no duplicate grid rows for the same
+    # (frequency, theta, phi) coordinate triple. Duplicates would be silently
+    # collapsed by the pivot operation; fail fast instead.
+    if df.duplicated(subset=[freq_col, theta_col, phi_col]).any():
+        raise ValueError(
+            "Duplicate rows detected for the same (Freq, Theta, Phi) grid point"
+        )
 
     # Axes
     theta = np.sort(df[theta_col].unique()) * u.deg
@@ -189,6 +208,15 @@ def import_hfss_csv(
         aggfunc="first",
     )
     df_pivoted = df_pivoted.reindex(index=index_target, columns=columns_target)
+
+    # After reindexing, any NaNs indicate that the CSV did not form a complete
+    # regular grid across theta, phi, and frequency. Fail to avoid propagating
+    # invalid values into the radiation pattern tensors.
+    if df_pivoted.isna().any().any():
+        raise ValueError(
+            "CSV does not form a complete regular grid; missing theta/phi/frequency "
+            "samples detected"
+        )
 
     # Reshape to (n_theta, n_phi, n_freq)
     gain_lhcp = units.to_linear(
