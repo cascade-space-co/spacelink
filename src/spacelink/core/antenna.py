@@ -399,7 +399,9 @@ class RadiationPattern:
         ValueError
             If the surface integral of the directivity is greater than 4π.
         """
-        self._validate_constructor_args(theta, phi, e_theta, e_phi, frequency)
+        self._validate_constructor_args(
+            theta, phi, e_theta, e_phi, frequency, rad_efficiency
+        )
         self.theta = theta
         self.phi = phi
         self.frequency = frequency
@@ -414,6 +416,14 @@ class RadiationPattern:
         self._e_theta_interp = ComplexInterpolator(theta, phi, frequency, e_theta)
         self._e_phi_interp = ComplexInterpolator(theta, phi, frequency, e_phi)
 
+    @staticmethod
+    def _validate_rad_efficiency(rad_efficiency: Dimensionless) -> None:
+        """Validate that ``rad_efficiency`` is a scalar in the open interval (0, 1]."""
+        if np.size(rad_efficiency) != 1:
+            raise ValueError("rad_efficiency must be a scalar.")
+        if not (0.0 < rad_efficiency.value <= 1.0):
+            raise ValueError(f"rad_efficiency must be in (0, 1], got {rad_efficiency}.")
+
     def _validate_constructor_args(
         self,
         theta: Angle,
@@ -421,6 +431,7 @@ class RadiationPattern:
         e_theta: Dimensionless,
         e_phi: Dimensionless,
         frequency: Frequency | None,
+        rad_efficiency: Dimensionless,
     ):
         if not np.all(theta >= 0 * u.rad) or not np.all(theta <= np.pi * u.rad):
             raise ValueError("theta must be in [0, pi]")
@@ -458,6 +469,7 @@ class RadiationPattern:
                     f"e_theta/e_phi must have shape {expected_shape_2d}, "
                     f"got {e_theta.shape} and {e_phi.shape}"
                 )
+        self._validate_rad_efficiency(rad_efficiency)
 
     def _validate_surface_integral(self):
         """Validate that surface integral of directivity is ≤ 4π."""
@@ -606,6 +618,8 @@ class RadiationPattern:
         """
         if np.any(gain_lhcp < 0) or np.any(gain_rhcp < 0):
             raise ValueError("Gain must be non-negative")
+        # Validate radiation efficiency prior to division
+        cls._validate_rad_efficiency(rad_efficiency)
 
         e_lhcp = np.sqrt(gain_lhcp / rad_efficiency) * np.exp(1j * phase_lhcp.value)
         e_rhcp = np.sqrt(gain_rhcp / rad_efficiency) * np.exp(1j * phase_rhcp.value)
@@ -680,6 +694,8 @@ class RadiationPattern:
         """
         if np.any(gain_theta < 0) or np.any(gain_phi < 0):
             raise ValueError("Gain must be non-negative")
+        # Validate radiation efficiency prior to division
+        cls._validate_rad_efficiency(rad_efficiency)
 
         e_theta = np.sqrt(gain_theta / rad_efficiency) * np.exp(1j * phase_theta.value)
         e_phi = np.sqrt(gain_phi / rad_efficiency) * np.exp(1j * phase_phi.value)
