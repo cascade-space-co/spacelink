@@ -391,8 +391,8 @@ class RadiationPattern:
             1D array of equally spaced azimuthal angles with shape (M,). The span must
             be at most 2π radians.
         frequency: Frequency | None
-            Optional 1D array of strictly increasing frequencies with shape (K,).
-            If None, the pattern is treated as frequency-invariant and 2D over
+            Optional 1D array of strictly increasing frequencies with shape (K,) where
+            K > 1. If None, the pattern is treated as frequency-invariant and 2D over
             (theta, phi).
         e_theta: Dimensionless
             Complex array of :math:`E_{\theta}(\theta, \phi[, f])` values normalized
@@ -474,8 +474,8 @@ class RadiationPattern:
             raise ValueError("phi must not span more than 2π radians")
 
         if frequency is not None:
-            if np.size(frequency) == 0:
-                raise ValueError("frequency must have length >= 1")
+            if np.size(frequency) < 2:
+                raise ValueError("frequency must have length >= 2")
             if not np.all(np.diff(frequency) > 0 * u.Hz):
                 raise ValueError("frequency must be strictly increasing")
             # Shape checks for 3D
