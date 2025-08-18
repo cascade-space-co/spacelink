@@ -8,6 +8,7 @@ import textwrap
 import astropy.units as u
 import numpy as np
 import pytest
+from astropy.tests.helper import assert_quantity_allclose
 
 from spacelink.core.antenna import RadiationPattern, Polarization, Handedness
 from spacelink.core import pattern_io
@@ -249,9 +250,7 @@ def test_radiation_pattern_npz_roundtrip_3d_with_polarization():
 
 class TestRadiationPatternHFSSImport:
 
-    def test_hfss_csv_import_success(self, tmp_path):
-        """Test successful import of HFSS CSV file."""
-        # Create a simple test CSV file with HFSS format
+    def test_single_freq(self, tmp_path):
         csv_content = textwrap.dedent(
             """\
             Freq [GHz],Theta [deg],Phi [deg],"""
@@ -278,7 +277,6 @@ class TestRadiationPatternHFSSImport:
         csv_file = tmp_path / "test_pattern.csv"
         csv_file.write_text(csv_content)
 
-        # Import pattern (will import all frequencies from CSV)
         pattern = pattern_io.import_hfss_csv(
             csv_file,
             rad_efficiency=0.8 * u.dimensionless,
@@ -301,44 +299,25 @@ class TestRadiationPatternHFSSImport:
         lhcp_pol = Polarization.lhcp()
         rhcp_pol = Polarization.rhcp()
 
-        # Check gain at a test point
-        gain_lhcp = pattern.gain(40 * u.deg, 90 * u.deg, polarization=lhcp_pol)
-        gain_rhcp = pattern.gain(40 * u.deg, 90 * u.deg, polarization=rhcp_pol)
-
-        # Just verify they're reasonable negative dB values
-        assert gain_lhcp < 0 * u.dB
-        assert gain_rhcp < 0 * u.dB
-
-    def test_hfss_csv_single_frequency(self, tmp_path):
-        """Test successful import of single frequency CSV."""
-        csv_content = textwrap.dedent(
-            """\
-            Freq [GHz],Theta [deg],Phi [deg],"""
-            """dB(RealizedGainRHCP) [],dB(RealizedGainLHCP) [],"""
-            """ang_deg(rELHCP) [deg],ang_deg(rERHCP) [deg]
-            2.4,20,0,2.0,-15.0,0,90
-            2.4,20,90,1.0,-16.0,45,135
-            2.4,40,0,1.5,-15.2,22,112
-            2.4,40,90,0.5,-16.2,67,157
-            2.4,60,0,1.0,-15.5,45,135
-            2.4,60,90,0.0,-16.5,90,180
-            """
+        # Exact-value checks at grid points (should match CSV dB values)
+        assert_quantity_allclose(
+            pattern.gain(20 * u.deg, 0 * u.deg, polarization=lhcp_pol),
+            -25.0 * u.dB,
         )
-        csv_file = tmp_path / "test_missing_freq.csv"
-        csv_file.write_text(csv_content)
-
-        # Test successful import of single frequency data
-        pattern = pattern_io.import_hfss_csv(
-            csv_file,
-            rad_efficiency=1.0 * u.dimensionless,
+        assert_quantity_allclose(
+            pattern.gain(20 * u.deg, 0 * u.deg, polarization=rhcp_pol),
+            -5.0 * u.dB,
         )
-        # Should successfully import as frequency-invariant pattern
-        assert pattern.frequency is None  # Single frequency -> 2D pattern
-        assert pattern.rad_efficiency == 1.0 * u.dimensionless
+        assert_quantity_allclose(
+            pattern.gain(40 * u.deg, 90 * u.deg, polarization=lhcp_pol),
+            -26.5 * u.dB,
+        )
+        assert_quantity_allclose(
+            pattern.gain(40 * u.deg, 90 * u.deg, polarization=rhcp_pol),
+            -6.5 * u.dB,
+        )
 
-    def test_hfss_csv_multiple_frequencies(self, tmp_path):
-        """Test import of CSV with multiple frequencies creates 3D pattern."""
-        # Create CSV with two frequencies
+    def test_multi_freq(self, tmp_path):
         csv_content = textwrap.dedent(
             """\
             Freq [GHz],Theta [deg],Phi [deg],"""
@@ -370,23 +349,25 @@ class TestRadiationPatternHFSSImport:
         assert len(pattern.theta) == 2  # 20, 40 degrees
         assert len(pattern.phi) == 2  # 0, 90 degrees
 
-        # Test gain calculation with the precision fix
+        # Exact LHCP gains at a shared grid point, per frequency
         lhcp_pol = Polarization.lhcp()
         # Use exact frequency values from pattern to avoid precision issues
         freq_24 = pattern.frequency[0]
         freq_58 = pattern.frequency[1]
-        gain_24 = pattern.gain(
-            20 * u.deg, 0 * u.deg, frequency=freq_24, polarization=lhcp_pol
+        assert_quantity_allclose(
+            pattern.gain(
+                20 * u.deg, 0 * u.deg, frequency=freq_24, polarization=lhcp_pol
+            ),
+            -25.0 * u.dB,
         )
-        gain_58 = pattern.gain(
-            20 * u.deg, 0 * u.deg, frequency=freq_58, polarization=lhcp_pol
+        assert_quantity_allclose(
+            pattern.gain(
+                20 * u.deg, 0 * u.deg, frequency=freq_58, polarization=lhcp_pol
+            ),
+            -24.0 * u.dB,
         )
 
-        # Gains should be reasonable negative dB values
-        assert gain_24 < 0 * u.dB
-        assert gain_58 < 0 * u.dB
-
-    def test_hfss_csv_file_not_found(self, tmp_path):
+    def test_file_not_found(self, tmp_path):
         """Test error when CSV file doesn't exist."""
         nonexistent_file = tmp_path / "does_not_exist.csv"
 
@@ -396,21 +377,40 @@ class TestRadiationPatternHFSSImport:
                 rad_efficiency=1.0 * u.dimensionless,
             )
 
-    def test_hfss_csv_missing_columns(self, tmp_path):
-        """Test error when required columns are missing."""
-        # CSV missing the LHCP gain column
-        csv_content = textwrap.dedent(
-            """\
-            Freq [GHz],Theta [deg],Phi [deg],dB(RealizedGainRHCP) [],"""
-            """ang_deg(rELHCP) [deg],ang_deg(rERHCP) [deg]
-            2.4,20,0,2.0,0,90
-            2.4,20,90,1.0,45,135
-            2.4,40,0,1.5,22,112
-            2.4,40,90,0.5,67,157
-            2.4,60,0,1.0,45,135
-            2.4,60,90,0.0,90,180
-            """
-        )
+    @pytest.mark.parametrize(
+        "drop_col",
+        [
+            "dB(RealizedGainLHCP) []",
+            "dB(RealizedGainRHCP) []",
+            "ang_deg(rELHCP) [deg]",
+            "ang_deg(rERHCP) [deg]",
+        ],
+    )
+    def test_missing_columns(self, tmp_path, drop_col):
+        """Parametrized: each missing required column should raise KeyError."""
+        cols = [
+            "Freq [GHz]",
+            "Theta [deg]",
+            "Phi [deg]",
+            "dB(RealizedGainRHCP) []",
+            "dB(RealizedGainLHCP) []",
+            "ang_deg(rELHCP) [deg]",
+            "ang_deg(rERHCP) [deg]",
+        ]
+        cols = [c for c in cols if c != drop_col]
+        header = ",".join(cols)
+        # Single row with values where present
+        values_map = {
+            "Freq [GHz]": "2.4",
+            "Theta [deg]": "20",
+            "Phi [deg]": "0",
+            "dB(RealizedGainRHCP) []": "2.0",
+            "dB(RealizedGainLHCP) []": "-15.0",
+            "ang_deg(rELHCP) [deg]": "0",
+            "ang_deg(rERHCP) [deg]": "90",
+        }
+        row = ",".join(values_map[c] for c in cols)
+        csv_content = f"{header}\n{row}\n"
         csv_file = tmp_path / "test_missing_column.csv"
         csv_file.write_text(csv_content)
 
@@ -419,3 +419,67 @@ class TestRadiationPatternHFSSImport:
                 csv_file,
                 rad_efficiency=1.0 * u.dimensionless,
             )
+
+    def test_duplicates(self, tmp_path):
+        """Duplicate (Freq,Theta,Phi) rows should raise ValueError."""
+        csv_content = textwrap.dedent(
+            """\
+            Freq [GHz],Theta [deg],Phi [deg],"""
+            """dB(RealizedGainRHCP) [],dB(RealizedGainLHCP) [],"""
+            """ang_deg(rELHCP) [deg],ang_deg(rERHCP) [deg]
+            2.4,20,0,-5.0,-25.0,0,90
+            2.4,20,0,-5.0,-25.0,0,90
+            """
+        )
+        csv_file = tmp_path / "dup.csv"
+        csv_file.write_text(csv_content)
+        with pytest.raises(ValueError):
+            pattern_io.import_hfss_csv(csv_file, rad_efficiency=1.0 * u.dimensionless)
+
+    def test_irregular_grid(self, tmp_path):
+        """Missing a single (theta,phi) grid cell should raise ValueError."""
+        csv_content = textwrap.dedent(
+            """\
+            Freq [GHz],Theta [deg],Phi [deg],"""
+            """dB(RealizedGainRHCP) [],dB(RealizedGainLHCP) [],"""
+            """ang_deg(rELHCP) [deg],ang_deg(rERHCP) [deg]
+            2.4,20,0,-3.0,-13.0,0,0
+            2.4,20,90,-6.0,-16.0,0,0
+            2.4,40,90,-12.0,-22.0,0,0
+            """
+        )
+        csv_file = tmp_path / "irregular.csv"
+        csv_file.write_text(csv_content)
+        with pytest.raises(ValueError):
+            pattern_io.import_hfss_csv(csv_file, rad_efficiency=1.0 * u.dimensionless)
+
+    def test_extra_columns_and_any_order(self, tmp_path):
+        """Shuffled headers and extra columns should be tolerated."""
+        csv_content = textwrap.dedent(
+            """\
+            ang_deg(rERHCP) [deg],dB(RealizedGainRHCP) [],Phi [deg],"""
+            """Freq [GHz],Theta [deg],EXTRA,"""
+            """dB(RealizedGainLHCP) [],ang_deg(rELHCP) [deg]
+            90,-3.0,0,2.4,20,foo,-13.0,0
+            180,-6.0,90,2.4,20,bar,-16.0,0
+            """
+        )
+        csv_file = tmp_path / "extra.csv"
+        csv_file.write_text(csv_content)
+        pat = pattern_io.import_hfss_csv(csv_file, rad_efficiency=1.0 * u.dimensionless)
+        assert pat.frequency is None
+        assert pat.theta.size == 1 and pat.phi.size == 2
+        lhcp_pol = Polarization.lhcp()
+        rhcp_pol = Polarization.rhcp()
+        assert_quantity_allclose(
+            pat.gain(20 * u.deg, 0 * u.deg, polarization=lhcp_pol), -13.0 * u.dB
+        )
+        assert_quantity_allclose(
+            pat.gain(20 * u.deg, 0 * u.deg, polarization=rhcp_pol), -3.0 * u.dB
+        )
+        assert_quantity_allclose(
+            pat.gain(20 * u.deg, 90 * u.deg, polarization=lhcp_pol), -16.0 * u.dB
+        )
+        assert_quantity_allclose(
+            pat.gain(20 * u.deg, 90 * u.deg, polarization=rhcp_pol), -6.0 * u.dB
+        )
