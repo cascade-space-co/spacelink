@@ -13,7 +13,7 @@ from spacelink.core.antenna import (
     Polarization,
     Handedness,
     RadiationPattern,
-    ComplexInterpolator,
+    _ComplexInterpolator,
     gain_from_g_over_t,
     temperature_from_g_over_t,
 )
@@ -398,7 +398,7 @@ class TestComplexInterpolator:
         )
         gain_decim = to_linear(gain_decim_db)
 
-        interpolator = ComplexInterpolator(theta_decim, phi_decim, None, gain_decim)
+        interpolator = _ComplexInterpolator(theta_decim, phi_decim, None, gain_decim)
 
         result = interpolator(theta[:, np.newaxis], phi)
 
@@ -423,7 +423,7 @@ class TestComplexInterpolator:
         )
         gain = to_linear(gain_db)
 
-        interpolator = ComplexInterpolator(
+        interpolator = _ComplexInterpolator(
             theta[::downsample],
             phi[::downsample],
             None,
@@ -458,7 +458,7 @@ class TestComplexInterpolator:
         phase = phi_grid.value + 0.5 * freq_grid.value
         values = amplitude * np.exp(1j * phase) * u.dimensionless
 
-        interpolator = ComplexInterpolator(
+        interpolator = _ComplexInterpolator(
             theta[::downsample],
             phi[::downsample],
             frequency[::downsample],
@@ -493,7 +493,7 @@ class TestComplexInterpolator:
             * unit
         )
 
-        interpolator = ComplexInterpolator(theta, phi, None, values, floor=floor)
+        interpolator = _ComplexInterpolator(theta, phi, None, values, floor=floor)
 
         # Test upper hemisphere
         test_theta = np.pi / 4 * u.rad
@@ -523,7 +523,7 @@ class TestComplexInterpolator:
             * u.dimensionless
         )
 
-        interpolator = ComplexInterpolator(theta, phi, None, values)
+        interpolator = _ComplexInterpolator(theta, phi, None, values)
 
         test_theta = np.linspace(0.03, np.pi - 0.03, 100) * u.rad
         test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
@@ -546,7 +546,7 @@ class TestComplexInterpolator:
         phi = np.linspace(0.25 * np.pi, 1.25 * np.pi, 12, endpoint=False) * u.rad
         values = np.ones((10, 12)) * u.dimensionless
 
-        interpolator = ComplexInterpolator(theta, phi, None, values)
+        interpolator = _ComplexInterpolator(theta, phi, None, values)
 
         # phi below range (after modulo) → error
         with pytest.raises(ValueError):
@@ -563,7 +563,7 @@ class TestComplexInterpolator:
         frequency = np.array([1.0, 2.0]) * u.GHz
         values = np.ones((10, 12, 2)) * u.dimensionless
 
-        interpolator = ComplexInterpolator(theta, phi, frequency, values)
+        interpolator = _ComplexInterpolator(theta, phi, frequency, values)
 
         # Calling 3D interpolator without frequency should raise error
         with pytest.raises(ValueError):

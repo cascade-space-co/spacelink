@@ -72,6 +72,14 @@ from .units import (
     DecibelPerKelvin,
 )
 
+__all__ = [
+    "polarization_loss",
+    "dish_gain",
+    "Handedness",
+    "Polarization",
+    "RadiationPattern",
+]
+
 
 @enforce_units
 def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
@@ -205,7 +213,7 @@ class Polarization:
         return cls(np.pi / 4 * u.rad, 1 * u.dimensionless, Handedness.RIGHT)
 
 
-class ComplexInterpolator:
+class _ComplexInterpolator:
     """Interpolates complex values using log-magnitude and unit-phase components."""
 
     @enforce_units
@@ -430,8 +438,8 @@ class RadiationPattern:
 
         self._validate_surface_integral()
 
-        self._e_theta_interp = ComplexInterpolator(theta, phi, frequency, e_theta)
-        self._e_phi_interp = ComplexInterpolator(theta, phi, frequency, e_phi)
+        self._e_theta_interp = _ComplexInterpolator(theta, phi, frequency, e_theta)
+        self._e_phi_interp = _ComplexInterpolator(theta, phi, frequency, e_phi)
 
     @staticmethod
     def _validate_rad_efficiency(rad_efficiency: Dimensionless) -> None:
