@@ -478,7 +478,7 @@ class TestComplexInterpolator:
     def test_with_zeros(self):
         """Test interpolation when input contains zeros (should use floor value)."""
         unit = u.K  # Arbitrary unit
-        floor = -100 * u.dB
+        floor = 2.847e-12 * unit
         theta = np.linspace(0, np.pi, 20) * u.rad
         phi = np.linspace(0, 2 * np.pi, 30, endpoint=False) * u.rad
         theta_grid, phi_grid = np.meshgrid(theta, phi, indexing="ij")
@@ -507,7 +507,7 @@ class TestComplexInterpolator:
         test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
         result = interpolator(test_theta, test_phi)
         expected = 10 ** (floor.value / 10)
-        assert_quantity_allclose(result, expected * unit, atol=1e-10 * unit)
+        assert_quantity_allclose(result, floor, atol=1e-10 * unit)
 
     def test_phase_continuity(self):
         theta = np.linspace(0, np.pi, 11) * u.rad
