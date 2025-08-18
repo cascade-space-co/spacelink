@@ -225,8 +225,8 @@ class ComplexInterpolator:
         theta: Angle
             1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
-            1D array of equally spaced azimuthal angles with shape (M,). The span must
-            be less than 2π radians.
+            1D array of equally spaced azimuthal angles with shape (M,). The span should
+            be at most 2π radians.
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
         values: Quantity
@@ -265,7 +265,7 @@ class ComplexInterpolator:
         full_circle = delta_phi * phi.size >= 2 * np.pi * u.rad - (delta_phi / 2)
 
         if full_circle:
-            # Pad phi with a wrap-around columns so interpolation works at the 2π wrap
+            # Pad phi with wrap-around columns so interpolation works at the 2π wrap
             # boundary.
             phi = np.concatenate(
                 [
@@ -380,7 +380,7 @@ class RadiationPattern:
             1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
             1D array of equally spaced azimuthal angles with shape (M,). The span must
-            be less than 2π radians.
+            be at most 2π radians.
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
             If None, the pattern is treated as frequency-invariant and 2D over
@@ -533,7 +533,7 @@ class RadiationPattern:
             1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
             1D array of equally spaced azimuthal angles with shape (M,). The span must
-            be less than 2π radians.
+            be at most 2π radians.
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
             If None, the pattern is treated as frequency-invariant and 2D over
@@ -597,7 +597,7 @@ class RadiationPattern:
             1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
             1D array of equally spaced azimuthal angles with shape (M,). The span must
-            be less than 2π radians.
+            be at most 2π radians.
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
             If None, the pattern is treated as frequency-invariant and 2D over
@@ -673,7 +673,7 @@ class RadiationPattern:
             1D array of equally spaced polar angles in [0, pi] radians with shape (N,).
         phi: Angle
             1D array of equally spaced azimuthal angles with shape (M,). The span must
-            be less than 2π radians.
+            be at most 2π radians.
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
             If None, the pattern is treated as frequency-invariant and 2D over
