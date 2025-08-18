@@ -267,9 +267,13 @@ class ComplexInterpolator:
                 [values[:, -1:, :], values, values[:, :1, :]], axis=1
             )
 
+        # Interpolate magnitude in log-space since this yields a more natural result
+        # for antenna patterns.
         with np.errstate(divide="ignore", invalid="ignore"):
             mag_db = np.clip(10.0 * np.log10(np.abs(values)), floor.value, None)
 
+        # Interpolate phase as a unit-magnitude complex exponential. This avoids issues
+        # with phase wrapping discontinuities.
         with np.errstate(invalid="ignore"):
             phase_exponential = np.where(
                 np.abs(values) == 0,
@@ -277,15 +281,14 @@ class ComplexInterpolator:
                 values / np.abs(values),
             )
 
-        grid = (theta.value, phi.value, frequency.value)
-        self.log_mag = scipy.interpolate.RegularGridInterpolator(
-            grid, mag_db, method="linear", bounds_error=True
-        )
-        self.phase_real = scipy.interpolate.RegularGridInterpolator(
-            grid, np.real(phase_exponential), method="linear", bounds_error=True
-        )
-        self.phase_imag = scipy.interpolate.RegularGridInterpolator(
-            grid, np.imag(phase_exponential), method="linear", bounds_error=True
+        self._interp = scipy.interpolate.RegularGridInterpolator(
+            points=(theta.value, phi.value, frequency.value),
+            values=np.stack(
+                [mag_db, np.real(phase_exponential), np.imag(phase_exponential)],
+                axis=-1,
+            ),
+            method="linear",
+            bounds_error=True,
         )
 
     @enforce_units
@@ -329,8 +332,9 @@ class ComplexInterpolator:
             frequency.value,
         )
 
-        mag = 10 ** (self.log_mag(points) / 10)
-        phase_exp = self.phase_real(points) + 1j * self.phase_imag(points)
+        features = self._interp(points)
+        mag = 10 ** (features[..., 0] / 10)
+        phase_exp = features[..., 1] + 1j * features[..., 2]
         phase_exp /= np.abs(phase_exp)  # Re-normalize to remove numerical drift
 
         return mag * phase_exp * self.unit
