@@ -49,7 +49,6 @@ conventions:
 """
 
 import enum
-import functools
 import typing
 
 import astropy.units as u
@@ -885,7 +884,8 @@ class RadiationPattern:
         freq = frequency if frequency is not None else self.default_frequency
         if self.frequency is not None and freq is None:
             raise ValueError(
-                "Frequency must be provided or a default_frequency must be set on the RadiationPattern."
+                "Frequency must be provided or a default_frequency must be set on the "
+                "RadiationPattern."
             )
         e_jones = self._e_jones(theta, phi, freq)
         coherency_matrix = np.einsum("...i,...j->...ij", e_jones, e_jones.conj())
