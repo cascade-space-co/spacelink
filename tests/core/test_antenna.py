@@ -498,6 +498,88 @@ class TestSphericalInterpolator:
         )
 
 
+class TestDefaultPolarization:
+    def _simple_pattern(self, default_pol=None) -> RadiationPattern:
+        theta = np.linspace(0, np.pi, 10) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
+        e_theta = np.ones((10, 12)) * u.dimensionless
+        e_phi = np.zeros((10, 12)) * u.dimensionless
+        return RadiationPattern(
+            theta=theta,
+            phi=phi,
+            e_theta=e_theta,
+            e_phi=e_phi,
+            rad_efficiency=0.8 * u.dimensionless,
+            default_polarization=default_pol,
+        )
+
+    def test_methods_use_default_polarization_when_none(self):
+        pattern = self._simple_pattern(default_pol=Polarization.lhcp())
+        theta = np.linspace(0, np.pi, 8) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 9, endpoint=False) * u.rad
+
+        # Compare explicit vs default for e_field, directivity, gain
+        e_explicit = pattern.e_field(theta[:, np.newaxis], phi, Polarization.lhcp())
+        e_default = pattern.e_field(theta[:, np.newaxis], phi)
+        assert_quantity_allclose(e_default, e_explicit)
+
+        d_explicit = pattern.directivity(theta[:, np.newaxis], phi, Polarization.lhcp())
+        d_default = pattern.directivity(theta[:, np.newaxis], phi)
+        assert_quantity_allclose(d_default, d_explicit)
+
+        g_explicit = pattern.gain(theta[:, np.newaxis], phi, Polarization.lhcp())
+        g_default = pattern.gain(theta[:, np.newaxis], phi)
+        assert_quantity_allclose(g_default, g_explicit)
+
+    def test_missing_polarization_raises_when_no_default(self):
+        pattern = self._simple_pattern(default_pol=None)
+        theta = np.linspace(0, np.pi, 3) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 4, endpoint=False) * u.rad
+
+        with pytest.raises(ValueError):
+            pattern.e_field(theta[:, np.newaxis], phi)
+        with pytest.raises(ValueError):
+            pattern.directivity(theta[:, np.newaxis], phi)
+        with pytest.raises(ValueError):
+            pattern.gain(theta[:, np.newaxis], phi)
+
+    def test_factories_forward_default_polarization(self):
+        theta = np.linspace(0, np.pi, 6) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 7, endpoint=False) * u.rad
+
+        # Circular factory
+        e_lhcp = (1.0 + 0.0j) * np.ones((6, 7)) * u.dimensionless
+        e_rhcp = (0.0 + 0.0j) * np.ones((6, 7)) * u.dimensionless
+        pat_circ = RadiationPattern.from_circular_e_field(
+            theta=theta,
+            phi=phi,
+            e_lhcp=e_lhcp,
+            e_rhcp=e_rhcp,
+            rad_efficiency=1.0 * u.dimensionless,
+            default_polarization=Polarization.lhcp(),
+        )
+        # Works without explicit polarization
+        _ = pat_circ.gain(theta[:, np.newaxis], phi)
+
+        # Linear factory
+        gain_theta = np.ones((6, 7)) * u.dimensionless
+        gain_phi = np.zeros((6, 7)) * u.dimensionless
+        phase_theta = np.zeros((6, 7)) * u.rad
+        phase_phi = np.zeros((6, 7)) * u.rad
+        pat_lin = RadiationPattern.from_linear_gain(
+            theta=theta,
+            phi=phi,
+            gain_theta=gain_theta,
+            gain_phi=gain_phi,
+            phase_theta=phase_theta,
+            phase_phi=phase_phi,
+            rad_efficiency=0.9 * u.dimensionless,
+            default_polarization=Polarization.lhcp(),
+        )
+        # Works without explicit polarization
+        _ = pat_lin.directivity(theta[:, np.newaxis], phi)
+
+
 @pytest.mark.parametrize(
     "theta, phi, values, expected_result, tol",
     [
