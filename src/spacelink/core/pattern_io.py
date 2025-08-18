@@ -145,7 +145,9 @@ def import_hfss_csv(
     Returns
     -------
     RadiationPattern
-        Radiation pattern constructed from the CSV.
+        Radiation pattern constructed from the CSV. If the CSV contains only a single
+        frequency the pattern will be created without a frequency axis (it will be
+        frequency-invariant).
     """
     # Define column name constants
     freq_col = "Freq [GHz]"
@@ -162,7 +164,10 @@ def import_hfss_csv(
     # Axes
     theta = np.sort(df[theta_col].unique()) * u.deg
     phi = np.sort(df[phi_col].unique()) * u.deg
-    frequencies = (np.sort(df[freq_col].unique()) * u.GHz).to(u.Hz)
+    # Save original frequency values to avoid precision issues when matching pivot table
+    # columns later
+    freq_values_original = np.sort(df[freq_col].unique())
+    frequencies = (freq_values_original * u.GHz).to(u.Hz)
 
     n_theta = theta.size
     n_phi = phi.size
@@ -173,9 +178,8 @@ def import_hfss_csv(
         [theta.to_value(u.deg), phi.to_value(u.deg)], names=[theta_col, phi_col]
     )
     value_cols = [gain_lhcp_col, gain_rhcp_col, phase_lhcp_col, phase_rhcp_col]
-    columns_target = pd.MultiIndex.from_product(
-        [value_cols, frequencies.to_value(u.GHz)]
-    )
+    # Use original frequency values to match pivot table columns exactly
+    columns_target = pd.MultiIndex.from_product([value_cols, freq_values_original])
 
     df_pivoted = pd.pivot_table(
         df,
@@ -200,13 +204,27 @@ def import_hfss_csv(
         df_pivoted[phase_rhcp_col].to_numpy().reshape(n_theta, n_phi, n_freq) * u.deg
     )
 
+    # If CSV contains a single frequency, emit a frequency-invariant pattern
+    if frequencies.size == 1:
+        return antenna.RadiationPattern.from_circular_gain(
+            theta=theta,
+            phi=phi,
+            frequency=None,
+            gain_lhcp=gain_lhcp[..., 0],
+            gain_rhcp=gain_rhcp[..., 0],
+            phase_lhcp=angle_lhcp[..., 0],
+            phase_rhcp=angle_rhcp[..., 0],
+            rad_efficiency=rad_efficiency,
+        )
+
+    # Otherwise, return full 3D frequency-aware pattern
     return antenna.RadiationPattern.from_circular_gain(
-        theta,
-        phi,
-        frequencies,
-        gain_lhcp,
-        gain_rhcp,
-        angle_lhcp,
-        angle_rhcp,
-        rad_efficiency,
+        theta=theta,
+        phi=phi,
+        frequency=frequencies,
+        gain_lhcp=gain_lhcp,
+        gain_rhcp=gain_rhcp,
+        phase_lhcp=angle_lhcp,
+        phase_rhcp=angle_rhcp,
+        rad_efficiency=rad_efficiency,
     )
