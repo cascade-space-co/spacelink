@@ -385,7 +385,7 @@ class RadiationPattern:
             - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         rad_efficiency: Dimensionless
-            Radiation efficiency :math:`\eta` in [0, 1].
+            Radiation efficiency :math:`\eta` in (0, 1].
         default_polarization: Polarization | None
             Optional default polarization used when instance methods are called without
             an explicit polarization.
@@ -539,7 +539,7 @@ class RadiationPattern:
             - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         rad_efficiency: Dimensionless
-            Radiation efficiency :math:`\eta` in [0, 1].
+            Radiation efficiency :math:`\eta` in (0, 1].
         default_polarization: Polarization | None
             Optional default polarization used when instance methods are called without
             an explicit polarization.
@@ -611,7 +611,7 @@ class RadiationPattern:
             - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         rad_efficiency: Dimensionless
-            Radiation efficiency :math:`\eta` in [0, 1].
+            Radiation efficiency :math:`\eta` in (0, 1].
         default_polarization: Polarization | None
             Optional default polarization used when instance methods are called without
             an explicit polarization.
@@ -687,7 +687,7 @@ class RadiationPattern:
             - If ``frequency is None``: shape ``(N, M)``
             - Else: shape ``(N, M, K)``
         rad_efficiency: Dimensionless
-            Radiation efficiency :math:`\eta` in [0, 1].
+            Radiation efficiency :math:`\eta` in (0, 1].
         default_polarization: Polarization | None
             Optional default polarization used when instance methods are called without
             an explicit polarization.
