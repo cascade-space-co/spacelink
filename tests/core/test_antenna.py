@@ -388,6 +388,33 @@ class TestComplexInterpolator:
         with pytest.raises(ValueError):
             interpolator(theta[0], phi[0])
 
+    @pytest.mark.parametrize("f_query", [0.5 * u.GHz, 2.5 * u.GHz])
+    def test_3d_frequency_out_of_bounds_raises(self, f_query):
+        theta = np.linspace(0, np.pi, 6) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 8, endpoint=False) * u.rad
+        frequency = np.array([1.0, 2.0]) * u.GHz
+        values = np.ones((6, 8, 2)) * u.dimensionless
+
+        interpolator = _ComplexInterpolator(theta, phi, frequency, values)
+        with pytest.raises(ValueError):
+            interpolator(theta[0], phi[0], f_query)
+
+    def test_floor_validation_errors(self):
+        theta = np.linspace(0, np.pi, 3) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 4, endpoint=False) * u.rad
+        vals = np.ones((3, 4)) * u.dimensionless
+        # Wrong unit
+        with pytest.raises(ValueError):
+            _ComplexInterpolator(theta, phi, None, vals, floor=1e-6 * u.K)
+        # Non-scalar floor (length > 1)
+        with pytest.raises(ValueError):
+            _ComplexInterpolator(
+                theta, phi, None, vals, floor=(np.array([1e-6, 2e-6]) * u.dimensionless)
+            )
+        # Non-positive floor
+        with pytest.raises(ValueError):
+            _ComplexInterpolator(theta, phi, None, vals, floor=0.0 * u.dimensionless)
+
 
 @dataclass
 class RadiationPatternExpectedResults:
@@ -674,7 +701,9 @@ class TestRadiationPatternDefaults:
         _ = pat_lin.directivity(theta[:, np.newaxis], phi)
 
     @pytest.mark.parametrize("with_default", [False, True])
-    @pytest.mark.parametrize("method", ["e_field", "directivity", "gain"])
+    @pytest.mark.parametrize(
+        "method", ["e_field", "directivity", "gain", "axial_ratio"]
+    )
     def test_default_frequency_semantics_3d(self, with_default, method):
         theta = np.linspace(0, np.pi, 5) * u.rad
         phi = np.linspace(0, 2 * np.pi, 6, endpoint=False) * u.rad
@@ -699,12 +728,19 @@ class TestRadiationPatternDefaults:
         pol = Polarization.lhcp()
         func = getattr(pat, method)
 
-        if with_default:
-            # Should not raise when frequency omitted
-            _ = func(theta[:, np.newaxis], phi, polarization=pol)
+        if method == "axial_ratio":
+            if with_default:
+                _ = func(theta[:, np.newaxis], phi)
+            else:
+                with pytest.raises(ValueError):
+                    _ = func(theta[:, np.newaxis], phi)
         else:
-            with pytest.raises(ValueError):
+            if with_default:
+                # Should not raise when frequency omitted
                 _ = func(theta[:, np.newaxis], phi, polarization=pol)
+            else:
+                with pytest.raises(ValueError):
+                    _ = func(theta[:, np.newaxis], phi, polarization=pol)
 
 
 class TestRadiationPatternValidation:
@@ -774,6 +810,22 @@ class TestRadiationPatternValidation:
         phi_too_much = np.linspace(0, 2.5 * np.pi, 10) * u.rad
         with pytest.raises(ValueError):
             RadiationPattern(theta, phi_too_much, None, e_theta, e_phi, rad_efficiency)
+
+    @pytest.mark.parametrize(
+        "eta",
+        [
+            0.0 * u.dimensionless,  # boundary
+            1.1 * u.dimensionless,  # > 1
+            np.array([0.8, 0.9]) * u.dimensionless,  # non-scalar
+        ],
+    )
+    def test_rad_efficiency_validation(self, eta):
+        theta = np.linspace(0, np.pi, 3) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 4, endpoint=False) * u.rad
+        e_theta = np.ones((3, 4)) * u.dimensionless
+        e_phi = np.zeros((3, 4)) * u.dimensionless
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi, None, e_theta, e_phi, eta)
 
     def test_surface_integral_exceeds_4pi_raises(self):
         # Construct fields whose directivity integrates to > 4π
