@@ -583,7 +583,7 @@ def test_antenna_pattern_calculations(test_case):
     )
 
 
-class TestDefaultPolarization:
+class TestRadiationPatternDefaults:
     def _simple_pattern(self, default_pol=None) -> RadiationPattern:
         theta = np.linspace(0, np.pi, 10) * u.rad
         phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
@@ -672,6 +672,39 @@ class TestDefaultPolarization:
         )
         # Works without explicit polarization
         _ = pat_lin.directivity(theta[:, np.newaxis], phi)
+
+    @pytest.mark.parametrize("with_default", [False, True])
+    @pytest.mark.parametrize("method", ["e_field", "directivity", "gain"])
+    def test_default_frequency_semantics_3d(self, with_default, method):
+        theta = np.linspace(0, np.pi, 5) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 6, endpoint=False) * u.rad
+        freq = np.array([1.0, 2.0]) * u.GHz
+        e_theta = np.ones((5, 6, 2)) * u.dimensionless
+        e_phi = np.zeros((5, 6, 2)) * u.dimensionless
+
+        kwargs = {}
+        if with_default:
+            kwargs["default_frequency"] = 2.0 * u.GHz
+
+        pat = RadiationPattern(
+            theta=theta,
+            phi=phi,
+            frequency=freq,
+            e_theta=e_theta,
+            e_phi=e_phi,
+            rad_efficiency=1.0 * u.dimensionless,
+            **kwargs,
+        )
+
+        pol = Polarization.lhcp()
+        func = getattr(pat, method)
+
+        if with_default:
+            # Should not raise when frequency omitted
+            _ = func(theta[:, np.newaxis], phi, polarization=pol)
+        else:
+            with pytest.raises(ValueError):
+                _ = func(theta[:, np.newaxis], phi, polarization=pol)
 
 
 class TestRadiationPatternValidation:
