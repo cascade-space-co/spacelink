@@ -187,200 +187,6 @@ class TestPolarization:
             Polarization(0 * u.rad, 0.5 * u.dimensionless, Handedness.LEFT)
 
 
-@dataclass
-class RadiationPatternExpectedResults:
-    """Expected results for radiation pattern tests."""
-
-    lhcp_gain: Dimensionless
-    lhcp_directivity: Dimensionless
-    rhcp_gain: Dimensionless
-    rhcp_directivity: Dimensionless
-    theta_directivity: Dimensionless
-    phi_directivity: Dimensionless
-    axial_ratio: Decibels
-
-
-@dataclass
-class RadiationPatternTestCase:
-    """Data structure for radiation pattern test cases."""
-
-    name: str
-    pattern: RadiationPattern
-    expected_results: RadiationPatternExpectedResults
-
-
-def create_antenna_pattern_test_cases():
-    """Create test patterns for different antenna configurations."""
-
-    return [
-        RadiationPatternTestCase(
-            name="isotropic_theta",
-            pattern=RadiationPattern(
-                theta=np.linspace(0, np.pi, 40) * u.rad,
-                phi=np.linspace(0, 2 * np.pi, 50, endpoint=False) * u.rad,
-                frequency=None,
-                e_theta=np.ones((40, 50)) * u.dimensionless,
-                e_phi=np.zeros((40, 50)) * u.dimensionless,
-                rad_efficiency=0.8 * u.dimensionless,
-            ),
-            expected_results=RadiationPatternExpectedResults(
-                lhcp_gain=0.8 * 0.5 * u.dimensionless,
-                lhcp_directivity=0.5 * u.dimensionless,
-                rhcp_gain=0.8 * 0.5 * u.dimensionless,
-                rhcp_directivity=0.5 * u.dimensionless,
-                theta_directivity=1.0 * u.dimensionless,
-                phi_directivity=0.0 * u.dimensionless,
-                axial_ratio=np.inf * u.dB,
-            ),
-        ),
-        RadiationPatternTestCase(
-            name="isotropic_phi",
-            pattern=RadiationPattern(
-                theta=np.linspace(0, np.pi, 30) * u.rad,
-                phi=np.linspace(0, 2 * np.pi, 40, endpoint=False) * u.rad,
-                frequency=None,
-                e_theta=np.zeros((30, 40)) * u.dimensionless,
-                e_phi=np.ones((30, 40)) * u.dimensionless,
-                rad_efficiency=1.0 * u.dimensionless,
-            ),
-            expected_results=RadiationPatternExpectedResults(
-                lhcp_gain=0.5 * u.dimensionless,
-                lhcp_directivity=0.5 * u.dimensionless,
-                rhcp_gain=0.5 * u.dimensionless,
-                rhcp_directivity=0.5 * u.dimensionless,
-                theta_directivity=0.0 * u.dimensionless,
-                phi_directivity=1.0 * u.dimensionless,
-                axial_ratio=np.inf * u.dB,
-            ),
-        ),
-        RadiationPatternTestCase(
-            name="isotropic_lhcp",
-            pattern=RadiationPattern(
-                theta=np.linspace(0, np.pi, 50) * u.rad,
-                phi=np.linspace(0, 2 * np.pi, 60, endpoint=False) * u.rad,
-                frequency=None,
-                e_theta=(1.0 + 0.0j) / np.sqrt(2) * np.ones((50, 60)) * u.dimensionless,
-                e_phi=(0.0 + 1.0j) / np.sqrt(2) * np.ones((50, 60)) * u.dimensionless,
-                rad_efficiency=1.0 * u.dimensionless,
-            ),
-            expected_results=RadiationPatternExpectedResults(
-                lhcp_gain=1.0 * u.dimensionless,
-                lhcp_directivity=1.0 * u.dimensionless,
-                rhcp_gain=0.0 * u.dimensionless,
-                rhcp_directivity=0.0 * u.dimensionless,
-                theta_directivity=0.5 * u.dimensionless,
-                phi_directivity=0.5 * u.dimensionless,
-                axial_ratio=0.0 * u.dB,
-            ),
-        ),
-        RadiationPatternTestCase(
-            name="isotropic_elliptical",
-            pattern=RadiationPattern(
-                theta=np.linspace(0, np.pi, 25) * u.rad,
-                phi=np.linspace(0, 2 * np.pi, 17, endpoint=False) * u.rad,
-                frequency=None,
-                e_theta=1.0 / np.sqrt(5 / 4) * np.ones((25, 17)) * u.dimensionless,
-                e_phi=0.5j / np.sqrt(5 / 4) * np.ones((25, 17)) * u.dimensionless,
-                rad_efficiency=0.7 * u.dimensionless,
-            ),
-            expected_results=RadiationPatternExpectedResults(
-                lhcp_gain=0.7 * 0.9 * u.dimensionless,
-                lhcp_directivity=0.9 * u.dimensionless,
-                rhcp_gain=0.7 * 0.1 * u.dimensionless,
-                rhcp_directivity=0.1 * u.dimensionless,
-                theta_directivity=4 / 5 * u.dimensionless,
-                phi_directivity=1 / 5 * u.dimensionless,
-                axial_ratio=10 * math.log10(2) * u.dB,
-            ),
-        ),
-    ]
-
-
-@pytest.mark.parametrize("test_case", create_antenna_pattern_test_cases())
-def test_antenna_pattern_calculations(test_case):
-
-    shape_interp = (40, 80)
-    theta_interp = np.linspace(0, np.pi, shape_interp[0]) * u.rad
-    phi_interp = np.linspace(0, 2 * np.pi, shape_interp[1]) * u.rad
-
-    pol_theta = Polarization(0 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
-    pol_phi = Polarization(np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
-
-    assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.gain(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.lhcp(),
-            )
-        ),
-        test_case.expected_results.lhcp_gain,
-        atol=1e-10 * u.dimensionless,
-    )
-
-    assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.lhcp(),
-            )
-        ),
-        test_case.expected_results.lhcp_directivity,
-        atol=1e-10 * u.dimensionless,
-    )
-
-    assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.gain(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.rhcp(),
-            )
-        ),
-        test_case.expected_results.rhcp_gain,
-        atol=1e-10 * u.dimensionless,
-    )
-
-    assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.rhcp(),
-            )
-        ),
-        test_case.expected_results.rhcp_directivity,
-        atol=1e-10 * u.dimensionless,
-    )
-
-    assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, polarization=pol_theta
-            )
-        ),
-        test_case.expected_results.theta_directivity,
-        atol=1e-10 * u.dimensionless,
-    )
-
-    assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, polarization=pol_phi
-            )
-        ),
-        test_case.expected_results.phi_directivity,
-        atol=1e-10 * u.dimensionless,
-    )
-
-    assert_quantity_allclose(
-        test_case.pattern.axial_ratio(theta_interp[:, np.newaxis], phi_interp),
-        test_case.expected_results.axial_ratio,
-        atol=1e-10 * u.dB,
-    )
-
-
 class TestComplexInterpolator:
     """Tests for the ComplexInterpolator class."""
 
@@ -583,6 +389,200 @@ class TestComplexInterpolator:
             interpolator(theta[0], phi[0])
 
 
+@dataclass
+class RadiationPatternExpectedResults:
+    """Expected results for radiation pattern tests."""
+
+    lhcp_gain: Dimensionless
+    lhcp_directivity: Dimensionless
+    rhcp_gain: Dimensionless
+    rhcp_directivity: Dimensionless
+    theta_directivity: Dimensionless
+    phi_directivity: Dimensionless
+    axial_ratio: Decibels
+
+
+@dataclass
+class RadiationPatternTestCase:
+    """Data structure for radiation pattern test cases."""
+
+    name: str
+    pattern: RadiationPattern
+    expected_results: RadiationPatternExpectedResults
+
+
+def create_antenna_pattern_test_cases():
+    """Create test patterns for different antenna configurations."""
+
+    return [
+        RadiationPatternTestCase(
+            name="isotropic_theta",
+            pattern=RadiationPattern(
+                theta=np.linspace(0, np.pi, 40) * u.rad,
+                phi=np.linspace(0, 2 * np.pi, 50, endpoint=False) * u.rad,
+                frequency=None,
+                e_theta=np.ones((40, 50)) * u.dimensionless,
+                e_phi=np.zeros((40, 50)) * u.dimensionless,
+                rad_efficiency=0.8 * u.dimensionless,
+            ),
+            expected_results=RadiationPatternExpectedResults(
+                lhcp_gain=0.8 * 0.5 * u.dimensionless,
+                lhcp_directivity=0.5 * u.dimensionless,
+                rhcp_gain=0.8 * 0.5 * u.dimensionless,
+                rhcp_directivity=0.5 * u.dimensionless,
+                theta_directivity=1.0 * u.dimensionless,
+                phi_directivity=0.0 * u.dimensionless,
+                axial_ratio=np.inf * u.dB,
+            ),
+        ),
+        RadiationPatternTestCase(
+            name="isotropic_phi",
+            pattern=RadiationPattern(
+                theta=np.linspace(0, np.pi, 30) * u.rad,
+                phi=np.linspace(0, 2 * np.pi, 40, endpoint=False) * u.rad,
+                frequency=None,
+                e_theta=np.zeros((30, 40)) * u.dimensionless,
+                e_phi=np.ones((30, 40)) * u.dimensionless,
+                rad_efficiency=1.0 * u.dimensionless,
+            ),
+            expected_results=RadiationPatternExpectedResults(
+                lhcp_gain=0.5 * u.dimensionless,
+                lhcp_directivity=0.5 * u.dimensionless,
+                rhcp_gain=0.5 * u.dimensionless,
+                rhcp_directivity=0.5 * u.dimensionless,
+                theta_directivity=0.0 * u.dimensionless,
+                phi_directivity=1.0 * u.dimensionless,
+                axial_ratio=np.inf * u.dB,
+            ),
+        ),
+        RadiationPatternTestCase(
+            name="isotropic_lhcp",
+            pattern=RadiationPattern(
+                theta=np.linspace(0, np.pi, 50) * u.rad,
+                phi=np.linspace(0, 2 * np.pi, 60, endpoint=False) * u.rad,
+                frequency=None,
+                e_theta=(1.0 + 0.0j) / np.sqrt(2) * np.ones((50, 60)) * u.dimensionless,
+                e_phi=(0.0 + 1.0j) / np.sqrt(2) * np.ones((50, 60)) * u.dimensionless,
+                rad_efficiency=1.0 * u.dimensionless,
+            ),
+            expected_results=RadiationPatternExpectedResults(
+                lhcp_gain=1.0 * u.dimensionless,
+                lhcp_directivity=1.0 * u.dimensionless,
+                rhcp_gain=0.0 * u.dimensionless,
+                rhcp_directivity=0.0 * u.dimensionless,
+                theta_directivity=0.5 * u.dimensionless,
+                phi_directivity=0.5 * u.dimensionless,
+                axial_ratio=0.0 * u.dB,
+            ),
+        ),
+        RadiationPatternTestCase(
+            name="isotropic_elliptical",
+            pattern=RadiationPattern(
+                theta=np.linspace(0, np.pi, 25) * u.rad,
+                phi=np.linspace(0, 2 * np.pi, 17, endpoint=False) * u.rad,
+                frequency=None,
+                e_theta=1.0 / np.sqrt(5 / 4) * np.ones((25, 17)) * u.dimensionless,
+                e_phi=0.5j / np.sqrt(5 / 4) * np.ones((25, 17)) * u.dimensionless,
+                rad_efficiency=0.7 * u.dimensionless,
+            ),
+            expected_results=RadiationPatternExpectedResults(
+                lhcp_gain=0.7 * 0.9 * u.dimensionless,
+                lhcp_directivity=0.9 * u.dimensionless,
+                rhcp_gain=0.7 * 0.1 * u.dimensionless,
+                rhcp_directivity=0.1 * u.dimensionless,
+                theta_directivity=4 / 5 * u.dimensionless,
+                phi_directivity=1 / 5 * u.dimensionless,
+                axial_ratio=10 * math.log10(2) * u.dB,
+            ),
+        ),
+    ]
+
+
+@pytest.mark.parametrize("test_case", create_antenna_pattern_test_cases())
+def test_antenna_pattern_calculations(test_case):
+
+    shape_interp = (40, 80)
+    theta_interp = np.linspace(0, np.pi, shape_interp[0]) * u.rad
+    phi_interp = np.linspace(0, 2 * np.pi, shape_interp[1]) * u.rad
+
+    pol_theta = Polarization(0 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
+    pol_phi = Polarization(np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
+
+    assert_quantity_allclose(
+        to_linear(
+            test_case.pattern.gain(
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.lhcp(),
+            )
+        ),
+        test_case.expected_results.lhcp_gain,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        to_linear(
+            test_case.pattern.directivity(
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.lhcp(),
+            )
+        ),
+        test_case.expected_results.lhcp_directivity,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        to_linear(
+            test_case.pattern.gain(
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.rhcp(),
+            )
+        ),
+        test_case.expected_results.rhcp_gain,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        to_linear(
+            test_case.pattern.directivity(
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.rhcp(),
+            )
+        ),
+        test_case.expected_results.rhcp_directivity,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        to_linear(
+            test_case.pattern.directivity(
+                theta_interp[:, np.newaxis], phi_interp, polarization=pol_theta
+            )
+        ),
+        test_case.expected_results.theta_directivity,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        to_linear(
+            test_case.pattern.directivity(
+                theta_interp[:, np.newaxis], phi_interp, polarization=pol_phi
+            )
+        ),
+        test_case.expected_results.phi_directivity,
+        atol=1e-10 * u.dimensionless,
+    )
+
+    assert_quantity_allclose(
+        test_case.pattern.axial_ratio(theta_interp[:, np.newaxis], phi_interp),
+        test_case.expected_results.axial_ratio,
+        atol=1e-10 * u.dB,
+    )
+
+
 class TestDefaultPolarization:
     def _simple_pattern(self, default_pol=None) -> RadiationPattern:
         theta = np.linspace(0, np.pi, 10) * u.rad
@@ -672,80 +672,6 @@ class TestDefaultPolarization:
         )
         # Works without explicit polarization
         _ = pat_lin.directivity(theta[:, np.newaxis], phi)
-
-
-@pytest.mark.parametrize(
-    "theta, phi, values, expected_result, tol",
-    [
-        # Test 1: Constant function f(θ,φ) = 1
-        # Expected: ∫∫ 1 sin(θ) dθ dφ = 4π
-        (
-            np.linspace(0, np.pi, 100) * u.rad,
-            np.linspace(0, 2 * np.pi, 200) * u.rad,
-            np.ones((100, 200)) * u.dimensionless,
-            4 * np.pi * u.sr,
-            1e-10 * u.sr,
-        ),
-        # Test 2: Function f(θ,φ) = sin(θ)
-        # Expected: ∫∫ sin(θ) sin(θ) dθ dφ = ∫∫ sin²(θ) dθ dφ = π²
-        (
-            np.linspace(0, np.pi, 100) * u.rad,
-            np.linspace(0, 2 * np.pi, 100) * u.rad,
-            np.sin(np.linspace(0, np.pi, 100))[:, np.newaxis]
-            * np.ones(100)
-            * u.dimensionless,
-            np.pi**2 * u.sr,
-            1e-10 * u.sr,
-        ),
-        # Test 3: Function f(θ,φ) = cos²(θ) (dipole pattern)
-        # Expected: ∫∫ cos²(θ) sin(θ) dθ dφ = 4π/3
-        (
-            np.linspace(0, np.pi, 100) * u.rad,
-            np.linspace(0, 2 * np.pi, 200) * u.rad,
-            (np.cos(np.linspace(0, np.pi, 100)) ** 2)[:, np.newaxis]
-            * np.ones(200)
-            * u.dimensionless,
-            4 * np.pi / 3 * u.sr,
-            1e-5 * u.sr,
-        ),
-        # Test 4: Function f(θ,φ) = cos(θ)
-        # Expected: ∫∫ cos(θ) sin(θ) dθ dφ = 0
-        (
-            np.linspace(0, np.pi, 127) * u.rad,
-            np.linspace(0, 2 * np.pi, 173) * u.rad,
-            np.cos(np.linspace(0, np.pi, 127))[:, np.newaxis]
-            * np.ones(173)
-            * u.dimensionless,
-            0 * u.sr,
-            1e-10 * u.sr,
-        ),
-        # Test 5: Constant function f(θ,φ) = 1 over a section of the sphere
-        # θ ∈ [0, π/2], φ ∈ [0, π/2] - quarter sphere
-        # Expected: ∫∫ 1 sin(θ) dθ dφ = π/2
-        (
-            np.linspace(0, np.pi / 2, 50) * u.rad,
-            np.linspace(0, np.pi / 2, 50) * u.rad,
-            np.ones((50, 50)) * u.dimensionless,
-            np.pi / 2 * u.sr,
-            1e-10 * u.sr,
-        ),
-    ],
-)
-def test_surface_integral(theta, phi, values, expected_result, tol):
-    """
-    Test the _surface_integral function with known analytical results.
-
-    The surface integral is defined as:
-    ∫∫ f(θ,φ) sin(θ) dθ dφ
-
-    This test uses simple functions with known analytical results.
-    """
-    from spacelink.core.antenna import _surface_integral
-
-    result = _surface_integral(theta, phi, values)
-
-    assert result.unit == expected_result.unit
-    assert_quantity_allclose(result, expected_result, atol=tol)
 
 
 class TestRadiationPatternValidation:
@@ -1095,6 +1021,80 @@ class TestRadiationPatternFactoryConstructors:
         e_th = pat.e_field(theta[:, np.newaxis], phi, polarization=pol_theta)
         phase_err = np.angle(e_th.value * np.exp(-1j * phase_theta.value))
         np.testing.assert_allclose(phase_err, 0.0, atol=1e-10)
+
+
+@pytest.mark.parametrize(
+    "theta, phi, values, expected_result, tol",
+    [
+        # Test 1: Constant function f(θ,φ) = 1
+        # Expected: ∫∫ 1 sin(θ) dθ dφ = 4π
+        (
+            np.linspace(0, np.pi, 100) * u.rad,
+            np.linspace(0, 2 * np.pi, 200) * u.rad,
+            np.ones((100, 200)) * u.dimensionless,
+            4 * np.pi * u.sr,
+            1e-10 * u.sr,
+        ),
+        # Test 2: Function f(θ,φ) = sin(θ)
+        # Expected: ∫∫ sin(θ) sin(θ) dθ dφ = ∫∫ sin²(θ) dθ dφ = π²
+        (
+            np.linspace(0, np.pi, 100) * u.rad,
+            np.linspace(0, 2 * np.pi, 100) * u.rad,
+            np.sin(np.linspace(0, np.pi, 100))[:, np.newaxis]
+            * np.ones(100)
+            * u.dimensionless,
+            np.pi**2 * u.sr,
+            1e-10 * u.sr,
+        ),
+        # Test 3: Function f(θ,φ) = cos²(θ) (dipole pattern)
+        # Expected: ∫∫ cos²(θ) sin(θ) dθ dφ = 4π/3
+        (
+            np.linspace(0, np.pi, 100) * u.rad,
+            np.linspace(0, 2 * np.pi, 200) * u.rad,
+            (np.cos(np.linspace(0, np.pi, 100)) ** 2)[:, np.newaxis]
+            * np.ones(200)
+            * u.dimensionless,
+            4 * np.pi / 3 * u.sr,
+            1e-5 * u.sr,
+        ),
+        # Test 4: Function f(θ,φ) = cos(θ)
+        # Expected: ∫∫ cos(θ) sin(θ) dθ dφ = 0
+        (
+            np.linspace(0, np.pi, 127) * u.rad,
+            np.linspace(0, 2 * np.pi, 173) * u.rad,
+            np.cos(np.linspace(0, np.pi, 127))[:, np.newaxis]
+            * np.ones(173)
+            * u.dimensionless,
+            0 * u.sr,
+            1e-10 * u.sr,
+        ),
+        # Test 5: Constant function f(θ,φ) = 1 over a section of the sphere
+        # θ ∈ [0, π/2], φ ∈ [0, π/2] - quarter sphere
+        # Expected: ∫∫ 1 sin(θ) dθ dφ = π/2
+        (
+            np.linspace(0, np.pi / 2, 50) * u.rad,
+            np.linspace(0, np.pi / 2, 50) * u.rad,
+            np.ones((50, 50)) * u.dimensionless,
+            np.pi / 2 * u.sr,
+            1e-10 * u.sr,
+        ),
+    ],
+)
+def test_surface_integral(theta, phi, values, expected_result, tol):
+    """
+    Test the _surface_integral function with known analytical results.
+
+    The surface integral is defined as:
+    ∫∫ f(θ,φ) sin(θ) dθ dφ
+
+    This test uses simple functions with known analytical results.
+    """
+    from spacelink.core.antenna import _surface_integral
+
+    result = _surface_integral(theta, phi, values)
+
+    assert result.unit == expected_result.unit
+    assert_quantity_allclose(result, expected_result, atol=tol)
 
 
 def test_gain_from_g_over_t():
