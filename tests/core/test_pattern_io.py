@@ -76,18 +76,43 @@ def _assert_pattern_equal(actual: RadiationPattern, expected: RadiationPattern) 
 class TestRadiationPatternNPZ:
 
     @pytest.mark.parametrize("dest_type", ["path", "filelike"])
-    def test_roundtrip_2d(self, tmp_path, dest_type):
-        # 2D pattern roundtrip via file path and file-like
-        theta = np.linspace(0, np.pi, 10) * u.rad
-        phi = np.linspace(0, 2 * np.pi, 15, endpoint=False) * u.rad
-        e_theta = (0.8 + 0.3j) * np.ones((10, 15)) * u.dimensionless
-        e_phi = (0.2 - 0.5j) * np.ones((10, 15)) * u.dimensionless
-        original = RadiationPattern(
-            theta, phi, None, e_theta, e_phi, 0.75 * u.dimensionless
-        )
+    @pytest.mark.parametrize("dim", ["2d", "3d"])
+    @pytest.mark.parametrize("with_pol", [False, True])
+    @pytest.mark.parametrize("with_default_freq", [False, True])
+    def test_roundtrip_npz(self, tmp_path, dest_type, dim, with_pol, with_default_freq):
+        default_pol = None
+        if with_pol:
+            default_pol = Polarization(
+                tilt_angle=45 * u.deg,
+                axial_ratio=1.5 * u.dimensionless,
+                handedness=Handedness.RIGHT,
+            )
+
+        if dim == "2d":
+            original = RadiationPattern(
+                theta=np.linspace(0, np.pi, 10) * u.rad,
+                phi=np.linspace(0, 2 * np.pi, 15, endpoint=False) * u.rad,
+                frequency=None,
+                e_theta=(0.8 + 0.3j) * np.ones((10, 15)) * u.dimensionless,
+                e_phi=(0.2 - 0.5j) * np.ones((10, 15)) * u.dimensionless,
+                rad_efficiency=0.75 * u.dimensionless,
+                default_frequency=(2.4 * u.GHz if with_default_freq else None),
+                default_polarization=default_pol,
+            )
+        else:
+            original = RadiationPattern(
+                theta=np.linspace(0, np.pi, 6) * u.rad,
+                phi=np.linspace(0, 2 * np.pi, 8, endpoint=False) * u.rad,
+                frequency=(np.array([2.4, 5.8, 10.0]) * u.GHz),
+                e_theta=(0.8 + 0.3j) * np.ones((6, 8, 3)) * u.dimensionless,
+                e_phi=(0.2 - 0.5j) * np.ones((6, 8, 3)) * u.dimensionless,
+                rad_efficiency=0.75 * u.dimensionless,
+                default_frequency=(2.4 * u.GHz if with_default_freq else None),
+                default_polarization=default_pol,
+            )
 
         if dest_type == "path":
-            npz_path = tmp_path / "pattern_2d.npz"
+            npz_path = tmp_path / "pattern.npz"
             pattern_io.save_radiation_pattern_npz(original, npz_path)
             source = npz_path
         else:
@@ -124,51 +149,6 @@ class TestRadiationPatternNPZ:
         with pytest.raises(KeyError):
             pattern_io.load_radiation_pattern_npz(npz_path)
 
-    @pytest.mark.parametrize("dest_type", ["path", "filelike"])
-    @pytest.mark.parametrize("with_pol", [False, True])
-    def test_roundtrip_3d(self, tmp_path, with_pol, dest_type):
-        # 3D pattern roundtrip with and without default polarization
-        theta = np.linspace(0, np.pi, 6) * u.rad
-        phi = np.linspace(0, 2 * np.pi, 8, endpoint=False) * u.rad
-        frequency = np.array([2.4, 5.8, 10.0]) * u.GHz
-        e_theta = (0.8 + 0.3j) * np.ones((6, 8, 3)) * u.dimensionless
-        e_phi = (0.2 - 0.5j) * np.ones((6, 8, 3)) * u.dimensionless
-        kwargs = {"default_frequency": 2.4 * u.GHz}
-        if with_pol:
-            kwargs["default_polarization"] = Polarization(
-                tilt_angle=45 * u.deg,
-                axial_ratio=1.5 * u.dimensionless,
-                handedness=Handedness.RIGHT,
-            )
-
-        original = RadiationPattern(
-            theta,
-            phi,
-            frequency,
-            e_theta,
-            e_phi,
-            0.75 * u.dimensionless,
-            **kwargs,
-        )
-
-        if dest_type == "path":
-            npz_path = tmp_path / ("pattern_3d_pol.npz" if with_pol else "pattern_3d.npz")
-            pattern_io.save_radiation_pattern_npz(original, npz_path)
-            source = npz_path
-        else:
-            buffer = io.BytesIO()
-            pattern_io.save_radiation_pattern_npz(original, buffer)
-            source = io.BytesIO(buffer.getvalue())
-
-        _assert_npz_metadata(np.load(source))
-
-        if dest_type == "path":
-            loaded = pattern_io.load_radiation_pattern_npz(npz_path)
-        else:
-            buffer.seek(0)
-            loaded = pattern_io.load_radiation_pattern_npz(buffer)
-
-        _assert_pattern_equal(loaded, original)
 
     @pytest.mark.parametrize(
         "format_name,format_version",
