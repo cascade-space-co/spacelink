@@ -753,12 +753,12 @@ class RadiationPattern:
         phi: Angle
             Azimuthal angles.
         frequency: Frequency | None
-            Desired frequency. If None, uses the instance's `default_frequency` if set;
-            otherwise raises ValueError. For 2D patterns (constructed without
+            Desired frequency. If None, uses the instance's ``default_frequency`` if
+            set; otherwise raises ValueError. For 2D patterns (constructed without
             ``frequency``), this argument is ignored.
         polarization: Polarization | None
             Desired polarization state. If None, uses the instance's
-            `default_polarization` if set; otherwise raises ValueError.
+            ``default_polarization`` if set; otherwise raises ValueError.
 
         Returns
         -------
@@ -819,12 +819,12 @@ class RadiationPattern:
         phi: Angle
             Azimuthal angles.
         frequency: Frequency | None
-            Desired frequency. If None, uses the instance's `default_frequency` if set;
-            otherwise raises ValueError. For 2D patterns (constructed without
+            Desired frequency. If None, uses the instance's ``default_frequency`` if
+            set; otherwise raises ValueError. For 2D patterns (constructed without
             ``frequency``), this argument is ignored.
         polarization: Polarization | None
             Desired polarization state. If None, uses the instance's
-            `default_polarization` if set; otherwise raises ValueError.
+            ``default_polarization`` if set; otherwise raises ValueError.
 
         Returns
         -------
@@ -863,8 +863,8 @@ class RadiationPattern:
         phi: Angle
             Azimuthal angles.
         frequency: Frequency | None
-            Desired frequency. If None, uses the instance's `default_frequency` if set;
-            otherwise raises ValueError. For 2D patterns (constructed without
+            Desired frequency. If None, uses the instance's ``default_frequency`` if
+            set; otherwise raises ValueError. For 2D patterns (constructed without
             ``frequency``), this argument is ignored.
         polarization: Polarization | None
             Desired polarization state. If None, uses the instance's
@@ -903,8 +903,8 @@ class RadiationPattern:
         phi: Angle
             Azimuthal angles.
         frequency: Frequency | None
-            Desired frequency. If None, uses the instance's `default_frequency` if set;
-            otherwise raises ValueError. For 2D patterns (constructed without
+            Desired frequency. If None, uses the instance's ``default_frequency`` if
+            set; otherwise raises ValueError. For 2D patterns (constructed without
             ``frequency``), this argument is ignored.
 
         Returns
