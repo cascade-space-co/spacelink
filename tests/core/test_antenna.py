@@ -27,6 +27,19 @@ from spacelink.core.units import (
 )
 
 
+def _assert_lin_gain_equals_eta_times_directivity(
+    pattern: RadiationPattern,
+    theta: u.Quantity,
+    phi: u.Quantity,
+    *,
+    polarization: Polarization,
+    eta: u.Quantity,
+) -> None:
+    dir_lin = to_linear(pattern.directivity(theta, phi, polarization=polarization))
+    gain_lin = to_linear(pattern.gain(theta, phi, polarization=polarization))
+    assert_quantity_allclose(gain_lin, eta * dir_lin)
+
+
 """
 This site was used to generate the following test cases:
 https://phillipmfeldman.org/Engineering/pol_mismatch_loss.html
@@ -755,63 +768,34 @@ class TestRadiationPatternValidation:
         with pytest.raises(ValueError):
             RadiationPattern(theta_too_large, phi, None, e_theta, e_phi, rad_efficiency)
 
-    def test_theta_sorting_validation(self):
-        """Test that theta must be sorted in strictly increasing order."""
-        phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
-        e_theta = np.ones((5, 10)) * u.dimensionless
-        e_phi = np.zeros((5, 10)) * u.dimensionless
+    @pytest.mark.parametrize(
+        "axis,case,values",
+        [
+            ("theta", "unsorted", np.array([0, 0.5, 0.3, 1.0, 1.5])),
+            ("theta", "duplicate", np.array([0, 0.5, 0.5, 1.0, 1.5])),
+            ("theta", "unequal", np.array([0, 0.5, 1.2, 2.0, 3.0])),
+            ("phi", "unsorted", np.array([0, 1.0, 0.5, 2.0, 3.0])),
+            ("phi", "duplicate", np.array([0, 1.0, 1.0, 2.0, 3.0])),
+            ("phi", "unequal", np.array([0, 0.5, 1.2, 2.0, 3.0])),
+        ],
+    )
+    def test_axis_order_and_spacing_validation(self, axis, case, values):
+        """Parametrized validation for axis ordering and equal spacing."""
         rad_efficiency = 1.0 * u.dimensionless
-
-        # Test unsorted theta
-        theta_unsorted = np.array([0, 0.5, 0.3, 1.0, 1.5]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta_unsorted, phi, None, e_theta, e_phi, rad_efficiency)
-
-        # Test repeated theta values
-        theta_repeated = np.array([0, 0.5, 0.5, 1.0, 1.5]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta_repeated, phi, None, e_theta, e_phi, rad_efficiency)
-
-    def test_phi_sorting_validation(self):
-        """Test that phi must be sorted in strictly increasing order."""
-        theta = np.linspace(0, np.pi, 5) * u.rad
-        e_theta = np.ones((5, 5)) * u.dimensionless
-        e_phi = np.zeros((5, 5)) * u.dimensionless
-        rad_efficiency = 1.0 * u.dimensionless
-
-        # Test unsorted phi
-        phi_unsorted = np.array([0, 1.0, 0.5, 2.0, 3.0]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta, phi_unsorted, None, e_theta, e_phi, rad_efficiency)
-
-        # Test repeated phi values
-        phi_repeated = np.array([0, 1.0, 1.0, 2.0, 3.0]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta, phi_repeated, None, e_theta, e_phi, rad_efficiency)
-
-    def test_theta_spacing_validation(self):
-        """Test that theta must be equally spaced."""
-        phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
-        e_theta = np.ones((5, 10)) * u.dimensionless
-        e_phi = np.zeros((5, 10)) * u.dimensionless
-        rad_efficiency = 1.0 * u.dimensionless
-
-        # Test unequally spaced theta
-        theta_unequal = np.array([0, 0.5, 1.2, 2.0, 3.0]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta_unequal, phi, None, e_theta, e_phi, rad_efficiency)
-
-    def test_phi_spacing_validation(self):
-        """Test that phi must be equally spaced."""
-        theta = np.linspace(0, np.pi, 5) * u.rad
-        e_theta = np.ones((5, 5)) * u.dimensionless
-        e_phi = np.zeros((5, 5)) * u.dimensionless
-        rad_efficiency = 1.0 * u.dimensionless
-
-        # Test unequally spaced phi
-        phi_unequal = np.array([0, 0.5, 1.2, 2.0, 3.0]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta, phi_unequal, None, e_theta, e_phi, rad_efficiency)
+        if axis == "theta":
+            theta = values * u.rad
+            phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
+            e_theta = np.ones((values.size, phi.size)) * u.dimensionless
+            e_phi = np.zeros((values.size, phi.size)) * u.dimensionless
+            with pytest.raises(ValueError):
+                RadiationPattern(theta, phi, None, e_theta, e_phi, rad_efficiency)
+        else:
+            theta = np.linspace(0, np.pi, values.size) * u.rad
+            phi = values * u.rad
+            e_theta = np.ones((theta.size, values.size)) * u.dimensionless
+            e_phi = np.zeros((theta.size, values.size)) * u.dimensionless
+            with pytest.raises(ValueError):
+                RadiationPattern(theta, phi, None, e_theta, e_phi, rad_efficiency)
 
     def test_phi_coverage_validation(self):
         """Test that phi must cover less than 2π radians."""
@@ -992,10 +976,13 @@ class TestRadiationPatternFactoryConstructors:
         assert_quantity_allclose(dir_phi, 0.5 * u.dimensionless)
 
         # Gain should be eta * directivity (in linear)
-        gain_lhcp = to_linear(
-            pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        _assert_lin_gain_equals_eta_times_directivity(
+            pat,
+            theta[:, np.newaxis],
+            phi,
+            polarization=pol_lhcp,
+            eta=0.65 * u.dimensionless,
         )
-        assert_quantity_allclose(gain_lhcp, 0.65 * dir_lhcp)
 
         # Phase of LHCP e-field should match exp(1j*phi)
         e_l = pat.e_field(theta[:, np.newaxis], phi, polarization=pol_lhcp)
@@ -1037,10 +1024,13 @@ class TestRadiationPatternFactoryConstructors:
         assert_quantity_allclose(
             dir_rhcp, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
         )
-        gain_lhcp = to_linear(
-            pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        _assert_lin_gain_equals_eta_times_directivity(
+            pat,
+            theta[:, np.newaxis],
+            phi,
+            polarization=pol_lhcp,
+            eta=0.75 * u.dimensionless,
         )
-        assert_quantity_allclose(gain_lhcp, 0.75 * dir_lhcp)
 
         # Phase of LHCP e-field should match provided phase_lhcp
         e_l = pat.e_field(theta[:, np.newaxis], phi, polarization=pol_lhcp)
@@ -1086,14 +1076,20 @@ class TestRadiationPatternFactoryConstructors:
             dir_phi, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
         )
         assert_quantity_allclose(dir_lhcp, 0.5 * u.dimensionless)
-        gain_theta_lin = to_linear(
-            pat.gain(theta[:, np.newaxis], phi, polarization=pol_theta)
+        _assert_lin_gain_equals_eta_times_directivity(
+            pat,
+            theta[:, np.newaxis],
+            phi,
+            polarization=pol_theta,
+            eta=0.6 * u.dimensionless,
         )
-        gain_lhcp_lin = to_linear(
-            pat.gain(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        _assert_lin_gain_equals_eta_times_directivity(
+            pat,
+            theta[:, np.newaxis],
+            phi,
+            polarization=pol_lhcp,
+            eta=0.6 * u.dimensionless,
         )
-        assert_quantity_allclose(gain_theta_lin, 0.6 * dir_theta)
-        assert_quantity_allclose(gain_lhcp_lin, 0.6 * dir_lhcp)
 
         # Phase of theta-polarized e-field should match phase_theta
         e_th = pat.e_field(theta[:, np.newaxis], phi, polarization=pol_theta)
