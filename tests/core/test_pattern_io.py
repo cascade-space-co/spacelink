@@ -53,7 +53,9 @@ def _assert_pattern_equal(actual: RadiationPattern, expected: RadiationPattern) 
     if expected.default_frequency is None:
         assert actual.default_frequency is None
     else:
-        np.testing.assert_array_equal(actual.default_frequency, expected.default_frequency)
+        np.testing.assert_array_equal(
+            actual.default_frequency, expected.default_frequency
+        )
 
     if expected.default_polarization is None:
         assert actual.default_polarization is None
@@ -148,7 +150,6 @@ class TestRadiationPatternNPZ:
 
         with pytest.raises(KeyError):
             pattern_io.load_radiation_pattern_npz(npz_path)
-
 
     @pytest.mark.parametrize(
         "format_name,format_version",
