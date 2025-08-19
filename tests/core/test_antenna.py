@@ -415,6 +415,26 @@ class TestComplexInterpolator:
         with pytest.raises(ValueError):
             _ComplexInterpolator(theta, phi, None, vals, floor=0.0 * u.dimensionless)
 
+    def test_phi_wrapping_negative_to_positive_range(self):
+        """Test phi ranging from -180° to +180° works after wrapping and sorting fix."""
+        theta = np.linspace(0, np.pi, 20) * u.rad
+        phi = np.linspace(-180, 180, 50) * u.deg  # This caused the original issue
+
+        # Create simple uniform test pattern
+        values = np.ones((theta.size, phi.size)) * u.dimensionless
+
+        # This should not raise "points in dimension 1 must be strictly ascending"
+        interpolator = _ComplexInterpolator(theta, phi, None, values)
+
+        # Verify interpolation works without error
+        test_theta = np.pi / 2 * u.rad
+        test_phi = np.array([-90, 0, 90]) * u.deg
+        result = interpolator(test_theta, test_phi)
+
+        # Should return uniform values
+        expected = np.ones(3) * u.dimensionless
+        assert_quantity_allclose(result, expected)
+
 
 @dataclass
 class RadiationPatternExpectedResults:
@@ -793,17 +813,17 @@ class TestRadiationPatternValidation:
                 RadiationPattern(theta, phi, None, e_theta, e_phi, rad_efficiency)
 
     def test_phi_coverage_validation(self):
-        """Test that phi must cover less than 2π radians."""
+        """Test that phi must cover 2π or less radians."""
         theta = np.linspace(0, np.pi, 5) * u.rad
         e_theta = np.ones((5, 10)) * u.dimensionless
         e_phi = np.zeros((5, 10)) * u.dimensionless
         rad_efficiency = 1.0 * u.dimensionless
 
-        # Test phi covering exactly 2π
-        phi_full_circle = np.linspace(0, 2 * np.pi, 10) * u.rad
+        # Test phi covering more than the allowed threshold (2π + tolerance)
+        phi_just_over_limit = np.linspace(0, 2.2 * np.pi, 10) * u.rad
         with pytest.raises(ValueError):
             RadiationPattern(
-                theta, phi_full_circle, None, e_theta, e_phi, rad_efficiency
+                theta, phi_just_over_limit, None, e_theta, e_phi, rad_efficiency
             )
 
         # Test phi covering more than 2π

@@ -266,6 +266,16 @@ class _ComplexInterpolator:
 
         phi = phi % (2 * np.pi * u.rad)
 
+        # Sort phi and values to ensure phi is monotonically increasing after wrapping
+        sort_indices = np.argsort(phi)
+        phi = phi[sort_indices]
+        values = values[:, sort_indices]
+
+        # Remove duplicate phi values that can occur when input spans exactly 2π
+        unique_indices = np.concatenate([[True], np.diff(phi) > 0])
+        phi = phi[unique_indices]
+        values = values[:, unique_indices]
+
         if frequency is None:
             values = values[:, :, np.newaxis]
             frequency = np.array([0.0]) * u.Hz  # Dummy frequency for 2D case
