@@ -1,5 +1,7 @@
 import pathlib
 import typing
+import datetime
+import json
 
 import astropy.units as u
 import numpy as np
@@ -7,6 +9,15 @@ import pandas as pd
 
 from . import antenna as antenna
 from . import units as units
+import spacelink
+
+
+# Serialization format identifiers (kept stable across code refactors)
+_FORMAT_NAME = "spacelink.RadiationPattern"
+_FORMAT_VERSION = 1
+_CONVENTIONS = (
+    "theta[rad], phi[rad], frequency[Hz], e_* dimensionless; handedness=enum.name"
+)
 
 
 def load_radiation_pattern_npz(
@@ -30,11 +41,25 @@ def load_radiation_pattern_npz(
     Raises
     ------
     FileNotFoundError
-        If the specified file does not exist (when source is a path).
+        If the specified file does not exist (when ``source`` is a path).
     KeyError
         If required keys are missing from the NPZ file.
+    ValueError
+        If the file's ``format_name`` or ``format_version`` are unsupported.
     """
     data = np.load(source)
+
+    # Validate format identity and version. These keys are required.
+    format_name = str(np.asarray(data["format_name"]).item())
+    if format_name != _FORMAT_NAME:
+        raise ValueError(
+            f"Unsupported format_name '{format_name}'; expected '{_FORMAT_NAME}'"
+        )
+    format_version = int(np.asarray(data["format_version"]))
+    if format_version != _FORMAT_VERSION:
+        raise ValueError(
+            f"Unsupported format_version {format_version}; expected {_FORMAT_VERSION}"
+        )
 
     default_polarization = None
     if data.get("has_default_polarization", False):
@@ -79,15 +104,68 @@ def save_radiation_pattern_npz(
         to write NPZ data to. This allows saving to files, databases, or
         in-memory buffers.
     """
+    theta_vals = pattern.theta.to(u.rad).value
+    phi_vals = pattern.phi.to(u.rad).value
+    e_theta_vals = pattern.e_theta.value
+    e_phi_vals = pattern.e_phi.value
+    rad_eff_vals = pattern.rad_efficiency.value
+
+    # Optional frequency
+    freq_vals = None
+    if pattern.frequency is not None:
+        freq_vals = pattern.frequency.to(u.Hz).value
+
+    # Human/provenance metadata that requires no pickling
+    created_ts = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    producer_str = f"spacelink {spacelink.__version__}"
+
+    # Summarize dtypes and shapes for quick inspection
+    dtype_summary: dict[str, typing.Any] = {
+        "theta": {
+            "dtype": np.asarray(theta_vals).dtype.name,
+            "shape": list(np.asarray(theta_vals).shape),
+        },
+        "phi": {
+            "dtype": np.asarray(phi_vals).dtype.name,
+            "shape": list(np.asarray(phi_vals).shape),
+        },
+        "e_theta": {
+            "dtype": np.asarray(e_theta_vals).dtype.name,
+            "shape": list(np.asarray(e_theta_vals).shape),
+        },
+        "e_phi": {
+            "dtype": np.asarray(e_phi_vals).dtype.name,
+            "shape": list(np.asarray(e_phi_vals).shape),
+        },
+        "rad_efficiency": {
+            "dtype": np.asarray(rad_eff_vals).dtype.name,
+            "shape": list(np.asarray(rad_eff_vals).shape),
+        },
+    }
+    if freq_vals is not None:
+        dtype_summary["frequency"] = {
+            "dtype": np.asarray(freq_vals).dtype.name,
+            "shape": list(np.asarray(freq_vals).shape),
+        }
+
     data_dict = {
-        "theta": pattern.theta.to(u.rad).value,
-        "phi": pattern.phi.to(u.rad).value,
-        "e_theta": pattern.e_theta.value,
-        "e_phi": pattern.e_phi.value,
-        "rad_efficiency": pattern.rad_efficiency.value,
+        # Data arrays
+        "theta": theta_vals,
+        "phi": phi_vals,
+        "e_theta": e_theta_vals,
+        "e_phi": e_phi_vals,
+        "rad_efficiency": rad_eff_vals,
+        # Presence flags
         "has_default_polarization": pattern.default_polarization is not None,
         "has_frequency": pattern.frequency is not None,
         "has_default_frequency": pattern.default_frequency is not None,
+        # Format identity and provenance
+        "format_name": _FORMAT_NAME,
+        "format_version": _FORMAT_VERSION,
+        "conventions": _CONVENTIONS,
+        "producer": producer_str,
+        "created_utc": created_ts,
+        "dtype_info": json.dumps(dtype_summary),
     }
 
     if pattern.default_polarization is not None:
@@ -100,8 +178,8 @@ def save_radiation_pattern_npz(
             }
         )
 
-    if pattern.frequency is not None:
-        data_dict["frequency"] = pattern.frequency.to(u.Hz).value
+    if freq_vals is not None:
+        data_dict["frequency"] = freq_vals
 
     if pattern.default_frequency is not None:
         data_dict["default_frequency"] = pattern.default_frequency.to(u.Hz).value

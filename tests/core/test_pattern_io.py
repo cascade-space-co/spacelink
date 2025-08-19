@@ -1,6 +1,7 @@
 """Tests for pattern I/O functionality."""
 
 import io
+import json
 import pathlib
 import textwrap
 
@@ -11,6 +12,65 @@ from astropy.tests.helper import assert_quantity_allclose
 
 from spacelink.core.antenna import RadiationPattern, Polarization, Handedness
 from spacelink.core import pattern_io
+
+
+def _assert_npz_metadata(data: np.lib.npyio.NpzFile) -> None:
+    # Required metadata keys should exist
+    assert "format_name" in data.files
+    assert "format_version" in data.files
+    assert "conventions" in data.files
+    assert "producer" in data.files
+    assert "created_utc" in data.files
+    assert "dtype_info" in data.files
+
+    # Basic value checks (no strict message comparisons)
+    format_name = str(np.asarray(data["format_name"]).item())
+    assert format_name == "spacelink.RadiationPattern"
+    format_version = int(np.asarray(data["format_version"]))
+    assert format_version == 1
+    # Producer should include package name
+    producer = str(np.asarray(data["producer"]).item())
+    assert producer.startswith("spacelink ")
+    # dtype_info should be valid JSON and include expected keys
+    dtype_info = json.loads(str(np.asarray(data["dtype_info"]).item()))
+    for key in ["theta", "phi", "e_theta", "e_phi", "rad_efficiency"]:
+        assert key in dtype_info
+
+
+def _assert_pattern_equal(actual: RadiationPattern, expected: RadiationPattern) -> None:
+    np.testing.assert_array_equal(actual.theta, expected.theta)
+    np.testing.assert_array_equal(actual.phi, expected.phi)
+    np.testing.assert_array_equal(actual.e_theta, expected.e_theta)
+    np.testing.assert_array_equal(actual.e_phi, expected.e_phi)
+    np.testing.assert_array_equal(actual.rad_efficiency, expected.rad_efficiency)
+
+    # Optional axes/metadata
+    if expected.frequency is None:
+        assert actual.frequency is None
+    else:
+        np.testing.assert_array_equal(actual.frequency, expected.frequency)
+
+    if expected.default_frequency is None:
+        assert actual.default_frequency is None
+    else:
+        np.testing.assert_array_equal(actual.default_frequency, expected.default_frequency)
+
+    if expected.default_polarization is None:
+        assert actual.default_polarization is None
+    else:
+        assert actual.default_polarization is not None
+        assert (
+            actual.default_polarization.tilt_angle
+            == expected.default_polarization.tilt_angle
+        )
+        assert (
+            actual.default_polarization.axial_ratio
+            == expected.default_polarization.axial_ratio
+        )
+        assert (
+            actual.default_polarization.handedness
+            == expected.default_polarization.handedness
+        )
 
 
 class TestRadiationPatternNPZ:
@@ -29,21 +89,23 @@ class TestRadiationPatternNPZ:
         if dest_type == "path":
             npz_path = tmp_path / "pattern_2d.npz"
             pattern_io.save_radiation_pattern_npz(original, npz_path)
-            loaded = pattern_io.load_radiation_pattern_npz(npz_path)
+            source = npz_path
         else:
             buffer = io.BytesIO()
             pattern_io.save_radiation_pattern_npz(original, buffer)
+            source = io.BytesIO(buffer.getvalue())
+
+        # Verify metadata directly from saved artifact
+        _assert_npz_metadata(np.load(source))
+
+        # Load for functional roundtrip assertions
+        if dest_type == "path":
+            loaded = pattern_io.load_radiation_pattern_npz(npz_path)
+        else:
             buffer.seek(0)
             loaded = pattern_io.load_radiation_pattern_npz(buffer)
 
-        np.testing.assert_array_equal(loaded.theta, original.theta)
-        np.testing.assert_array_equal(loaded.phi, original.phi)
-        np.testing.assert_array_equal(loaded.e_theta, original.e_theta)
-        np.testing.assert_array_equal(loaded.e_phi, original.e_phi)
-        np.testing.assert_array_equal(loaded.rad_efficiency, original.rad_efficiency)
-        assert loaded.default_polarization is None
-        assert loaded.frequency is None
-        assert loaded.default_frequency is None
+        _assert_pattern_equal(loaded, original)
 
     def test_missing_file(self):
         nonexistent_path = pathlib.Path("/nonexistent/path/missing.npz")
@@ -62,8 +124,9 @@ class TestRadiationPatternNPZ:
         with pytest.raises(KeyError):
             pattern_io.load_radiation_pattern_npz(npz_path)
 
+    @pytest.mark.parametrize("dest_type", ["path", "filelike"])
     @pytest.mark.parametrize("with_pol", [False, True])
-    def test_roundtrip_3d(self, tmp_path, with_pol):
+    def test_roundtrip_3d(self, tmp_path, with_pol, dest_type):
         # 3D pattern roundtrip with and without default polarization
         theta = np.linspace(0, np.pi, 6) * u.rad
         phi = np.linspace(0, 2 * np.pi, 8, endpoint=False) * u.rad
@@ -88,35 +151,52 @@ class TestRadiationPatternNPZ:
             **kwargs,
         )
 
-        npz_path = tmp_path / ("pattern_3d_pol.npz" if with_pol else "pattern_3d.npz")
-        pattern_io.save_radiation_pattern_npz(original, npz_path)
-        loaded = pattern_io.load_radiation_pattern_npz(npz_path)
-
-        np.testing.assert_array_equal(loaded.theta, original.theta)
-        np.testing.assert_array_equal(loaded.phi, original.phi)
-        np.testing.assert_array_equal(loaded.frequency, original.frequency)
-        np.testing.assert_array_equal(loaded.e_theta, original.e_theta)
-        np.testing.assert_array_equal(loaded.e_phi, original.e_phi)
-        np.testing.assert_array_equal(loaded.rad_efficiency, original.rad_efficiency)
-        np.testing.assert_array_equal(
-            loaded.default_frequency, original.default_frequency
-        )
-        if with_pol:
-            assert loaded.default_polarization is not None
-            assert (
-                loaded.default_polarization.tilt_angle
-                == original.default_polarization.tilt_angle
-            )
-            assert (
-                loaded.default_polarization.axial_ratio
-                == original.default_polarization.axial_ratio
-            )
-            assert (
-                loaded.default_polarization.handedness
-                == original.default_polarization.handedness
-            )
+        if dest_type == "path":
+            npz_path = tmp_path / ("pattern_3d_pol.npz" if with_pol else "pattern_3d.npz")
+            pattern_io.save_radiation_pattern_npz(original, npz_path)
+            source = npz_path
         else:
-            assert loaded.default_polarization is None
+            buffer = io.BytesIO()
+            pattern_io.save_radiation_pattern_npz(original, buffer)
+            source = io.BytesIO(buffer.getvalue())
+
+        _assert_npz_metadata(np.load(source))
+
+        if dest_type == "path":
+            loaded = pattern_io.load_radiation_pattern_npz(npz_path)
+        else:
+            buffer.seek(0)
+            loaded = pattern_io.load_radiation_pattern_npz(buffer)
+
+        _assert_pattern_equal(loaded, original)
+
+    @pytest.mark.parametrize(
+        "format_name,format_version",
+        [
+            ("not.spacelink", 1),
+            ("spacelink.RadiationPattern", 999),
+        ],
+    )
+    def test_invalid_format_identity(self, tmp_path, format_name, format_version):
+        # Construct a minimal but complete NPZ overriding identity fields
+        theta = np.array([0.0])
+        phi = np.array([0.0])
+        e_theta = np.ones((1, 1), dtype=np.complex128)
+        e_phi = 1j * np.ones((1, 1), dtype=np.complex128)
+        rad_eff = np.array(1.0)
+        npz_path = tmp_path / "bad_identity.npz"
+        np.savez_compressed(
+            npz_path,
+            format_name=format_name,
+            format_version=format_version,
+            theta=theta,
+            phi=phi,
+            e_theta=e_theta,
+            e_phi=e_phi,
+            rad_efficiency=rad_eff,
+        )
+        with pytest.raises(ValueError):
+            pattern_io.load_radiation_pattern_npz(npz_path)
 
 
 class TestRadiationPatternHFSSImport:
