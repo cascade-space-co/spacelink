@@ -206,6 +206,102 @@ def test_enforce_units_rejects_incompatible_units():
         test_angle_function(45)  # Raw number instead of Quantity
 
 
+def test_enforce_units_optional_parameters():
+    """Test that enforce_units decorator handles optional parameters correctly."""
+
+    @enforce_units
+    def test_optional_frequency(freq: Frequency | None = None) -> str:
+        """Function with optional frequency parameter."""
+        if freq is None:
+            return "no frequency"
+        # Verify the frequency is converted to Hz
+        assert freq.unit == u.Hz
+        return f"frequency: {freq.value} Hz"
+
+    @enforce_units
+    def test_optional_angle(angle: Angle | None = None, scale: float = 1.0) -> str:
+        """Function with optional angle parameter and non-unit parameter."""
+        if angle is None:
+            return "no angle"
+        # Verify the angle is converted to radians
+        assert angle.unit == u.rad
+        return f"angle: {angle.value * scale} rad"
+
+    # Test with None values - should work without enforcement
+    result = test_optional_frequency(None)
+    assert result == "no frequency"
+
+    result = test_optional_frequency()  # Default None
+    assert result == "no frequency"
+
+    # Test with valid Quantity values - should be converted properly
+    result = test_optional_frequency(1000 * u.MHz)
+    assert result == "frequency: 1000000000.0 Hz"
+
+    result = test_optional_angle(180 * u.deg)
+    expected_radians = np.pi
+    assert f"angle: {expected_radians} rad" == result
+
+    # Test with multiple parameters where one is optional
+    result = test_optional_angle(90 * u.deg, scale=2.0)
+    expected_radians = np.pi / 2 * 2.0
+    assert f"angle: {expected_radians} rad" == result
+
+    result = test_optional_angle(None, scale=2.0)
+    assert result == "no angle"
+
+
+def test_enforce_units_optional_parameters_invalid_units():
+    """Test that enforce_units decorator rejects invalid units for optional parameters."""
+
+    @enforce_units
+    def test_optional_frequency(freq: Frequency | None = None) -> str:
+        return "ok"
+
+    # Should raise UnitConversionError for incompatible units
+    with pytest.raises(u.UnitConversionError):
+        test_optional_frequency(5 * u.m)  # Length instead of frequency
+
+    # Should raise TypeError for raw numbers
+    with pytest.raises(TypeError, match="must be provided as an astropy Quantity"):
+        test_optional_frequency(1000)  # Raw number instead of Quantity
+
+
+def test_enforce_units_multiple_optional_parameters():
+    """Test enforce_units with multiple optional parameters."""
+
+    @enforce_units
+    def test_function(
+        freq: Frequency | None = None,
+        angle: Angle | None = None,
+        temp: Temperature | None = None,
+    ) -> str:
+        results = []
+        if freq is not None:
+            assert freq.unit == u.Hz
+            results.append(f"freq: {freq.value}")
+        if angle is not None:
+            assert angle.unit == u.rad
+            results.append(f"angle: {angle.value}")
+        if temp is not None:
+            assert temp.unit == u.K
+            results.append(f"temp: {temp.value}")
+        return ", ".join(results) if results else "all none"
+
+    # Test all None
+    assert test_function() == "all none"
+
+    # Test mixed values
+    result = test_function(freq=1 * u.GHz, angle=None, temp=300 * u.K)
+    assert "freq: 1000000000.0" in result
+    assert "temp: 300.0" in result
+    assert "angle:" not in result
+
+    # Test temperature conversion (Celsius to Kelvin)
+    result = test_function(temp=0 * u.deg_C)  # 0°C = 273.15 K
+    assert "temp: 273.15" in result
+
+
 def test_custom_units_exist():
     """Test that custom units are added to astropy.units"""
     assert hasattr(u, "dBHz")
