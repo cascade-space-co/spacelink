@@ -952,6 +952,31 @@ class TestRadiationPatternValidation:
                 rad_efficiency=1.0 * u.dimensionless,
             )
 
+    def test_default_frequency_3d_validation(self):
+        frequency = np.array([1.0, 2.0]) * u.GHz
+        base_kwargs = {
+            "theta": np.linspace(0, np.pi, 4) * u.rad,
+            "phi": np.linspace(0, 2 * np.pi, 5, endpoint=False) * u.rad,
+            "frequency": frequency,
+            "e_theta": np.ones((4, 5, 2)) * u.dimensionless,
+            "e_phi": np.zeros((4, 5, 2)) * u.dimensionless,
+            "rad_efficiency": 1.0 * u.dimensionless,
+        }
+
+        # Accept: min, max, and mid-point
+        for good in [frequency.min(), frequency.max(), 1.5 * u.GHz]:
+            _ = RadiationPattern(**base_kwargs, default_frequency=good)
+            pat = RadiationPattern(**base_kwargs)
+            pat.default_frequency = good
+
+        # Reject: out-of-bounds and non-scalar
+        for bad in [0.5 * u.GHz, 2.5 * u.GHz, np.array([1.0, 1.5]) * u.GHz]:
+            with pytest.raises(ValueError):
+                _ = RadiationPattern(**base_kwargs, default_frequency=bad)
+            pat = RadiationPattern(**base_kwargs)
+            with pytest.raises(ValueError):
+                pat.default_frequency = bad
+
 
 class TestRadiationPatternFactoryConstructors:
     def _grid(self):

@@ -451,6 +451,42 @@ class RadiationPattern:
         self._e_theta_interp = _ComplexInterpolator(theta, phi, frequency, e_theta)
         self._e_phi_interp = _ComplexInterpolator(theta, phi, frequency, e_phi)
 
+    @property
+    def default_frequency(self) -> Frequency | None:
+        """Default frequency used when instance methods are called without an explicit
+        frequency.
+
+        For frequency-aware patterns, this must be a scalar frequency within the closed
+        interval defined by the pattern's ``frequency`` grid or None.
+
+        For frequency-invariant patterns this is stored but ignored.
+        """
+        return getattr(self, "_default_frequency", None)
+
+    @default_frequency.setter
+    def default_frequency(self, value: Frequency | None) -> None:
+        if value is None:
+            self._default_frequency = None
+            return
+
+        if np.size(value) != 1:
+            raise ValueError("default_frequency must be a scalar Quantity")
+
+        # For 2D patterns (no frequency axis), store and ignore in computations
+        if self.frequency is None:
+            self._default_frequency = value
+            return
+
+        # For 3D patterns, enforce range within the frequency grid
+        fmin = np.min(self.frequency)
+        fmax = np.max(self.frequency)
+        if not (fmin <= value <= fmax):
+            raise ValueError(
+                f"default_frequency {value} must be within [{fmin}, {fmax}]"
+            )
+
+        self._default_frequency = value
+
     @staticmethod
     def _validate_rad_efficiency(rad_efficiency: Dimensionless) -> None:
         """Validate that ``rad_efficiency`` is a scalar in the open interval (0, 1]."""
