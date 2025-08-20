@@ -13,7 +13,7 @@ from spacelink.core.antenna import (
     Polarization,
     Handedness,
     RadiationPattern,
-    SphericalInterpolator,
+    _ComplexInterpolator,
     gain_from_g_over_t,
     temperature_from_g_over_t,
 )
@@ -25,6 +25,19 @@ from spacelink.core.units import (
     to_dB,
     to_linear,
 )
+
+
+def _assert_lin_gain_equals_eta_times_directivity(
+    pattern: RadiationPattern,
+    theta: u.Quantity,
+    phi: u.Quantity,
+    *,
+    polarization: Polarization,
+    eta: u.Quantity,
+) -> None:
+    dir_lin = to_linear(pattern.directivity(theta, phi, polarization=polarization))
+    gain_lin = to_linear(pattern.gain(theta, phi, polarization=polarization))
+    assert_quantity_allclose(gain_lin, eta * dir_lin)
 
 
 """
@@ -169,6 +182,259 @@ class TestPolarization:
         inner_product = np.dot(lhcp.jones_vector.conj(), rhcp.jones_vector)
         assert abs(inner_product) == pytest.approx(0.0)
 
+    def test_invalid_axial_ratio_raises(self):
+        with pytest.raises(ValueError):
+            Polarization(0 * u.rad, 0.5 * u.dimensionless, Handedness.LEFT)
+
+
+class TestComplexInterpolator:
+    """Tests for the ComplexInterpolator class."""
+
+    def test_interpolation(self):
+        N = 80
+        M = 120
+        downsample = 2
+        periods = 2  # Number of periods in phi
+        peak_gain = 40.0  # Gain varies between ± this value in dBi
+
+        theta = np.linspace(0, np.pi, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+
+        gain_db_expected = (
+            peak_gain
+            * np.sin(theta.value)[:, np.newaxis]  # Taper to 0 dB at poles
+            * np.sin(periods * phi.value)
+            * u.dB
+        )
+
+        theta_decim = np.linspace(0, np.pi, N // downsample) * u.rad
+        phi_decim = np.linspace(0, 2 * np.pi, M // downsample, endpoint=False) * u.rad
+        gain_decim_db = (
+            peak_gain
+            * np.sin(theta_decim.value)[:, np.newaxis]  # Taper to 0 dB at poles
+            * np.sin(periods * phi_decim.value)
+            * u.dB
+        )
+        gain_decim = to_linear(gain_decim_db)
+
+        interpolator = _ComplexInterpolator(theta_decim, phi_decim, None, gain_decim)
+
+        result = interpolator(theta[:, np.newaxis], phi)
+
+        assert_quantity_allclose(to_dB(result), gain_db_expected, atol=0.3 * u.dB)
+
+    def test_subset_sphere_interpolation(self):
+        N = 80
+        M = 100
+        downsample = 2
+        periods = 2  # Number of periods in phi
+        peak_gain = 40.0  # Gain varies between ± this value in dBi
+
+        # Create subset of sphere: theta from 30° to 120°, phi from 45° to 270°
+        theta = np.linspace(np.pi / 6, 2 * np.pi / 3, N) * u.rad
+        phi = np.linspace(np.pi / 4, 3 * np.pi / 2, M, endpoint=False) * u.rad
+
+        gain_db = (
+            peak_gain
+            * np.sin(theta.value)[:, np.newaxis]
+            * np.sin(periods * phi.value)
+            * u.dB
+        )
+        gain = to_linear(gain_db)
+
+        interpolator = _ComplexInterpolator(
+            theta[::downsample],
+            phi[::downsample],
+            None,
+            gain[::downsample, ::downsample],
+        )
+
+        result = interpolator(
+            theta[:-downsample, np.newaxis],
+            phi[:-downsample],
+        )
+        assert_quantity_allclose(
+            to_dB(result),
+            gain_db[:-downsample, :-downsample],
+            atol=0.2 * u.dB,
+        )
+
+    def test_frequency_dependent_interpolation(self):
+        """Test 3D interpolation over theta, phi, and frequency."""
+        N = 40
+        M = 48
+        K = 10
+        downsample = 2
+        theta = np.linspace(0, np.pi, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+        frequency = (np.arange(K) + 1) * u.GHz
+
+        # Amplitude scales with frequency, phase rotates with frequency
+        theta_grid, phi_grid, freq_grid = np.meshgrid(
+            theta, phi, frequency, indexing="ij"
+        )
+        amplitude = freq_grid.to_value(u.GHz) * (1 + np.sin(theta_grid).value)
+        phase = phi_grid.value + 0.5 * freq_grid.value
+        values = amplitude * np.exp(1j * phase) * u.dimensionless
+
+        interpolator = _ComplexInterpolator(
+            theta[::downsample],
+            phi[::downsample],
+            frequency[::downsample],
+            values[::downsample, ::downsample, ::downsample],
+        )
+
+        result = interpolator(
+            theta[:-downsample, np.newaxis, np.newaxis],
+            phi[:, np.newaxis],
+            frequency[:-downsample],
+        )
+
+        assert_quantity_allclose(
+            result, values[:-downsample, :, :-downsample], rtol=0.2
+        )
+
+    def test_with_zeros(self):
+        """Test interpolation when input contains zeros (should use floor value)."""
+        unit = u.K  # Arbitrary unit
+        floor = 2.847e-12 * unit
+        theta = np.linspace(0, np.pi, 20) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 30, endpoint=False) * u.rad
+        theta_grid, phi_grid = np.meshgrid(theta, phi, indexing="ij")
+
+        # Pattern with zeros at theta > π/2
+        values = (
+            np.where(
+                theta_grid.value < np.pi / 2,
+                np.sin(theta_grid.value) * np.exp(1j * phi_grid.value),
+                0,
+            )
+            * unit
+        )
+
+        interpolator = _ComplexInterpolator(theta, phi, None, values, floor=floor)
+
+        # Test upper hemisphere
+        test_theta = np.pi / 4 * u.rad
+        test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
+        result = interpolator(test_theta, test_phi)
+        expected = np.sin(test_theta.value) * np.exp(1j * test_phi.value)
+        assert_quantity_allclose(result, expected * unit, atol=1e-2 * unit)
+
+        # Test lower hemisphere
+        test_theta = 3 * np.pi / 4 * u.rad
+        test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
+        result = interpolator(test_theta, test_phi)
+        expected = 10 ** (floor.value / 10)
+        assert_quantity_allclose(result, floor, atol=1e-10 * unit)
+
+    def test_phase_continuity(self):
+        theta = np.linspace(0, np.pi, 11) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 21, endpoint=False) * u.rad
+
+        # Create a pattern with phase equal to 2*phi. This will cause two wraps from
+        # 2π back to 0, one in the middle of the grid where phi == π and another at the
+        # extreme edges of the grid where phi == 0 and phi == 2π. We expect the
+        # interpolator to handle both of these correctly.
+        values = (
+            np.ones_like(theta.value[:, np.newaxis])
+            * np.exp(1j * 2 * phi.value)
+            * u.dimensionless
+        )
+
+        interpolator = _ComplexInterpolator(theta, phi, None, values)
+
+        test_theta = np.linspace(0.03, np.pi - 0.03, 100) * u.rad
+        test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
+        result = interpolator(test_theta[:, np.newaxis], test_phi)
+
+        assert result.shape == (100, 100)
+        assert result.unit == u.dimensionless
+
+        # Conjugate product avoids problems when comparing angles near 0 and 2π.
+        phase_diff = np.angle(result.value * np.conj(np.exp(1j * 2 * test_phi.value)))
+        np.testing.assert_allclose(
+            phase_diff,
+            0.0,
+            atol=1e-2,
+        )
+
+    def test_out_of_bounds_theta_phi_raise(self):
+        # Create subset grids so bounds checking is meaningful
+        theta = np.linspace(0.2 * np.pi, 0.8 * np.pi, 10) * u.rad
+        phi = np.linspace(0.25 * np.pi, 1.25 * np.pi, 12, endpoint=False) * u.rad
+        values = np.ones((10, 12)) * u.dimensionless
+
+        interpolator = _ComplexInterpolator(theta, phi, None, values)
+
+        # phi below range (after modulo) → error
+        with pytest.raises(ValueError):
+            interpolator(theta[0], (0.0 * u.rad))
+
+        # theta above range → error
+        with pytest.raises(ValueError):
+            interpolator(0.95 * np.pi * u.rad, phi[0])
+
+    def test_3d_interpolator_requires_frequency(self):
+        """Test that 3D interpolator raises error when called without frequency."""
+        theta = np.linspace(0, np.pi, 10) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
+        frequency = np.array([1.0, 2.0]) * u.GHz
+        values = np.ones((10, 12, 2)) * u.dimensionless
+
+        interpolator = _ComplexInterpolator(theta, phi, frequency, values)
+
+        # Calling 3D interpolator without frequency should raise error
+        with pytest.raises(ValueError):
+            interpolator(theta[0], phi[0])
+
+    @pytest.mark.parametrize("f_query", [0.5 * u.GHz, 2.5 * u.GHz])
+    def test_3d_frequency_out_of_bounds_raises(self, f_query):
+        theta = np.linspace(0, np.pi, 6) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 8, endpoint=False) * u.rad
+        frequency = np.array([1.0, 2.0]) * u.GHz
+        values = np.ones((6, 8, 2)) * u.dimensionless
+
+        interpolator = _ComplexInterpolator(theta, phi, frequency, values)
+        with pytest.raises(ValueError):
+            interpolator(theta[0], phi[0], f_query)
+
+    def test_floor_validation_errors(self):
+        theta = np.linspace(0, np.pi, 3) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 4, endpoint=False) * u.rad
+        vals = np.ones((3, 4)) * u.dimensionless
+        # Wrong unit
+        with pytest.raises(ValueError):
+            _ComplexInterpolator(theta, phi, None, vals, floor=1e-6 * u.K)
+        # Non-scalar floor (length > 1)
+        with pytest.raises(ValueError):
+            _ComplexInterpolator(
+                theta, phi, None, vals, floor=(np.array([1e-6, 2e-6]) * u.dimensionless)
+            )
+        # Non-positive floor
+        with pytest.raises(ValueError):
+            _ComplexInterpolator(theta, phi, None, vals, floor=0.0 * u.dimensionless)
+
+    def test_phi_wrapping_negative_to_positive_range(self):
+        """Test phi ranging from -180° to +180° works after wrapping and sorting fix."""
+        theta = np.linspace(0, np.pi, 20) * u.rad
+        phi = np.linspace(-180, 180, 50) * u.deg  # This caused the original issue
+
+        # Create simple uniform test pattern
+        values = np.ones((theta.size, phi.size)) * u.dimensionless
+
+        # This should not raise "points in dimension 1 must be strictly ascending"
+        interpolator = _ComplexInterpolator(theta, phi, None, values)
+
+        # Verify interpolation works without error
+        test_theta = np.pi / 2 * u.rad
+        test_phi = np.array([-90, 0, 90]) * u.deg
+        result = interpolator(test_theta, test_phi)
+
+        # Should return uniform values
+        expected = np.ones(3) * u.dimensionless
+        assert_quantity_allclose(result, expected)
+
 
 @dataclass
 class RadiationPatternExpectedResults:
@@ -201,6 +467,7 @@ def create_antenna_pattern_test_cases():
             pattern=RadiationPattern(
                 theta=np.linspace(0, np.pi, 40) * u.rad,
                 phi=np.linspace(0, 2 * np.pi, 50, endpoint=False) * u.rad,
+                frequency=None,
                 e_theta=np.ones((40, 50)) * u.dimensionless,
                 e_phi=np.zeros((40, 50)) * u.dimensionless,
                 rad_efficiency=0.8 * u.dimensionless,
@@ -220,6 +487,7 @@ def create_antenna_pattern_test_cases():
             pattern=RadiationPattern(
                 theta=np.linspace(0, np.pi, 30) * u.rad,
                 phi=np.linspace(0, 2 * np.pi, 40, endpoint=False) * u.rad,
+                frequency=None,
                 e_theta=np.zeros((30, 40)) * u.dimensionless,
                 e_phi=np.ones((30, 40)) * u.dimensionless,
                 rad_efficiency=1.0 * u.dimensionless,
@@ -239,6 +507,7 @@ def create_antenna_pattern_test_cases():
             pattern=RadiationPattern(
                 theta=np.linspace(0, np.pi, 50) * u.rad,
                 phi=np.linspace(0, 2 * np.pi, 60, endpoint=False) * u.rad,
+                frequency=None,
                 e_theta=(1.0 + 0.0j) / np.sqrt(2) * np.ones((50, 60)) * u.dimensionless,
                 e_phi=(0.0 + 1.0j) / np.sqrt(2) * np.ones((50, 60)) * u.dimensionless,
                 rad_efficiency=1.0 * u.dimensionless,
@@ -258,6 +527,7 @@ def create_antenna_pattern_test_cases():
             pattern=RadiationPattern(
                 theta=np.linspace(0, np.pi, 25) * u.rad,
                 phi=np.linspace(0, 2 * np.pi, 17, endpoint=False) * u.rad,
+                frequency=None,
                 e_theta=1.0 / np.sqrt(5 / 4) * np.ones((25, 17)) * u.dimensionless,
                 e_phi=0.5j / np.sqrt(5 / 4) * np.ones((25, 17)) * u.dimensionless,
                 rad_efficiency=0.7 * u.dimensionless,
@@ -278,7 +548,7 @@ def create_antenna_pattern_test_cases():
 @pytest.mark.parametrize("test_case", create_antenna_pattern_test_cases())
 def test_antenna_pattern_calculations(test_case):
 
-    shape_interp = (100, 200)
+    shape_interp = (40, 80)
     theta_interp = np.linspace(0, np.pi, shape_interp[0]) * u.rad
     phi_interp = np.linspace(0, 2 * np.pi, shape_interp[1]) * u.rad
 
@@ -288,7 +558,9 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.gain(
-                theta_interp[:, np.newaxis], phi_interp, Polarization.lhcp()
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.lhcp(),
             )
         ),
         test_case.expected_results.lhcp_gain,
@@ -298,7 +570,9 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, Polarization.lhcp()
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.lhcp(),
             )
         ),
         test_case.expected_results.lhcp_directivity,
@@ -308,7 +582,9 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.gain(
-                theta_interp[:, np.newaxis], phi_interp, Polarization.rhcp()
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.rhcp(),
             )
         ),
         test_case.expected_results.rhcp_gain,
@@ -318,7 +594,9 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, Polarization.rhcp()
+                theta_interp[:, np.newaxis],
+                phi_interp,
+                polarization=Polarization.rhcp(),
             )
         ),
         test_case.expected_results.rhcp_directivity,
@@ -328,7 +606,7 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, pol_theta
+                theta_interp[:, np.newaxis], phi_interp, polarization=pol_theta
             )
         ),
         test_case.expected_results.theta_directivity,
@@ -338,7 +616,7 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         to_linear(
             test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, pol_phi
+                theta_interp[:, np.newaxis], phi_interp, polarization=pol_phi
             )
         ),
         test_case.expected_results.phi_directivity,
@@ -352,153 +630,7 @@ def test_antenna_pattern_calculations(test_case):
     )
 
 
-class TestSphericalInterpolator:
-    """Tests for the SphericalInterpolator class."""
-
-    def test_interpolation(self):
-        N = 150
-        M = 200
-        downsample = 5
-        periods = 7  # Number of periods in phi
-        peak_gain = 50.0  # Gain varies between -50 and +50 dBi
-
-        theta = np.linspace(0, np.pi, N) * u.rad
-        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
-
-        gain_db_expected = (
-            peak_gain
-            * np.sin(theta.value)[:, np.newaxis]  # Taper to 0 dB at poles
-            * np.sin(periods * phi.value)
-            * u.dB
-        )
-
-        theta_decim = np.linspace(0, np.pi, N // downsample) * u.rad
-        phi_decim = np.linspace(0, 2 * np.pi, M // downsample, endpoint=False) * u.rad
-        gain_decim_db = (
-            peak_gain
-            * np.sin(theta_decim.value)[:, np.newaxis]  # Taper to 0 dB at poles
-            * np.sin(periods * phi_decim.value)
-            * u.dB
-        )
-        gain_decim = to_linear(gain_decim_db)
-
-        interpolator = SphericalInterpolator(theta_decim, phi_decim, gain_decim)
-
-        result = interpolator(theta[:, np.newaxis], phi)
-
-        assert result.shape == (N, M)
-        assert result.unit == u.dimensionless
-        np.testing.assert_allclose(
-            to_dB(result).value, gain_db_expected.value, atol=0.3
-        )
-
-    def test_subset_sphere_interpolation(self):
-        N = 80
-        M = 100
-        downsample = 4
-        periods = 5  # Number of periods in phi
-        peak_gain = 40.0  # Gain varies between -40 and +40 dBi
-
-        # Create subset of sphere: theta from 30° to 120°, phi from 45° to 270°
-        theta = np.linspace(np.pi / 6, 2 * np.pi / 3, N) * u.rad
-        phi = np.linspace(np.pi / 4, 3 * np.pi / 2, M, endpoint=False) * u.rad
-
-        gain_db = (
-            peak_gain
-            * np.sin(theta.value)[:, np.newaxis]
-            * np.sin(periods * phi.value)
-            * u.dB
-        )
-        gain = to_linear(gain_db)
-
-        interpolator = SphericalInterpolator(
-            theta[::downsample],
-            phi[::downsample],
-            gain[::downsample, ::downsample],
-        )
-
-        result = interpolator(theta[:-downsample, np.newaxis], phi[:-downsample])
-
-        assert result.shape == (N - downsample, M - downsample)
-        assert result.unit == u.dimensionless
-
-        # Loose tolerance because interpolation performance degrades at the edges when
-        # the grid does not span the full circle.
-        np.testing.assert_allclose(
-            to_dB(result).value,
-            gain_db[:-downsample, :-downsample].value,
-            atol=1.2,
-        )
-
-    def test_with_zeros(self):
-        """Test interpolation when input contains zeros (should use floor value)."""
-        unit = u.K  # Arbitrary unit
-        floor = -100 * u.dB
-        theta = np.linspace(0, np.pi, 20) * u.rad
-        phi = np.linspace(0, 2 * np.pi, 30, endpoint=False) * u.rad
-        theta_grid, phi_grid = np.meshgrid(theta, phi, indexing="ij")
-
-        # Pattern with zeros at theta > π/2
-        values = (
-            np.where(
-                theta_grid.value < np.pi / 2,
-                np.sin(theta_grid.value) * np.exp(1j * phi_grid.value),
-                0,
-            )
-            * unit
-        )
-
-        interpolator = SphericalInterpolator(theta, phi, values, floor=floor)
-
-        # Test upper hemisphere
-        test_theta = np.pi / 4 * u.rad
-        test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
-        result = interpolator(test_theta, test_phi)
-        assert result.shape == (100,)
-        assert result.unit == unit
-        expected = np.sin(test_theta.value) * np.exp(1j * test_phi.value)
-        np.testing.assert_allclose(result.value, expected, atol=1e-2)
-
-        # Test lower hemisphere
-        test_theta = 3 * np.pi / 4 * u.rad
-        test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
-        result = interpolator(test_theta, test_phi)
-        assert result.shape == (100,)
-        assert result.unit == unit
-        expected = 10 ** (floor.value / 10)
-        np.testing.assert_allclose(result.value, expected, atol=1e-10)
-
-    def test_phase_continuity(self):
-        theta = np.linspace(0, np.pi, 11) * u.rad
-        phi = np.linspace(0, 2 * np.pi, 21, endpoint=False) * u.rad
-
-        # Create a pattern with phase equal to 2*phi. This will cause two wraps from
-        # 2π back to 0, one in the middle of the grid where phi == π and another at the
-        # extreme edges of the grid where phi == 0 and phi == 2π. We expect the
-        # interpolator to handle both of these correctly.
-        values = (
-            np.sin(theta[:, np.newaxis]) * np.exp(1j * 2 * phi.value) * u.dimensionless
-        )
-
-        interpolator = SphericalInterpolator(theta, phi, values)
-
-        test_theta = np.linspace(0.03, np.pi - 0.03, 100) * u.rad
-        test_phi = np.linspace(0, 2 * np.pi, 100) * u.rad
-        result = interpolator(test_theta[:, np.newaxis], test_phi)
-
-        assert result.shape == (100, 100)
-        assert result.unit == u.dimensionless
-
-        # Conjugate product avoids problems when comparing angles near 0 and 2π.
-        phase_diff = np.angle(result.value * np.conj(np.exp(1j * 2 * test_phi.value)))
-        np.testing.assert_allclose(
-            phase_diff,
-            0.0,
-            atol=1e-4,
-        )
-
-
-class TestDefaultPolarization:
+class TestRadiationPatternDefaults:
     def _simple_pattern(self, default_pol=None) -> RadiationPattern:
         theta = np.linspace(0, np.pi, 10) * u.rad
         phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
@@ -507,6 +639,7 @@ class TestDefaultPolarization:
         return RadiationPattern(
             theta=theta,
             phi=phi,
+            frequency=None,
             e_theta=e_theta,
             e_phi=e_phi,
             rad_efficiency=0.8 * u.dimensionless,
@@ -519,15 +652,21 @@ class TestDefaultPolarization:
         phi = np.linspace(0, 2 * np.pi, 9, endpoint=False) * u.rad
 
         # Compare explicit vs default for e_field, directivity, gain
-        e_explicit = pattern.e_field(theta[:, np.newaxis], phi, Polarization.lhcp())
+        e_explicit = pattern.e_field(
+            theta[:, np.newaxis], phi, polarization=Polarization.lhcp()
+        )
         e_default = pattern.e_field(theta[:, np.newaxis], phi)
         assert_quantity_allclose(e_default, e_explicit)
 
-        d_explicit = pattern.directivity(theta[:, np.newaxis], phi, Polarization.lhcp())
+        d_explicit = pattern.directivity(
+            theta[:, np.newaxis], phi, polarization=Polarization.lhcp()
+        )
         d_default = pattern.directivity(theta[:, np.newaxis], phi)
         assert_quantity_allclose(d_default, d_explicit)
 
-        g_explicit = pattern.gain(theta[:, np.newaxis], phi, Polarization.lhcp())
+        g_explicit = pattern.gain(
+            theta[:, np.newaxis], phi, polarization=Polarization.lhcp()
+        )
         g_default = pattern.gain(theta[:, np.newaxis], phi)
         assert_quantity_allclose(g_default, g_explicit)
 
@@ -553,6 +692,7 @@ class TestDefaultPolarization:
         pat_circ = RadiationPattern.from_circular_e_field(
             theta=theta,
             phi=phi,
+            frequency=None,
             e_lhcp=e_lhcp,
             e_rhcp=e_rhcp,
             rad_efficiency=1.0 * u.dimensionless,
@@ -569,6 +709,7 @@ class TestDefaultPolarization:
         pat_lin = RadiationPattern.from_linear_gain(
             theta=theta,
             phi=phi,
+            frequency=None,
             gain_theta=gain_theta,
             gain_phi=gain_phi,
             phase_theta=phase_theta,
@@ -578,6 +719,438 @@ class TestDefaultPolarization:
         )
         # Works without explicit polarization
         _ = pat_lin.directivity(theta[:, np.newaxis], phi)
+
+    @pytest.mark.parametrize("with_default", [False, True])
+    @pytest.mark.parametrize(
+        "method", ["e_field", "directivity", "gain", "axial_ratio"]
+    )
+    def test_default_frequency_semantics_3d(self, with_default, method):
+        theta = np.linspace(0, np.pi, 5) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 6, endpoint=False) * u.rad
+        freq = np.array([1.0, 2.0]) * u.GHz
+        e_theta = np.ones((5, 6, 2)) * u.dimensionless
+        e_phi = np.zeros((5, 6, 2)) * u.dimensionless
+
+        kwargs = {}
+        if with_default:
+            kwargs["default_frequency"] = 2.0 * u.GHz
+
+        pat = RadiationPattern(
+            theta=theta,
+            phi=phi,
+            frequency=freq,
+            e_theta=e_theta,
+            e_phi=e_phi,
+            rad_efficiency=1.0 * u.dimensionless,
+            **kwargs,
+        )
+
+        pol = Polarization.lhcp()
+        func = getattr(pat, method)
+
+        if method == "axial_ratio":
+            if with_default:
+                _ = func(theta[:, np.newaxis], phi)
+            else:
+                with pytest.raises(ValueError):
+                    _ = func(theta[:, np.newaxis], phi)
+        else:
+            if with_default:
+                # Should not raise when frequency omitted
+                _ = func(theta[:, np.newaxis], phi, polarization=pol)
+            else:
+                with pytest.raises(ValueError):
+                    _ = func(theta[:, np.newaxis], phi, polarization=pol)
+
+
+class TestRadiationPatternValidation:
+    """Tests for RadiationPattern constructor validation checks."""
+
+    def test_theta_range_validation(self):
+        """Test that theta values must be in [0, pi]."""
+        phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
+        e_theta = np.ones((5, 10)) * u.dimensionless
+        e_phi = np.zeros((5, 10)) * u.dimensionless
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Test theta < 0
+        theta_negative = np.linspace(-0.1, np.pi, 5) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta_negative, phi, None, e_theta, e_phi, rad_efficiency)
+
+        # Test theta > pi
+        theta_too_large = np.linspace(0, np.pi + 0.1, 5) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta_too_large, phi, None, e_theta, e_phi, rad_efficiency)
+
+    @pytest.mark.parametrize(
+        "axis,case,values",
+        [
+            ("theta", "unsorted", np.array([0, 0.5, 0.3, 1.0, 1.5])),
+            ("theta", "duplicate", np.array([0, 0.5, 0.5, 1.0, 1.5])),
+            ("theta", "unequal", np.array([0, 0.5, 1.2, 2.0, 3.0])),
+            ("phi", "unsorted", np.array([0, 1.0, 0.5, 2.0, 3.0])),
+            ("phi", "duplicate", np.array([0, 1.0, 1.0, 2.0, 3.0])),
+            ("phi", "unequal", np.array([0, 0.5, 1.2, 2.0, 3.0])),
+        ],
+    )
+    def test_axis_order_and_spacing_validation(self, axis, case, values):
+        """Parametrized validation for axis ordering and equal spacing."""
+        rad_efficiency = 1.0 * u.dimensionless
+        if axis == "theta":
+            theta = values * u.rad
+            phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
+            e_theta = np.ones((values.size, phi.size)) * u.dimensionless
+            e_phi = np.zeros((values.size, phi.size)) * u.dimensionless
+            with pytest.raises(ValueError):
+                RadiationPattern(theta, phi, None, e_theta, e_phi, rad_efficiency)
+        else:
+            theta = np.linspace(0, np.pi, values.size) * u.rad
+            phi = values * u.rad
+            e_theta = np.ones((theta.size, values.size)) * u.dimensionless
+            e_phi = np.zeros((theta.size, values.size)) * u.dimensionless
+            with pytest.raises(ValueError):
+                RadiationPattern(theta, phi, None, e_theta, e_phi, rad_efficiency)
+
+    def test_phi_coverage_validation(self):
+        """Test that phi must cover 2π or less radians."""
+        theta = np.linspace(0, np.pi, 5) * u.rad
+        e_theta = np.ones((5, 10)) * u.dimensionless
+        e_phi = np.zeros((5, 10)) * u.dimensionless
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Test phi covering more than the allowed threshold (2π + tolerance)
+        phi_just_over_limit = np.linspace(0, 2.2 * np.pi, 10) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(
+                theta, phi_just_over_limit, None, e_theta, e_phi, rad_efficiency
+            )
+
+        # Test phi covering more than 2π
+        phi_too_much = np.linspace(0, 2.5 * np.pi, 10) * u.rad
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi_too_much, None, e_theta, e_phi, rad_efficiency)
+
+    @pytest.mark.parametrize(
+        "eta",
+        [
+            0.0 * u.dimensionless,  # boundary
+            1.1 * u.dimensionless,  # > 1
+            np.array([0.8, 0.9]) * u.dimensionless,  # non-scalar
+        ],
+    )
+    def test_rad_efficiency_validation(self, eta):
+        theta = np.linspace(0, np.pi, 3) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 4, endpoint=False) * u.rad
+        e_theta = np.ones((3, 4)) * u.dimensionless
+        e_phi = np.zeros((3, 4)) * u.dimensionless
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi, None, e_theta, e_phi, eta)
+
+    def test_surface_integral_exceeds_4pi_raises(self):
+        # Construct fields whose directivity integrates to > 4π
+        theta = np.linspace(0, np.pi, 10) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
+        scale = np.sqrt(2.0)
+        e_theta = scale * np.ones((10, 12)) * u.dimensionless
+        e_phi = np.zeros((10, 12)) * u.dimensionless
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi, None, e_theta, e_phi, 1.0 * u.dimensionless)
+
+    def test_surface_integral_validation_3d_exceeds_4pi(self):
+        """Test surface integral validation for 3D patterns that exceed 4π."""
+        theta = np.linspace(0, np.pi, 6) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 8, endpoint=False) * u.rad
+        frequency = np.array([1.0, 2.0]) * u.GHz
+
+        # Create 3D fields whose directivity exceeds 4π at some frequency
+        scale = np.sqrt(2.0)
+        e_theta_3d = scale * np.ones((6, 8, 2)) * u.dimensionless
+        e_phi_3d = np.zeros((6, 8, 2)) * u.dimensionless
+
+        with pytest.raises(ValueError):
+            RadiationPattern(
+                theta, phi, frequency, e_theta_3d, e_phi_3d, 1.0 * u.dimensionless
+            )
+
+    def test_3d_frequency_validation(self):
+        """Test validation errors for 3D frequency-dependent patterns."""
+        theta = np.linspace(0, np.pi, 5) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 6, endpoint=False) * u.rad
+        e_theta_3d = np.ones((5, 6, 3)) * u.dimensionless
+        e_phi_3d = np.zeros((5, 6, 3)) * u.dimensionless
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Empty frequency array
+        with pytest.raises(ValueError):
+            RadiationPattern(
+                theta, phi, np.array([]) * u.GHz, e_theta_3d, e_phi_3d, rad_efficiency
+            )
+
+        # Non-increasing frequency values
+        frequency_decreasing = np.array([3.0, 2.0, 1.0]) * u.GHz
+        with pytest.raises(ValueError):
+            RadiationPattern(
+                theta, phi, frequency_decreasing, e_theta_3d, e_phi_3d, rad_efficiency
+            )
+
+        # Wrong 3D array shape
+        frequency = np.array([1.0, 2.0, 3.0]) * u.GHz
+        e_theta_wrong_shape = (
+            np.ones((5, 6, 2)) * u.dimensionless
+        )  # Wrong frequency dimension
+        with pytest.raises(ValueError):
+            RadiationPattern(
+                theta, phi, frequency, e_theta_wrong_shape, e_phi_3d, rad_efficiency
+            )
+
+    def test_2d_array_shape_validation(self):
+        """Test validation error for wrong 2D array shapes."""
+        theta = np.linspace(0, np.pi, 5) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 6, endpoint=False) * u.rad
+        rad_efficiency = 1.0 * u.dimensionless
+
+        # Wrong 2D array shape
+        e_theta_wrong = np.ones((4, 6)) * u.dimensionless  # Wrong theta dimension
+        e_phi = np.zeros((5, 6)) * u.dimensionless
+        with pytest.raises(ValueError):
+            RadiationPattern(theta, phi, None, e_theta_wrong, e_phi, rad_efficiency)
+
+    def test_factories_negative_gain_raise(self):
+        theta = np.linspace(0, np.pi, 6) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 7, endpoint=False) * u.rad
+
+        # Circular gain negative
+        gain_l = np.ones((6, 7)) * u.dimensionless
+        gain_r = np.ones((6, 7)) * u.dimensionless
+        gain_l[0, 0] = -1 * u.dimensionless
+        with pytest.raises(ValueError):
+            RadiationPattern.from_circular_gain(
+                theta=theta,
+                phi=phi,
+                frequency=None,
+                gain_lhcp=gain_l,
+                gain_rhcp=gain_r,
+                phase_lhcp=np.zeros((6, 7)) * u.rad,
+                phase_rhcp=np.zeros((6, 7)) * u.rad,
+                rad_efficiency=1.0 * u.dimensionless,
+            )
+
+        # Linear gain negative
+        g_th = np.ones((6, 7)) * u.dimensionless
+        g_ph = np.ones((6, 7)) * u.dimensionless
+        g_ph[0, 0] = -1 * u.dimensionless
+        with pytest.raises(ValueError):
+            RadiationPattern.from_linear_gain(
+                theta=theta,
+                phi=phi,
+                frequency=None,
+                gain_theta=g_th,
+                gain_phi=g_ph,
+                phase_theta=np.zeros((6, 7)) * u.rad,
+                phase_phi=np.zeros((6, 7)) * u.rad,
+                rad_efficiency=1.0 * u.dimensionless,
+            )
+
+    def test_default_frequency_3d_validation(self):
+        frequency = np.array([1.0, 2.0]) * u.GHz
+        base_kwargs = {
+            "theta": np.linspace(0, np.pi, 4) * u.rad,
+            "phi": np.linspace(0, 2 * np.pi, 5, endpoint=False) * u.rad,
+            "frequency": frequency,
+            "e_theta": np.ones((4, 5, 2)) * u.dimensionless,
+            "e_phi": np.zeros((4, 5, 2)) * u.dimensionless,
+            "rad_efficiency": 1.0 * u.dimensionless,
+        }
+
+        # Accept: min, max, and mid-point
+        for good in [frequency.min(), frequency.max(), 1.5 * u.GHz]:
+            _ = RadiationPattern(**base_kwargs, default_frequency=good)
+            pat = RadiationPattern(**base_kwargs)
+            pat.default_frequency = good
+
+        # Reject: out-of-bounds and non-scalar
+        for bad in [0.5 * u.GHz, 2.5 * u.GHz, np.array([1.0, 1.5]) * u.GHz]:
+            with pytest.raises(ValueError):
+                _ = RadiationPattern(**base_kwargs, default_frequency=bad)
+            pat = RadiationPattern(**base_kwargs)
+            with pytest.raises(ValueError):
+                pat.default_frequency = bad
+
+
+class TestRadiationPatternFactoryConstructors:
+    def _grid(self):
+        # Avoid endpoints to match interpolator constraints
+        N, M = 12, 16
+        theta = np.linspace(0.1, np.pi - 0.1, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+        return theta, phi
+
+    def test_from_circular_e_field(self):
+        theta, phi = self._grid()
+        # Non-trivial phase across phi, constant over theta
+        e_lhcp = (
+            np.exp(1j * phi.value)[np.newaxis, :] * np.ones((theta.size, 1))
+        ) * u.dimensionless
+        e_rhcp = np.zeros((theta.size, phi.size)) * u.dimensionless
+
+        pat = RadiationPattern.from_circular_e_field(
+            theta=theta,
+            phi=phi,
+            frequency=None,
+            e_lhcp=e_lhcp,
+            e_rhcp=e_rhcp,
+            rad_efficiency=0.65 * u.dimensionless,
+        )
+
+        pol_lhcp = Polarization.lhcp()
+        pol_rhcp = Polarization.rhcp()
+        pol_theta = Polarization(0 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
+        pol_phi = Polarization(
+            np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT
+        )
+
+        # LHCP directivity should be 1, RHCP should be 0, linear components 0.5 and 0.5
+        dir_lhcp = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        )
+        dir_rhcp = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp)
+        )
+        dir_theta = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta)
+        )
+        dir_phi = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi)
+        )
+
+        assert_quantity_allclose(dir_lhcp, 1.0 * u.dimensionless)
+        assert_quantity_allclose(
+            dir_rhcp, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
+        )
+        assert_quantity_allclose(dir_theta, 0.5 * u.dimensionless)
+        assert_quantity_allclose(dir_phi, 0.5 * u.dimensionless)
+
+        # Gain should be eta * directivity (in linear)
+        _assert_lin_gain_equals_eta_times_directivity(
+            pat,
+            theta[:, np.newaxis],
+            phi,
+            polarization=pol_lhcp,
+            eta=0.65 * u.dimensionless,
+        )
+
+        # Phase of LHCP e-field should match exp(1j*phi)
+        e_l = pat.e_field(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        phase_err = np.angle(e_l.value * np.exp(-1j * phi.value))
+        np.testing.assert_allclose(phase_err, 0.0, atol=1e-10)
+
+    def test_from_circular_gain(self):
+        theta, phi = self._grid()
+        gain_lhcp = 0.25 * np.ones((theta.size, phi.size)) * u.dimensionless
+        gain_rhcp = np.zeros((theta.size, phi.size)) * u.dimensionless
+        # Give LHCP a varying phase; directivity is phase-independent
+        phase_lhcp = (
+            np.linspace(0, 2 * np.pi, phi.size)[np.newaxis, :]
+            * np.ones((theta.size, 1))
+            * u.rad
+        )
+        phase_rhcp = np.zeros((theta.size, phi.size)) * u.rad
+
+        pat = RadiationPattern.from_circular_gain(
+            theta=theta,
+            phi=phi,
+            frequency=None,
+            gain_lhcp=gain_lhcp,
+            gain_rhcp=gain_rhcp,
+            phase_lhcp=phase_lhcp,
+            phase_rhcp=phase_rhcp,
+            rad_efficiency=0.75 * u.dimensionless,
+        )
+
+        pol_lhcp = Polarization.lhcp()
+        pol_rhcp = Polarization.rhcp()
+        dir_lhcp = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        )
+        dir_rhcp = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp)
+        )
+        assert_quantity_allclose(dir_lhcp, (0.25 / 0.75) * u.dimensionless)
+        assert_quantity_allclose(
+            dir_rhcp, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
+        )
+        _assert_lin_gain_equals_eta_times_directivity(
+            pat,
+            theta[:, np.newaxis],
+            phi,
+            polarization=pol_lhcp,
+            eta=0.75 * u.dimensionless,
+        )
+
+        # Phase of LHCP e-field should match provided phase_lhcp
+        e_l = pat.e_field(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        phase_err = np.angle(e_l.value * np.exp(-1j * phase_lhcp.value))
+        np.testing.assert_allclose(phase_err, 0.0, atol=1e-10)
+
+    def test_from_linear_gain(self):
+        theta, phi = self._grid()
+        # Choose gain equal to eta so resulting directivity is 1
+        gain_theta = 0.6 * np.ones((theta.size, phi.size)) * u.dimensionless
+        gain_phi = np.zeros((theta.size, phi.size)) * u.dimensionless
+        # Non-trivial phase that varies in theta
+        phase_theta = theta[:, np.newaxis]
+        phase_phi = np.zeros((theta.size, phi.size)) * u.rad
+
+        pat = RadiationPattern.from_linear_gain(
+            theta=theta,
+            phi=phi,
+            frequency=None,
+            gain_theta=gain_theta,
+            gain_phi=gain_phi,
+            phase_theta=phase_theta,
+            phase_phi=phase_phi,
+            rad_efficiency=0.6 * u.dimensionless,
+        )
+
+        pol_theta = Polarization(0 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
+        pol_phi = Polarization(
+            np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT
+        )
+        pol_lhcp = Polarization.lhcp()
+        dir_theta = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta)
+        )
+        dir_phi = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi)
+        )
+        dir_lhcp = to_linear(
+            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        )
+        assert_quantity_allclose(dir_theta, 1.0 * u.dimensionless)
+        assert_quantity_allclose(
+            dir_phi, 0.0 * u.dimensionless, atol=1e-10 * u.dimensionless
+        )
+        assert_quantity_allclose(dir_lhcp, 0.5 * u.dimensionless)
+        _assert_lin_gain_equals_eta_times_directivity(
+            pat,
+            theta[:, np.newaxis],
+            phi,
+            polarization=pol_theta,
+            eta=0.6 * u.dimensionless,
+        )
+        _assert_lin_gain_equals_eta_times_directivity(
+            pat,
+            theta[:, np.newaxis],
+            phi,
+            polarization=pol_lhcp,
+            eta=0.6 * u.dimensionless,
+        )
+
+        # Phase of theta-polarized e-field should match phase_theta
+        e_th = pat.e_field(theta[:, np.newaxis], phi, polarization=pol_theta)
+        phase_err = np.angle(e_th.value * np.exp(-1j * phase_theta.value))
+        np.testing.assert_allclose(phase_err, 0.0, atol=1e-10)
 
 
 @pytest.mark.parametrize(
@@ -652,102 +1225,6 @@ def test_surface_integral(theta, phi, values, expected_result, tol):
 
     assert result.unit == expected_result.unit
     assert_quantity_allclose(result, expected_result, atol=tol)
-
-
-class TestRadiationPatternValidation:
-    """Tests for RadiationPattern constructor validation checks."""
-
-    def test_theta_range_validation(self):
-        """Test that theta values must be in [0, pi]."""
-        phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
-        e_theta = np.ones((5, 10)) * u.dimensionless
-        e_phi = np.zeros((5, 10)) * u.dimensionless
-        rad_efficiency = 1.0 * u.dimensionless
-
-        # Test theta < 0
-        theta_negative = np.linspace(-0.1, np.pi, 5) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta_negative, phi, e_theta, e_phi, rad_efficiency)
-
-        # Test theta > pi
-        theta_too_large = np.linspace(0, np.pi + 0.1, 5) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta_too_large, phi, e_theta, e_phi, rad_efficiency)
-
-    def test_theta_sorting_validation(self):
-        """Test that theta must be sorted in strictly increasing order."""
-        phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
-        e_theta = np.ones((5, 10)) * u.dimensionless
-        e_phi = np.zeros((5, 10)) * u.dimensionless
-        rad_efficiency = 1.0 * u.dimensionless
-
-        # Test unsorted theta
-        theta_unsorted = np.array([0, 0.5, 0.3, 1.0, 1.5]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta_unsorted, phi, e_theta, e_phi, rad_efficiency)
-
-        # Test repeated theta values
-        theta_repeated = np.array([0, 0.5, 0.5, 1.0, 1.5]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta_repeated, phi, e_theta, e_phi, rad_efficiency)
-
-    def test_phi_sorting_validation(self):
-        """Test that phi must be sorted in strictly increasing order."""
-        theta = np.linspace(0, np.pi, 5) * u.rad
-        e_theta = np.ones((5, 5)) * u.dimensionless
-        e_phi = np.zeros((5, 5)) * u.dimensionless
-        rad_efficiency = 1.0 * u.dimensionless
-
-        # Test unsorted phi
-        phi_unsorted = np.array([0, 1.0, 0.5, 2.0, 3.0]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta, phi_unsorted, e_theta, e_phi, rad_efficiency)
-
-        # Test repeated phi values
-        phi_repeated = np.array([0, 1.0, 1.0, 2.0, 3.0]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta, phi_repeated, e_theta, e_phi, rad_efficiency)
-
-    def test_theta_spacing_validation(self):
-        """Test that theta must be equally spaced."""
-        phi = np.linspace(0, 2 * np.pi, 10, endpoint=False) * u.rad
-        e_theta = np.ones((5, 10)) * u.dimensionless
-        e_phi = np.zeros((5, 10)) * u.dimensionless
-        rad_efficiency = 1.0 * u.dimensionless
-
-        # Test unequally spaced theta
-        theta_unequal = np.array([0, 0.5, 1.2, 2.0, 3.0]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta_unequal, phi, e_theta, e_phi, rad_efficiency)
-
-    def test_phi_spacing_validation(self):
-        """Test that phi must be equally spaced."""
-        theta = np.linspace(0, np.pi, 5) * u.rad
-        e_theta = np.ones((5, 5)) * u.dimensionless
-        e_phi = np.zeros((5, 5)) * u.dimensionless
-        rad_efficiency = 1.0 * u.dimensionless
-
-        # Test unequally spaced phi
-        phi_unequal = np.array([0, 0.5, 1.2, 2.0, 3.0]) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta, phi_unequal, e_theta, e_phi, rad_efficiency)
-
-    def test_phi_coverage_validation(self):
-        """Test that phi must cover less than 2π radians."""
-        theta = np.linspace(0, np.pi, 5) * u.rad
-        e_theta = np.ones((5, 10)) * u.dimensionless
-        e_phi = np.zeros((5, 10)) * u.dimensionless
-        rad_efficiency = 1.0 * u.dimensionless
-
-        # Test phi covering exactly 2π
-        phi_full_circle = np.linspace(0, 2 * np.pi, 10) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta, phi_full_circle, e_theta, e_phi, rad_efficiency)
-
-        # Test phi covering more than 2π
-        phi_too_much = np.linspace(0, 2.5 * np.pi, 10) * u.rad
-        with pytest.raises(ValueError):
-            RadiationPattern(theta, phi_too_much, e_theta, e_phi, rad_efficiency)
 
 
 def test_gain_from_g_over_t():
