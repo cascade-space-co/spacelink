@@ -32,7 +32,7 @@ jobs:
 
       - name: Build documentation
         run: |
-          poetry run sphinx-build -b html docs/source docs/build
+          poetry run sphinx-build --fail-on-warning -b html docs/source docs/build
 
       - name: Check for HTML output
         run: |
