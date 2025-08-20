@@ -3,13 +3,13 @@ import typing
 import datetime
 import json
 
+import importlib.metadata
 import astropy.units as u
 import numpy as np
 import pandas as pd
 
 from . import antenna as antenna
 from . import units as units
-import spacelink
 
 
 # Serialization format identifiers (kept stable across code refactors)
@@ -18,6 +18,9 @@ _FORMAT_VERSION = 1
 _CONVENTIONS = (
     "theta[rad], phi[rad], frequency[Hz], e_* dimensionless; handedness=enum.name"
 )
+
+# Resolve the package version without importing the top-level package
+_SPACELINK_VERSION = importlib.metadata.version("spacelink")
 
 
 def load_radiation_pattern_npz(
@@ -117,7 +120,7 @@ def save_radiation_pattern_npz(
 
     # Human/provenance metadata that requires no pickling
     created_ts = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    producer_str = f"spacelink {spacelink.__version__}"
+    producer_str = f"spacelink {_SPACELINK_VERSION}"
 
     # Summarize dtypes and shapes for quick inspection
     dtype_summary: dict[str, typing.Any] = {
