@@ -116,7 +116,7 @@ class ModePerformance(pydantic.BaseModel):
         -------
         Dimensionless
             Error rate or NaN if the Eb/N0 is outside the range of available performance
-            data. Same shape as ``ebn0``.
+            data. Same shape as `ebn0`.
         """
         return 10.0 ** self._ebn0_to_error_interpolator(ebn0.value) * u.dimensionless
 
@@ -135,7 +135,7 @@ class ModePerformance(pydantic.BaseModel):
         Decibels
             Required Eb/N0 in decibels to achieve the target error rate or NaN if the
             error rate is outside the range of available performance data. Same shape as
-            ``error_rate``.
+            `error_rate`.
         """
         return self._error_to_ebn0_interpolator(np.log10(error_rate.value)) * u.dB
 
@@ -159,7 +159,7 @@ class ModePerformance(pydantic.BaseModel):
         -------
         Decibels
             Coding gain in decibels or NaN if the error rate is outside the range of
-            the available performance data. Same shape as ``error_rate``.
+            the available performance data. Same shape as `error_rate`.
 
         Raises
         ------
