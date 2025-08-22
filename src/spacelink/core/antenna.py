@@ -57,8 +57,12 @@ import numpy as np
 import scipy.integrate
 import scipy.interpolate
 
+from astropy.constants import k_B as BOLTZMANN
+
 from .units import (
     Angle,
+    DecibelHertz,
+    DecibelWatts,
     Decibels,
     Dimensionless,
     Frequency,
@@ -70,6 +74,7 @@ from .units import (
     to_linear,
     safe_negate,
     Temperature,
+    DecibelPerKelvin,
     DecibelPerKelvin,
 )
 
@@ -785,3 +790,26 @@ def temperature_from_g_over_t(
         System noise temperature
     """
     return (gain - g_over_t).to(u.K)
+
+
+@enforce_units
+def cn0_from_g_over_t(
+    signal_power: DecibelWatts, g_over_t: DecibelPerKelvin
+) -> DecibelHertz:
+    r"""
+    Calculate the carrier-to-noise ratio (CN0) in dB from signal power and G/T.
+
+    Parameters
+    ----------
+    signal_power: u.dBW
+        Signal power in dBW
+    g_over_t: u.dBPerKelvin
+        G/T in dB/K
+
+    Returns
+    -------
+    u.dB
+        CN0 in dB
+    """
+    boltzmann_db = BOLTZMANN.to(u.dB(u.W / u.Hz / u.K))
+    return signal_power + g_over_t - boltzmann_db
