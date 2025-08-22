@@ -744,7 +744,6 @@ def _surface_integral(theta: Angle, phi: Angle, values: Dimensionless) -> SolidA
     return scipy.integrate.simpson(int_phi, theta) * u.sr
 
 
-
 @enforce_units
 def gain_from_g_over_t(
     g_over_t: DecibelPerKelvin, temperature: Temperature
