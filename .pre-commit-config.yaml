@@ -10,3 +10,13 @@ repos:
     rev: 0.8.1
     hooks:
       - id: nbstripout
+        args:
+          - --extra-keys
+          - >
+            metadata.kernelspec.display_name
+            metadata.language_info.version
+            metadata.language_info.codemirror_mode
+            metadata.language_info.nbconvert_exporter
+            metadata.language_info.pygments_lexer
+            metadata.language_info.file_extension
+            metadata.widgets
