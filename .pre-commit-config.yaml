@@ -1,17 +1,12 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 25.1.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.10
     hooks:
-      - id: black
-        language_version: python3
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.3.0
-    hooks:
-      - id: flake8
-        language_version: python3
+      - id: ruff-format
+      - id: ruff-check
+        args: [--fix]
 
   - repo: https://github.com/kynan/nbstripout
     rev: 0.8.1
     hooks:
-      - id: nbstripout 
+      - id: nbstripout
