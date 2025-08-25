@@ -547,7 +547,6 @@ def create_antenna_pattern_test_cases():
 
 @pytest.mark.parametrize("test_case", create_antenna_pattern_test_cases())
 def test_antenna_pattern_calculations(test_case):
-
     shape_interp = (40, 80)
     theta_interp = np.linspace(0, np.pi, shape_interp[0]) * u.rad
     phi_interp = np.linspace(0, 2 * np.pi, shape_interp[1]) * u.rad

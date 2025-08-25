@@ -12,7 +12,6 @@ from spacelink.phy.performance import ErrorMetric
 
 
 class TestRegistry:
-
     def test_load_with_valid_data(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
