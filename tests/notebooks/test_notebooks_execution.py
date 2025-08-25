@@ -3,9 +3,9 @@ Test that Jupyter notebooks execute without errors.
 """
 
 from pathlib import Path
-import pytest
-import nbformat
 
+import nbformat
+import pytest
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 

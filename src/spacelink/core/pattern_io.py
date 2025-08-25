@@ -1,16 +1,15 @@
+import datetime
+import importlib.metadata
+import json
 import pathlib
 import typing
-import datetime
-import json
 
-import importlib.metadata
 import astropy.units as u
 import numpy as np
 import pandas as pd
 
 from . import antenna as antenna
 from . import units as units
-
 
 # Serialization format identifiers (kept stable across code refactors)
 _FORMAT_NAME = "spacelink.RadiationPattern"
@@ -119,7 +118,7 @@ def save_radiation_pattern_npz(
         freq_vals = pattern.frequency.to(u.Hz).value
 
     # Human/provenance metadata that requires no pickling
-    created_ts = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    created_ts = datetime.datetime.now(datetime.UTC).isoformat()
     producer_str = f"spacelink {_SPACELINK_VERSION}"
 
     # Summarize dtypes and shapes for quick inspection

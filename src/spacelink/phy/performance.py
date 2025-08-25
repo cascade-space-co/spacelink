@@ -1,14 +1,13 @@
 import enum
+import typing
 
 import astropy.units as u
 import numpy as np
 import pydantic
 import scipy.interpolate
-import typing
 
+from spacelink.core.units import Decibels, Dimensionless, enforce_units
 from spacelink.phy.mode import LinkMode
-from spacelink.core.units import Dimensionless, Decibels, enforce_units
-
 
 ErrorCurvePoint = tuple[float, float]  # (Eb/N0 [dB], error rate)
 

@@ -1,14 +1,15 @@
-from pathlib import Path
-import pytest
 import tempfile
+from pathlib import Path
+
+import pytest
 import yaml
 
+from spacelink.phy.performance import ErrorMetric
 from spacelink.phy.registry import (
-    Registry,
     DuplicateRegistryEntryError,
     NoRegistryFilesError,
+    Registry,
 )
-from spacelink.phy.performance import ErrorMetric
 
 
 class TestRegistry:

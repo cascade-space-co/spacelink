@@ -1,11 +1,12 @@
 from fractions import Fraction
+
 import astropy.units as u
 
 from spacelink.phy.mode import (
-    Modulation,
     Code,
     CodeChain,
     LinkMode,
+    Modulation,
 )
 
 

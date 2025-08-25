@@ -1,12 +1,14 @@
-import pytest
-import numpy as np
-import astropy.units as u
 from fractions import Fraction
+
+import astropy.units as u
+import numpy as np
+import pytest
+
+from spacelink.phy.mode import Code, CodeChain, LinkMode, Modulation
 from spacelink.phy.performance import (
-    ModePerformance,
     ErrorMetric,
+    ModePerformance,
 )
-from spacelink.phy.mode import LinkMode, Modulation, CodeChain, Code
 
 
 class TestModePerformance:

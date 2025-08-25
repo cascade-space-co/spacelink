@@ -2,12 +2,12 @@
 Tests for path loss calculations.
 """
 
-import pytest
 import astropy.units as u
+import pytest
 from astropy.tests.helper import assert_quantity_allclose
 
 # Updated imports
-from spacelink.core.path import free_space_path_loss, spreading_loss, aperture_loss
+from spacelink.core.path import aperture_loss, free_space_path_loss, spreading_loss
 
 # from spacelink.core import units # Unused
 

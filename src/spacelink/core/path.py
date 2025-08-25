@@ -37,15 +37,16 @@ The aperture loss term is actually the effective aperture of an ideal isotropic 
 """
 
 import astropy.units as u
+import numpy as np
+
 from .units import (
-    wavelength,
-    Frequency,
     Decibels,
     Distance,
+    Frequency,
     enforce_units,
     to_dB,
+    wavelength,
 )
-import numpy as np
 
 
 @enforce_units

@@ -24,20 +24,21 @@ References
 
 import enum
 import math
-import astropy.units as u
+
 import astropy.constants as const
+import astropy.units as u
 import numpy as np
 import scipy.integrate
-import scipy.special
 import scipy.optimize
+import scipy.special
 
 from .units import (
     Angle,
-    Decibels,
     DecibelHertz,
+    Decibels,
     Dimensionless,
-    Frequency,
     Distance,
+    Frequency,
     Time,
     enforce_units,
 )
