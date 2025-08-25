@@ -49,20 +49,20 @@ signal power and then compute the SNR at the output.
 
 """
 
-from astropy.constants import k_B as BOLTZMANN
 import astropy.units as u
+from astropy.constants import k_B as BOLTZMANN
 
 from .units import (
     DecibelHertz,
     Decibels,
     Dimensionless,
-    Temperature,
     Frequency,
     Power,
     PowerDensity,
+    Temperature,
     enforce_units,
-    to_linear,
     to_dB,
+    to_linear,
 )
 
 T0 = 290.0 * u.K

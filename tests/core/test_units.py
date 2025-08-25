@@ -1,20 +1,20 @@
 """Tests for the units module."""
 
 import astropy.units as u
-from astropy.tests.helper import assert_quantity_allclose
-import pytest
 import numpy as np
+import pytest
+from astropy.tests.helper import assert_quantity_allclose
 
 from spacelink.core import units
 from spacelink.core.units import (
-    return_loss_to_vswr,
-    vswr_to_return_loss,
-    wavelength,
-    frequency,
-    enforce_units,
     Angle,
     Frequency,
     Temperature,
+    enforce_units,
+    frequency,
+    return_loss_to_vswr,
+    vswr_to_return_loss,
+    wavelength,
 )
 
 

@@ -10,8 +10,8 @@ import numpy as np
 import pytest
 from astropy.tests.helper import assert_quantity_allclose
 
-from spacelink.core.antenna import RadiationPattern, Polarization, Handedness
 from spacelink.core import pattern_io
+from spacelink.core.antenna import Handedness, Polarization, RadiationPattern
 
 
 def _assert_npz_metadata(data: np.lib.npyio.NpzFile) -> None:

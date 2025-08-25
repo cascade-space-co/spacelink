@@ -1,7 +1,9 @@
-import yaml
-from spacelink.phy.mode import LinkMode
-from spacelink.phy.performance import ModePerformance, ErrorMetric
 from pathlib import Path
+
+import yaml
+
+from spacelink.phy.mode import LinkMode
+from spacelink.phy.performance import ErrorMetric, ModePerformance
 
 MODES_DIR = Path(__file__).parent / "data/modes"
 PERF_DIR = Path(__file__).parent / "data/perf"

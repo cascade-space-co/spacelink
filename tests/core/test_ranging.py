@@ -3,19 +3,19 @@
 See ranging.py for references.
 """
 
-import pytest
 import astropy.units as u
-from astropy.tests.helper import assert_quantity_allclose
-from astropy.coordinates import Angle
 import numpy as np
+import pytest
+from astropy.coordinates import Angle
+from astropy.tests.helper import assert_quantity_allclose
 
 from spacelink.core import ranging
 from spacelink.core.units import (
-    Frequency,
-    Distance,
     DecibelHertz,
     Decibels,
     Dimensionless,
+    Distance,
+    Frequency,
     Time,
 )
 
@@ -241,7 +241,7 @@ def gen_pn_component_acq_prob_test_params():
         for row in dsn_table_6_raw:
             row_values = [float(v) for v in row.split()]
             expected_probability = 10 ** row_values[0]
-            for component, table_val in zip(components, row_values[1:]):
+            for component, table_val in zip(components, row_values[1:], strict=False):
                 corr_coeff = ranging._CORR_COEFF_DSN[code][component]
                 ranging_to_noise_psd = 10 ** (table_val / 10) / corr_coeff**2 * u.Hz
 

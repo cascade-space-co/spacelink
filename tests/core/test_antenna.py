@@ -1,27 +1,28 @@
 """Tests for core antenna calculation functions."""
 
 import math
-import pytest
-import numpy as np
-import astropy.units as u
-from astropy.tests.helper import assert_quantity_allclose
 from dataclasses import dataclass
 
+import astropy.units as u
+import numpy as np
+import pytest
+from astropy.tests.helper import assert_quantity_allclose
+
 from spacelink.core.antenna import (
-    polarization_loss,
-    dish_gain,
-    Polarization,
     Handedness,
+    Polarization,
     RadiationPattern,
     _ComplexInterpolator,
+    dish_gain,
     gain_from_g_over_t,
+    polarization_loss,
     temperature_from_g_over_t,
 )
 from spacelink.core.units import (
-    Dimensionless,
-    Length,
-    Frequency,
     Decibels,
+    Dimensionless,
+    Frequency,
+    Length,
     to_dB,
     to_linear,
 )

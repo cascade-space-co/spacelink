@@ -58,18 +58,18 @@ import scipy.interpolate
 
 from .units import (
     Angle,
+    DecibelPerKelvin,
     Decibels,
     Dimensionless,
     Frequency,
     Length,
     SolidAngle,
-    wavelength,
+    Temperature,
     enforce_units,
+    safe_negate,
     to_dB,
     to_linear,
-    safe_negate,
-    Temperature,
-    DecibelPerKelvin,
+    wavelength,
 )
 
 __all__ = [
@@ -547,7 +547,7 @@ class RadiationPattern:
 
         if self.frequency is not None:
             for freq, freq_slice in zip(
-                self.frequency, np.moveaxis(total_directivity, -1, 0)
+                self.frequency, np.moveaxis(total_directivity, -1, 0), strict=False
             ):
                 dir_surf_int = _surface_integral(self.theta, self.phi, freq_slice)
                 if dir_surf_int > 1.01 * (4 * np.pi) * u.sr:
