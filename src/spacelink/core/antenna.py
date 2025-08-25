@@ -559,7 +559,8 @@ class RadiationPattern:
             dir_surf_int = _surface_integral(self.theta, self.phi, total_directivity)
             if dir_surf_int > 1.01 * (4 * np.pi) * u.sr:
                 raise ValueError(
-                    f"Surface integral of directivity {dir_surf_int} is greater than 4π."
+                    f"Surface integral of directivity {dir_surf_int} is greater than "
+                    "4π."
                 )
 
     @classmethod
