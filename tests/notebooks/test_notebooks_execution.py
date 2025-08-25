@@ -40,7 +40,8 @@ def test_notebook_execution(nb_path):
         script_lines.append("import warnings\n")
         script_lines.append("matplotlib.use('Agg')\n")
         script_lines.append(
-            "warnings.filterwarnings('ignore', message='.*FigureCanvasAgg is non-interactive.*')\n"
+            "warnings.filterwarnings('ignore', message='.*FigureCanvasAgg is "
+            "non-interactive.*')\n"
         )
 
         for cell in cells:

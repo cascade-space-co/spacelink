@@ -252,7 +252,7 @@ def test_enforce_units_optional_parameters():
 
 
 def test_enforce_units_optional_parameters_invalid_units():
-    """Test that enforce_units decorator rejects invalid units for optional parameters."""
+    """Test that enforce_units rejects invalid units for optional parameters."""
 
     @enforce_units
     def test_optional_frequency(freq: Frequency | None = None) -> str:

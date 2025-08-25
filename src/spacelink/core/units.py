@@ -40,7 +40,8 @@ where:
 Return Loss to VSWR
 -------------------
 
-The conversion from return loss in decibels to voltage standing wave ratio (VSWR) is done using:
+The conversion from return loss in decibels to voltage standing wave ratio (VSWR) is
+done using:
 
 .. math::
    \text{VSWR} = \frac{1 + |\Gamma|}{1 - |\Gamma|}
@@ -54,7 +55,8 @@ where:
 VSWR to Return Loss
 -------------------
 
-The conversion from voltage standing wave ratio (VSWR) to return loss in decibels is done using:
+The conversion from voltage standing wave ratio (VSWR) to return loss in decibels is
+done using:
 
 .. math::
    \text{RL} = -20 \log_{10}\left(\frac{\text{VSWR} - 1}{\text{VSWR} + 1}\right)
