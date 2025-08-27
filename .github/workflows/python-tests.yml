@@ -37,6 +37,19 @@ jobs:
       - name: Check for lint with Ruff
         run: poetry run ruff check
 
+      - name: Verify notebooks are stripped
+        # Keep these arguments in sync with .pre-commit-config.yaml
+        run: |
+          poetry run nbstripout --verify --extra-keys \
+            metadata.kernelspec.display_name \
+            metadata.language_info.version \
+            metadata.language_info.codemirror_mode \
+            metadata.language_info.nbconvert_exporter \
+            metadata.language_info.pygments_lexer \
+            metadata.language_info.file_extension \
+            metadata.widgets \
+            notebooks/**/*.ipynb
+
       - name: Run tests
         run: |
           poetry run pytest --maxfail=1 --disable-warnings -v
