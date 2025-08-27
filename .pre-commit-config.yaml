@@ -10,6 +10,7 @@ repos:
     rev: 0.8.1
     hooks:
       - id: nbstripout
+        # Keep these arguments in sync with .github/workflows/python-tests.yml
         args:
           - --extra-keys
           - >
