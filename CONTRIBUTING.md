@@ -15,6 +15,26 @@ We welcome bugfixes, new features, documentation, and tests.
 2. Clone the repo and run `poetry install --with dev`.
 3. Run tests with `poetry run pytest`.
 
+#### Optional: Pre-commit Hooks
+This repository includes support for [pre-commit](https://pre-commit.com/) which manages
+pre-commit hooks that run format/lint tools (Black, Flake8, and notebook cleanup) on
+each `git commit` command. These hooks are optional but recommended to reduce CI 
+failures on pull requests.
+
+To enable the hooks locally:
+
+```bash
+poetry run pre-commit install
+```
+
+You can also run the hooks on demand against all files:
+
+```bash
+poetry run pre-commit run --all-files
+```
+
+To skip hooks for a commit, pass `--no-verify` to `git commit`.
+
 ### Building Documentation
 - Build the Sphinx docs locally:
 
