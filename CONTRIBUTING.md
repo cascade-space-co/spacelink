@@ -17,7 +17,7 @@ We welcome bugfixes, new features, documentation, and tests.
 
 #### Optional: Pre-commit Hooks
 This repository includes support for [pre-commit](https://pre-commit.com/) which manages
-pre-commit hooks that run format/lint tools (Black, Flake8, and notebook cleanup) on
+pre-commit hooks that run format/lint tools (Ruff and notebook cleanup) on
 each `git commit` command. These hooks are optional but recommended to reduce CI 
 failures on pull requests.
 
@@ -45,8 +45,8 @@ To skip hooks for a commit, pass `--no-verify` to `git commit`.
 - Then open `docs/build/html/index.html` in a browser.
 
 ### Coding Standards
-- Use Black for formatting: `poetry run black .`
-- Use Flake8 for linting: `poetry run flake8 .`
+- Use Ruff for formatting: `poetry run ruff format .`
+- Use Ruff for linting: `poetry run ruff check .`
 - Write docstrings for public functions/classes.
 - Write unit tests.
   - Run the tests with `poetry run pytest`
@@ -84,8 +84,8 @@ Check the [tests GitHub Actions workflow](https://github.com/cascade-space-co/sp
 This can also be checked locally with the following commands:
 ```bash
 poetry run pytest
-poetry run black --check .
-poetry run flake8 .
+poetry run ruff format --check .
+poetry run ruff check .
 ```
 
 ### 3. Build the Distribution
