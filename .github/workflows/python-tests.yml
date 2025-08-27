@@ -31,11 +31,11 @@ jobs:
           poetry install --with dev
         timeout-minutes: 5
 
-      - name: Check formatting with Black
-        run: poetry run black --check .
+      - name: Check formatting with Ruff
+        run: poetry run ruff format --check
 
-      - name: Lint with flake8
-        run: poetry run flake8 .
+      - name: Check for lint with Ruff
+        run: poetry run ruff check
 
       - name: Run tests
         run: |

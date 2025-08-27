@@ -40,7 +40,8 @@ where:
 Return Loss to VSWR
 -------------------
 
-The conversion from return loss in decibels to voltage standing wave ratio (VSWR) is done using:
+The conversion from return loss in decibels to voltage standing wave ratio (VSWR) is
+done using:
 
 .. math::
    \text{VSWR} = \frac{1 + |\Gamma|}{1 - |\Gamma|}
@@ -54,7 +55,8 @@ where:
 VSWR to Return Loss
 -------------------
 
-The conversion from voltage standing wave ratio (VSWR) to return loss in decibels is done using:
+The conversion from voltage standing wave ratio (VSWR) to return loss in decibels is
+done using:
 
 .. math::
    \text{RL} = -20 \log_{10}\left(\frac{\text{VSWR} - 1}{\text{VSWR} + 1}\right)
@@ -65,15 +67,15 @@ where:
 * :math:`\text{RL}` is the return loss in dB
 """
 
+import types
 from functools import wraps
 from inspect import signature
-from typing import get_type_hints, get_args, get_origin, Annotated, Union, Any
-import types
-import astropy.units as u
-import astropy.constants as constants
-from astropy.units import Quantity
+from typing import Annotated, Any, Union, get_args, get_origin, get_type_hints
 
+import astropy.constants as constants
+import astropy.units as u
 import numpy as np
+from astropy.units import Quantity
 
 if not hasattr(u, "dBHz"):  # pragma: no cover
     u.dBHz = u.dB(u.Hz)

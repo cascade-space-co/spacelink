@@ -3,9 +3,9 @@ Test that Jupyter notebooks execute without errors.
 """
 
 from pathlib import Path
-import pytest
-import nbformat
 
+import nbformat
+import pytest
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
@@ -40,7 +40,8 @@ def test_notebook_execution(nb_path):
         script_lines.append("import warnings\n")
         script_lines.append("matplotlib.use('Agg')\n")
         script_lines.append(
-            "warnings.filterwarnings('ignore', message='.*FigureCanvasAgg is non-interactive.*')\n"
+            "warnings.filterwarnings('ignore', message='.*FigureCanvasAgg is "
+            "non-interactive.*')\n"
         )
 
         for cell in cells:
