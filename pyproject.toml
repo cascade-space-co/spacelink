@@ -96,6 +96,11 @@ exclude = [
 src = ["src"]
 
 [tool.ruff.lint]
-# E (pycodestyle), F (pyflakes), I (isort), B (bugbear), UP (pyupgrade)
-select = ["E", "F", "I", "B", "UP"]
+# E (pycodestyle)
+# W (pycodestyle warnings)
+# F (pyflakes)
+# I (isort)
+# B (bugbear)
+# UP (pyupgrade)
+select = ["E", "W", "F", "I", "B", "UP"]
 ignore = []
