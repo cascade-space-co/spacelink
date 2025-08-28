@@ -24,6 +24,7 @@ References
 
 import enum
 import math
+from dataclasses import dataclass
 
 import astropy.constants
 import astropy.units as u
@@ -573,72 +574,170 @@ class TrackingArchitecture(enum.Enum):
     OPEN_LOOP = enum.auto()
 
 
-def _range_est_variance(
-    range_clock_rate: Frequency,
-    loop_bandwidth: Frequency,
-    range_clock_to_noise_psd: DecibelHertz,
+@enforce_units
+@dataclass(frozen=True)
+class RangingLinkParameters:
+    r"""Parameters for a ranging link (uplink or downlink).
+
+    Parameters
+    ----------
+    loop_bandwidth : Frequency
+        The one-sided bandwidth :math:`B` of the ranging clock tracking loop. If the
+        tracking system uses an open-loop architecture then :math:`B = 1 / (2T)` where
+        :math:`T` is the integration time.
+    range_clock_to_noise_psd : DecibelHertz
+        The ranging-clock-to-noise power spectral density :math:`P_{RC}/N_0`.
+    range_clock_waveform : RangeClockWaveform
+        The shape of the ranging clock.
+    reference_clock_waveform : RangeClockWaveform
+        The shape of the reference clock in the receiver, which may or may not be
+        matched to the transmitted ranging clock waveform.
+    tracking_architecture : TrackingArchitecture
+        The architecture of the ranging clock tracking system (open or closed loop).
+    """
+
+    loop_bandwidth: Frequency
+    range_clock_to_noise_psd: DecibelHertz
+    range_clock_waveform: RangeClockWaveform
+    reference_clock_waveform: RangeClockWaveform
+    tracking_architecture: TrackingArchitecture | None = None
+
+
+def _range_jitter_coefficient(
     range_clock_waveform: RangeClockWaveform,
     reference_clock_waveform: RangeClockWaveform,
     tracking_architecture: TrackingArchitecture | None = None,
-) -> Distance:
-    r""" """
+) -> float:
+    r"""Lookup the coefficient for the range estimator jitter expression.
 
-    if range_clock_waveform == RangeClockWaveform.SQUARE:
-        if reference_clock_waveform == RangeClockWaveform.SQUARE:
-            if tracking_architecture is None:
-                raise ValueError(
-                    "Tracking architecture is required for square range clock with "
-                    "square reference clock."
-                )
+    The range jitter expressions in `[4]`_ typically have the form
+    :math:`\alpha \frac{c}{f_{RC}} \sqrt{\frac{B}{P_{RC}/N_0}}` where :math:`\alpha` is
+    the coefficient to be returned by this function.
 
-            if tracking_architecture == TrackingArchitecture.CLOSED_LOOP:
-                coeff = 1 / 8
-            elif tracking_architecture == TrackingArchitecture.OPEN_LOOP:
-                coeff = 1 / (8 * math.sqrt(2))
-            else:
-                raise ValueError(
-                    f"Unsupported tracking architecture {tracking_architecture}"
-                )
-        else:
+    If using a jitter expression in terms of integration time :math:`T`, which has the
+    form :math:`\beta \frac{c}{f_{RC}} \sqrt{\frac{1}{T \cdot P_{RC}/N_0}}`, then you
+    will need to divide the return value by :math:`\sqrt{2}` because :math:`2B = 1 / T`
+    and therefore :math:`\beta = \alpha / \sqrt{2}`.
+
+    These coefficients all come from jitter expressions in `[2]`_ and `[4]`_. See
+    comments in the code for references to specific equations.
+
+    Parameters
+    ----------
+    range_clock_waveform : RangeClockWaveform
+        The shape of the ranging clock.
+    reference_clock_waveform : RangeClockWaveform
+        The shape of the reference clock in the receiver, which may or may not be
+        matched to the transmitted ranging clock waveform.
+    tracking_architecture : TrackingArchitecture | None = None
+        The architecture of the ranging clock tracking system (open or closed loop).
+        Only required if the range clock and reference clock are both square. In all
+        other cases the receiver architecture does not affect the return value.
+
+    Returns
+    -------
+    float
+        The coefficient for the range estimator jitter expression.
+    """
+
+    # TODO: Add references to all of the cases
+    match (range_clock_waveform, reference_clock_waveform, tracking_architecture):
+        case (
+            RangeClockWaveform.SQUARE,
+            RangeClockWaveform.SQUARE,
+            TrackingArchitecture.CLOSED_LOOP,
+        ):
+            # [4] last equation in Section 2.5.1.
+            return 1 / 8
+        case (
+            RangeClockWaveform.SQUARE,
+            RangeClockWaveform.SQUARE,
+            TrackingArchitecture.OPEN_LOOP,
+        ):
+            # [4] part (c) of Section 2.7.2.1 times sqrt(2).
+            return 1 / (8 * math.sqrt(2))
+        case (RangeClockWaveform.SINE, RangeClockWaveform.SQUARE, _):
+            # [4] last equation in Section 2.5.2,
+            # [4] part (a) of Section 2.7.2.1 times sqrt(2).
+            return 1 / (8 * math.sqrt(2))
+        case (RangeClockWaveform.SINE, RangeClockWaveform.SINE, _):
+            # [4] near the bottom of page 2-34 in Section 2.5.3,
+            # [4] part (b) of Section 2.7.2.1 times sqrt(2),
+            # [2] equation (85) times sqrt(2),
+            # [2] equation (89).
+            return 1 / (4 * math.pi)
+        case (RangeClockWaveform.SQUARE, RangeClockWaveform.SQUARE, None):
             raise ValueError(
-                f"Reference clock waveform {reference_clock_waveform} is not supported "
-                "with square range clock."
+                "Tracking architecture is required for square range clock with "
+                "square reference clock."
             )
-    elif range_clock_waveform == RangeClockWaveform.SINE:
-        if reference_clock_waveform == RangeClockWaveform.SQUARE:
-            coeff = 1 / (8 * math.sqrt(2))
-        elif reference_clock_waveform == RangeClockWaveform.SINE:
-            coeff = 1 / (4 * math.pi)
-        else:
+        case _:
             raise ValueError(
-                f"Reference clock waveform {reference_clock_waveform} is not supported "
-                "with sine range clock."
+                f"Unsupported combination: range_clock={range_clock_waveform}, "
+                f"reference_clock={reference_clock_waveform}, "
+                f"tracking={tracking_architecture}"
             )
-    else:
-        raise ValueError(f"Unsupported range clock waveform: {range_clock_waveform}")
 
+
+def _range_est_variance(
+    range_clock_rate: Frequency,
+    link_params: RangingLinkParameters,
+) -> u.Quantity[u.m**2]:
+    """Calculate the contribution of uplink or downlink to end-to-end range variance.
+
+    Parameters
+    ----------
+    range_clock_rate : Frequency
+        Rate of the ranging clock (half the chip rate).
+    link_params : RangingLinkParameters
+        Uplink or downlink ranging parameters.
+
+    Returns
+    -------
+    u.Quantity[u.m**2]
+        The variance contributed to the end-to-end range estimator.
+    """
+    coeff = _range_jitter_coefficient(
+        link_params.range_clock_waveform,
+        link_params.reference_clock_waveform,
+        link_params.tracking_architecture,
+    )
+
+    # Distilled from many jitter expressions in both [2] and [4]. In particular, see
+    # equations (85) and (89) in [2] and Sections 2.5 and 2.7 in [4]. Most of the jitter
+    # expressions in these references are closely related to each other and can be
+    # manipulated into this form. Note that this is the variance and not the standard
+    # deviation, so this is the square of the jitter.
     return (
         (coeff * astropy.constants.c / range_clock_rate) ** 2
-        * loop_bandwidth
-        / range_clock_to_noise_psd.to(u.Hz)
-    )
+        * link_params.loop_bandwidth
+        / link_params.range_clock_to_noise_psd.to(u.Hz)
+    ).decompose()
 
 
 @enforce_units
-def pn_end_to_end_jitter(
+def pn_regen_end_to_end_jitter(
     range_clock_rate: Frequency,
-    uplink_loop_bandwidth: Frequency,
-    uplink_range_clock_to_noise_psd: DecibelHertz,
-    uplink_range_clock_waveform: RangeClockWaveform,
-    uplink_reference_clock_waveform: RangeClockWaveform,
-    uplink_tracking_architecture: TrackingArchitecture,
-    downlink_loop_bandwidth: Frequency,
-    downlink_range_clock_to_noise_psd: DecibelHertz,
-    downlink_range_clock_waveform: RangeClockWaveform,
-    downlink_reference_clock_waveform: RangeClockWaveform,
-    downlink_tracking_architecture: TrackingArchitecture,
+    uplink: RangingLinkParameters,
+    downlink: RangingLinkParameters,
 ) -> Distance:
-    r""" """
+    r"""
+    Calculate end-to-end range jitter for regenerative pseusdonoise ranging.
+
+    Parameters
+    ----------
+    range_clock_rate : Frequency
+        Frequency of the ranging clock (half the chip rate).
+    uplink : RangingLinkParameters
+        Uplink ranging parameters.
+    downlink : RangingLinkParameters
+        Downlink ranging parameters.
+
+    Returns
+    -------
+    Distance
+        The standard deviation of the end-to-end range estimator (1-sigma).
+    """
 
     # The transponder's regenerated range clock has some phase noise (jitter) that is
     # contributed by the noise on the uplink. If the loop bandwidth of the transponder's
@@ -648,23 +747,26 @@ def pn_end_to_end_jitter(
     # then it becomes the narrower and thus determining filter bandwidth. If the two
     # bandwidths are similar then the most accurate approach (not performed here) is to
     # multiply the transfer functions of the two systems.
-    uplink_effective_bandwidth = min(uplink_loop_bandwidth, downlink_loop_bandwidth)
+    uplink_effective_bandwidth = min(uplink.loop_bandwidth, downlink.loop_bandwidth)
 
     uplink_range_variance = _range_est_variance(
         range_clock_rate,
         uplink_effective_bandwidth,
-        uplink_range_clock_to_noise_psd,
-        uplink_range_clock_waveform,
-        uplink_reference_clock_waveform,
-        uplink_tracking_architecture,
+        uplink.range_clock_to_noise_psd,
+        uplink.range_clock_waveform,
+        uplink.reference_clock_waveform,
+        uplink.tracking_architecture,
     )
     downlink_range_variance = _range_est_variance(
         range_clock_rate,
-        downlink_loop_bandwidth,
-        downlink_range_clock_to_noise_psd,
-        downlink_range_clock_waveform,
-        downlink_reference_clock_waveform,
-        downlink_tracking_architecture,
+        downlink.loop_bandwidth,
+        downlink.range_clock_to_noise_psd,
+        downlink.range_clock_waveform,
+        downlink.reference_clock_waveform,
+        downlink.tracking_architecture,
     )
 
+    # [2] equation (88),
+    # [4] Section 2.7.3.2.2,
+    # [4] Section 2.7.3.2.3 (after some manipulation).
     return np.sqrt(uplink_range_variance + downlink_range_variance)
