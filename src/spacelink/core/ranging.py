@@ -25,7 +25,7 @@ References
 import enum
 import math
 
-import astropy.constants as const
+import astropy.constants
 import astropy.units as u
 import numpy as np
 import scipy.integrate
@@ -116,7 +116,7 @@ def pn_sequence_range_ambiguity(ranging_clock_rate: Frequency) -> Distance:
 
     `[4]`_ p. 2-2.
     """
-    return (CODE_LENGTH * const.c / (4 * ranging_clock_rate)).decompose()
+    return (CODE_LENGTH * astropy.constants.c / (4 * ranging_clock_rate)).decompose()
 
 
 @enforce_units
@@ -557,3 +557,114 @@ def pn_acquisition_time(
     )
 
     return solution.root * u.s
+
+
+class RangeClockWaveform(enum.Enum):
+    """The shape of the ranging clock component."""
+
+    SQUARE = enum.auto()
+    SINE = enum.auto()
+
+
+class TrackingArchitecture(enum.Enum):
+    """The architecture of the ranging clock tracking system."""
+
+    CLOSED_LOOP = enum.auto()
+    OPEN_LOOP = enum.auto()
+
+
+def _range_est_variance(
+    range_clock_rate: Frequency,
+    loop_bandwidth: Frequency,
+    range_clock_to_noise_psd: DecibelHertz,
+    range_clock_waveform: RangeClockWaveform,
+    reference_clock_waveform: RangeClockWaveform,
+    tracking_architecture: TrackingArchitecture | None = None,
+) -> Distance:
+    r""" """
+
+    if range_clock_waveform == RangeClockWaveform.SQUARE:
+        if reference_clock_waveform == RangeClockWaveform.SQUARE:
+            if tracking_architecture is None:
+                raise ValueError(
+                    "Tracking architecture is required for square range clock with "
+                    "square reference clock."
+                )
+
+            if tracking_architecture == TrackingArchitecture.CLOSED_LOOP:
+                coeff = 1 / 8
+            elif tracking_architecture == TrackingArchitecture.OPEN_LOOP:
+                coeff = 1 / (8 * math.sqrt(2))
+            else:
+                raise ValueError(
+                    f"Unsupported tracking architecture {tracking_architecture}"
+                )
+        else:
+            raise ValueError(
+                f"Reference clock waveform {reference_clock_waveform} is not supported "
+                "with square range clock."
+            )
+    elif range_clock_waveform == RangeClockWaveform.SINE:
+        if reference_clock_waveform == RangeClockWaveform.SQUARE:
+            coeff = 1 / (8 * math.sqrt(2))
+        elif reference_clock_waveform == RangeClockWaveform.SINE:
+            coeff = 1 / (4 * math.pi)
+        else:
+            raise ValueError(
+                f"Reference clock waveform {reference_clock_waveform} is not supported "
+                "with sine range clock."
+            )
+    else:
+        raise ValueError(f"Unsupported range clock waveform: {range_clock_waveform}")
+
+    return (
+        (coeff * astropy.constants.c / range_clock_rate) ** 2
+        * loop_bandwidth
+        / range_clock_to_noise_psd.to(u.Hz)
+    )
+
+
+@enforce_units
+def pn_end_to_end_jitter(
+    range_clock_rate: Frequency,
+    uplink_loop_bandwidth: Frequency,
+    uplink_range_clock_to_noise_psd: DecibelHertz,
+    uplink_range_clock_waveform: RangeClockWaveform,
+    uplink_reference_clock_waveform: RangeClockWaveform,
+    uplink_tracking_architecture: TrackingArchitecture,
+    downlink_loop_bandwidth: Frequency,
+    downlink_range_clock_to_noise_psd: DecibelHertz,
+    downlink_range_clock_waveform: RangeClockWaveform,
+    downlink_reference_clock_waveform: RangeClockWaveform,
+    downlink_tracking_architecture: TrackingArchitecture,
+) -> Distance:
+    r""" """
+
+    # The transponder's regenerated range clock has some phase noise (jitter) that is
+    # contributed by the noise on the uplink. If the loop bandwidth of the transponder's
+    # range clock tracking loop is smaller than the bandwidth of the ground station's
+    # tracking loop then uplink noise bandwidth is controlled by the transponder's
+    # loop filter. On the other hand if the ground receiver's loop bandwidth is smaller
+    # then it becomes the narrower and thus determining filter bandwidth. If the two
+    # bandwidths are similar then the most accurate approach (not performed here) is to
+    # multiply the transfer functions of the two systems.
+    uplink_effective_bandwidth = min(uplink_loop_bandwidth, downlink_loop_bandwidth)
+
+    uplink_range_variance = _range_est_variance(
+        range_clock_rate,
+        uplink_effective_bandwidth,
+        uplink_range_clock_to_noise_psd,
+        uplink_range_clock_waveform,
+        uplink_reference_clock_waveform,
+        uplink_tracking_architecture,
+    )
+    downlink_range_variance = _range_est_variance(
+        range_clock_rate,
+        downlink_loop_bandwidth,
+        downlink_range_clock_to_noise_psd,
+        downlink_range_clock_waveform,
+        downlink_reference_clock_waveform,
+        downlink_tracking_architecture,
+    )
+
+    return np.sqrt(uplink_range_variance + downlink_range_variance)
