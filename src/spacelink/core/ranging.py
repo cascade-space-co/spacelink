@@ -22,9 +22,9 @@ References
 5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf
 """
 
+import dataclasses
 import enum
 import math
-from dataclasses import dataclass
 
 import astropy.constants
 import astropy.units as u
@@ -575,9 +575,9 @@ class TrackingArchitecture(enum.Enum):
 
 
 @enforce_units
-@dataclass(frozen=True)
-class RangingLinkParameters:
-    r"""Parameters for a ranging link (uplink or downlink).
+@dataclasses.dataclass(frozen=True)
+class RangeJitterParameters:
+    r"""Parameters for range estimator jitter or variance calculations.
 
     Parameters
     ----------
@@ -586,7 +586,9 @@ class RangingLinkParameters:
         tracking system uses an open-loop architecture then :math:`B = 1 / (2T)` where
         :math:`T` is the integration time.
     range_clock_to_noise_psd : DecibelHertz
-        The ranging-clock-to-noise power spectral density :math:`P_{RC}/N_0`.
+        The ranging-clock-to-noise power spectral density :math:`P_{RC}/N_0`. In general
+        this is smaller than the ranging-to-noise power spectral density :math:`P_R/N_0`
+        because the ranging clock is only one component of the composite ranging signal.
     range_clock_waveform : RangeClockWaveform
         The shape of the ranging clock.
     reference_clock_waveform : RangeClockWaveform
@@ -681,7 +683,7 @@ def _range_jitter_coefficient(
 
 def _range_est_variance(
     range_clock_rate: Frequency,
-    link_params: RangingLinkParameters,
+    link_params: RangeJitterParameters,
 ) -> u.Quantity[u.m**2]:
     """Calculate the contribution of uplink or downlink to end-to-end range variance.
 
@@ -689,7 +691,7 @@ def _range_est_variance(
     ----------
     range_clock_rate : Frequency
         Rate of the ranging clock (half the chip rate).
-    link_params : RangingLinkParameters
+    link_params : RangeJitterParameters
         Uplink or downlink ranging parameters.
 
     Returns
@@ -718,19 +720,19 @@ def _range_est_variance(
 @enforce_units
 def pn_regen_end_to_end_jitter(
     range_clock_rate: Frequency,
-    uplink: RangingLinkParameters,
-    downlink: RangingLinkParameters,
+    uplink_params: RangeJitterParameters,
+    downlink_params: RangeJitterParameters,
 ) -> Distance:
     r"""
-    Calculate end-to-end range jitter for regenerative pseusdonoise ranging.
+    Calculate end-to-end range jitter for regenerative pseusdo-noise (PN) ranging.
 
     Parameters
     ----------
     range_clock_rate : Frequency
         Frequency of the ranging clock (half the chip rate).
-    uplink : RangingLinkParameters
+    uplink_params : RangeJitterParameters
         Uplink ranging parameters.
-    downlink : RangingLinkParameters
+    downlink_params : RangeJitterParameters
         Downlink ranging parameters.
 
     Returns
@@ -747,23 +749,20 @@ def pn_regen_end_to_end_jitter(
     # then it becomes the narrower and thus determining filter bandwidth. If the two
     # bandwidths are similar then the most accurate approach (not performed here) is to
     # multiply the transfer functions of the two systems.
-    uplink_effective_bandwidth = min(uplink.loop_bandwidth, downlink.loop_bandwidth)
+    uplink_params = dataclasses.replace(
+        uplink_params,
+        loop_bandwidth=min(
+            uplink_params.loop_bandwidth, downlink_params.loop_bandwidth
+        ),
+    )
 
     uplink_range_variance = _range_est_variance(
         range_clock_rate,
-        uplink_effective_bandwidth,
-        uplink.range_clock_to_noise_psd,
-        uplink.range_clock_waveform,
-        uplink.reference_clock_waveform,
-        uplink.tracking_architecture,
+        uplink_params,
     )
     downlink_range_variance = _range_est_variance(
         range_clock_rate,
-        downlink.loop_bandwidth,
-        downlink.range_clock_to_noise_psd,
-        downlink.range_clock_waveform,
-        downlink.reference_clock_waveform,
-        downlink.tracking_architecture,
+        downlink_params,
     )
 
     # [2] equation (88),

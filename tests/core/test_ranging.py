@@ -3,6 +3,8 @@
 See ranging.py for references.
 """
 
+import math
+
 import astropy.units as u
 import numpy as np
 import pytest
@@ -426,5 +428,137 @@ def test_pn_acquisition_time(
         result,
         expected_time,
         rtol=5e-2,  # Test values are from plot extraction
+        err_msg=f"Failed for case: {case_description}",
+    )
+
+
+@pytest.mark.parametrize(
+    "range_clock_waveform, "
+    "reference_clock_waveform, "
+    "tracking_architecture, "
+    "jitter_offset_from_dsn, "
+    "case_description",
+    [
+        # The case from [2] Figures 12 and 13. No offset is required.
+        (
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SINE,
+            None,
+            1.0,
+            "sine-sine",
+        ),
+        (
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SQUARE,
+            None,
+            (4 * np.pi) / (8 * math.sqrt(2)),
+            "sine-square",
+        ),
+        (
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.TrackingArchitecture.OPEN_LOOP,
+            (4 * np.pi) / (8 * math.sqrt(2)),
+            "square-square open loop",
+        ),
+        (
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            (4 * np.pi) / 8,
+            "square-square closed loop",
+        ),
+    ],
+)
+def test_range_est_variance_from_plots(
+    range_clock_waveform: ranging.RangeClockWaveform,
+    reference_clock_waveform: ranging.RangeClockWaveform,
+    tracking_architecture: ranging.TrackingArchitecture | None,
+    jitter_offset_from_dsn: float,
+    case_description: str,
+):
+    """Test _range_est_variance against plot-extracted reference data."""
+
+    range_clock_rate = 1 * u.MHz
+    integration_time = 1 * u.s
+    loop_bandwidth = 1 / (2 * integration_time)
+
+    # Data from [2] Figures 12 and 13, extracted with WebPlotDigitizer.
+    # All of these are for a 1 MHz range clock.
+    # Keys are T * P_R/N_0 in dB and values are range jitter in meters.
+    jitter_plot_data = {
+        ranging.PnRangingCode.DSN: {
+            29.994: 0.55937,
+            30.996: 0.49931,
+            31.992: 0.44455,
+            32.988: 0.39686,
+            33.997: 0.35270,
+            34.993: 0.31501,
+            35.995: 0.28086,
+            36.998: 0.25083,
+            38.000: 0.22316,
+        },
+        ranging.PnRangingCode.CCSDS_T4B: {
+            29.994: 0.56879,
+            30.996: 0.50756,
+            31.992: 0.45280,
+            32.995: 0.40334,
+            33.997: 0.35859,
+            34.999: 0.31973,
+            35.995: 0.28616,
+            36.998: 0.25496,
+            38.000: 0.22728,
+        },
+        ranging.PnRangingCode.CCSDS_T2B: {
+            16.561: 4.0000,
+            16.999: 3.8043,
+            17.998: 3.3894,
+            18.998: 3.0176,
+            20.003: 2.6928,
+            21.002: 2.3992,
+            21.995: 2.1409,
+            22.995: 1.9100,
+            24.000: 1.7065,
+        },
+    }
+
+    t_prcn0_db = []
+    expected_jitter_m = []
+    for code in jitter_plot_data:
+        t_prn0_db_list, expected_jitter_m_list = zip(
+            *jitter_plot_data[code].items(), strict=True
+        )
+        expected_jitter_m += expected_jitter_m_list
+
+        # Convert from P_R/N_0 to P_{RC}/N_0 using the correlation coefficient for the
+        # range clock component. This accounts for the fact that some of the ranging
+        # power is allocated to the other components of the ranging signal.
+        t_prcn0_db += list(
+            np.array(t_prn0_db_list) + 20 * np.log10(ranging._CORR_COEFF_DSN[code][1])
+        )
+    t_prcn0_db = np.array(t_prcn0_db) * u.dB
+
+    # We only have plots of the jitter expressions from [2], so to test other cases of
+    # range clock waveform and reference clock waveform an appropriate offset is applied
+    # to the DSN expected jitter values. This isn't ideal but it's the best we can do
+    # with the limited reference data available.
+    expected_jitter_m = jitter_offset_from_dsn * np.array(expected_jitter_m) * u.m
+
+    range_variance = ranging._range_est_variance(
+        range_clock_rate,
+        ranging.RangeJitterParameters(
+            loop_bandwidth,
+            t_prcn0_db - integration_time.to(u.dB(u.s)),
+            range_clock_waveform,
+            reference_clock_waveform,
+            tracking_architecture,
+        ),
+    )
+    calculated_jitter = np.sqrt(range_variance)
+
+    assert_quantity_allclose(
+        calculated_jitter,
+        expected_jitter_m,
+        rtol=1e-2,  # Somewhat loose because ref data came from plot extraction
         err_msg=f"Failed for case: {case_description}",
     )
