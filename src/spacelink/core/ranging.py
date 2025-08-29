@@ -726,8 +726,6 @@ def pn_regen_end_to_end_jitter(
     Calculate the standard deviation of end-to-end range measurement error for
     regenerative pseudo-noise (PN) ranging.
 
-    Based on equations in Section 2.5.4 of `[2]`_ and Sections 2.5 and 2.7 of `[4]`_.
-
     An approximation is used to determine how much of the uplink jitter contributed to
     the end-to-end jitter. This approximation is most accurate when the loop bandwidth
     of the transponder is significantly different from the loop bandwidth of the ground
@@ -747,6 +745,12 @@ def pn_regen_end_to_end_jitter(
     -------
     Distance
         The standard deviation of the end-to-end range estimation error (1-sigma).
+
+    References
+    ----------
+    `[2]`_ Section 2.5.4.
+
+    `[4]`_ Sections 2.5 and 2.7.
     """
 
     # The transponder's regenerated range clock has some phase noise (jitter) that is
