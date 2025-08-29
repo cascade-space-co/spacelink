@@ -562,3 +562,18 @@ def test_range_est_variance_from_plots(
         rtol=1e-2,  # Somewhat loose because ref data came from plot extraction
         err_msg=f"Failed for case: {case_description}",
     )
+
+
+def test_range_jitter_coefficient_error_cases():
+    with pytest.raises(ValueError):
+        ranging._range_jitter_coefficient(
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.RangeClockWaveform.SQUARE,
+            None,
+        )
+    with pytest.raises(ValueError):
+        ranging._range_jitter_coefficient(
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.RangeClockWaveform.SINE,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+        )
