@@ -60,6 +60,20 @@ class DataModulation(enum.Enum):
     SINE_SUBCARRIER = enum.auto()
 
 
+class RangeClockWaveform(enum.Enum):
+    """The shape of the ranging clock component."""
+
+    SQUARE = enum.auto()
+    SINE = enum.auto()
+
+
+class TrackingArchitecture(enum.Enum):
+    """The architecture of the ranging clock tracking system."""
+
+    CLOSED_LOOP = enum.auto()
+    OPEN_LOOP = enum.auto()
+
+
 CODE_LENGTH = 1_009_470
 """int: The length of the full PN ranging sequence.
 
@@ -558,20 +572,6 @@ def pn_acquisition_time(
     )
 
     return solution.root * u.s
-
-
-class RangeClockWaveform(enum.Enum):
-    """The shape of the ranging clock component."""
-
-    SQUARE = enum.auto()
-    SINE = enum.auto()
-
-
-class TrackingArchitecture(enum.Enum):
-    """The architecture of the ranging clock tracking system."""
-
-    CLOSED_LOOP = enum.auto()
-    OPEN_LOOP = enum.auto()
 
 
 @enforce_units
