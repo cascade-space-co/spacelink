@@ -3,8 +3,6 @@
 See ranging.py for references.
 """
 
-import math
-
 import astropy.units as u
 import numpy as np
 import pytest
@@ -432,57 +430,31 @@ def test_pn_acquisition_time(
     )
 
 
-@pytest.mark.parametrize(
-    "range_clock_waveform, "
-    "reference_clock_waveform, "
-    "tracking_architecture, "
-    "jitter_offset_from_dsn, "
-    "case_description",
-    [
-        # The case from [2] Figures 12 and 13. No offset is required.
-        (
-            ranging.RangeClockWaveform.SINE,
-            ranging.RangeClockWaveform.SINE,
-            None,
-            1.0,
-            "sine-sine",
-        ),
-        (
-            ranging.RangeClockWaveform.SINE,
-            ranging.RangeClockWaveform.SQUARE,
-            None,
-            (4 * np.pi) / (8 * math.sqrt(2)),
-            "sine-square",
-        ),
-        (
-            ranging.RangeClockWaveform.SQUARE,
-            ranging.RangeClockWaveform.SQUARE,
-            ranging.TrackingArchitecture.OPEN_LOOP,
-            (4 * np.pi) / (8 * math.sqrt(2)),
-            "square-square open loop",
-        ),
-        (
-            ranging.RangeClockWaveform.SQUARE,
-            ranging.RangeClockWaveform.SQUARE,
-            ranging.TrackingArchitecture.CLOSED_LOOP,
-            (4 * np.pi) / 8,
-            "square-square closed loop",
-        ),
-    ],
-)
-def test_range_est_variance_vs_dsn_plots(
+def _get_dsn_plot_jitter_data(
     range_clock_waveform: ranging.RangeClockWaveform,
     reference_clock_waveform: ranging.RangeClockWaveform,
-    tracking_architecture: ranging.TrackingArchitecture | None,
-    jitter_offset_from_dsn: float,
-    case_description: str,
-):
-    """Test _range_est_variance against plot-extracted reference data."""
+    tracking_architecture: ranging.TrackingArchitecture | None = None,
+) -> tuple[u.Quantity, u.Quantity]:
+    """Helper to get processed DSN plot data for jitter testing.
 
-    range_clock_rate = 1 * u.MHz
-    integration_time = 1 * u.s
-    loop_bandwidth = 1 / (2 * integration_time)
+    The DSN plot data is for sine-sine waveforms. This function automatically
+    calculates the appropriate offset for other waveform combinations based on
+    the ratio of jitter coefficients.
 
+    Parameters
+    ----------
+    range_clock_waveform : ranging.RangeClockWaveform
+        The shape of the ranging clock.
+    reference_clock_waveform : ranging.RangeClockWaveform
+        The shape of the reference clock in the receiver.
+    tracking_architecture : ranging.TrackingArchitecture | None
+        The architecture of the ranging clock tracking system.
+
+    Returns
+    -------
+    tuple[u.Quantity, u.Quantity]
+        (t_prcn0_db, expected_jitter_m) arrays for testing.
+    """
     # Data from [2] Figures 12 and 13, extracted with WebPlotDigitizer.
     # All of these are for a 1 MHz range clock.
     # Keys are T * P_R/N_0 in dB and values are range jitter in meters.
@@ -538,11 +510,69 @@ def test_range_est_variance_vs_dsn_plots(
         )
     t_prcn0_db = np.array(t_prcn0_db) * u.dB
 
-    # We only have plots of the jitter expressions from [2], so to test other cases of
-    # range clock waveform and reference clock waveform an appropriate offset is applied
-    # to the DSN expected jitter values. This isn't ideal but it's the best we can do
-    # with the limited reference data available.
-    expected_jitter_m = jitter_offset_from_dsn * np.array(expected_jitter_m) * u.m
+    # We only have plots of the jitter expressions from [2] which are for the sine-sine
+    # case, so to test other cases of range clock waveform and reference clock waveform
+    # an appropriate offset is applied to the DSN expected jitter values. This isn't
+    # ideal but it's the best we can do with the limited reference data available.
+    dsn_coefficient = ranging._range_jitter_coefficient(
+        ranging.RangeClockWaveform.SINE, ranging.RangeClockWaveform.SINE, None
+    )
+    target_coefficient = ranging._range_jitter_coefficient(
+        range_clock_waveform, reference_clock_waveform, tracking_architecture
+    )
+    jitter_offset = target_coefficient / dsn_coefficient
+    expected_jitter_m = jitter_offset * np.array(expected_jitter_m) * u.m
+
+    return t_prcn0_db, expected_jitter_m
+
+
+@pytest.mark.parametrize(
+    (
+        "range_clock_waveform, reference_clock_waveform, tracking_architecture, "
+        "case_description"
+    ),
+    [
+        (
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SINE,
+            None,
+            "sine-sine",
+        ),
+        (
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SQUARE,
+            None,
+            "sine-square",
+        ),
+        (
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.TrackingArchitecture.OPEN_LOOP,
+            "square-square open loop",
+        ),
+        (
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            "square-square closed loop",
+        ),
+    ],
+)
+def test_range_est_variance_vs_dsn_plots(
+    range_clock_waveform: ranging.RangeClockWaveform,
+    reference_clock_waveform: ranging.RangeClockWaveform,
+    tracking_architecture: ranging.TrackingArchitecture | None,
+    case_description: str,
+):
+    """Test _range_est_variance against plot-extracted reference data."""
+    range_clock_rate = 1 * u.MHz
+    integration_time = 1 * u.s
+    loop_bandwidth = 1 / (2 * integration_time)
+
+    # Get processed DSN plot data using helper function
+    t_prcn0_db, expected_jitter_m = _get_dsn_plot_jitter_data(
+        range_clock_waveform, reference_clock_waveform, tracking_architecture
+    )
 
     range_variance = ranging._range_est_variance(
         range_clock_rate,
@@ -680,6 +710,107 @@ def test_range_est_variance_vs_ccsds_green_book(
         calculated_jitter,
         expected_jitter_m,
         atol=1e-2 * u.m,  # Green book table values are rounded to 2 decimal places
+    )
+
+
+@pytest.mark.parametrize(
+    (
+        "uplink_waveform, "
+        "uplink_ref_waveform, "
+        "uplink_tracking, "
+        "downlink_waveform, "
+        "downlink_ref_waveform, "
+        "downlink_tracking, "
+        "uplink_integration_time, "
+        "downlink_integration_time"
+    ),
+    [
+        (
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SINE,
+            None,
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SINE,
+            None,
+            1.0 * u.s,
+            1.0 * u.s,
+        ),
+        (
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SQUARE,
+            None,
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            0.5 * u.s,
+            2.0 * u.s,
+        ),
+        (
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.TrackingArchitecture.OPEN_LOOP,
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SQUARE,
+            None,
+            2.0 * u.s,
+            0.5 * u.s,
+        ),
+    ],
+)
+def test_pn_regen_end_to_end_jitter_vs_dsn_plots(
+    uplink_waveform: ranging.RangeClockWaveform,
+    uplink_ref_waveform: ranging.RangeClockWaveform,
+    uplink_tracking: ranging.TrackingArchitecture | None,
+    downlink_waveform: ranging.RangeClockWaveform,
+    downlink_ref_waveform: ranging.RangeClockWaveform,
+    downlink_tracking: ranging.TrackingArchitecture | None,
+    uplink_integration_time: Time,
+    downlink_integration_time: Time,
+):
+    """Test pn_regen_end_to_end_jitter using synthesized data from DSN plots."""
+    range_clock_rate = 1 * u.MHz
+
+    # Calculate loop bandwidths from integration times (B = 1/(2T))
+    uplink_loop_bandwidth = 1 / (2 * uplink_integration_time)
+    downlink_loop_bandwidth = 1 / (2 * downlink_integration_time)
+
+    uplink_t_prcn0_db, uplink_expected_jitter = _get_dsn_plot_jitter_data(
+        uplink_waveform, uplink_ref_waveform, uplink_tracking
+    )
+    downlink_t_prcn0_db, downlink_expected_jitter = _get_dsn_plot_jitter_data(
+        downlink_waveform, downlink_ref_waveform, downlink_tracking
+    )
+
+    # Adjust uplink jitter contribution iff downlink loop bandwidth is smaller.
+    if downlink_loop_bandwidth < uplink_loop_bandwidth:
+        uplink_expected_jitter *= np.sqrt(
+            downlink_loop_bandwidth / uplink_loop_bandwidth
+        )
+
+    expected_jitter = np.sqrt(uplink_expected_jitter**2 + downlink_expected_jitter**2)
+
+    calculated_jitter = ranging.pn_regen_end_to_end_jitter(
+        range_clock_rate,
+        uplink_params=ranging.RangeJitterParameters(
+            uplink_loop_bandwidth,
+            uplink_t_prcn0_db - uplink_integration_time.to(u.dB(u.s)),
+            uplink_waveform,
+            uplink_ref_waveform,
+            uplink_tracking,
+        ),
+        downlink_params=ranging.RangeJitterParameters(
+            downlink_loop_bandwidth,
+            downlink_t_prcn0_db - downlink_integration_time.to(u.dB(u.s)),
+            downlink_waveform,
+            downlink_ref_waveform,
+            downlink_tracking,
+        ),
+    )
+
+    assert_quantity_allclose(
+        calculated_jitter,
+        expected_jitter,
+        rtol=1e-2,
     )
 
 
