@@ -470,7 +470,7 @@ def test_pn_acquisition_time(
         ),
     ],
 )
-def test_range_est_variance_from_plots(
+def test_range_est_variance_vs_dsn_plots(
     range_clock_waveform: ranging.RangeClockWaveform,
     reference_clock_waveform: ranging.RangeClockWaveform,
     tracking_architecture: ranging.TrackingArchitecture | None,
@@ -561,6 +561,125 @@ def test_range_est_variance_from_plots(
         expected_jitter_m,
         rtol=1e-2,  # Somewhat loose because ref data came from plot extraction
         err_msg=f"Failed for case: {case_description}",
+    )
+
+
+@pytest.mark.parametrize(
+    "code, "
+    "tracking_architecture, "
+    "range_clock_waveform, "
+    "reference_clock_waveform, "
+    "expected_jitter_m",
+    [
+        # [4] Table 2-9
+        (
+            ranging.PnRangingCode.CCSDS_T4B,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SINE,
+            0.78 * u.m,
+        ),
+        (
+            ranging.PnRangingCode.CCSDS_T4B,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SQUARE,
+            0.87 * u.m,
+        ),
+        (
+            ranging.PnRangingCode.CCSDS_T4B,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.RangeClockWaveform.SQUARE,
+            1.22 * u.m,
+        ),
+        (
+            ranging.PnRangingCode.CCSDS_T2B,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SINE,
+            1.17 * u.m,
+        ),
+        (
+            ranging.PnRangingCode.CCSDS_T2B,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SQUARE,
+            1.29 * u.m,
+        ),
+        (
+            ranging.PnRangingCode.CCSDS_T2B,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            ranging.RangeClockWaveform.SQUARE,
+            ranging.RangeClockWaveform.SQUARE,
+            1.82 * u.m,
+        ),
+        # [4] Table 2-12 (some entries are redundant with Table 2-9; that's okay)
+        (
+            ranging.PnRangingCode.CCSDS_T4B,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SQUARE,
+            0.87 * u.m,
+        ),
+        (
+            ranging.PnRangingCode.CCSDS_T4B,
+            ranging.TrackingArchitecture.OPEN_LOOP,
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SINE,
+            0.78 * u.m,
+        ),
+        (
+            ranging.PnRangingCode.CCSDS_T2B,
+            ranging.TrackingArchitecture.CLOSED_LOOP,
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SQUARE,
+            # Strangely this value is slightly different from the 1.29 m value given in
+            # Table 2-9 for the same case. Unclear why; maybe different rounding?
+            1.30 * u.m,
+        ),
+        (
+            ranging.PnRangingCode.CCSDS_T2B,
+            ranging.TrackingArchitecture.OPEN_LOOP,
+            ranging.RangeClockWaveform.SINE,
+            ranging.RangeClockWaveform.SINE,
+            1.17 * u.m,
+        ),
+    ],
+)
+def test_range_est_variance_vs_ccsds_green_book(
+    code: ranging.PnRangingCode,
+    tracking_architecture: ranging.TrackingArchitecture,
+    range_clock_waveform: ranging.RangeClockWaveform,
+    reference_clock_waveform: ranging.RangeClockWaveform,
+    expected_jitter_m: Distance,
+):
+    """Test _range_est_variance against [4] Tables 2-9 and 2-12."""
+    # Parameters associated with Tables 2-9 and 2-12 in [4]
+    loop_bandwidth = 1.0 * u.Hz
+    chip_rate = 2.068 * u.MHz
+    range_clock_rate = chip_rate / 2
+    prc_n0_values = {
+        ranging.PnRangingCode.CCSDS_T4B: 29.45 * u.dBHz,
+        ranging.PnRangingCode.CCSDS_T2B: 25.95 * u.dBHz,
+    }
+
+    range_variance = ranging._range_est_variance(
+        range_clock_rate,
+        ranging.RangeJitterParameters(
+            loop_bandwidth,
+            prc_n0_values[code],
+            range_clock_waveform,
+            reference_clock_waveform,
+            tracking_architecture,
+        ),
+    )
+    calculated_jitter = np.sqrt(range_variance)
+
+    assert_quantity_allclose(
+        calculated_jitter,
+        expected_jitter_m,
+        atol=1e-2 * u.m,  # Green book table values are rounded to 2 decimal places
     )
 
 
