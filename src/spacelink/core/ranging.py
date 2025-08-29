@@ -641,8 +641,6 @@ def _range_jitter_coefficient(
     float
         The coefficient for the range estimator jitter expression.
     """
-
-    # TODO: Add references to all of the cases
     match (range_clock_waveform, reference_clock_waveform, tracking_architecture):
         case (
             RangeClockWaveform.SQUARE,
