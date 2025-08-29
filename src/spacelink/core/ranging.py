@@ -594,8 +594,9 @@ class RangeJitterParameters:
     reference_clock_waveform : RangeClockWaveform
         The shape of the reference clock in the receiver, which may or may not be
         matched to the transmitted ranging clock waveform.
-    tracking_architecture : TrackingArchitecture
+    tracking_architecture : TrackingArchitecture | None
         The architecture of the ranging clock tracking system (open or closed loop).
+        Only required if the range clock and reference clock are both square.
     """
 
     loop_bandwidth: Frequency
@@ -722,7 +723,16 @@ def pn_regen_end_to_end_jitter(
     downlink_params: RangeJitterParameters,
 ) -> Distance:
     r"""
-    Calculate end-to-end range jitter for regenerative pseusdo-noise (PN) ranging.
+    Calculate the standard deviation of end-to-end range measurement error for
+    regenerative pseudo-noise (PN) ranging.
+
+    Based on equations in Section 2.5.4 of `[2]`_ and Sections 2.5 and 2.7 of `[4]`_.
+
+    An approximation is used to determine how much of the uplink jitter contributed to
+    the end-to-end jitter. This approximation is most accurate when the loop bandwidth
+    of the transponder is significantly different from the loop bandwidth of the ground
+    station. When the bandwidths are similar then the most accurate approach is to
+    multiply the transfer functions of the two systems but this is not implemented here.
 
     Parameters
     ----------
@@ -736,7 +746,7 @@ def pn_regen_end_to_end_jitter(
     Returns
     -------
     Distance
-        The standard deviation of the end-to-end range estimator (1-sigma).
+        The standard deviation of the end-to-end range estimation error (1-sigma).
     """
 
     # The transponder's regenerated range clock has some phase noise (jitter) that is
