@@ -396,6 +396,44 @@ _CORR_COEFF_DSN = {
 }
 
 
+def pn_component_to_ranging_power(code: PnRangingCode, component: int) -> Dimensionless:
+    r"""
+    Usable PN component power to total ranging power ratio.
+
+    This returns the power ratio :math:`P_n / P_R` for the :math:`n`-th component of
+    the PN ranging signal. For :math:`n = 1` this is equivalent to
+    :math:`P_{RC} / P_R` where :math:`P_{RC}` is the usable power in the ranging clock
+    component.
+
+    Parameters
+    ----------
+    code : PnRangingCode
+        The PN ranging code type.
+    component : int
+        The component index :math:`n` in [1, 6]. Component 1 is the ranging clock.
+
+    Returns
+    -------
+    Dimensionless
+        The fraction of usable ranging power :math:`P_n / P_R`.
+
+    References
+    ----------
+    `[2]`_ Tables 3–5 (:math:`R_n` values; power fraction is :math:`R_n^2`).
+    """
+    try:
+        coeff_dict = _CORR_COEFF_DSN[code]
+    except KeyError as exc:  # pragma: no cover - defensive guard
+        raise ValueError(f"Invalid PN ranging code: {code}") from exc
+
+    try:
+        corr_coeff = coeff_dict[component]
+    except KeyError as exc:  # pragma: no cover - defensive guard
+        raise ValueError(f"Invalid component index: {component}") from exc
+
+    return (corr_coeff**2) * u.dimensionless_unscaled
+
+
 @enforce_units
 def pn_component_acquisition_probability(
     ranging_to_noise_psd: Frequency,

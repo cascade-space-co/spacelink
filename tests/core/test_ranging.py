@@ -230,6 +230,28 @@ def test_data_to_total_power(
     assert_quantity_allclose(data_ratio, expected_data_ratio, rtol=1e-4)
 
 
+@pytest.mark.parametrize(
+    "code, component, expected_fraction",
+    [
+        # DSN: R1=0.9544, R2..6=0.0456
+        (ranging.PnRangingCode.DSN, 1, 0.91087936),
+        (ranging.PnRangingCode.DSN, 2, 0.00207936),
+        # CCSDS T4B: R1=0.9387, R2..6=0.0613
+        (ranging.PnRangingCode.CCSDS_T4B, 1, 0.88115769),
+        (ranging.PnRangingCode.CCSDS_T4B, 2, 0.00375769),
+        # CCSDS T2B: R1=0.6274, R6=0.2496
+        (ranging.PnRangingCode.CCSDS_T2B, 1, 0.39363076),
+        (ranging.PnRangingCode.CCSDS_T2B, 6, 0.06230016),
+    ],
+)
+def test_pn_component_to_ranging_power(
+    code: ranging.PnRangingCode, component: int, expected_fraction: Dimensionless
+):
+    """Test pn_component_to_ranging_power against squared correlation coefficients."""
+    result = ranging.pn_component_to_ranging_power(code, component)
+    assert_quantity_allclose(result, expected_fraction * u.dimensionless, atol=1e-10)
+
+
 def gen_pn_component_acq_prob_test_params():
     """Generate test parameters for pn_component_acquisition_probability."""
 
