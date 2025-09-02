@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.core.pattern_io &mdash; SpaceLink 0.1.7 documentation</title>
+  <title>spacelink.core.pattern_io &mdash; SpaceLink 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=ca7ad2ea"></script>
+        <script src="../../../_static/documentation_options.js?v=22607128"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.7
+                0.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -79,7 +79,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spacelink.core.pattern_io</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">importlib.metadata</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
@@ -88,6 +91,16 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">antenna</span> <span class="k">as</span> <span class="n">antenna</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">units</span>
+
+<span class="c1"># Serialization format identifiers (kept stable across code refactors)</span>
+<span class="n">_FORMAT_NAME</span> <span class="o">=</span> <span class="s2">&quot;spacelink.RadiationPattern&quot;</span>
+<span class="n">_FORMAT_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">_CONVENTIONS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;theta[rad], phi[rad], frequency[Hz], e_* dimensionless; handedness=enum.name&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Resolve the package version without importing the top-level package</span>
+<span class="n">_SPACELINK_VERSION</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">&quot;spacelink&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="load_radiation_pattern_npz">
@@ -113,25 +126,51 @@
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    FileNotFoundError</span>
-<span class="sd">        If the specified file does not exist (when source is a path).</span>
+<span class="sd">        If the specified file does not exist (when ``source`` is a path).</span>
 <span class="sd">    KeyError</span>
 <span class="sd">        If required keys are missing from the NPZ file.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the file&#39;s ``format_name`` or ``format_version`` are unsupported.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
 
-    <span class="c1"># Reconstruct arrays with proper units</span>
-    <span class="n">theta</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;theta&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span>
-    <span class="n">phi</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;phi&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span>
-    <span class="n">e_theta</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;e_theta&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span>
-    <span class="n">e_phi</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;e_phi&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span>
-    <span class="n">rad_efficiency</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;rad_efficiency&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span>
+    <span class="c1"># Validate format identity and version. These keys are required.</span>
+    <span class="n">format_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;format_name&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">format_name</span> <span class="o">!=</span> <span class="n">_FORMAT_NAME</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unsupported format_name &#39;</span><span class="si">{</span><span class="n">format_name</span><span class="si">}</span><span class="s2">&#39;; expected &#39;</span><span class="si">{</span><span class="n">_FORMAT_NAME</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="p">)</span>
+    <span class="n">format_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;format_version&quot;</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">format_version</span> <span class="o">!=</span> <span class="n">_FORMAT_VERSION</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unsupported format_version </span><span class="si">{</span><span class="n">format_version</span><span class="si">}</span><span class="s2">; expected </span><span class="si">{</span><span class="n">_FORMAT_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">default_polarization</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;has_default_polarization&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">default_polarization</span> <span class="o">=</span> <span class="n">antenna</span><span class="o">.</span><span class="n">Polarization</span><span class="p">(</span>
+            <span class="n">tilt_angle</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;default_pol_tilt_angle&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">,</span>
+            <span class="n">axial_ratio</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;default_pol_axial_ratio&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">,</span>
+            <span class="n">handedness</span><span class="o">=</span><span class="n">antenna</span><span class="o">.</span><span class="n">Handedness</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;default_pol_handedness&quot;</span><span class="p">])],</span>
+        <span class="p">)</span>
+
+    <span class="n">frequency</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;has_frequency&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">frequency</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;frequency&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>
+
+    <span class="n">default_frequency</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;has_default_frequency&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">default_frequency</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;default_frequency&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>
 
     <span class="k">return</span> <span class="n">antenna</span><span class="o">.</span><span class="n">RadiationPattern</span><span class="p">(</span>
-        <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
-        <span class="n">phi</span><span class="o">=</span><span class="n">phi</span><span class="p">,</span>
-        <span class="n">e_theta</span><span class="o">=</span><span class="n">e_theta</span><span class="p">,</span>
-        <span class="n">e_phi</span><span class="o">=</span><span class="n">e_phi</span><span class="p">,</span>
-        <span class="n">rad_efficiency</span><span class="o">=</span><span class="n">rad_efficiency</span><span class="p">,</span>
+        <span class="n">theta</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;theta&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">,</span>
+        <span class="n">phi</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;phi&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="o">=</span><span class="n">frequency</span><span class="p">,</span>
+        <span class="n">e_theta</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;e_theta&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">,</span>
+        <span class="n">e_phi</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;e_phi&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">,</span>
+        <span class="n">rad_efficiency</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;rad_efficiency&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">,</span>
+        <span class="n">default_polarization</span><span class="o">=</span><span class="n">default_polarization</span><span class="p">,</span>
+        <span class="n">default_frequency</span><span class="o">=</span><span class="n">default_frequency</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -153,24 +192,100 @@
 <span class="sd">        to write NPZ data to. This allows saving to files, databases, or</span>
 <span class="sd">        in-memory buffers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">theta_vals</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">theta</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">phi_vals</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">e_theta_vals</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">e_theta</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">e_phi_vals</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">e_phi</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">rad_eff_vals</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">rad_efficiency</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="c1"># Optional frequency</span>
+    <span class="n">freq_vals</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">freq_vals</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">frequency</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="c1"># Human/provenance metadata that requires no pickling</span>
+    <span class="n">created_ts</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">UTC</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+    <span class="n">producer_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;spacelink </span><span class="si">{</span><span class="n">_SPACELINK_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Summarize dtypes and shapes for quick inspection</span>
+    <span class="n">dtype_summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">theta_vals</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">theta_vals</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;phi&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phi_vals</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phi_vals</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;e_theta&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">e_theta_vals</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">e_theta_vals</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;e_phi&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">e_phi_vals</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">e_phi_vals</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;rad_efficiency&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">rad_eff_vals</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">rad_eff_vals</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">freq_vals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dtype_summary</span><span class="p">[</span><span class="s2">&quot;frequency&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freq_vals</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freq_vals</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+        <span class="p">}</span>
+
+    <span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># Data arrays</span>
+        <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="n">theta_vals</span><span class="p">,</span>
+        <span class="s2">&quot;phi&quot;</span><span class="p">:</span> <span class="n">phi_vals</span><span class="p">,</span>
+        <span class="s2">&quot;e_theta&quot;</span><span class="p">:</span> <span class="n">e_theta_vals</span><span class="p">,</span>
+        <span class="s2">&quot;e_phi&quot;</span><span class="p">:</span> <span class="n">e_phi_vals</span><span class="p">,</span>
+        <span class="s2">&quot;rad_efficiency&quot;</span><span class="p">:</span> <span class="n">rad_eff_vals</span><span class="p">,</span>
+        <span class="c1"># Presence flags</span>
+        <span class="s2">&quot;has_default_polarization&quot;</span><span class="p">:</span> <span class="n">pattern</span><span class="o">.</span><span class="n">default_polarization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;has_frequency&quot;</span><span class="p">:</span> <span class="n">pattern</span><span class="o">.</span><span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;has_default_frequency&quot;</span><span class="p">:</span> <span class="n">pattern</span><span class="o">.</span><span class="n">default_frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># Format identity and provenance</span>
+        <span class="s2">&quot;format_name&quot;</span><span class="p">:</span> <span class="n">_FORMAT_NAME</span><span class="p">,</span>
+        <span class="s2">&quot;format_version&quot;</span><span class="p">:</span> <span class="n">_FORMAT_VERSION</span><span class="p">,</span>
+        <span class="s2">&quot;conventions&quot;</span><span class="p">:</span> <span class="n">_CONVENTIONS</span><span class="p">,</span>
+        <span class="s2">&quot;producer&quot;</span><span class="p">:</span> <span class="n">producer_str</span><span class="p">,</span>
+        <span class="s2">&quot;created_utc&quot;</span><span class="p">:</span> <span class="n">created_ts</span><span class="p">,</span>
+        <span class="s2">&quot;dtype_info&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">dtype_summary</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">default_polarization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pol</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">default_polarization</span>
+        <span class="n">data_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;default_pol_tilt_angle&quot;</span><span class="p">:</span> <span class="n">pol</span><span class="o">.</span><span class="n">tilt_angle</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s2">&quot;default_pol_axial_ratio&quot;</span><span class="p">:</span> <span class="n">pol</span><span class="o">.</span><span class="n">axial_ratio</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s2">&quot;default_pol_handedness&quot;</span><span class="p">:</span> <span class="n">pol</span><span class="o">.</span><span class="n">handedness</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">freq_vals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;frequency&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">freq_vals</span>
+
+    <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">default_frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;default_frequency&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">default_frequency</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
     <span class="n">np</span><span class="o">.</span><span class="n">savez_compressed</span><span class="p">(</span>
         <span class="n">destination</span><span class="p">,</span>
-        <span class="n">theta</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">theta</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="n">phi</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="n">e_theta</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">e_theta</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="n">e_phi</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">e_phi</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="n">rad_efficiency</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">rad_efficiency</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
         <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">data_dict</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="import_hfss_csv">
 <a class="viewcode-back" href="../../../core/pattern_io.html#spacelink.core.pattern_io.import_hfss_csv">[docs]</a>
+<span class="nd">@units</span><span class="o">.</span><span class="n">enforce_units</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">import_hfss_csv</span><span class="p">(</span>
     <span class="n">hfss_csv_path</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">carrier_frequency</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Frequency</span><span class="p">,</span>
     <span class="n">rad_efficiency</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Dimensionless</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">antenna</span><span class="o">.</span><span class="n">RadiationPattern</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -194,16 +309,25 @@
 <span class="sd">    ----------</span>
 <span class="sd">    hfss_csv_path: pathlib.Path</span>
 <span class="sd">        Path to the HFSS CSV file.</span>
-<span class="sd">    carrier_frequency: Frequency</span>
-<span class="sd">        Pattern data corresponding to this carrier frequency will be imported from</span>
-<span class="sd">        the CSV file. Only a single frequency is currently supported.</span>
 <span class="sd">    rad_efficiency: Dimensionless</span>
-<span class="sd">        Radiation efficiency :math:`\eta` in [0, 1].</span>
+<span class="sd">        Radiation efficiency :math:`\eta` in (0, 1].</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    RadiationPattern</span>
-<span class="sd">        Radiation pattern constructed from the CSV.</span>
+<span class="sd">        Radiation pattern constructed from the CSV. If the CSV contains only a single</span>
+<span class="sd">        frequency the pattern will be created without a frequency axis (it will be</span>
+<span class="sd">        frequency-invariant).</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    FileNotFoundError</span>
+<span class="sd">        If the CSV file does not exist.</span>
+<span class="sd">    KeyError</span>
+<span class="sd">        If required columns are missing from the CSV.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If duplicate (Freq, Theta, Phi) grid rows are present or if the CSV does not</span>
+<span class="sd">        form a complete regular grid (NaNs detected after pivoting and reindexing).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Define column name constants</span>
     <span class="n">freq_col</span> <span class="o">=</span> <span class="s2">&quot;Freq [GHz]&quot;</span>
@@ -215,63 +339,90 @@
     <span class="n">phase_rhcp_col</span> <span class="o">=</span> <span class="s2">&quot;ang_deg(rERHCP) [deg]&quot;</span>
 
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">hfss_csv_path</span><span class="p">)</span>
-    <span class="n">target_freq</span> <span class="o">=</span> <span class="n">carrier_frequency</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">GHz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-    <span class="n">df_one_freq</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">freq_col</span><span class="p">],</span> <span class="n">target_freq</span><span class="p">)]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="n">freq_col</span><span class="p">,</span> <span class="n">theta_col</span><span class="p">,</span> <span class="n">phi_col</span><span class="p">])</span>
 
-    <span class="k">if</span> <span class="n">df_one_freq</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No data found for frequency </span><span class="si">{</span><span class="n">carrier_frequency</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Validate that there are no duplicate grid rows for the same</span>
+    <span class="c1"># (frequency, theta, phi) coordinate triple. Duplicates would be silently</span>
+    <span class="c1"># collapsed by the pivot operation; fail fast instead.</span>
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">freq_col</span><span class="p">,</span> <span class="n">theta_col</span><span class="p">,</span> <span class="n">phi_col</span><span class="p">])</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Duplicate rows detected for the same (Freq, Theta, Phi) grid point&quot;</span>
+        <span class="p">)</span>
 
-    <span class="n">df_one_freq</span> <span class="o">=</span> <span class="n">df_one_freq</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="n">theta_col</span><span class="p">,</span> <span class="n">phi_col</span><span class="p">])</span>
+    <span class="c1"># Axes</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">theta_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">phi_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+    <span class="c1"># Save original frequency values to avoid precision issues when matching pivot table</span>
+    <span class="c1"># columns later</span>
+    <span class="n">freq_values_original</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">freq_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="n">frequencies</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_values_original</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">GHz</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
 
-    <span class="c1"># Extract arrays of unique theta and phi values</span>
-    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">df_one_freq</span><span class="p">[</span><span class="n">theta_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
-    <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">df_one_freq</span><span class="p">[</span><span class="n">phi_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+    <span class="n">n_theta</span> <span class="o">=</span> <span class="n">theta</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">n_phi</span> <span class="o">=</span> <span class="n">phi</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">n_freq</span> <span class="o">=</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">size</span>
 
-    <span class="c1"># Create 2D arrays with shape (N_theta, N_phi)</span>
+    <span class="c1"># Single pivot across all value columns, then reindex once</span>
+    <span class="n">index_target</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_product</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">theta</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">),</span> <span class="n">phi</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="n">theta_col</span><span class="p">,</span> <span class="n">phi_col</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">value_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">gain_lhcp_col</span><span class="p">,</span> <span class="n">gain_rhcp_col</span><span class="p">,</span> <span class="n">phase_lhcp_col</span><span class="p">,</span> <span class="n">phase_rhcp_col</span><span class="p">]</span>
+    <span class="c1"># Use original frequency values to match pivot table columns exactly</span>
+    <span class="n">columns_target</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_product</span><span class="p">([</span><span class="n">value_cols</span><span class="p">,</span> <span class="n">freq_values_original</span><span class="p">])</span>
+
+    <span class="n">df_pivoted</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">theta_col</span><span class="p">,</span> <span class="n">phi_col</span><span class="p">],</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">freq_col</span><span class="p">,</span>
+        <span class="n">values</span><span class="o">=</span><span class="n">value_cols</span><span class="p">,</span>
+        <span class="n">aggfunc</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">df_pivoted</span> <span class="o">=</span> <span class="n">df_pivoted</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index_target</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns_target</span><span class="p">)</span>
+
+    <span class="c1"># After reindexing, any NaNs indicate that the CSV did not form a complete</span>
+    <span class="c1"># regular grid across theta, phi, and frequency. Fail to avoid propagating</span>
+    <span class="c1"># invalid values into the radiation pattern tensors.</span>
+    <span class="k">if</span> <span class="n">df_pivoted</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;CSV does not form a complete regular grid; missing theta/phi/frequency &quot;</span>
+            <span class="s2">&quot;samples detected&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Reshape to (n_theta, n_phi, n_freq)</span>
     <span class="n">gain_lhcp</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">to_linear</span><span class="p">(</span>
-        <span class="n">df_one_freq</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span>
-            <span class="n">index</span><span class="o">=</span><span class="n">theta_col</span><span class="p">,</span>
-            <span class="n">columns</span><span class="o">=</span><span class="n">phi_col</span><span class="p">,</span>
-            <span class="n">values</span><span class="o">=</span><span class="n">gain_lhcp_col</span><span class="p">,</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">values</span>
-        <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span>
+        <span class="n">df_pivoted</span><span class="p">[</span><span class="n">gain_lhcp_col</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_theta</span><span class="p">,</span> <span class="n">n_phi</span><span class="p">,</span> <span class="n">n_freq</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span>
     <span class="p">)</span>
     <span class="n">gain_rhcp</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">to_linear</span><span class="p">(</span>
-        <span class="n">df_one_freq</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span>
-            <span class="n">index</span><span class="o">=</span><span class="n">theta_col</span><span class="p">,</span>
-            <span class="n">columns</span><span class="o">=</span><span class="n">phi_col</span><span class="p">,</span>
-            <span class="n">values</span><span class="o">=</span><span class="n">gain_rhcp_col</span><span class="p">,</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">values</span>
-        <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span>
+        <span class="n">df_pivoted</span><span class="p">[</span><span class="n">gain_rhcp_col</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_theta</span><span class="p">,</span> <span class="n">n_phi</span><span class="p">,</span> <span class="n">n_freq</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span>
     <span class="p">)</span>
     <span class="n">angle_lhcp</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">df_one_freq</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span>
-            <span class="n">index</span><span class="o">=</span><span class="n">theta_col</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">phi_col</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">phase_lhcp_col</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">values</span>
-        <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+        <span class="n">df_pivoted</span><span class="p">[</span><span class="n">phase_lhcp_col</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_theta</span><span class="p">,</span> <span class="n">n_phi</span><span class="p">,</span> <span class="n">n_freq</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
     <span class="p">)</span>
     <span class="n">angle_rhcp</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">df_one_freq</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span>
-            <span class="n">index</span><span class="o">=</span><span class="n">theta_col</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">phi_col</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">phase_rhcp_col</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">values</span>
-        <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+        <span class="n">df_pivoted</span><span class="p">[</span><span class="n">phase_rhcp_col</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_theta</span><span class="p">,</span> <span class="n">n_phi</span><span class="p">,</span> <span class="n">n_freq</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
     <span class="p">)</span>
 
-    <span class="c1"># HFSS exports often have phi = 0 and 360 degrees which means the last phi</span>
-    <span class="c1"># value is redundant with the first. In that case we drop the redundant phi</span>
-    <span class="c1"># values.</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">phi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">phi</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">360</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">):</span>
-        <span class="n">phi_last_idx</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">phi_last_idx</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># If CSV contains a single frequency, emit a frequency-invariant pattern</span>
+    <span class="k">if</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">antenna</span><span class="o">.</span><span class="n">RadiationPattern</span><span class="o">.</span><span class="n">from_circular_gain</span><span class="p">(</span>
+            <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
+            <span class="n">phi</span><span class="o">=</span><span class="n">phi</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">gain_lhcp</span><span class="o">=</span><span class="n">gain_lhcp</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">gain_rhcp</span><span class="o">=</span><span class="n">gain_rhcp</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">phase_lhcp</span><span class="o">=</span><span class="n">angle_lhcp</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">phase_rhcp</span><span class="o">=</span><span class="n">angle_rhcp</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">rad_efficiency</span><span class="o">=</span><span class="n">rad_efficiency</span><span class="p">,</span>
+        <span class="p">)</span>
 
+    <span class="c1"># Otherwise, return full 3D frequency-aware pattern</span>
     <span class="k">return</span> <span class="n">antenna</span><span class="o">.</span><span class="n">RadiationPattern</span><span class="o">.</span><span class="n">from_circular_gain</span><span class="p">(</span>
-        <span class="n">theta</span><span class="p">,</span>
-        <span class="n">phi</span><span class="p">[:</span><span class="n">phi_last_idx</span><span class="p">],</span>
-        <span class="n">gain_lhcp</span><span class="p">[:,</span> <span class="p">:</span><span class="n">phi_last_idx</span><span class="p">],</span>
-        <span class="n">gain_rhcp</span><span class="p">[:,</span> <span class="p">:</span><span class="n">phi_last_idx</span><span class="p">],</span>
-        <span class="n">angle_lhcp</span><span class="p">[:,</span> <span class="p">:</span><span class="n">phi_last_idx</span><span class="p">],</span>
-        <span class="n">angle_rhcp</span><span class="p">[:,</span> <span class="p">:</span><span class="n">phi_last_idx</span><span class="p">],</span>
+        <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
+        <span class="n">phi</span><span class="o">=</span><span class="n">phi</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="o">=</span><span class="n">frequencies</span><span class="p">,</span>
+        <span class="n">gain_lhcp</span><span class="o">=</span><span class="n">gain_lhcp</span><span class="p">,</span>
+        <span class="n">gain_rhcp</span><span class="o">=</span><span class="n">gain_rhcp</span><span class="p">,</span>
+        <span class="n">phase_lhcp</span><span class="o">=</span><span class="n">angle_lhcp</span><span class="p">,</span>
+        <span class="n">phase_rhcp</span><span class="o">=</span><span class="n">angle_rhcp</span><span class="p">,</span>
         <span class="n">rad_efficiency</span><span class="o">=</span><span class="n">rad_efficiency</span><span class="p">,</span>
     <span class="p">)</span></div>
 

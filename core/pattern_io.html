@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pattern I/O Module &mdash; SpaceLink 0.1.7 documentation</title>
+  <title>Pattern I/O Module &mdash; SpaceLink 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
+        <script src="../_static/documentation_options.js?v=22607128"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.7
+                0.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -117,8 +117,9 @@ files, databases, or in-memory buffers.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>FileNotFoundError</strong> – If the specified file does not exist (when source is a path).</p></li>
+<li><p><strong>FileNotFoundError</strong> – If the specified file does not exist (when <code class="docutils literal notranslate"><span class="pre">source</span></code> is a path).</p></li>
 <li><p><strong>KeyError</strong> – If required keys are missing from the NPZ file.</p></li>
+<li><p><strong>ValueError</strong> – If the file’s <code class="docutils literal notranslate"><span class="pre">format_name</span></code> or <code class="docutils literal notranslate"><span class="pre">format_version</span></code> are unsupported.</p></li>
 </ul>
 </dd>
 </dl>
@@ -145,7 +146,7 @@ in-memory buffers.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="spacelink.core.pattern_io.import_hfss_csv">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.pattern_io.</span></span><span class="sig-name descname"><span class="pre">import_hfss_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hfss_csv_path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/pattern_io.html#import_hfss_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.pattern_io.import_hfss_csv" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.pattern_io.</span></span><span class="sig-name descname"><span class="pre">import_hfss_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hfss_csv_path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/pattern_io.html#import_hfss_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.core.pattern_io.import_hfss_csv" title="Link to this definition"></a></dt>
 <dd><p>Create a radiation pattern from an HFSS exported CSV file.</p>
 <p>This expects the CSV file to contain the following columns in any order:
 - Freq [GHz]
@@ -162,16 +163,24 @@ column names.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>hfss_csv_path</strong> (<em>pathlib.Path</em>) – Path to the HFSS CSV file.</p></li>
-<li><p><strong>carrier_frequency</strong> (<em>Frequency</em>) – Pattern data corresponding to this carrier frequency will be imported from
-the CSV file. Only a single frequency is currently supported.</p></li>
-<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in [0, 1].</p></li>
+<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in (0, 1].</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Radiation pattern constructed from the CSV.</p>
+<dd class="field-even"><p>Radiation pattern constructed from the CSV. If the CSV contains only a single
+frequency the pattern will be created without a frequency axis (it will be
+frequency-invariant).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>RadiationPattern</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If the CSV file does not exist.</p></li>
+<li><p><strong>KeyError</strong> – If required columns are missing from the CSV.</p></li>
+<li><p><strong>ValueError</strong> – If duplicate (Freq, Theta, Phi) grid rows are present or if the CSV does not
+    form a complete regular grid (NaNs detected after pivoting and reindexing).</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

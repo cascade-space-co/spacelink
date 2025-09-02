@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Antenna Module &mdash; SpaceLink 0.1.7 documentation</title>
+  <title>Antenna Module &mdash; SpaceLink 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
+        <script src="../_static/documentation_options.js?v=22607128"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.7
+                0.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -253,84 +253,94 @@ propagation.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.core.antenna.</span></span><span class="sig-name descname"><span class="pre">SphericalInterpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">floor=&lt;Quantity</span> <span class="pre">-200.</span> <span class="pre">dB&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#SphericalInterpolator"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Interpolates a regular grid of complex values in spherical coordinates.</p>
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">floor=&lt;Quantity</span> <span class="pre">-200.</span> <span class="pre">dB&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#SphericalInterpolator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Create a spherical interpolator.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> (<em>Angle</em>) – 1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</p></li>
-<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
-(M,). Note that the last element must be less than 2π.</p></li>
-<li><p><strong>values</strong> (<em>u.Quantity</em>) – 2D complex array of values with shape (N, M) to interpolate.</p></li>
-<li><p><strong>floor</strong> (<em>Decibels</em>) – Floor value for the magnitude in dB. The interpolation approach used cannot
-handle 0 values anywhere, so 0s (-∞ dB) are replaced with this prior to
-interpolation.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.core.antenna.</span></span><span class="sig-name descname"><span class="pre">RadiationPattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.core.antenna.</span></span><span class="sig-name descname"><span class="pre">RadiationPattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_polarization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represents an antenna radiation pattern on a spherical coordinate system.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_polarization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Create a radiation pattern from a set of E-field components.</p>
 <div class="math notranslate nohighlight">
-\[\vec{E}(\theta, \phi) = E_\theta(\theta, \phi)\hat{\theta}
-+ E_\phi(\theta, \phi)\hat{\phi}\]</div>
+\[\vec{E}(\theta, \phi, f) = E_\theta(\theta, \phi, f)\hat{\theta}
++ E_\phi(\theta, \phi, f)\hat{\phi}\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> (<em>Angle</em>) – 1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</p></li>
-<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
-(M,). Note that the last element must be less than 2π.</p></li>
-<li><p><strong>e_theta</strong> (<em>Dimensionless</em>) – 2D complex array of <span class="math notranslate nohighlight">\(E_{\theta}(\theta, \phi)\)</span> values with shape (N,
-M) normalized such that the magnitude squared is equal to directivity.</p></li>
-<li><p><strong>e_phi</strong> (<em>Dimensionless</em>) – 2D complex array of <span class="math notranslate nohighlight">\(E_{\phi}(\theta, \phi)\)</span> values with shape (N, M)
-normalized such that the magnitude squared is equal to directivity.</p></li>
-<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in [0, 1].</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles with shape (M,). The span must
+be at most 2π radians.</p></li>
+<li><p><strong>frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Optional 1D array of strictly increasing frequencies with shape (K,) where
+K &gt; 1. If None, the pattern is treated as frequency-invariant and 2D over
+(theta, phi).</p></li>
+<li><p><strong>e_theta</strong> (<em>Dimensionless</em>) – Complex array of <span class="math notranslate nohighlight">\(E_{\theta}(\theta, \phi[, f])\)</span> values normalized
+such that the magnitude squared is equal to directivity. The required
+shape depends on whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>e_phi</strong> (<em>Dimensionless</em>) – Complex array of <span class="math notranslate nohighlight">\(E_{\phi}(\theta, \phi[, f])\)</span> values normalized
+such that the magnitude squared is equal to directivity. The required
+shape depends on whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in (0, 1].</p></li>
+<li><p><strong>default_polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Optional default polarization used when instance methods are called without
+an explicit polarization.</p></li>
+<li><p><strong>default_frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Optional default frequency used when instance methods are called without an
+explicit frequency.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>ValueError</strong> – If theta or phi are not in [0, pi], or if theta or phi are not sorted in
-    strictly increasing order, or if theta or phi are not equally spaced, or if
-    phi does not cover less than 2π radians.</p></li>
+<li><p><strong>ValueError</strong> – If theta is not in [0, pi], if phi spans more than 2π radians, or if
+    theta/phi/frequency are not strictly increasing, or if inputs are outside
+    allowed ranges.</p></li>
 <li><p><strong>ValueError</strong> – If the surface integral of the directivity is greater than 4π.</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'Hz'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<dd><p>Default frequency used when instance methods are called without an explicit
+frequency.</p>
+<p>For frequency-aware patterns, this must be a scalar frequency within the closed
+interval defined by the pattern’s <code class="docutils literal notranslate"><span class="pre">frequency</span></code> grid or None.</p>
+<p>For frequency-invariant patterns this is stored but ignored.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_circular_e_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_lhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_rhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.from_circular_e_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_circular_e_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_lhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_rhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_polarization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.from_circular_e_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Create a radiation pattern from a set of LHCP/RHCP E-field components.</p>
 <div class="math notranslate nohighlight">
-\[\vec{E}(\theta, \phi) = E_\text{LHCP}(\theta, \phi)\hat{\text{LHCP}}
-+ E_\text{RHCP}(\theta, \phi)\hat{\text{RHCP}}\]</div>
+\[\vec{E}(\theta, \phi, f) = E_\text{LHCP}(\theta, \phi, f)\hat{\text{LHCP}}
++ E_\text{RHCP}(\theta, \phi, f)\hat{\text{RHCP}}\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> (<em>Angle</em>) – 1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</p></li>
-<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
-(M,).</p></li>
-<li><p><strong>e_lhcp</strong> (<em>Dimensionless</em>) – 2D complex array of <span class="math notranslate nohighlight">\(E_{\text{LHCP}}(\theta, \phi)\)</span> values with shape
-(N, M) normalized such that the magnitude squared is equal to directivity.</p></li>
-<li><p><strong>e_rhcp</strong> (<em>Dimensionless</em>) – 2D complex array of <span class="math notranslate nohighlight">\(E_{\text{RHCP}}(\theta, \phi)\)</span> values with shape
-(N, M) normalized such that the magnitude squared is equal to directivity.</p></li>
-<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in [0, 1].</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles with shape (M,). The span must
+be at most 2π radians.</p></li>
+<li><p><strong>frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Optional 1D array of strictly increasing frequencies with shape (K,).
+If None, the pattern is treated as frequency-invariant and 2D over
+(theta, phi).</p></li>
+<li><p><strong>e_lhcp</strong> (<em>Dimensionless</em>) – Complex array of <span class="math notranslate nohighlight">\(E_{\text{LHCP}}(\theta, \phi[, f])\)</span> values
+normalized such that the magnitude squared is equal to directivity. The
+required shape depends on whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>e_rhcp</strong> (<em>Dimensionless</em>) – Complex array of <span class="math notranslate nohighlight">\(E_{\text{RHCP}}(\theta, \phi[, f])\)</span> values
+normalized such that the magnitude squared is equal to directivity. The
+required shape depends on whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in (0, 1].</p></li>
+<li><p><strong>default_polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Optional default polarization used when instance methods are called without
+an explicit polarization.</p></li>
+<li><p><strong>default_frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Optional default frequency used when instance methods are called without an
+explicit frequency.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -341,19 +351,38 @@ normalized such that the magnitude squared is equal to directivity.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_circular_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_lhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_rhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_lhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_rhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.from_circular_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_circular_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_lhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_rhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_lhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_rhcp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_polarization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.from_circular_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Create a radiation pattern from circular gain and phase.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> (<em>Angle</em>) – 1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</p></li>
-<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
-(M,).</p></li>
-<li><p><strong>gain_lhcp</strong> (<em>Dimensionless</em>) – 2D array of LHCP gain with shape (N, M).</p></li>
-<li><p><strong>gain_rhcp</strong> (<em>Dimensionless</em>) – 2D array of RHCP gain with shape (N, M).</p></li>
-<li><p><strong>phase_lhcp</strong> (<em>Angle</em>) – 2D array of LHCP phase angles with shape (N, M).</p></li>
-<li><p><strong>phase_rhcp</strong> (<em>Angle</em>) – 2D array of RHCP phase angles with shape (N, M).</p></li>
-<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in [0, 1].</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles with shape (M,). The span must
+be at most 2π radians.</p></li>
+<li><p><strong>frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Optional 1D array of strictly increasing frequencies with shape (K,).
+If None, the pattern is treated as frequency-invariant and 2D over
+(theta, phi).</p></li>
+<li><p><strong>gain_lhcp</strong> (<em>Dimensionless</em>) – Array of LHCP gain values. The required shape depends on whether
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>gain_rhcp</strong> (<em>Dimensionless</em>) – Array of RHCP gain values. The required shape depends on whether
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>phase_lhcp</strong> (<em>Angle</em>) – Array of LHCP phase angles. The required shape depends on whether
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>phase_rhcp</strong> (<em>Angle</em>) – Array of RHCP phase angles. The required shape depends on whether
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in (0, 1].</p></li>
+<li><p><strong>default_polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Optional default polarization used when instance methods are called without
+an explicit polarization.</p></li>
+<li><p><strong>default_frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Optional default frequency used when instance methods are called without an
+explicit frequency.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -364,19 +393,38 @@ normalized such that the magnitude squared is equal to directivity.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_linear_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.from_linear_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_linear_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rad_efficiency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_polarization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.from_linear_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Create a radiation pattern from linear gain and phase.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> (<em>Angle</em>) – 1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</p></li>
-<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape
-(M,).</p></li>
-<li><p><strong>gain_theta</strong> (<em>Dimensionless</em>) – 2D array of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> gain with shape (N, M).</p></li>
-<li><p><strong>gain_phi</strong> (<em>Dimensionless</em>) – 2D array of <span class="math notranslate nohighlight">\(\hat{\phi}\)</span> gain with shape (N, M).</p></li>
-<li><p><strong>phase_theta</strong> (<em>Angle</em>) – 2D array of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> phase angles with shape (N, M).</p></li>
-<li><p><strong>phase_phi</strong> (<em>Angle</em>) – 2D array of <span class="math notranslate nohighlight">\(\hat{\phi}\)</span> phase angles with shape (N, M).</p></li>
-<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in [0, 1].</p></li>
+<li><p><strong>phi</strong> (<em>Angle</em>) – 1D array of equally spaced azimuthal angles with shape (M,). The span must
+be at most 2π radians.</p></li>
+<li><p><strong>frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Optional 1D array of strictly increasing frequencies with shape (K,).
+If None, the pattern is treated as frequency-invariant and 2D over
+(theta, phi).</p></li>
+<li><p><strong>gain_theta</strong> (<em>Dimensionless</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> gain values. The required shape depends on
+whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>gain_phi</strong> (<em>Dimensionless</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\phi}\)</span> gain values. The required shape depends on
+whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>phase_theta</strong> (<em>Angle</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> phase angles. The required shape depends on
+whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>phase_phi</strong> (<em>Angle</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\phi}\)</span> phase angles. The required shape depends on
+whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
+- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in (0, 1].</p></li>
+<li><p><strong>default_polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Optional default polarization used when instance methods are called without
+an explicit polarization.</p></li>
+<li><p><strong>default_frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Optional default frequency used when instance methods are called without an
+explicit frequency.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -387,14 +435,18 @@ normalized such that the magnitude squared is equal to directivity.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">e_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarization</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.e_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">e_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.e_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Normalized complex E-field in the desired polarization state.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> (<em>Angle</em>) – Polar angles.</p></li>
 <li><p><strong>phi</strong> (<em>Angle</em>) – Azimuthal angles.</p></li>
-<li><p><strong>polarization</strong> (<em>Polarization</em>) – Desired polarization state.</p></li>
+<li><p><strong>frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Desired frequency. If None, uses the instance’s <code class="docutils literal notranslate"><span class="pre">default_frequency</span></code> if
+set; otherwise raises ValueError. For 2D patterns (constructed without
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code>), this argument is ignored.</p></li>
+<li><p><strong>polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Desired polarization state. If None, uses the instance’s
+<code class="docutils literal notranslate"><span class="pre">default_polarization</span></code> if set; otherwise raises ValueError.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -410,7 +462,7 @@ broadcasting rules from the shapes of theta and phi.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">directivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarization</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.directivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">directivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.directivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Directivity of the antenna.</p>
 <p>Directivity as a function of the E-field in V/m is</p>
 <div class="math notranslate nohighlight">
@@ -426,7 +478,11 @@ Thus the directivity is simply</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> (<em>Angle</em>) – Polar angles.</p></li>
 <li><p><strong>phi</strong> (<em>Angle</em>) – Azimuthal angles.</p></li>
-<li><p><strong>polarization</strong> (<em>Polarization</em>) – Desired polarization state.</p></li>
+<li><p><strong>frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Desired frequency. If None, uses the instance’s <code class="docutils literal notranslate"><span class="pre">default_frequency</span></code> if
+set; otherwise raises ValueError. For 2D patterns (constructed without
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code>), this argument is ignored.</p></li>
+<li><p><strong>polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Desired polarization state. If None, uses the instance’s
+<code class="docutils literal notranslate"><span class="pre">default_polarization</span></code> if set; otherwise raises ValueError.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -441,7 +497,7 @@ the shapes of theta and phi.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarization</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Gain of the antenna.</p>
 <div class="math notranslate nohighlight">
 \[G(\theta, \phi) = \eta \cdot D(\theta, \phi)\]</div>
@@ -451,7 +507,11 @@ the shapes of theta and phi.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> (<em>Angle</em>) – Polar angles.</p></li>
 <li><p><strong>phi</strong> (<em>Angle</em>) – Azimuthal angles.</p></li>
-<li><p><strong>polarization</strong> (<em>Polarization</em>) – Desired polarization state.</p></li>
+<li><p><strong>frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Desired frequency. If None, uses the instance’s <code class="docutils literal notranslate"><span class="pre">default_frequency</span></code> if
+set; otherwise raises ValueError. For 2D patterns (constructed without
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code>), this argument is ignored.</p></li>
+<li><p><strong>polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Desired polarization state. If None, uses the instance’s
+<cite>default_polarization</cite> if set; otherwise raises ValueError.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -466,7 +526,7 @@ shapes of theta and phi.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">axial_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.axial_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">axial_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/antenna.html#RadiationPattern.axial_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Axial ratio of the antenna.</p>
 <p>The axial ratio is the ratio of the major to minor axis of the polarization
 ellipse. An axial ratio of 0 dB corresponds to circular polarization, and an
@@ -477,6 +537,9 @@ have axial ratios between these two extremes.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> (<em>Angle</em>) – Polar angles.</p></li>
 <li><p><strong>phi</strong> (<em>Angle</em>) – Azimuthal angles.</p></li>
+<li><p><strong>frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Desired frequency. If None, uses the instance’s <code class="docutils literal notranslate"><span class="pre">default_frequency</span></code> if
+set; otherwise raises ValueError. For 2D patterns (constructed without
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code>), this argument is ignored.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

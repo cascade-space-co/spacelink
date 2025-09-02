@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.core.antenna &mdash; SpaceLink 0.1.7 documentation</title>
+  <title>spacelink.core.antenna &mdash; SpaceLink 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=ca7ad2ea"></script>
+        <script src="../../../_static/documentation_options.js?v=22607128"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.7
+                0.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -130,7 +130,6 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
@@ -140,17 +139,27 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Angle</span><span class="p">,</span>
+    <span class="n">DecibelPerKelvin</span><span class="p">,</span>
     <span class="n">Decibels</span><span class="p">,</span>
     <span class="n">Dimensionless</span><span class="p">,</span>
     <span class="n">Frequency</span><span class="p">,</span>
     <span class="n">Length</span><span class="p">,</span>
     <span class="n">SolidAngle</span><span class="p">,</span>
-    <span class="n">wavelength</span><span class="p">,</span>
+    <span class="n">Temperature</span><span class="p">,</span>
     <span class="n">enforce_units</span><span class="p">,</span>
+    <span class="n">safe_negate</span><span class="p">,</span>
     <span class="n">to_dB</span><span class="p">,</span>
     <span class="n">to_linear</span><span class="p">,</span>
-    <span class="n">safe_negate</span><span class="p">,</span>
+    <span class="n">wavelength</span><span class="p">,</span>
 <span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;polarization_loss&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dish_gain&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Handedness&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Polarization&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RadiationPattern&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 
 
 <div class="viewcode-block" id="polarization_loss">
@@ -306,139 +315,162 @@
 
 
 
-<div class="viewcode-block" id="SphericalInterpolator">
-<a class="viewcode-back" href="../../../core/antenna.html#spacelink.core.antenna.SphericalInterpolator">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SphericalInterpolator</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolates a regular grid of complex values in spherical coordinates.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_ComplexInterpolator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolates complex values using log-magnitude and unit-phase components.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SphericalInterpolator.__init__">
-<a class="viewcode-back" href="../../../core/antenna.html#spacelink.core.antenna.SphericalInterpolator.__init__">[docs]</a>
     <span class="nd">@enforce_units</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
         <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">values</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">Quantity</span><span class="p">,</span>
-        <span class="n">floor</span><span class="p">:</span> <span class="n">Decibels</span> <span class="o">=</span> <span class="o">-</span><span class="mi">200</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">,</span>
+        <span class="n">floor</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">Quantity</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a spherical interpolator.</span>
+<span class="sd">        Create a complex interpolator.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        theta: Angle</span>
 <span class="sd">            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</span>
 <span class="sd">        phi: Angle</span>
-<span class="sd">            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape</span>
-<span class="sd">            (M,). Note that the last element must be less than 2π.</span>
-<span class="sd">        values: u.Quantity</span>
-<span class="sd">            2D complex array of values with shape (N, M) to interpolate.</span>
-<span class="sd">        floor: Decibels</span>
-<span class="sd">            Floor value for the magnitude in dB. The interpolation approach used cannot</span>
-<span class="sd">            handle 0 values anywhere, so 0s (-∞ dB) are replaced with this prior to</span>
-<span class="sd">            interpolation.</span>
+<span class="sd">            1D array of equally spaced azimuthal angles with shape (M,). The span should</span>
+<span class="sd">            be at most 2π radians.</span>
+<span class="sd">        frequency: Frequency | None</span>
+<span class="sd">            Optional 1D array of strictly increasing frequencies with shape (K,).</span>
+<span class="sd">        values: Quantity</span>
+<span class="sd">            Complex array of values to interpolate. This should be in linear-scale (not</span>
+<span class="sd">            log-scale like u.dB). The required shape depends on whether ``frequency`` is</span>
+<span class="sd">            provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
+<span class="sd">        floor: Quantity | None</span>
+<span class="sd">            Optional floor value for the magnitude in linear scale with the same unit as</span>
+<span class="sd">            ``values``. If None, a default of ``1e-20 * values.unit`` is used. Magnitude</span>
+<span class="sd">            interpolation is performed in log-space and thus cannot handle 0 values</span>
+<span class="sd">            anywhere, so 0s are replaced with this prior to interpolation. Must be a</span>
+<span class="sd">            positive scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">unit</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">value</span>
 
-        <span class="n">phi_mod</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span>
-        <span class="n">delta_phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">phi_mod</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Assume equal spacing</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">delta_phi</span> <span class="o">*</span> <span class="n">phi</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">phi_min</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">phi_max</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span>
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># phi does not span the full circle</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">phi_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">phi_mod</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">phi_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">phi_mod</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">floor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">floor</span> <span class="o">=</span> <span class="mf">1e-20</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span>
+        <span class="k">elif</span> <span class="n">floor</span><span class="o">.</span><span class="n">unit</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;floor must be in the same unit as values.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">floor</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;floor must be a scalar Quantity.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">floor</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;floor must be &gt; 0.&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">theta_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">theta_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_3d</span> <span class="o">=</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
-        <span class="c1"># RectSphereBivariateSpline requires theta to be in the range (0, pi),</span>
-        <span class="c1"># excluding the endpoints where spherical coordinates have singularities.</span>
-        <span class="n">phi_slice</span> <span class="o">=</span> <span class="n">phi</span><span class="o">.</span><span class="n">value</span>
-        <span class="n">theta_start</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
-        <span class="n">theta_end</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="n">theta_slice</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="n">theta_start</span><span class="p">:</span><span class="n">theta_end</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-        <span class="n">values_slice</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">theta_start</span><span class="p">:</span><span class="n">theta_end</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
-            <span class="n">values_db</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">values_slice</span><span class="p">))</span>
-        <span class="c1"># Apply a floor because spline interpolation can&#39;t handle -inf values anywhere.</span>
-        <span class="n">values_db</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">values_db</span><span class="p">,</span> <span class="n">floor</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># Sort phi and values to ensure phi is monotonically increasing after wrapping</span>
+        <span class="n">sort_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[</span><span class="n">sort_indices</span><span class="p">]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[:,</span> <span class="n">sort_indices</span><span class="p">]</span>
 
-        <span class="c1"># Interpolate magnitude in log-space to avoid numerical stability issues that</span>
-        <span class="c1"># can arise when interpolating magnitude or real and imaginary parts separately.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log_mag</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
-            <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">RectSphereBivariateSpline</span><span class="p">(</span>
-                <span class="n">theta_slice</span><span class="p">,</span>
-                <span class="n">phi_slice</span><span class="p">,</span>
-                <span class="n">values_db</span><span class="p">,</span>
-            <span class="p">),</span>
-            <span class="n">grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="c1"># Remove duplicate phi values that can occur when input spans exactly 2π</span>
+        <span class="n">unique_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="kc">True</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[</span><span class="n">unique_indices</span><span class="p">]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[:,</span> <span class="n">unique_indices</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+            <span class="n">frequency</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">])</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>  <span class="c1"># Dummy frequency for 2D case</span>
+
+        <span class="n">delta_phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">phi</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Assume equal spacing</span>
+        <span class="n">full_circle</span> <span class="o">=</span> <span class="n">delta_phi</span> <span class="o">*</span> <span class="n">phi</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span> <span class="o">-</span> <span class="p">(</span><span class="n">delta_phi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">full_circle</span><span class="p">:</span>
+            <span class="c1"># Pad phi with wrap-around columns so interpolation works at the 2π wrap</span>
+            <span class="c1"># boundary.</span>
+            <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">[</span><span class="n">phi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">],</span>
+                    <span class="n">phi</span><span class="p">,</span>
+                    <span class="p">[</span><span class="n">phi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">],</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">values</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:],</span> <span class="n">values</span><span class="p">,</span> <span class="n">values</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Interpolate magnitude in log-space since this yields a more natural result</span>
+        <span class="c1"># for antenna patterns.</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+            <span class="n">mag_linear</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">floor</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">log_mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">mag_linear</span><span class="p">)</span>
 
         <span class="c1"># Interpolate phase as a unit-magnitude complex exponential. This avoids issues</span>
         <span class="c1"># with phase wrapping discontinuities.</span>
         <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
             <span class="n">phase_exponential</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">values_slice</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="mf">1.0</span><span class="p">,</span>
-                <span class="n">values_slice</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">values_slice</span><span class="p">),</span>
+                <span class="n">values</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">values</span><span class="p">),</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">phase_real</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
-            <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">RectSphereBivariateSpline</span><span class="p">(</span>
-                <span class="n">theta_slice</span><span class="p">,</span>
-                <span class="n">phi_slice</span><span class="p">,</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">phase_exponential</span><span class="p">),</span>
-            <span class="p">),</span>
-            <span class="n">grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">phase_imag</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
-            <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">RectSphereBivariateSpline</span><span class="p">(</span>
-                <span class="n">theta_slice</span><span class="p">,</span>
-                <span class="n">phi_slice</span><span class="p">,</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">phase_exponential</span><span class="p">),</span>
-            <span class="p">),</span>
-            <span class="n">grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span></div>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">RegularGridInterpolator</span><span class="p">(</span>
+            <span class="n">points</span><span class="o">=</span><span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">phi</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">frequency</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+            <span class="n">values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">log_mag</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">phase_exponential</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">phase_exponential</span><span class="p">)],</span>
+                <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+            <span class="n">bounds_error</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="nd">@enforce_units</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">u</span><span class="o">.</span><span class="n">Quantity</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Interpolate at the given spherical coordinates.</span>
-
-<span class="sd">        Interpolate at points `(theta[i], phi[i]), i=0, ..., len(x)-1`. Standard Numpy</span>
-<span class="sd">        broadcasting is obeyed.</span>
+<span class="sd">        Interpolate at the given coordinates.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        theta: Angle</span>
 <span class="sd">            Polar angles.</span>
 <span class="sd">        phi: Angle</span>
-<span class="sd">            Azimuthal angles with the same shape as theta.</span>
+<span class="sd">            Azimuthal angles.</span>
+<span class="sd">        frequency: Frequency | None</span>
+<span class="sd">            Desired frequency. For 2D interpolators (constructed without ``frequency``),</span>
+<span class="sd">            this argument is ignored.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        u.Quantity</span>
+<span class="sd">        Quantity</span>
 <span class="sd">            Interpolated values. The unit will be the same as the unit of the values</span>
-<span class="sd">            Quantity passed to the constructor.</span>
+<span class="sd">            Quantity passed to the constructor. Shape is determined by standard Numpy</span>
+<span class="sd">            broadcasting rules from the shapes of theta, phi, and frequency.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If phi or theta are outside the range of the original grid.</span>
+<span class="sd">            If phi, theta, or frequency are outside the range of the original grid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">phi_mod</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">phi_mod</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi_min</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">phi_mod</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi_max</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;phi must be in [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phi_min</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phi_max</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">theta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_min</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">theta</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_max</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;theta must be in [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_min</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_max</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_3d</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Frequency must be provided for 3D interpolators&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">frequency</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>
 
-        <span class="n">mag</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_mag</span><span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">phi</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span>
-        <span class="n">phase_exp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_real</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_imag</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">)</span>
-        <span class="n">phase_exp</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phase_exp</span><span class="p">)</span>  <span class="c1"># Re-normalize to remove numerical drift.</span>
-        <span class="k">return</span> <span class="n">mag</span> <span class="o">*</span> <span class="n">phase_exp</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span></div>
+        <span class="n">points</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">theta</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">phi</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">))</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span>
 
+        <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">phase_exp</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">features</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">phase_exp</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phase_exp</span><span class="p">)</span>  <span class="c1"># Re-normalize to remove numerical drift</span>
+
+        <span class="k">return</span> <span class="n">mag</span> <span class="o">*</span> <span class="n">phase_exp</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span>
 
 
 <div class="viewcode-block" id="RadiationPattern">
@@ -453,76 +485,190 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
         <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">e_theta</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
         <span class="n">e_phi</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
         <span class="n">rad_efficiency</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
+        <span class="n">default_polarization</span><span class="p">:</span> <span class="n">Polarization</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">default_frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a radiation pattern from a set of E-field components.</span>
 
 <span class="sd">        .. math::</span>
-<span class="sd">            \vec{E}(\theta, \phi) = E_\theta(\theta, \phi)\hat{\theta}</span>
-<span class="sd">            + E_\phi(\theta, \phi)\hat{\phi}</span>
+<span class="sd">            \vec{E}(\theta, \phi, f) = E_\theta(\theta, \phi, f)\hat{\theta}</span>
+<span class="sd">            + E_\phi(\theta, \phi, f)\hat{\phi}</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        theta: Angle</span>
 <span class="sd">            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</span>
 <span class="sd">        phi: Angle</span>
-<span class="sd">            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape</span>
-<span class="sd">            (M,). Note that the last element must be less than 2π.</span>
+<span class="sd">            1D array of equally spaced azimuthal angles with shape (M,). The span must</span>
+<span class="sd">            be at most 2π radians.</span>
+<span class="sd">        frequency: Frequency | None</span>
+<span class="sd">            Optional 1D array of strictly increasing frequencies with shape (K,) where</span>
+<span class="sd">            K &gt; 1. If None, the pattern is treated as frequency-invariant and 2D over</span>
+<span class="sd">            (theta, phi).</span>
 <span class="sd">        e_theta: Dimensionless</span>
-<span class="sd">            2D complex array of :math:`E_{\theta}(\theta, \phi)` values with shape (N,</span>
-<span class="sd">            M) normalized such that the magnitude squared is equal to directivity.</span>
+<span class="sd">            Complex array of :math:`E_{\theta}(\theta, \phi[, f])` values normalized</span>
+<span class="sd">            such that the magnitude squared is equal to directivity. The required</span>
+<span class="sd">            shape depends on whether ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        e_phi: Dimensionless</span>
-<span class="sd">            2D complex array of :math:`E_{\phi}(\theta, \phi)` values with shape (N, M)</span>
-<span class="sd">            normalized such that the magnitude squared is equal to directivity.</span>
+<span class="sd">            Complex array of :math:`E_{\phi}(\theta, \phi[, f])` values normalized</span>
+<span class="sd">            such that the magnitude squared is equal to directivity. The required</span>
+<span class="sd">            shape depends on whether ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        rad_efficiency: Dimensionless</span>
-<span class="sd">            Radiation efficiency :math:`\eta` in [0, 1].</span>
+<span class="sd">            Radiation efficiency :math:`\eta` in (0, 1].</span>
+<span class="sd">        default_polarization: Polarization | None</span>
+<span class="sd">            Optional default polarization used when instance methods are called without</span>
+<span class="sd">            an explicit polarization.</span>
+<span class="sd">        default_frequency: Frequency | None</span>
+<span class="sd">            Optional default frequency used when instance methods are called without an</span>
+<span class="sd">            explicit frequency.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            If theta or phi are not in [0, pi], or if theta or phi are not sorted in</span>
-<span class="sd">            strictly increasing order, or if theta or phi are not equally spaced, or if</span>
-<span class="sd">            phi does not cover less than 2π radians.</span>
+<span class="sd">            If theta is not in [0, pi], if phi spans more than 2π radians, or if</span>
+<span class="sd">            theta/phi/frequency are not strictly increasing, or if inputs are outside</span>
+<span class="sd">            allowed ranges.</span>
 <span class="sd">        ValueError</span>
 <span class="sd">            If the surface integral of the directivity is greater than 4π.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">theta</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">theta</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;theta must be in [0, pi]&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;theta must be sorted in strictly increasing order&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;phi must be sorted in strictly increasing order&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">theta</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;theta must be equally spaced&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">phi</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;phi must be equally spaced&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">phi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">phi</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;phi must cover less than 2π radians&quot;</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_constructor_args</span><span class="p">(</span>
+            <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">e_theta</span><span class="p">,</span> <span class="n">e_phi</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">rad_efficiency</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">phi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span> <span class="o">=</span> <span class="n">frequency</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">e_theta</span> <span class="o">=</span> <span class="n">e_theta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">e_phi</span> <span class="o">=</span> <span class="n">e_phi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rad_efficiency</span> <span class="o">=</span> <span class="n">rad_efficiency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_polarization</span> <span class="o">=</span> <span class="n">default_polarization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_frequency</span> <span class="o">=</span> <span class="n">default_frequency</span>
 
-        <span class="c1"># Surface integral of directivity should be 4π over the whole sphere (or less if</span>
-        <span class="c1"># the pattern is not defined over the whole sphere). It should never be greater</span>
-        <span class="c1"># than 4π.</span>
-        <span class="n">dir_surf_int</span> <span class="o">=</span> <span class="n">_surface_integral</span><span class="p">(</span>
-            <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e_theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e_phi</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">dir_surf_int</span> <span class="o">&gt;</span> <span class="mf">1.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">sr</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_surface_integral</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_e_theta_interp</span> <span class="o">=</span> <span class="n">_ComplexInterpolator</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">e_theta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_e_phi_interp</span> <span class="o">=</span> <span class="n">_ComplexInterpolator</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">e_phi</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Default frequency used when instance methods are called without an explicit</span>
+<span class="sd">        frequency.</span>
+
+<span class="sd">        For frequency-aware patterns, this must be a scalar frequency within the closed</span>
+<span class="sd">        interval defined by the pattern&#39;s ``frequency`` grid or None.</span>
+
+<span class="sd">        For frequency-invariant patterns this is stored but ignored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_default_frequency&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="nd">@default_frequency</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_default_frequency</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;default_frequency must be a scalar Quantity&quot;</span><span class="p">)</span>
+
+        <span class="c1"># For 2D patterns (no frequency axis), store and ignore in computations</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_default_frequency</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span>
+
+        <span class="c1"># For 3D patterns, enforce range within the frequency grid</span>
+        <span class="n">fmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">)</span>
+        <span class="n">fmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">fmin</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">fmax</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Surface integral of directivity </span><span class="si">{</span><span class="n">dir_surf_int</span><span class="si">}</span><span class="s2"> is greater than 4π.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;default_frequency </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> must be within [</span><span class="si">{</span><span class="n">fmin</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">fmax</span><span class="si">}</span><span class="s2">]&quot;</span>
             <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">e_theta_interp</span> <span class="o">=</span> <span class="n">SphericalInterpolator</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">e_theta</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">e_phi_interp</span> <span class="o">=</span> <span class="n">SphericalInterpolator</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">e_phi</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default_frequency</span> <span class="o">=</span> <span class="n">value</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_rad_efficiency</span><span class="p">(</span><span class="n">rad_efficiency</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate that ``rad_efficiency`` is a scalar in the open interval (0, 1].&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">rad_efficiency</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rad_efficiency must be a scalar.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mf">0.0</span> <span class="o">&lt;</span> <span class="n">rad_efficiency</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;rad_efficiency must be in (0, 1], got </span><span class="si">{</span><span class="n">rad_efficiency</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_constructor_args</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">e_theta</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
+        <span class="n">e_phi</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rad_efficiency</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">theta_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">phi_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">theta</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">theta</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;theta must be in [0, pi]&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">theta_step</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;theta must be strictly increasing&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">phi_step</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;phi must be strictly increasing&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">theta_step</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">theta_step</span><span class="p">,</span> <span class="n">theta_step</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;theta must be equally spaced&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">phi_step</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">phi_step</span><span class="p">,</span> <span class="n">phi_step</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;phi must be equally spaced&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">phi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">phi</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">phi_step</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;phi must not span more than 2π radians&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;frequency must have length &gt;= 2&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;frequency must be strictly increasing&quot;</span><span class="p">)</span>
+            <span class="c1"># Shape checks for 3D</span>
+            <span class="n">expected_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">phi</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">frequency</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">e_theta</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">expected_shape</span> <span class="ow">or</span> <span class="n">e_phi</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">expected_shape</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;e_theta/e_phi must have shape </span><span class="si">{</span><span class="n">expected_shape</span><span class="si">}</span><span class="s2">, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="n">e_theta</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">e_phi</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Shape checks for 2D</span>
+            <span class="n">expected_shape_2d</span> <span class="o">=</span> <span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">phi</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">e_theta</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">expected_shape_2d</span> <span class="ow">or</span> <span class="n">e_phi</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">expected_shape_2d</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;e_theta/e_phi must have shape </span><span class="si">{</span><span class="n">expected_shape_2d</span><span class="si">}</span><span class="s2">, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="n">e_theta</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">e_phi</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_rad_efficiency</span><span class="p">(</span><span class="n">rad_efficiency</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_surface_integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate that surface integral of directivity is ≤ 4π.&quot;&quot;&quot;</span>
+        <span class="n">total_directivity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_phi</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">freq</span><span class="p">,</span> <span class="n">freq_slice</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">total_directivity</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">):</span>
+                <span class="n">dir_surf_int</span> <span class="o">=</span> <span class="n">_surface_integral</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">freq_slice</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dir_surf_int</span> <span class="o">&gt;</span> <span class="mf">1.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">sr</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Surface integral of directivity </span><span class="si">{</span><span class="n">dir_surf_int</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">freq</span><span class="si">}</span><span class="s2"> is &quot;</span>
+                        <span class="s2">&quot;greater than 4π.&quot;</span>
+                    <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dir_surf_int</span> <span class="o">=</span> <span class="n">_surface_integral</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">total_directivity</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dir_surf_int</span> <span class="o">&gt;</span> <span class="mf">1.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">sr</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Surface integral of directivity </span><span class="si">{</span><span class="n">dir_surf_int</span><span class="si">}</span><span class="s2"> is greater than &quot;</span>
+                    <span class="s2">&quot;4π.&quot;</span>
+                <span class="p">)</span>
 
 <div class="viewcode-block" id="RadiationPattern.from_circular_e_field">
 <a class="viewcode-back" href="../../../core/antenna.html#spacelink.core.antenna.RadiationPattern.from_circular_e_field">[docs]</a>
@@ -532,37 +678,65 @@
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
         <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">e_lhcp</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
         <span class="n">e_rhcp</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
         <span class="n">rad_efficiency</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
+        <span class="n">default_polarization</span><span class="p">:</span> <span class="n">Polarization</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">default_frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Self</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a radiation pattern from a set of LHCP/RHCP E-field components.</span>
 
 <span class="sd">        .. math::</span>
-<span class="sd">            \vec{E}(\theta, \phi) = E_\text{LHCP}(\theta, \phi)\hat{\text{LHCP}}</span>
-<span class="sd">            + E_\text{RHCP}(\theta, \phi)\hat{\text{RHCP}}</span>
+<span class="sd">            \vec{E}(\theta, \phi, f) = E_\text{LHCP}(\theta, \phi, f)\hat{\text{LHCP}}</span>
+<span class="sd">            + E_\text{RHCP}(\theta, \phi, f)\hat{\text{RHCP}}</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        theta: Angle</span>
 <span class="sd">            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</span>
 <span class="sd">        phi: Angle</span>
-<span class="sd">            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape</span>
-<span class="sd">            (M,).</span>
+<span class="sd">            1D array of equally spaced azimuthal angles with shape (M,). The span must</span>
+<span class="sd">            be at most 2π radians.</span>
+<span class="sd">        frequency: Frequency | None</span>
+<span class="sd">            Optional 1D array of strictly increasing frequencies with shape (K,).</span>
+<span class="sd">            If None, the pattern is treated as frequency-invariant and 2D over</span>
+<span class="sd">            (theta, phi).</span>
 <span class="sd">        e_lhcp: Dimensionless</span>
-<span class="sd">            2D complex array of :math:`E_{\text{LHCP}}(\theta, \phi)` values with shape</span>
-<span class="sd">            (N, M) normalized such that the magnitude squared is equal to directivity.</span>
+<span class="sd">            Complex array of :math:`E_{\text{LHCP}}(\theta, \phi[, f])` values</span>
+<span class="sd">            normalized such that the magnitude squared is equal to directivity. The</span>
+<span class="sd">            required shape depends on whether ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        e_rhcp: Dimensionless</span>
-<span class="sd">            2D complex array of :math:`E_{\text{RHCP}}(\theta, \phi)` values with shape</span>
-<span class="sd">            (N, M) normalized such that the magnitude squared is equal to directivity.</span>
+<span class="sd">            Complex array of :math:`E_{\text{RHCP}}(\theta, \phi[, f])` values</span>
+<span class="sd">            normalized such that the magnitude squared is equal to directivity. The</span>
+<span class="sd">            required shape depends on whether ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        rad_efficiency: Dimensionless</span>
-<span class="sd">            Radiation efficiency :math:`\eta` in [0, 1].</span>
+<span class="sd">            Radiation efficiency :math:`\eta` in (0, 1].</span>
+<span class="sd">        default_polarization: Polarization | None</span>
+<span class="sd">            Optional default polarization used when instance methods are called without</span>
+<span class="sd">            an explicit polarization.</span>
+<span class="sd">        default_frequency: Frequency | None</span>
+<span class="sd">            Optional default frequency used when instance methods are called without an</span>
+<span class="sd">            explicit frequency.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Change of basis from LHCP/RHCP to theta/phi.</span>
         <span class="n">e_theta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">e_lhcp</span> <span class="o">+</span> <span class="n">e_rhcp</span><span class="p">)</span>
         <span class="n">e_phi</span> <span class="o">=</span> <span class="mi">1</span><span class="n">j</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">e_lhcp</span> <span class="o">-</span> <span class="n">e_rhcp</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">e_theta</span><span class="p">,</span> <span class="n">e_phi</span><span class="p">,</span> <span class="n">rad_efficiency</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">theta</span><span class="p">,</span>
+            <span class="n">phi</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="p">,</span>
+            <span class="n">e_theta</span><span class="p">,</span>
+            <span class="n">e_phi</span><span class="p">,</span>
+            <span class="n">rad_efficiency</span><span class="p">,</span>
+            <span class="n">default_polarization</span><span class="p">,</span>
+            <span class="n">default_frequency</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RadiationPattern.from_circular_gain">
@@ -573,11 +747,14 @@
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
         <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">gain_lhcp</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
         <span class="n">gain_rhcp</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
         <span class="n">phase_lhcp</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
         <span class="n">phase_rhcp</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
         <span class="n">rad_efficiency</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
+        <span class="n">default_polarization</span><span class="p">:</span> <span class="n">Polarization</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">default_frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Self</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a radiation pattern from circular gain and phase.</span>
@@ -587,25 +764,58 @@
 <span class="sd">        theta: Angle</span>
 <span class="sd">            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</span>
 <span class="sd">        phi: Angle</span>
-<span class="sd">            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape</span>
-<span class="sd">            (M,).</span>
+<span class="sd">            1D array of equally spaced azimuthal angles with shape (M,). The span must</span>
+<span class="sd">            be at most 2π radians.</span>
+<span class="sd">        frequency: Frequency | None</span>
+<span class="sd">            Optional 1D array of strictly increasing frequencies with shape (K,).</span>
+<span class="sd">            If None, the pattern is treated as frequency-invariant and 2D over</span>
+<span class="sd">            (theta, phi).</span>
 <span class="sd">        gain_lhcp: Dimensionless</span>
-<span class="sd">            2D array of LHCP gain with shape (N, M).</span>
+<span class="sd">            Array of LHCP gain values. The required shape depends on whether</span>
+<span class="sd">            ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        gain_rhcp: Dimensionless</span>
-<span class="sd">            2D array of RHCP gain with shape (N, M).</span>
+<span class="sd">            Array of RHCP gain values. The required shape depends on whether</span>
+<span class="sd">            ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        phase_lhcp: Angle</span>
-<span class="sd">            2D array of LHCP phase angles with shape (N, M).</span>
+<span class="sd">            Array of LHCP phase angles. The required shape depends on whether</span>
+<span class="sd">            ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        phase_rhcp: Angle</span>
-<span class="sd">            2D array of RHCP phase angles with shape (N, M).</span>
+<span class="sd">            Array of RHCP phase angles. The required shape depends on whether</span>
+<span class="sd">            ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        rad_efficiency: Dimensionless</span>
-<span class="sd">            Radiation efficiency :math:`\eta` in [0, 1].</span>
+<span class="sd">            Radiation efficiency :math:`\eta` in (0, 1].</span>
+<span class="sd">        default_polarization: Polarization | None</span>
+<span class="sd">            Optional default polarization used when instance methods are called without</span>
+<span class="sd">            an explicit polarization.</span>
+<span class="sd">        default_frequency: Frequency | None</span>
+<span class="sd">            Optional default frequency used when instance methods are called without an</span>
+<span class="sd">            explicit frequency.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">gain_lhcp</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">gain_rhcp</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Gain must be non-negative&quot;</span><span class="p">)</span>
+        <span class="c1"># Validate radiation efficiency prior to division</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_rad_efficiency</span><span class="p">(</span><span class="n">rad_efficiency</span><span class="p">)</span>
 
         <span class="n">e_lhcp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gain_lhcp</span> <span class="o">/</span> <span class="n">rad_efficiency</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">phase_lhcp</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
         <span class="n">e_rhcp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gain_rhcp</span> <span class="o">/</span> <span class="n">rad_efficiency</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">phase_rhcp</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_circular_e_field</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">e_lhcp</span><span class="p">,</span> <span class="n">e_rhcp</span><span class="p">,</span> <span class="n">rad_efficiency</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_circular_e_field</span><span class="p">(</span>
+            <span class="n">theta</span><span class="p">,</span>
+            <span class="n">phi</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="p">,</span>
+            <span class="n">e_lhcp</span><span class="p">,</span>
+            <span class="n">e_rhcp</span><span class="p">,</span>
+            <span class="n">rad_efficiency</span><span class="p">,</span>
+            <span class="n">default_polarization</span><span class="p">,</span>
+            <span class="n">default_frequency</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RadiationPattern.from_linear_gain">
@@ -616,11 +826,14 @@
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
         <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">gain_theta</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
         <span class="n">gain_phi</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
         <span class="n">phase_theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
         <span class="n">phase_phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
         <span class="n">rad_efficiency</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">,</span>
+        <span class="n">default_polarization</span><span class="p">:</span> <span class="n">Polarization</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">default_frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Self</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a radiation pattern from linear gain and phase.</span>
@@ -630,32 +843,70 @@
 <span class="sd">        theta: Angle</span>
 <span class="sd">            1D array of equally spaced polar angles in [0, pi] radians with shape (N,).</span>
 <span class="sd">        phi: Angle</span>
-<span class="sd">            1D array of equally spaced azimuthal angles in [0, 2*pi) radians with shape</span>
-<span class="sd">            (M,).</span>
+<span class="sd">            1D array of equally spaced azimuthal angles with shape (M,). The span must</span>
+<span class="sd">            be at most 2π radians.</span>
+<span class="sd">        frequency: Frequency | None</span>
+<span class="sd">            Optional 1D array of strictly increasing frequencies with shape (K,).</span>
+<span class="sd">            If None, the pattern is treated as frequency-invariant and 2D over</span>
+<span class="sd">            (theta, phi).</span>
 <span class="sd">        gain_theta: Dimensionless</span>
-<span class="sd">            2D array of :math:`\hat{\theta}` gain with shape (N, M).</span>
+<span class="sd">            Array of :math:`\hat{\theta}` gain values. The required shape depends on</span>
+<span class="sd">            whether ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        gain_phi: Dimensionless</span>
-<span class="sd">            2D array of :math:`\hat{\phi}` gain with shape (N, M).</span>
+<span class="sd">            Array of :math:`\hat{\phi}` gain values. The required shape depends on</span>
+<span class="sd">            whether ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        phase_theta: Angle</span>
-<span class="sd">            2D array of :math:`\hat{\theta}` phase angles with shape (N, M).</span>
+<span class="sd">            Array of :math:`\hat{\theta}` phase angles. The required shape depends on</span>
+<span class="sd">            whether ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        phase_phi: Angle</span>
-<span class="sd">            2D array of :math:`\hat{\phi}` phase angles with shape (N, M).</span>
+<span class="sd">            Array of :math:`\hat{\phi}` phase angles. The required shape depends on</span>
+<span class="sd">            whether ``frequency`` is provided:</span>
+<span class="sd">            - If ``frequency is None``: shape ``(N, M)``</span>
+<span class="sd">            - Else: shape ``(N, M, K)``</span>
 <span class="sd">        rad_efficiency: Dimensionless</span>
-<span class="sd">            Radiation efficiency :math:`\eta` in [0, 1].</span>
+<span class="sd">            Radiation efficiency :math:`\eta` in (0, 1].</span>
+<span class="sd">        default_polarization: Polarization | None</span>
+<span class="sd">            Optional default polarization used when instance methods are called without</span>
+<span class="sd">            an explicit polarization.</span>
+<span class="sd">        default_frequency: Frequency | None</span>
+<span class="sd">            Optional default frequency used when instance methods are called without an</span>
+<span class="sd">            explicit frequency.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">gain_theta</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">gain_phi</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Gain must be non-negative&quot;</span><span class="p">)</span>
+        <span class="c1"># Validate radiation efficiency prior to division</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_rad_efficiency</span><span class="p">(</span><span class="n">rad_efficiency</span><span class="p">)</span>
 
         <span class="n">e_theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gain_theta</span> <span class="o">/</span> <span class="n">rad_efficiency</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">phase_theta</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
         <span class="n">e_phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gain_phi</span> <span class="o">/</span> <span class="n">rad_efficiency</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">phase_phi</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">e_theta</span><span class="p">,</span> <span class="n">e_phi</span><span class="p">,</span> <span class="n">rad_efficiency</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">theta</span><span class="p">,</span>
+            <span class="n">phi</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="p">,</span>
+            <span class="n">e_theta</span><span class="p">,</span>
+            <span class="n">e_phi</span><span class="p">,</span>
+            <span class="n">rad_efficiency</span><span class="p">,</span>
+            <span class="n">default_polarization</span><span class="p">,</span>
+            <span class="n">default_frequency</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RadiationPattern.e_field">
 <a class="viewcode-back" href="../../../core/antenna.html#spacelink.core.antenna.RadiationPattern.e_field">[docs]</a>
     <span class="nd">@enforce_units</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">e_field</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">polarization</span><span class="p">:</span> <span class="n">Polarization</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">polarization</span><span class="p">:</span> <span class="n">Polarization</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Normalized complex E-field in the desired polarization state.</span>
@@ -666,8 +917,13 @@
 <span class="sd">            Polar angles.</span>
 <span class="sd">        phi: Angle</span>
 <span class="sd">            Azimuthal angles.</span>
-<span class="sd">        polarization: Polarization</span>
-<span class="sd">            Desired polarization state.</span>
+<span class="sd">        frequency: Frequency | None</span>
+<span class="sd">            Desired frequency. If None, uses the instance&#39;s ``default_frequency`` if</span>
+<span class="sd">            set; otherwise raises ValueError. For 2D patterns (constructed without</span>
+<span class="sd">            ``frequency``), this argument is ignored.</span>
+<span class="sd">        polarization: Polarization | None</span>
+<span class="sd">            Desired polarization state. If None, uses the instance&#39;s</span>
+<span class="sd">            ``default_polarization`` if set; otherwise raises ValueError.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -676,9 +932,22 @@
 <span class="sd">            squared is the directivity. Shape is determined by standard Numpy</span>
 <span class="sd">            broadcasting rules from the shapes of theta and phi.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">e_jones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_e_jones</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">)</span>
+        <span class="n">pol</span> <span class="o">=</span> <span class="n">polarization</span> <span class="k">if</span> <span class="n">polarization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_polarization</span>
+        <span class="k">if</span> <span class="n">pol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Polarization must be provided or a default_polarization must be set &quot;</span>
+                <span class="s2">&quot;on the RadiationPattern.&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># Get frequency (None for 2D patterns, actual frequency for 3D)</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="n">frequency</span> <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_frequency</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Frequency must be provided or a default_frequency must be set on the &quot;</span>
+                <span class="s2">&quot;RadiationPattern.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">e_jones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_e_jones</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">freq</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">polarization</span><span class="o">.</span><span class="n">jones_vector</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">e_jones</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">pol</span><span class="o">.</span><span class="n">jones_vector</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">e_jones</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
             <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span>
         <span class="p">)</span></div>
 
@@ -687,7 +956,12 @@
 <a class="viewcode-back" href="../../../core/antenna.html#spacelink.core.antenna.RadiationPattern.directivity">[docs]</a>
     <span class="nd">@enforce_units</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">directivity</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">polarization</span><span class="p">:</span> <span class="n">Polarization</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">polarization</span><span class="p">:</span> <span class="n">Polarization</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Directivity of the antenna.</span>
@@ -712,8 +986,13 @@
 <span class="sd">            Polar angles.</span>
 <span class="sd">        phi: Angle</span>
 <span class="sd">            Azimuthal angles.</span>
-<span class="sd">        polarization: Polarization</span>
-<span class="sd">            Desired polarization state.</span>
+<span class="sd">        frequency: Frequency | None</span>
+<span class="sd">            Desired frequency. If None, uses the instance&#39;s ``default_frequency`` if</span>
+<span class="sd">            set; otherwise raises ValueError. For 2D patterns (constructed without</span>
+<span class="sd">            ``frequency``), this argument is ignored.</span>
+<span class="sd">        polarization: Polarization | None</span>
+<span class="sd">            Desired polarization state. If None, uses the instance&#39;s</span>
+<span class="sd">            ``default_polarization`` if set; otherwise raises ValueError.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -721,13 +1000,25 @@
 <span class="sd">            Directivity. Shape is determined by standard Numpy broadcasting rules from</span>
 <span class="sd">            the shapes of theta and phi.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">to_dB</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_field</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">polarization</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">to_dB</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">e_field</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="n">frequency</span><span class="p">,</span> <span class="n">polarization</span><span class="o">=</span><span class="n">polarization</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="o">**</span> <span class="mi">2</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RadiationPattern.gain">
 <a class="viewcode-back" href="../../../core/antenna.html#spacelink.core.antenna.RadiationPattern.gain">[docs]</a>
     <span class="nd">@enforce_units</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">gain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">polarization</span><span class="p">:</span> <span class="n">Polarization</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gain</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">polarization</span><span class="p">:</span> <span class="n">Polarization</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gain of the antenna.</span>
 
@@ -742,8 +1033,13 @@
 <span class="sd">            Polar angles.</span>
 <span class="sd">        phi: Angle</span>
 <span class="sd">            Azimuthal angles.</span>
-<span class="sd">        polarization: Polarization</span>
-<span class="sd">            Desired polarization state.</span>
+<span class="sd">        frequency: Frequency | None</span>
+<span class="sd">            Desired frequency. If None, uses the instance&#39;s ``default_frequency`` if</span>
+<span class="sd">            set; otherwise raises ValueError. For 2D patterns (constructed without</span>
+<span class="sd">            ``frequency``), this argument is ignored.</span>
+<span class="sd">        polarization: Polarization | None</span>
+<span class="sd">            Desired polarization state. If None, uses the instance&#39;s</span>
+<span class="sd">            `default_polarization` if set; otherwise raises ValueError.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -751,13 +1047,21 @@
 <span class="sd">            Gain. Shape is determined by standard Numpy broadcasting rules from the</span>
 <span class="sd">            shapes of theta and phi.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">to_dB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rad_efficiency</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">directivity</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">polarization</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">to_dB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rad_efficiency</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">directivity</span><span class="p">(</span>
+            <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="n">frequency</span><span class="p">,</span> <span class="n">polarization</span><span class="o">=</span><span class="n">polarization</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RadiationPattern.axial_ratio">
 <a class="viewcode-back" href="../../../core/antenna.html#spacelink.core.antenna.RadiationPattern.axial_ratio">[docs]</a>
     <span class="nd">@enforce_units</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">axial_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">axial_ratio</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Axial ratio of the antenna.</span>
 
@@ -772,6 +1076,10 @@
 <span class="sd">            Polar angles.</span>
 <span class="sd">        phi: Angle</span>
 <span class="sd">            Azimuthal angles.</span>
+<span class="sd">        frequency: Frequency | None</span>
+<span class="sd">            Desired frequency. If None, uses the instance&#39;s ``default_frequency`` if</span>
+<span class="sd">            set; otherwise raises ValueError. For 2D patterns (constructed without</span>
+<span class="sd">            ``frequency``), this argument is ignored.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -779,7 +1087,14 @@
 <span class="sd">            Axial ratio. Shape is determined by standard Numpy broadcasting rules from</span>
 <span class="sd">            the shapes of theta and phi.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">e_jones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_e_jones</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">)</span>
+        <span class="c1"># Get frequency (None for 2D patterns, actual frequency for 3D)</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="n">frequency</span> <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_frequency</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Frequency must be provided or a default_frequency must be set on the &quot;</span>
+                <span class="s2">&quot;RadiationPattern.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">e_jones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_e_jones</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">freq</span><span class="p">)</span>
         <span class="n">coherency_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,...j-&gt;...ij&quot;</span><span class="p">,</span> <span class="n">e_jones</span><span class="p">,</span> <span class="n">e_jones</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span>
         <span class="n">eigvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">coherency_matrix</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
         <span class="n">lambda_min</span> <span class="o">=</span> <span class="n">eigvals</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
@@ -790,10 +1105,12 @@
 
 
     <span class="nd">@enforce_units</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_e_jones</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
-        <span class="n">e_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_theta_interp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">)</span>
-        <span class="n">e_phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_phi_interp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">e_theta</span><span class="p">,</span> <span class="n">e_phi</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_e_jones</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
+        <span class="n">e_theta_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_e_theta_interp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">frequency</span><span class="p">)</span>
+        <span class="n">e_phi_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_e_phi_interp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">frequency</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">e_theta_vals</span><span class="p">,</span> <span class="n">e_phi_vals</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
 
 
 
@@ -821,6 +1138,54 @@
     <span class="n">integrand</span> <span class="o">=</span> <span class="n">values</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
     <span class="n">int_phi</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">int_phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">sr</span>
+
+
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">gain_from_g_over_t</span><span class="p">(</span>
+    <span class="n">g_over_t</span><span class="p">:</span> <span class="n">DecibelPerKelvin</span><span class="p">,</span> <span class="n">temperature</span><span class="p">:</span> <span class="n">Temperature</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Decibels</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Antenna gain from G/T and system noise temperature</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    g_over_t: DecibelPerKelvin</span>
+<span class="sd">        Ratio of gain to the noise (G/T in dB/K)</span>
+<span class="sd">    temperature: Temperature</span>
+<span class="sd">        System noise temperature</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Decibels</span>
+<span class="sd">        Gain in dB.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">temperature</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Temperature must be positive&quot;</span><span class="p">)</span>
+
+    <span class="n">gain</span> <span class="o">=</span> <span class="n">g_over_t</span> <span class="o">+</span> <span class="n">temperature</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">dBK</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">gain</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">)</span>
+
+
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">temperature_from_g_over_t</span><span class="p">(</span>
+    <span class="n">g_over_t</span><span class="p">:</span> <span class="n">DecibelPerKelvin</span><span class="p">,</span> <span class="n">gain</span><span class="p">:</span> <span class="n">Decibels</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Temperature</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the temperature in Kelvin from ratio of gain to the noise.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    g_over_t: DecibelPerKelvin</span>
+<span class="sd">        Ratio of gain to the noise.</span>
+<span class="sd">    gain: Decibels</span>
+<span class="sd">        Gain in dB.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Temperature</span>
+<span class="sd">        System noise temperature</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">gain</span> <span class="o">-</span> <span class="n">g_over_t</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>
 </pre></div>
 
            </div>

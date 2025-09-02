@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.core.noise &mdash; SpaceLink 0.1.7 documentation</title>
+  <title>spacelink.core.noise &mdash; SpaceLink 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=ca7ad2ea"></script>
+        <script src="../../../_static/documentation_options.js?v=22607128"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.7
+                0.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -98,9 +98,10 @@
 
 <span class="sd">Noise Figure / Factor Modeling</span>
 <span class="sd">------------------------------</span>
-<span class="sd">The noise figure is a measure of the degradation of the signal-to-noise ratio (SNR) due to the</span>
-<span class="sd">noise added by the amplifier, given an input noise temperature of T_0. If the input noise</span>
-<span class="sd">temperature is not equal to T_0, noise figure cannot be used to measure the degradation in SNR.</span>
+<span class="sd">The noise figure is a measure of the degradation of the signal-to-noise ratio (SNR) due</span>
+<span class="sd">to the noise added by the amplifier, given an input noise temperature of T_0. If the</span>
+<span class="sd">input noise temperature is not equal to T_0, noise figure cannot be used to measure the</span>
+<span class="sd">degradation in SNR.</span>
 
 <span class="sd">The relationships between noise temperature, noise figure, and noise factor are:</span>
 
@@ -116,34 +117,35 @@
 <span class="sd">.. math::</span>
 <span class="sd">    F = 10^{\text{NF}_{\text{dB}}/10}</span>
 
-<span class="sd">where :math:`T` is the noise temperature, :math:`T_0` is the reference temperature (290 K),</span>
-<span class="sd">:math:`F` is the noise factor, and :math:`\text{NF}_{\text{dB}}` is the noise figure in dB.</span>
+<span class="sd">where :math:`T` is the noise temperature, :math:`T_0` is the reference temperature (290</span>
+<span class="sd">K), :math:`F` is the noise factor, and :math:`\text{NF}_{\text{dB}}` is the noise figure</span>
+<span class="sd">in dB.</span>
 
 <span class="sd">Noise temperature and SNR</span>
 <span class="sd">-------------------------</span>
-<span class="sd">It is important to remember what the noise temperature is. The noise temperature of an amplifier</span>
-<span class="sd">is the input referred noise temperature, meaning we model the amplifier as a noiseless amplifier</span>
-<span class="sd">with a noisy resistor at the input with temperature :math:`T`. The output noise temperature is</span>
-<span class="sd">therefore :math:`G T` where :math:`G` is the gain of the amplifier. To accurately model the</span>
-<span class="sd">SNR through the amplifier chain, best practice is to model the noise power separately from the</span>
-<span class="sd">signal power and then compute the SNR at the output.</span>
-
+<span class="sd">It is important to remember what the noise temperature is. The noise temperature of an</span>
+<span class="sd">amplifier is the input referred noise temperature, meaning we model the amplifier as a</span>
+<span class="sd">noiseless amplifier with a noisy resistor at the input with temperature :math:`T`. The</span>
+<span class="sd">output noise temperature is therefore :math:`G T` where :math:`G` is the gain of the</span>
+<span class="sd">amplifier. To accurately model the SNR through the amplifier chain, best practice is to</span>
+<span class="sd">model the noise power separately from the signal power and then compute the SNR at the</span>
+<span class="sd">output.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">k_B</span> <span class="k">as</span> <span class="n">BOLTZMANN</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">k_B</span> <span class="k">as</span> <span class="n">BOLTZMANN</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DecibelHertz</span><span class="p">,</span>
     <span class="n">Decibels</span><span class="p">,</span>
     <span class="n">Dimensionless</span><span class="p">,</span>
-    <span class="n">Temperature</span><span class="p">,</span>
     <span class="n">Frequency</span><span class="p">,</span>
     <span class="n">Power</span><span class="p">,</span>
     <span class="n">PowerDensity</span><span class="p">,</span>
+    <span class="n">Temperature</span><span class="p">,</span>
     <span class="n">enforce_units</span><span class="p">,</span>
-    <span class="n">to_linear</span><span class="p">,</span>
     <span class="n">to_dB</span><span class="p">,</span>
+    <span class="n">to_linear</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">T0</span> <span class="o">=</span> <span class="mf">290.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registry Module &mdash; SpaceLink 0.1.7 documentation</title>
+  <title>Registry Module &mdash; SpaceLink 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
+        <script src="../_static/documentation_options.js?v=22607128"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -40,7 +40,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.7
+                0.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -58,6 +58,7 @@
 <li class="toctree-l2"><a class="reference internal" href="performance.html">Performance Module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Registry Module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#spacelink.phy.registry.DuplicateRegistryEntryError"><code class="docutils literal notranslate"><span class="pre">DuplicateRegistryEntryError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.phy.registry.NoRegistryFilesError"><code class="docutils literal notranslate"><span class="pre">NoRegistryFilesError</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#spacelink.phy.registry.Registry"><code class="docutils literal notranslate"><span class="pre">Registry</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.registry.Registry.__init__"><code class="docutils literal notranslate"><span class="pre">Registry.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.registry.Registry.load"><code class="docutils literal notranslate"><span class="pre">Registry.load()</span></code></a></li>
@@ -106,6 +107,13 @@
 <p>Raised when duplicate entries are found during registry loading.</p>
 </dd></dl>
 
+<dl class="py exception">
+<dt class="sig sig-object py" id="spacelink.phy.registry.NoRegistryFilesError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.registry.</span></span><span class="sig-name descname"><span class="pre">NoRegistryFilesError</span></span><a class="reference internal" href="../_modules/spacelink/phy/registry.html#NoRegistryFilesError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.registry.NoRegistryFilesError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Raised when no YAML files are found in the specified directories.</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="spacelink.phy.registry.Registry">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.registry.</span></span><span class="sig-name descname"><span class="pre">Registry</span></span><a class="reference internal" href="../_modules/spacelink/phy/registry.html#Registry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.registry.Registry" title="Link to this definition"></a></dt>
@@ -125,11 +133,15 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mode_dir</strong> (<em>Path</em>) – Path to the directory containing the link mode files.</p></li>
-<li><p><strong>perf_dir</strong> (<em>Path</em>) – Path to the directory containing the performance data.</p></li>
+<li><p><strong>perf_dir</strong> (<em>Path</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Path to the directory containing the performance data. If None, no
+performance data will be loaded.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#spacelink.phy.registry.DuplicateRegistryEntryError" title="spacelink.phy.registry.DuplicateRegistryEntryError"><strong>DuplicateRegistryEntryError</strong></a> – If duplicate entries are found during loading.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="#spacelink.phy.registry.DuplicateRegistryEntryError" title="spacelink.phy.registry.DuplicateRegistryEntryError"><strong>DuplicateRegistryEntryError</strong></a> – If duplicate entries are found during loading.</p></li>
+<li><p><a class="reference internal" href="#spacelink.phy.registry.NoRegistryFilesError" title="spacelink.phy.registry.NoRegistryFilesError"><strong>NoRegistryFilesError</strong></a> – If no YAML files are found in the specified directories.</p></li>
+</ul>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>

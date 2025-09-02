@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.phy.registry &mdash; SpaceLink 0.1.7 documentation</title>
+  <title>spacelink.phy.registry &mdash; SpaceLink 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=ca7ad2ea"></script>
+        <script src="../../../_static/documentation_options.js?v=22607128"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.7
+                0.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -79,10 +79,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spacelink.phy.registry</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.mode</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkMode</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.performance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModePerformance</span><span class="p">,</span> <span class="n">ErrorMetric</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.performance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorMetric</span><span class="p">,</span> <span class="n">ModePerformance</span>
 
 <span class="n">MODES_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data/modes&quot;</span>
 <span class="n">PERF_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data/perf&quot;</span>
@@ -92,6 +94,13 @@
 <a class="viewcode-back" href="../../../phy/registry.html#spacelink.phy.registry.DuplicateRegistryEntryError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DuplicateRegistryEntryError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when duplicate entries are found during registry loading.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NoRegistryFilesError">
+<a class="viewcode-back" href="../../../phy/registry.html#spacelink.phy.registry.NoRegistryFilesError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NoRegistryFilesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when no YAML files are found in the specified directories.&quot;&quot;&quot;</span></div>
 
 
 
@@ -115,7 +124,9 @@
 
 <div class="viewcode-block" id="Registry.load">
 <a class="viewcode-back" href="../../../phy/registry.html#spacelink.phy.registry.Registry.load">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">MODES_DIR</span><span class="p">,</span> <span class="n">perf_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">PERF_DIR</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mode_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">MODES_DIR</span><span class="p">,</span> <span class="n">perf_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">PERF_DIR</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load link modes and performance data from files.</span>
 
@@ -123,15 +134,25 @@
 <span class="sd">        ----------</span>
 <span class="sd">        mode_dir : Path</span>
 <span class="sd">            Path to the directory containing the link mode files.</span>
-<span class="sd">        perf_dir : Path</span>
-<span class="sd">            Path to the directory containing the performance data.</span>
+<span class="sd">        perf_dir : Path | None, optional</span>
+<span class="sd">            Path to the directory containing the performance data. If None, no</span>
+<span class="sd">            performance data will be loaded.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        DuplicateRegistryEntryError</span>
 <span class="sd">            If duplicate entries are found during loading.</span>
+<span class="sd">        NoRegistryFilesError</span>
+<span class="sd">            If no YAML files are found in the specified directories.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">mode_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.yaml&quot;</span><span class="p">):</span>
+        <span class="n">mode_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mode_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.yaml&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mode_files</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoRegistryFilesError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No YAML files found in mode directory &#39;</span><span class="si">{</span><span class="n">mode_dir</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">mode_files</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">raw</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">:</span>
@@ -142,7 +163,17 @@
                         <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="p">[</span><span class="n">mode</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">mode</span>
 
-        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">perf_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.yaml&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">perf_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">perf_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">perf_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.yaml&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">perf_files</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoRegistryFilesError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No YAML files found in performance directory &#39;</span><span class="si">{</span><span class="n">perf_dir</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">perf_files</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">raw</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
                 <span class="n">mode_ids</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="s2">&quot;mode_ids&quot;</span><span class="p">]</span>

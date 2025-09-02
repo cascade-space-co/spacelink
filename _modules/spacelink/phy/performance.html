@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.phy.performance &mdash; SpaceLink 0.1.7 documentation</title>
+  <title>spacelink.phy.performance &mdash; SpaceLink 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=ca7ad2ea"></script>
+        <script src="../../../_static/documentation_options.js?v=22607128"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.7
+                0.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -80,16 +80,15 @@
              
   <h1>Source code for spacelink.phy.performance</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pydantic</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.interpolate</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.core.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decibels</span><span class="p">,</span> <span class="n">Dimensionless</span><span class="p">,</span> <span class="n">enforce_units</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.mode</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkMode</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.core.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dimensionless</span><span class="p">,</span> <span class="n">Decibels</span><span class="p">,</span> <span class="n">enforce_units</span>
-
 
 <span class="n">ErrorCurvePoint</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>  <span class="c1"># (Eb/N0 [dB], error rate)</span>
 
@@ -216,7 +215,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        Dimensionless</span>
 <span class="sd">            Error rate or NaN if the Eb/N0 is outside the range of available performance</span>
-<span class="sd">            data. Same shape as `ebn0`.</span>
+<span class="sd">            data. Same shape as ``ebn0``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ebn0_to_error_interpolator</span><span class="p">(</span><span class="n">ebn0</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless</span></div>
 
@@ -238,7 +237,7 @@
 <span class="sd">        Decibels</span>
 <span class="sd">            Required Eb/N0 in decibels to achieve the target error rate or NaN if the</span>
 <span class="sd">            error rate is outside the range of available performance data. Same shape as</span>
-<span class="sd">            `error_rate`.</span>
+<span class="sd">            ``error_rate``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_error_to_ebn0_interpolator</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">error_rate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dB</span></div>
 
@@ -265,7 +264,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        Decibels</span>
 <span class="sd">            Coding gain in decibels or NaN if the error rate is outside the range of</span>
-<span class="sd">            the available performance data. Same shape as `error_rate`.</span>
+<span class="sd">            the available performance data. Same shape as ``error_rate``.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>

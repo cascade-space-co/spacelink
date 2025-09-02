@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Noise Module &mdash; SpaceLink 0.1.7 documentation</title>
+  <title>Noise Module &mdash; SpaceLink 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=ca7ad2ea"></script>
+        <script src="../_static/documentation_options.js?v=22607128"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.7
+                0.1.8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -112,9 +112,10 @@ and <span class="math notranslate nohighlight">\(B\)</span> is the bandwidth in 
 </section>
 <section id="noise-figure-factor-modeling">
 <h2>Noise Figure / Factor Modeling<a class="headerlink" href="#noise-figure-factor-modeling" title="Link to this heading"></a></h2>
-<p>The noise figure is a measure of the degradation of the signal-to-noise ratio (SNR) due to the
-noise added by the amplifier, given an input noise temperature of T_0. If the input noise
-temperature is not equal to T_0, noise figure cannot be used to measure the degradation in SNR.</p>
+<p>The noise figure is a measure of the degradation of the signal-to-noise ratio (SNR) due
+to the noise added by the amplifier, given an input noise temperature of T_0. If the
+input noise temperature is not equal to T_0, noise figure cannot be used to measure the
+degradation in SNR.</p>
 <p>The relationships between noise temperature, noise figure, and noise factor are:</p>
 <div class="math notranslate nohighlight">
 \[F = 1 + \frac{T}{T_0}\]</div>
@@ -124,17 +125,19 @@ temperature is not equal to T_0, noise figure cannot be used to measure the degr
 \[\text{NF}_{\text{dB}} = 10 \log_{10}(F)\]</div>
 <div class="math notranslate nohighlight">
 \[F = 10^{\text{NF}_{\text{dB}}/10}\]</div>
-<p>where <span class="math notranslate nohighlight">\(T\)</span> is the noise temperature, <span class="math notranslate nohighlight">\(T_0\)</span> is the reference temperature (290 K),
-<span class="math notranslate nohighlight">\(F\)</span> is the noise factor, and <span class="math notranslate nohighlight">\(\text{NF}_{\text{dB}}\)</span> is the noise figure in dB.</p>
+<p>where <span class="math notranslate nohighlight">\(T\)</span> is the noise temperature, <span class="math notranslate nohighlight">\(T_0\)</span> is the reference temperature (290
+K), <span class="math notranslate nohighlight">\(F\)</span> is the noise factor, and <span class="math notranslate nohighlight">\(\text{NF}_{\text{dB}}\)</span> is the noise figure
+in dB.</p>
 </section>
 <section id="noise-temperature-and-snr">
 <h2>Noise temperature and SNR<a class="headerlink" href="#noise-temperature-and-snr" title="Link to this heading"></a></h2>
-<p>It is important to remember what the noise temperature is. The noise temperature of an amplifier
-is the input referred noise temperature, meaning we model the amplifier as a noiseless amplifier
-with a noisy resistor at the input with temperature <span class="math notranslate nohighlight">\(T\)</span>. The output noise temperature is
-therefore <span class="math notranslate nohighlight">\(G T\)</span> where <span class="math notranslate nohighlight">\(G\)</span> is the gain of the amplifier. To accurately model the
-SNR through the amplifier chain, best practice is to model the noise power separately from the
-signal power and then compute the SNR at the output.</p>
+<p>It is important to remember what the noise temperature is. The noise temperature of an
+amplifier is the input referred noise temperature, meaning we model the amplifier as a
+noiseless amplifier with a noisy resistor at the input with temperature <span class="math notranslate nohighlight">\(T\)</span>. The
+output noise temperature is therefore <span class="math notranslate nohighlight">\(G T\)</span> where <span class="math notranslate nohighlight">\(G\)</span> is the gain of the
+amplifier. To accurately model the SNR through the amplifier chain, best practice is to
+model the noise power separately from the signal power and then compute the SNR at the
+output.</p>
 </section>
 <dl class="py function">
 <dt class="sig sig-object py">
