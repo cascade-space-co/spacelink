@@ -239,10 +239,8 @@ class _ComplexInterpolator:
             Optional 1D array of strictly increasing frequencies with shape (K,).
         values: Quantity
             Complex array of values to interpolate. This should be in linear-scale (not
-            log-scale like u.dB). The required shape depends on whether ``frequency`` is
-            provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            log-scale like u.dB). Shape is ``(N, M)`` if ``frequency`` is None,
+            otherwise ``(N, M, K)``.
         floor: Quantity | None
             Optional floor value for the magnitude in linear scale with the same unit as
             ``values``. If None, a default of ``1e-20 * values.unit`` is used. Magnitude
@@ -406,16 +404,12 @@ class RadiationPattern:
             (theta, phi).
         e_theta: Dimensionless
             Complex array of :math:`E_{\theta}(\theta, \phi[, f])` values normalized
-            such that the magnitude squared is equal to directivity. The required
-            shape depends on whether ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            such that the magnitude squared is equal to directivity. Shape is ``(N, M)``
+            if ``frequency`` is None, otherwise ``(N, M, K)``.
         e_phi: Dimensionless
             Complex array of :math:`E_{\phi}(\theta, \phi[, f])` values normalized
-            such that the magnitude squared is equal to directivity. The required
-            shape depends on whether ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            such that the magnitude squared is equal to directivity. Shape is ``(N, M)``
+            if ``frequency`` is None, otherwise ``(N, M, K)``.
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in (0, 1].
         default_polarization: Polarization | None
@@ -596,16 +590,12 @@ class RadiationPattern:
             (theta, phi).
         e_lhcp: Dimensionless
             Complex array of :math:`E_{\text{LHCP}}(\theta, \phi[, f])` values
-            normalized such that the magnitude squared is equal to directivity. The
-            required shape depends on whether ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            normalized such that the magnitude squared is equal to directivity. Shape is
+            ``(N, M)`` if ``frequency`` is None, otherwise ``(N, M, K)``.
         e_rhcp: Dimensionless
             Complex array of :math:`E_{\text{RHCP}}(\theta, \phi[, f])` values
-            normalized such that the magnitude squared is equal to directivity. The
-            required shape depends on whether ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            normalized such that the magnitude squared is equal to directivity. Shape is
+            ``(N, M)`` if ``frequency`` is None, otherwise ``(N, M, K)``.
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in (0, 1].
         default_polarization: Polarization | None
@@ -659,25 +649,17 @@ class RadiationPattern:
             If None, the pattern is treated as frequency-invariant and 2D over
             (theta, phi).
         gain_lhcp: Dimensionless
-            Array of LHCP gain values. The required shape depends on whether
-            ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            Array of LHCP gain values. Shape is ``(N, M)`` if ``frequency`` is None,
+            otherwise ``(N, M, K)``.
         gain_rhcp: Dimensionless
-            Array of RHCP gain values. The required shape depends on whether
-            ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            Array of RHCP gain values. Shape is ``(N, M)`` if ``frequency`` is None,
+            otherwise ``(N, M, K)``.
         phase_lhcp: Angle
-            Array of LHCP phase angles. The required shape depends on whether
-            ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            Array of LHCP phase angles. Shape is ``(N, M)`` if ``frequency`` is None,
+            otherwise ``(N, M, K)``.
         phase_rhcp: Angle
-            Array of RHCP phase angles. The required shape depends on whether
-            ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            Array of RHCP phase angles. Shape is ``(N, M)`` if ``frequency`` is None,
+            otherwise ``(N, M, K)``.
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in (0, 1].
         default_polarization: Polarization | None
@@ -735,25 +717,17 @@ class RadiationPattern:
             If None, the pattern is treated as frequency-invariant and 2D over
             (theta, phi).
         gain_theta: Dimensionless
-            Array of :math:`\hat{\theta}` gain values. The required shape depends on
-            whether ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            Array of :math:`\hat{\theta}` gain values. Shape is ``(N, M)`` if
+            ``frequency`` is None, otherwise ``(N, M, K)``.
         gain_phi: Dimensionless
-            Array of :math:`\hat{\phi}` gain values. The required shape depends on
-            whether ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            Array of :math:`\hat{\phi}` gain values. Shape is ``(N, M)`` if
+            ``frequency`` is None, otherwise ``(N, M, K)``.
         phase_theta: Angle
-            Array of :math:`\hat{\theta}` phase angles. The required shape depends on
-            whether ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            Array of :math:`\hat{\theta}` phase angles. Shape is ``(N, M)`` if
+            ``frequency`` is None, otherwise ``(N, M, K)``.
         phase_phi: Angle
-            Array of :math:`\hat{\phi}` phase angles. The required shape depends on
-            whether ``frequency`` is provided:
-            - If ``frequency is None``: shape ``(N, M)``
-            - Else: shape ``(N, M, K)``
+            Array of :math:`\hat{\phi}` phase angles. Shape is ``(N, M)`` if
+            ``frequency`` is None, otherwise ``(N, M, K)``.
         rad_efficiency: Dimensionless
             Radiation efficiency :math:`\eta` in (0, 1].
         default_polarization: Polarization | None
