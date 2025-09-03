@@ -110,7 +110,7 @@ SolidAngle = Annotated[Quantity, u.sr]
 Time = Annotated[Quantity, u.s]
 
 # Module-level flag to enable return unit checking (for tests)
-_RETURN_UNITS_CHECK_STRICT = False
+_RETURN_UNITS_CHECK_ENABLED = False
 
 
 def _extract_annotated_from_hint(hint: Any) -> tuple[type, u.Unit] | None:
@@ -306,7 +306,7 @@ def _validate_return_units(result: Any, ret_hint: Any) -> None:
     ret_hint : Any
         Return type hint
     """
-    if not _RETURN_UNITS_CHECK_STRICT or ret_hint is None:
+    if not _RETURN_UNITS_CHECK_ENABLED or ret_hint is None:
         return
 
     # Try tuple support first

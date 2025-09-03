@@ -315,8 +315,8 @@ class TestEnforceUnitsArgs:
 class TestEnforceUnitsReturns:
     """Test enforce_units decorator return value validation."""
 
-    def test_return_value_strict_mode(self):
-        """Test that enforce_units validates return value units in strict mode."""
+    def test_return_value_checking_mode(self):
+        """Test that enforce_units validates return value units."""
 
         @enforce_units
         def correct_return_units() -> Frequency:
@@ -347,7 +347,7 @@ class TestEnforceUnitsReturns:
         result = correct_return_units()
         assert result == 1000.0 * u.Hz
 
-        # Test wrong return units - should fail in strict mode
+        # Test wrong return units - should fail
         with pytest.raises(u.UnitConversionError):
             wrong_return_units()
 
@@ -416,17 +416,17 @@ class TestEnforceUnitsReturns:
                 """Function that returns wrong units in tuple."""
                 return wrong_value()
 
-        # Temporarily disable strict checking
-        original_value = units._RETURN_UNITS_CHECK_STRICT
+        # Temporarily disable checking
+        original_value = units._RETURN_UNITS_CHECK_ENABLED
         try:
-            units._RETURN_UNITS_CHECK_STRICT = False
+            units._RETURN_UNITS_CHECK_ENABLED = False
 
             # Should not raise when checking is disabled
             result = wrong_return_units()
             assert result == expected_value
 
         finally:
-            units._RETURN_UNITS_CHECK_STRICT = original_value
+            units._RETURN_UNITS_CHECK_ENABLED = original_value
 
     def test_tuple_return_values(self):
         """Test that enforce_units validates tuple return values correctly."""
