@@ -67,15 +67,29 @@ where:
 * :math:`\text{RL}` is the return loss in dB
 """
 
+import dataclasses
 import types
+from collections.abc import Callable
 from functools import wraps
 from inspect import signature
-from typing import Annotated, Any, Union, get_args, get_origin, get_type_hints
+from typing import (
+    Annotated,
+    Any,
+    TypeVar,
+    Union,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 import astropy.constants as constants
 import astropy.units as u
 import numpy as np
 from astropy.units import Quantity
+
+# Type variable for enforce_units decorator - accepts only functions or classes
+FuncOrClass = TypeVar("FuncOrClass", Callable[..., Any], type)
+
 
 if not hasattr(u, "dBHz"):  # pragma: no cover
     u.dBHz = u.dB(u.Hz)
@@ -146,40 +160,12 @@ def _extract_annotated_from_hint(hint: Any) -> tuple[type, u.Unit] | None:
     return None
 
 
-def enforce_units(func):
+def _wrap_function_with_unit_enforcement(func: FuncOrClass) -> FuncOrClass:
     """
-    Decorator to enforce the units specified in function parameter type annotations.
+    Internal helper to wrap a function with unit enforcement logic.
 
-    This decorator enforces some unit consistency rules for function parameters that
-    annotated with one of the ``Annotated`` types in this module:
-
-    * The argument must be a ``Quantity`` object.
-    * The argument must be provided with a compatible unit. For example, a ``Frequency``
-      argument's units can be ``u.Hz``, ``u.MHz``, ``u.GHz``, etc. but not ``u.m``,
-      ``u.K``, or any other non-frequency unit.
-
-    In addition to the above, the value of any ``Annotated`` argument will be converted
-    automatically to the unit specified in for that type. For example, the ``Angle``
-    type will be converted to ``u.rad``, even if the argument is provided with a unit of
-    ``u.deg``. This allows functions to flexibly handle compatible units while keeping
-    tedious unit conversion logic out of the function body.
-
-    Parameters
-    ----------
-    func : callable
-        The function to wrap.
-
-    Returns
-    -------
-    callable
-        The wrapped function with unit enforcement.
-
-    Raises
-    ------
-    UnitConversionError
-        If any argument has incompatible units.
-    TypeError
-        If an ``Annotated`` argument is not an Astropy ``Quantity`` object.
+    This is the core unit enforcement logic extracted to be reusable
+    for both regular functions and dataclass __init__ methods.
     """
     sig = signature(func)
     hints = get_type_hints(func, include_extras=True)
@@ -227,6 +213,68 @@ def enforce_units(func):
         return func(*bound.args, **bound.kwargs)
 
     return wrapper
+
+
+def enforce_units(func_or_class: FuncOrClass) -> FuncOrClass:
+    """
+    Decorator to enforce the units specified in function parameter type annotations.
+
+    This decorator enforces some unit consistency rules for function parameters that
+    annotated with one of the ``Annotated`` types in this module:
+
+    * The argument must be a ``Quantity`` object.
+    * The argument must be provided with a compatible unit. For example, a ``Frequency``
+      argument's units can be ``u.Hz``, ``u.MHz``, ``u.GHz``, etc. but not ``u.m``,
+      ``u.K``, or any other non-frequency unit.
+
+    In addition to the above, the value of any ``Annotated`` argument will be converted
+    automatically to the unit specified in for that type. For example, the ``Angle``
+    type will be converted to ``u.rad``, even if the argument is provided with a unit of
+    ``u.deg``. This allows functions to flexibly handle compatible units while keeping
+    tedious unit conversion logic out of the function body.
+
+    When applied to a dataclass, this decorator will wrap the ``__init__`` method
+    to enforce units on dataclass field assignments.
+
+    Parameters
+    ----------
+    func_or_class : callable or class
+        The function or dataclass to wrap.
+
+    Returns
+    -------
+    callable or class
+        The wrapped function or modified dataclass with unit enforcement.
+
+    Raises
+    ------
+    UnitConversionError
+        If any argument has incompatible units.
+    TypeError
+        If an ``Annotated`` argument is not an Astropy ``Quantity`` object.
+    """
+    # Check if this is a class
+    if isinstance(func_or_class, type):
+        if dataclasses.is_dataclass(func_or_class):
+            # Handle dataclass case: wrap the __init__ method
+            original_init = func_or_class.__init__
+            wrapped_init = _wrap_function_with_unit_enforcement(original_init)
+            func_or_class.__init__ = wrapped_init
+
+            return func_or_class
+        else:
+            # Regular class - this is probably a mistake
+            raise TypeError(
+                f"@enforce_units should not be applied to regular classes. "
+                f"Apply it directly to the __init__ method instead:\n\n"
+                f"class {func_or_class.__name__}:\n"
+                f"    @enforce_units\n"
+                f"    def __init__(self, ...):\n"
+                f"        ..."
+            )
+    else:
+        # Handle regular function case
+        return _wrap_function_with_unit_enforcement(func_or_class)
 
 
 @enforce_units
