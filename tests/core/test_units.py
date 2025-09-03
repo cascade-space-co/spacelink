@@ -8,6 +8,8 @@ from astropy.tests.helper import assert_quantity_allclose
 from spacelink.core import units
 from spacelink.core.units import (
     Angle,
+    Decibels,
+    Dimensionless,
     Frequency,
     Temperature,
     enforce_units,
@@ -355,3 +357,104 @@ def test_enforce_units_rejects_regular_classes():
         @enforce_units
         class AnotherRegularClass:
             pass
+
+
+def test_enforce_units_return_value_strict_mode():
+    """Test that enforce_units validates return value units in strict mode."""
+
+    @enforce_units
+    def correct_return_units() -> Frequency:
+        """Function that returns correct units."""
+        return 1000.0 * u.Hz
+
+    @enforce_units
+    def wrong_return_units() -> Frequency:
+        """Function that returns wrong units."""
+        return 1.0 * u.MHz  # MHz instead of Hz
+
+    @enforce_units
+    def non_quantity_return() -> Frequency:
+        """Function that returns non-Quantity."""
+        return 1000.0  # Raw number instead of Quantity
+
+    @enforce_units
+    def optional_return_none() -> Frequency | None:
+        """Function that can return None."""
+        return None
+
+    @enforce_units
+    def optional_return_wrong_none() -> Frequency:
+        """Function that returns None but not annotated as optional."""
+        return None
+
+    # Test correct return units - should pass
+    result = correct_return_units()
+    assert result == 1000.0 * u.Hz
+
+    # Test wrong return units - should fail in strict mode
+    with pytest.raises(u.UnitConversionError):
+        wrong_return_units()
+
+    # Test non-Quantity return - should fail
+    with pytest.raises(TypeError):
+        non_quantity_return()
+
+    # Test optional return None - should pass
+    result = optional_return_none()
+    assert result is None
+
+    # Test non-optional return None - should fail
+    with pytest.raises(TypeError):
+        optional_return_wrong_none()
+
+
+def test_enforce_units_return_value_disabled():
+    """Test that return value checking can be disabled."""
+
+    @enforce_units
+    def wrong_return_units() -> Frequency:
+        """Function that returns wrong units."""
+        return 1.0 * u.MHz  # MHz instead of Hz
+
+    # Temporarily disable strict checking
+    original_value = units._RETURN_UNITS_CHECK_STRICT
+    try:
+        units._RETURN_UNITS_CHECK_STRICT = False
+
+        # Should not raise when checking is disabled
+        result = wrong_return_units()
+        assert result == 1.0 * u.MHz
+
+    finally:
+        units._RETURN_UNITS_CHECK_STRICT = original_value
+
+
+def test_enforce_units_return_value_complex_types():
+    """Test return value checking with complex unit types."""
+
+    @enforce_units
+    def return_decibels() -> Decibels:
+        """Function that returns decibels."""
+        return 10.0 * u.dB
+
+    @enforce_units
+    def return_wrong_decibels() -> Decibels:
+        """Function that returns wrong decibel unit."""
+        return 10.0 * u.dBW  # dBW instead of dB
+
+    @enforce_units
+    def return_dimensionless() -> Dimensionless:
+        """Function that returns dimensionless quantity."""
+        return 1.5 * u.dimensionless
+
+    # Test correct decibel return
+    result = return_decibels()
+    assert result == 10.0 * u.dB
+
+    # Test wrong decibel type - should fail
+    with pytest.raises(u.UnitConversionError):
+        return_wrong_decibels()
+
+    # Test dimensionless return
+    result = return_dimensionless()
+    assert result == 1.5 * u.dimensionless

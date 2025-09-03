@@ -123,6 +123,9 @@ Angle = Annotated[Quantity, u.rad]
 SolidAngle = Annotated[Quantity, u.sr]
 Time = Annotated[Quantity, u.s]
 
+# Module-level flag to enable return unit checking (for tests)
+_RETURN_UNITS_CHECK_STRICT = False
+
 
 def _extract_annotated_from_hint(hint: Any) -> tuple[type, u.Unit] | None:
     """
@@ -210,7 +213,36 @@ def _wrap_function_with_unit_enforcement(func: FuncOrClass) -> FuncOrClass:
                         f"Parameter '{name}' must be provided as an astropy Quantity, "
                         f"not a raw number."
                     )
-        return func(*bound.args, **bound.kwargs)
+
+        result = func(*bound.args, **bound.kwargs)
+
+        # Check return value units if strict checking is enabled
+        if _RETURN_UNITS_CHECK_STRICT:
+            ret_hint = hints.get("return")
+            annotated_info = _extract_annotated_from_hint(ret_hint)
+
+            if annotated_info is not None:
+                _, expected_unit = annotated_info
+
+                # Allow None only if the return annotation is a union including None
+                if result is None:
+                    origin = get_origin(ret_hint)
+                    if not (
+                        origin in (Union, getattr(types, "UnionType", ()))
+                        and type(None) in get_args(ret_hint)
+                    ):
+                        raise TypeError(
+                            "Return value is None but not annotated as Optional."
+                        )
+                else:
+                    if not isinstance(result, Quantity):
+                        raise TypeError("Return value must be an astropy Quantity.")
+                    if result.unit != expected_unit:
+                        raise u.UnitConversionError(
+                            f"Return unit {result.unit} != annotated {expected_unit}."
+                        )
+
+        return result
 
     return wrapper
 
