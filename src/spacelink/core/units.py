@@ -127,7 +127,7 @@ def _extract_annotated_from_hint(hint: Any) -> tuple[type, u.Unit] | None:
     tuple[type, u.Unit] | None
         (quantity_type, unit) if Annotated type found, None otherwise
     """
-    if hint is None:
+    if hint is None:  # pragma: no cover
         return None
 
     # Check if hint is directly Annotated
@@ -147,6 +147,210 @@ def _extract_annotated_from_hint(hint: Any) -> tuple[type, u.Unit] | None:
                     return annotated_args[0], annotated_args[1]
 
     return None
+
+
+def _extract_tuple_annotations(hint: Any) -> list[tuple[type, u.Unit] | None] | None:
+    """
+    Extract annotations from tuple type hints.
+
+    Parameters
+    ----------
+    hint : Any
+        Type hint that may be a tuple containing Annotated types
+
+    Returns
+    -------
+    list[tuple[type, u.Unit] | None] | None
+        List of (quantity_type, unit) for each tuple element, or None if element
+        is not annotated. Returns None if hint is not a tuple.
+    """
+    origin = get_origin(hint)
+    if origin is tuple:
+        args = get_args(hint)
+        annotations = []
+        for arg in args:
+            annotated_info = _extract_annotated_from_hint(arg)
+            annotations.append(annotated_info)  # None for non-annotated elements
+        return annotations
+    return None
+
+
+def _validate_tuple_return(result, expected_annotations):
+    """
+    Validate tuple return values against their type annotations.
+
+    Parameters
+    ----------
+    result : Any
+        The actual return value (should be a tuple)
+    expected_annotations : list[tuple[type, u.Unit] | None]
+        List of expected annotations for each tuple element
+    """
+    if not isinstance(result, tuple):
+        raise TypeError("Expected tuple return value.")
+
+    if len(result) != len(expected_annotations):
+        raise TypeError(
+            f"Expected tuple with {len(expected_annotations)} elements, "
+            f"got {len(result)} elements."
+        )
+
+    for i, (value, annotation) in enumerate(
+        zip(result, expected_annotations, strict=False)
+    ):
+        if annotation is not None:  # Only check annotated elements
+            _, expected_unit = annotation
+
+            if value is None:
+                raise TypeError(f"tuple[{i}] is None but not annotated as Optional.")
+
+            if not isinstance(value, Quantity):
+                raise TypeError(f"tuple[{i}] must be an astropy Quantity.")
+
+            if value.unit != expected_unit:
+                raise u.UnitConversionError(
+                    f"tuple[{i}] unit {value.unit} != annotated {expected_unit}."
+                )
+
+
+def _convert_parameter_units(name: str, value: Any, expected_unit: u.Unit) -> Quantity:
+    """
+    Convert a parameter value to the expected unit.
+
+    Parameters
+    ----------
+    name : str
+        Parameter name for error messages
+    value : Any
+        Parameter value to convert
+    expected_unit : u.Unit
+        Expected unit for the parameter
+
+    Returns
+    -------
+    Quantity
+        Converted quantity with the expected unit
+
+    Raises
+    ------
+    TypeError
+        If value is not a Quantity
+    UnitConversionError
+        If units are incompatible
+    """
+    if not isinstance(value, Quantity):
+        raise TypeError(
+            f"Parameter '{name}' must be provided as an astropy Quantity, "
+            f"not a raw number."
+        )
+
+    try:
+        if expected_unit.is_equivalent(u.K):
+            return value.to(expected_unit, equivalencies=u.temperature())
+        else:
+            return value.to(expected_unit)
+    except u.UnitConversionError as e:
+        raise u.UnitConversionError(
+            f"Parameter '{name}' requires unit compatible with {expected_unit}, "
+            f"but got {value.unit}. Original error: {e}"
+        ) from e
+
+
+def _validate_single_return(result: Any, expected_unit: u.Unit, ret_hint: Any) -> None:
+    """
+    Validate a single return value against its expected unit.
+
+    Parameters
+    ----------
+    result : Any
+        The actual return value
+    expected_unit : u.Unit
+        Expected unit for the return value
+    ret_hint : Any
+        Original return type hint for Optional checking
+
+    Raises
+    ------
+    TypeError
+        If result is None when not Optional, or not a Quantity
+    UnitConversionError
+        If units don't match exactly
+    """
+    if result is None:
+        # Check if None is allowed (Optional type)
+        origin = get_origin(ret_hint)
+        if not (
+            origin in (Union, getattr(types, "UnionType", ()))
+            and type(None) in get_args(ret_hint)
+        ):
+            raise TypeError("Return value is None but not annotated as Optional.")
+        return
+
+    if not isinstance(result, Quantity):
+        raise TypeError("Return value must be an astropy Quantity.")
+
+    if result.unit != expected_unit:
+        raise u.UnitConversionError(
+            f"Return unit {result.unit} != annotated {expected_unit}."
+        )
+
+
+def _validate_return_units(result: Any, ret_hint: Any) -> None:
+    """
+    Validate return value units based on type hint.
+
+    Parameters
+    ----------
+    result : Any
+        The actual return value
+    ret_hint : Any
+        Return type hint
+    """
+    if not _RETURN_UNITS_CHECK_STRICT or ret_hint is None:
+        return
+
+    # Try tuple support first
+    tuple_annotations = _extract_tuple_annotations(ret_hint)
+    if tuple_annotations is not None:
+        _validate_tuple_return(result, tuple_annotations)
+        return
+
+    # Single annotated quantity
+    annotated_info = _extract_annotated_from_hint(ret_hint)
+    if annotated_info is not None:
+        _, expected_unit = annotated_info
+        _validate_single_return(result, expected_unit, ret_hint)
+
+
+def _process_parameter(name: str, value: Any, hint: Any) -> Quantity | Any:
+    """
+    Process a single parameter, converting units if needed.
+
+    Parameters
+    ----------
+    name : str
+        Parameter name
+    value : Any
+        Parameter value
+    hint : Any
+        Type hint for the parameter
+
+    Returns
+    -------
+    Quantity | Any
+        Converted parameter value, or original value if not annotated
+    """
+    annotated_info = _extract_annotated_from_hint(hint)
+    if annotated_info is None:
+        return value  # Not an annotated parameter
+
+    _, expected_unit = annotated_info
+
+    # Handle None values for optional parameters
+    if value is None:
+        return value
+
+    return _convert_parameter_units(name, value, expected_unit)
 
 
 def enforce_units(func):
@@ -192,69 +396,16 @@ def enforce_units(func):
         bound = sig.bind(*args, **kwargs)
         bound.apply_defaults()
 
+        # Process all parameters
         for name, value in bound.arguments.items():
             hint = hints.get(name)
-            annotated_info = _extract_annotated_from_hint(hint)
+            bound.arguments[name] = _process_parameter(name, value, hint)
 
-            if annotated_info is not None:
-                _, unit = annotated_info
-
-                # Handle None values for optional parameters
-                if value is None:
-                    continue
-
-                if isinstance(value, Quantity):
-                    # Convert to expected unit
-                    try:
-                        if unit.is_equivalent(u.K):
-                            converted_value = value.to(
-                                unit, equivalencies=u.temperature()
-                            )
-                        else:
-                            converted_value = value.to(unit)
-                    except u.UnitConversionError as e:
-                        raise u.UnitConversionError(
-                            f"Parameter '{name}' requires unit compatible with {unit}, "
-                            f"but got {value.unit}. Original error: {e}"
-                        ) from e
-
-                    # Unit conversion successful
-                    bound.arguments[name] = converted_value
-
-                else:
-                    # Handle non-Quantity inputs
-                    raise TypeError(
-                        f"Parameter '{name}' must be provided as an astropy Quantity, "
-                        f"not a raw number."
-                    )
-
+        # Execute the function
         result = func(*bound.args, **bound.kwargs)
 
-        # Check return value units if strict checking is enabled
-        if _RETURN_UNITS_CHECK_STRICT:
-            ret_hint = hints.get("return")
-            annotated_info = _extract_annotated_from_hint(ret_hint)
-
-            if annotated_info is not None:
-                _, expected_unit = annotated_info
-
-                # Allow None only if the return annotation is a union including None
-                if result is None:
-                    origin = get_origin(ret_hint)
-                    if not (
-                        origin in (Union, getattr(types, "UnionType", ()))
-                        and type(None) in get_args(ret_hint)
-                    ):
-                        raise TypeError(
-                            "Return value is None but not annotated as Optional."
-                        )
-                else:
-                    if not isinstance(result, Quantity):
-                        raise TypeError("Return value must be an astropy Quantity.")
-                    if result.unit != expected_unit:
-                        raise u.UnitConversionError(
-                            f"Return unit {result.unit} != annotated {expected_unit}."
-                        )
+        # Validate return value units
+        _validate_return_units(result, hints.get("return"))
 
         return result
 
