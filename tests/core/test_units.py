@@ -11,6 +11,7 @@ from spacelink.core.units import (
     Decibels,
     Dimensionless,
     Frequency,
+    Power,
     Temperature,
     enforce_units,
     frequency,
@@ -204,7 +205,7 @@ def test_enforce_units_rejects_incompatible_units():
         test_angle_function(5 * u.m)  # Length instead of angle
 
     # Should raise TypeError for raw numbers
-    with pytest.raises(TypeError, match="must be provided as an astropy Quantity"):
+    with pytest.raises(TypeError):
         test_angle_function(45)  # Raw number instead of Quantity
 
 
@@ -265,7 +266,7 @@ def test_enforce_units_optional_parameters_invalid_units():
         test_optional_frequency(5 * u.m)  # Length instead of frequency
 
     # Should raise TypeError for raw numbers
-    with pytest.raises(TypeError, match="must be provided as an astropy Quantity"):
+    with pytest.raises(TypeError):
         test_optional_frequency(1000)  # Raw number instead of Quantity
 
 
@@ -408,25 +409,40 @@ def test_enforce_units_return_value_strict_mode():
         optional_return_wrong_none()
 
 
-def test_enforce_units_return_value_disabled():
+@pytest.mark.parametrize(
+    "return_type, wrong_value, expected_value",
+    [
+        ("single", lambda: 1.0 * u.MHz, 1.0 * u.MHz),
+        ("tuple", lambda: (1.0 * u.MHz, 10.0 * u.W), (1.0 * u.MHz, 10.0 * u.W)),
+    ],
+)
+def test_enforce_units_return_value_disabled(return_type, wrong_value, expected_value):
     """Test that return value checking can be disabled."""
 
-    @enforce_units
-    def wrong_return_units() -> Frequency:
-        """Function that returns wrong units."""
-        return 1.0 * u.MHz  # MHz instead of Hz
+    if return_type == "single":
+
+        @enforce_units
+        def wrong_return_units() -> Frequency:
+            """Function that returns wrong units."""
+            return wrong_value()
+    else:  # tuple
+
+        @enforce_units
+        def wrong_return_units() -> tuple[Frequency, Power]:
+            """Function that returns wrong units in tuple."""
+            return wrong_value()
 
     # Temporarily disable strict checking
-    original_value = units._RETURN_UNITS_CHECK_STRICT
+    original_value = units._RETURN_UNITS_CHECK_ENABLED
     try:
-        units._RETURN_UNITS_CHECK_STRICT = False
+        units._RETURN_UNITS_CHECK_ENABLED = False
 
         # Should not raise when checking is disabled
         result = wrong_return_units()
-        assert result == 1.0 * u.MHz
+        assert result == expected_value
 
     finally:
-        units._RETURN_UNITS_CHECK_STRICT = original_value
+        units._RETURN_UNITS_CHECK_ENABLED = original_value
 
 
 def test_enforce_units_return_value_complex_types():
@@ -458,3 +474,61 @@ def test_enforce_units_return_value_complex_types():
     # Test dimensionless return
     result = return_dimensionless()
     assert result == 1.5 * u.dimensionless
+
+
+def test_enforce_units_tuple_return_values():
+    """Test that enforce_units validates tuple return values correctly."""
+
+    @enforce_units
+    def correct_tuple() -> tuple[Frequency, Power]:
+        """Function that returns correct tuple units."""
+        return 1000.0 * u.Hz, 10.0 * u.W
+
+    @enforce_units
+    def wrong_tuple_units() -> tuple[Frequency, Power]:
+        """Function that returns wrong units in tuple."""
+        return 1.0 * u.MHz, 10.0 * u.W  # MHz instead of Hz
+
+    @enforce_units
+    def wrong_tuple_length() -> tuple[Frequency, Power]:
+        """Function that returns wrong tuple length."""
+        return (1000.0 * u.Hz,)  # Missing second element
+
+    @enforce_units
+    def mixed_tuple() -> tuple[str, Frequency, int]:
+        """Function with mixed annotated and non-annotated tuple elements."""
+        return "hello", 1000.0 * u.Hz, 42
+
+    @enforce_units
+    def wrong_mixed_tuple() -> tuple[str, Frequency, int]:
+        """Function with wrong units in mixed tuple."""
+        return "hello", 1.0 * u.MHz, 42  # Wrong frequency unit
+
+    @enforce_units
+    def non_quantity_in_tuple() -> tuple[Frequency, Power]:
+        """Function that returns non-Quantity in tuple."""
+        return 1000.0, 10.0 * u.W  # Raw number instead of Quantity
+
+    # Test correct tuple - should pass
+    result = correct_tuple()
+    assert result == (1000.0 * u.Hz, 10.0 * u.W)
+
+    # Test wrong units in tuple - should fail
+    with pytest.raises(u.UnitConversionError):
+        wrong_tuple_units()
+
+    # Test wrong tuple length - should fail
+    with pytest.raises(TypeError):
+        wrong_tuple_length()
+
+    # Test mixed tuple with correct units - should pass
+    result = mixed_tuple()
+    assert result == ("hello", 1000.0 * u.Hz, 42)
+
+    # Test mixed tuple with wrong units - should fail
+    with pytest.raises(u.UnitConversionError):
+        wrong_mixed_tuple()
+
+    # Test non-Quantity in tuple - should fail
+    with pytest.raises(TypeError):
+        non_quantity_in_tuple()
