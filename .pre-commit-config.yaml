@@ -14,7 +14,6 @@ repos:
         args:
           - --extra-keys
           - >
-            metadata.kernelspec.display_name
             metadata.language_info.version
             metadata.language_info.codemirror_mode
             metadata.language_info.nbconvert_exporter
