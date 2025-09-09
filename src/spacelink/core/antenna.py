@@ -223,7 +223,6 @@ class _ComplexInterpolator:
         phi: Angle,
         frequency: Frequency | None,
         values: u.Quantity,
-        floor: u.Quantity | None = None,
     ):
         r"""
         Create a complex interpolator.
@@ -241,24 +240,9 @@ class _ComplexInterpolator:
             Complex array of values to interpolate. This should be in linear-scale (not
             log-scale like u.dB). Shape is ``(N, M)`` if ``frequency`` is None,
             otherwise ``(N, M, K)``.
-        floor: Quantity | None
-            Optional floor value for the magnitude in linear scale with the same unit as
-            ``values``. If None, a default of ``1e-20 * values.unit`` is used. Magnitude
-            interpolation is performed in log-space and thus cannot handle 0 values
-            anywhere, so 0s are replaced with this prior to interpolation. Must be a
-            positive scalar.
         """
         self.unit = values.unit
         values = values.value
-
-        if floor is None:
-            floor = 1e-20 * self.unit
-        elif floor.unit != self.unit:
-            raise ValueError("floor must be in the same unit as values.")
-        if np.size(floor) != 1:
-            raise ValueError("floor must be a scalar Quantity.")
-        if floor.value <= 0:
-            raise ValueError("floor must be > 0.")
 
         self._is_3d = frequency is not None
 
@@ -295,27 +279,9 @@ class _ComplexInterpolator:
                 [values[:, -1:, :], values, values[:, :1, :]], axis=1
             )
 
-        # Interpolate magnitude in log-space since this yields a more natural result
-        # for antenna patterns.
-        with np.errstate(divide="ignore", invalid="ignore"):
-            mag_linear = np.clip(np.abs(values), floor.value, None)
-            log_mag = np.log(mag_linear)
-
-        # Interpolate phase as a unit-magnitude complex exponential. This avoids issues
-        # with phase wrapping discontinuities.
-        with np.errstate(invalid="ignore"):
-            phase_exponential = np.where(
-                np.abs(values) == 0,
-                1.0,
-                values / np.abs(values),
-            )
-
         self._interp = scipy.interpolate.RegularGridInterpolator(
             points=(theta.value, phi.value, frequency.value),
-            values=np.stack(
-                [log_mag, np.real(phase_exponential), np.imag(phase_exponential)],
-                axis=-1,
-            ),
+            values=values,
             method="linear",
             bounds_error=True,
         )
@@ -361,12 +327,7 @@ class _ComplexInterpolator:
             frequency.value,
         )
 
-        features = self._interp(points)
-        mag = np.exp(features[..., 0])
-        phase_exp = features[..., 1] + 1j * features[..., 2]
-        phase_exp /= np.abs(phase_exp)  # Re-normalize to remove numerical drift
-
-        return mag * phase_exp * self.unit
+        return self._interp(points) * self.unit
 
 
 class RadiationPattern:
