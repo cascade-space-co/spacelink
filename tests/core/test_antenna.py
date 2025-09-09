@@ -190,8 +190,8 @@ class TestPolarization:
 class TestComplexInterpolator:
     """Tests for the ComplexInterpolator class."""
 
-    def test_exactness_at_grid_nodes(self):
-        """Test that interpolation is exact at the provided grid points."""
+    def test_exactness_at_grid_nodes_2d(self):
+        """Test that 2D interpolation is exact at the provided grid points."""
         N, M = 9, 13
         theta = np.linspace(0.1, np.pi - 0.1, N) * u.rad
         phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
@@ -201,22 +201,42 @@ class TestComplexInterpolator:
         values = (np.random.randn(N, M) + 1j * np.random.randn(N, M)) * u.dimensionless
 
         interpolator = _ComplexInterpolator(theta, phi, None, values)
-
-        # Query exactly at grid points
         result = interpolator(theta[:, np.newaxis], phi)
 
         # Should be exact (within machine precision)
         assert_quantity_allclose(result, values, atol=1e-12 * u.dimensionless)
 
-    def test_phi_periodicity_and_rotation_invariance(self):
-        """Test φ modulo invariance and rotation invariance."""
+    def test_exactness_at_grid_nodes_3d(self):
+        """Test that 3D interpolation is exact at the provided grid points."""
+        N, M, K = 9, 13, 5
+        theta = np.linspace(0.1, np.pi - 0.1, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+        frequency = (np.arange(K) + 1) * u.GHz
+
+        # Use random complex values to ensure we're not relying on special structure
+        np.random.seed(42)
+        values = (
+            np.random.randn(N, M, K) + 1j * np.random.randn(N, M, K)
+        ) * u.dimensionless
+
+        interpolator = _ComplexInterpolator(theta, phi, frequency, values)
+        result = interpolator(
+            theta[:, np.newaxis, np.newaxis],
+            phi[np.newaxis, :, np.newaxis],
+            frequency[np.newaxis, np.newaxis, :],
+        )
+
+        # Should be exact (within machine precision)
+        assert_quantity_allclose(result, values, atol=1e-12 * u.dimensionless)
+
+    def test_phi_periodicity_and_rotation_invariance_2d(self):
+        """Test φ modulo invariance and rotation invariance for 2D patterns."""
         N, M = 12, 16
         theta = np.linspace(0.1, np.pi - 0.1, N) * u.rad
         phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
 
         np.random.seed(123)
         values = (np.random.randn(N, M) + 1j * np.random.randn(N, M)) * u.dimensionless
-
         interpolator = _ComplexInterpolator(theta, phi, None, values)
 
         # Test φ modulo invariance: f(θ, φ) == f(θ, φ + 2π)
@@ -241,22 +261,60 @@ class TestComplexInterpolator:
             result_orig, result_shifted, atol=1e-12 * u.dimensionless
         )
 
-    def test_complex_equivariance_properties(self):
-        """Test scaling and conjugation equivariance properties."""
+    def test_phi_periodicity_and_rotation_invariance_3d(self):
+        """Test φ modulo invariance and rotation invariance for 3D patterns."""
+        N, M, K = 12, 16, 4
+        theta = np.linspace(0.1, np.pi - 0.1, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+        frequency = (np.arange(K) + 1) * u.GHz
+
+        np.random.seed(123)
+        values = (
+            np.random.randn(N, M, K) + 1j * np.random.randn(N, M, K)
+        ) * u.dimensionless
+        interpolator = _ComplexInterpolator(theta, phi, frequency, values)
+
+        # Test φ modulo invariance: f(θ, φ, f) == f(θ, φ + 2π, f)
+        result1 = interpolator(theta[:, np.newaxis], phi, frequency[0])
+        result2 = interpolator(
+            theta[:, np.newaxis], phi + 2 * np.pi * u.rad, frequency[0]
+        )
+        assert_quantity_allclose(result1, result2, atol=1e-12 * u.dimensionless)
+
+        # Test φ rotation invariance: shifting grid and data should give same results
+        shift = 3
+        phi_shifted = np.roll(phi.value, shift) * u.rad
+        values_shifted = np.roll(values.value, shift, axis=1) * u.dimensionless
+        interpolator_shifted = _ComplexInterpolator(
+            theta, phi_shifted, frequency, values_shifted
+        )
+
+        # Test at evaluation points
+        eval_theta = np.linspace(0.2, np.pi - 0.2, 6) * u.rad
+        eval_phi = np.linspace(0.1, 2 * np.pi - 0.1, 8) * u.rad
+        result_orig = interpolator(eval_theta[:, np.newaxis], eval_phi, frequency[1])
+        result_shifted = interpolator_shifted(
+            eval_theta[:, np.newaxis], eval_phi, frequency[1]
+        )
+        assert_quantity_allclose(
+            result_orig, result_shifted, atol=1e-12 * u.dimensionless
+        )
+
+    def test_complex_equivariance_properties_2d(self):
+        """Test scaling and conjugation equivariance properties for 2D patterns."""
         N, M = 8, 12
         theta = np.linspace(0.2, np.pi - 0.2, N) * u.rad
         phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
 
         np.random.seed(456)
         values = (np.random.randn(N, M) + 1j * np.random.randn(N, M)) * u.dimensionless
-
-        # Test complex scaling: Interp(c * V) == c * Interp(V)
         c = 1.2 - 0.7j
-        interpolator_orig = _ComplexInterpolator(theta, phi, None, values)
-        interpolator_scaled = _ComplexInterpolator(theta, phi, None, c * values)
-
         test_theta = np.linspace(0.3, np.pi - 0.3, 5) * u.rad
         test_phi = np.linspace(0.1, 2 * np.pi - 0.1, 7) * u.rad
+
+        # Test complex scaling: Interp(c * V) == c * Interp(V)
+        interpolator_orig = _ComplexInterpolator(theta, phi, None, values)
+        interpolator_scaled = _ComplexInterpolator(theta, phi, None, c * values)
 
         result_scaled = interpolator_scaled(test_theta[:, np.newaxis], test_phi)
         expected_scaled = c * interpolator_orig(test_theta[:, np.newaxis], test_phi)
@@ -272,6 +330,106 @@ class TestComplexInterpolator:
         assert_quantity_allclose(
             result_conj, expected_conj, atol=1e-12 * u.dimensionless
         )
+
+    def test_complex_equivariance_properties_3d(self):
+        """Test scaling and conjugation equivariance properties for 3D patterns."""
+        N, M, K = 8, 12, 3
+        theta = np.linspace(0.2, np.pi - 0.2, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+        frequency = (np.arange(K) + 1) * u.GHz
+
+        np.random.seed(456)
+        values = (
+            np.random.randn(N, M, K) + 1j * np.random.randn(N, M, K)
+        ) * u.dimensionless
+        c = 1.2 - 0.7j
+        test_theta = np.linspace(0.3, np.pi - 0.3, 5) * u.rad
+        test_phi = np.linspace(0.1, 2 * np.pi - 0.1, 7) * u.rad
+
+        interpolator_orig = _ComplexInterpolator(theta, phi, frequency, values)
+        interpolator_scaled = _ComplexInterpolator(theta, phi, frequency, c * values)
+        interpolator_conj = _ComplexInterpolator(theta, phi, frequency, np.conj(values))
+
+        # Test complex scaling: Interp(c * V) == c * Interp(V)
+        result_scaled = interpolator_scaled(
+            test_theta[:, np.newaxis], test_phi, frequency[1]
+        )
+        expected_scaled = c * interpolator_orig(
+            test_theta[:, np.newaxis], test_phi, frequency[1]
+        )
+        assert_quantity_allclose(
+            result_scaled, expected_scaled, atol=1e-12 * u.dimensionless
+        )
+
+        # Test conjugation: Interp(conj(V)) == conj(Interp(V))
+        result_conj = interpolator_conj(
+            test_theta[:, np.newaxis], test_phi, frequency[1]
+        )
+        expected_conj = np.conj(
+            interpolator_orig(test_theta[:, np.newaxis], test_phi, frequency[1])
+        )
+        assert_quantity_allclose(
+            result_conj, expected_conj, atol=1e-12 * u.dimensionless
+        )
+
+    def test_2d_3d_consistency_with_single_frequency(self):
+        """Test that 2D and 3D interpolators agree when K=1."""
+        N, M = 8, 12
+        theta = np.linspace(0.1, np.pi - 0.1, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+
+        np.random.seed(789)
+        values_2d = (
+            np.random.randn(N, M) + 1j * np.random.randn(N, M)
+        ) * u.dimensionless
+        frequency_single = np.array([1.5]) * u.GHz
+        values_3d = values_2d[..., np.newaxis]
+
+        interpolator_2d = _ComplexInterpolator(theta, phi, None, values_2d)
+        interpolator_3d = _ComplexInterpolator(theta, phi, frequency_single, values_3d)
+
+        # Test at evaluation points
+        eval_theta = np.linspace(0.2, np.pi - 0.2, 7) * u.rad
+        eval_phi = np.linspace(0.1, 2 * np.pi - 0.1, 9) * u.rad
+
+        result_2d = interpolator_2d(eval_theta[:, np.newaxis], eval_phi)
+        result_3d = interpolator_3d(
+            eval_theta[:, np.newaxis], eval_phi, frequency_single[0]
+        )
+
+        assert_quantity_allclose(result_2d, result_3d, atol=1e-12 * u.dimensionless)
+
+    def test_frequency_endpoint_exactness(self):
+        """Test that interpolation is exact at frequency endpoints."""
+        N, M, K = 7, 9, 4
+        theta = np.linspace(0.1, np.pi - 0.1, N) * u.rad
+        phi = np.linspace(0, 2 * np.pi, M, endpoint=False) * u.rad
+        frequency = (np.arange(K) + 1) * u.GHz
+
+        np.random.seed(101112)
+        values = (
+            np.random.randn(N, M, K) + 1j * np.random.randn(N, M, K)
+        ) * u.dimensionless
+
+        interpolator = _ComplexInterpolator(theta, phi, frequency, values)
+
+        # Test exactness at frequency endpoints for arbitrary theta, phi
+        eval_theta = np.linspace(0.15, np.pi - 0.15, 6) * u.rad
+        eval_phi = np.linspace(0.05, 2 * np.pi - 0.05, 8) * u.rad
+
+        # At minimum frequency
+        result_min = interpolator(eval_theta[:, np.newaxis], eval_phi, frequency[0])
+        expected_min = _ComplexInterpolator(theta, phi, None, values[..., 0])(
+            eval_theta[:, np.newaxis], eval_phi
+        )
+        assert_quantity_allclose(result_min, expected_min, atol=1e-12 * u.dimensionless)
+
+        # At maximum frequency
+        result_max = interpolator(eval_theta[:, np.newaxis], eval_phi, frequency[-1])
+        expected_max = _ComplexInterpolator(theta, phi, None, values[..., -1])(
+            eval_theta[:, np.newaxis], eval_phi
+        )
+        assert_quantity_allclose(result_max, expected_max, atol=1e-12 * u.dimensionless)
 
     def test_convergence_under_refinement(self):
         """Test that interpolation error decreases monotonically with refinement."""
