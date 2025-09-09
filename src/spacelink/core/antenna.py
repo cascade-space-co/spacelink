@@ -214,7 +214,7 @@ class Polarization:
 
 
 class _ComplexInterpolator:
-    """Interpolates complex values using log-magnitude and unit-phase components."""
+    """Interpolates complex values over a spherical coordinate system."""
 
     @enforce_units
     def __init__(
@@ -237,9 +237,8 @@ class _ComplexInterpolator:
         frequency: Frequency | None
             Optional 1D array of strictly increasing frequencies with shape (K,).
         values: Quantity
-            Complex array of values to interpolate. This should be in linear-scale (not
-            log-scale like u.dB). Shape is ``(N, M)`` if ``frequency`` is None,
-            otherwise ``(N, M, K)``.
+            Complex array of values to interpolate. Shape is ``(N, M)`` if ``frequency``
+            is None, otherwise ``(N, M, K)``.
         """
         self.unit = values.unit
         values = values.value
