@@ -309,3 +309,49 @@ def test_custom_units_exist():
     assert hasattr(u, "dBm")
     assert hasattr(u, "dBK")
     assert hasattr(u, "dimensionless")
+
+
+def test_enforce_units_dataclass_support():
+    """Test that enforce_units decorator works correctly on dataclasses."""
+    from dataclasses import dataclass
+
+    @enforce_units
+    @dataclass(frozen=True)
+    class TestDataclass:
+        frequency: Frequency
+        angle: Angle
+
+    # Test valid units - should work and convert
+    obj = TestDataclass(frequency=1000 * u.MHz, angle=180 * u.deg)
+
+    # Verify units were converted correctly
+    assert_quantity_allclose(obj.frequency, 1e9 * u.Hz)
+    assert_quantity_allclose(obj.angle, np.pi * u.rad)
+
+    # Test invalid units - should raise UnitConversionError
+    with pytest.raises(u.UnitConversionError):
+        TestDataclass(
+            frequency=5 * u.m, angle=180 * u.deg
+        )  # Length instead of frequency
+
+    # Test raw numbers - should raise TypeError
+    with pytest.raises(TypeError):
+        TestDataclass(frequency=1000, angle=180 * u.deg)
+
+
+def test_enforce_units_rejects_regular_classes():
+    """Test that enforce_units decorator rejects regular classes with helpful error."""
+
+    with pytest.raises(TypeError):
+
+        @enforce_units
+        class RegularClass:
+            def __init__(self, frequency: Frequency):
+                self.frequency = frequency
+
+    # Error message should include helpful guidance
+    with pytest.raises(TypeError):
+
+        @enforce_units
+        class AnotherRegularClass:
+            pass
