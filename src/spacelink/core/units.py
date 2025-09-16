@@ -1,4 +1,17 @@
 r"""
+Decibel Units
+-------------
+
+To create a dimensionless quantity in decibels, use the ``u.dB(1)`` unit rather than
+``u.dB``. For example, ``3.01 * u.dB(1)``. The (1) informs Astropy that the reference
+level is 1, which allows conversion from decibels to linear scale via
+``.to(u.dimensionless)``. A bare ``u.dB`` has no defined reference level and Astropy
+will refuse to convert it to ``u.dimensionless``.
+
+For quantities with physical dimensions in decibels, use ``u.dB(unit)``. For example,
+``3.01 * u.dB(u.W)``. Or use one of the aliases defined in this module for common cases
+like ``u.dBW`` or ``u.dBm``.
+
 Wavelength
 ----------
 
