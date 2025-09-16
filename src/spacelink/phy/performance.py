@@ -136,7 +136,7 @@ class ModePerformance(pydantic.BaseModel):
             error rate is outside the range of available performance data. Same shape as
             ``error_rate``.
         """
-        return self._error_to_ebn0_interpolator(np.log10(error_rate.value)) * u.dB
+        return self._error_to_ebn0_interpolator(np.log10(error_rate.value)) * u.dB(1)
 
     @enforce_units
     def coding_gain(self, uncoded: typing.Self, error_rate: Dimensionless) -> Decibels:
