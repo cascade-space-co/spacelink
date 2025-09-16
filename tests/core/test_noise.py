@@ -63,16 +63,14 @@ def test_noise_factor_to_temperature():
     with pytest.raises(ValueError):
         noise.noise_factor_to_temperature(0.5 * u.dimensionless)
 
-
-def test_noise_figure_to_temperature():
     noise_figure = 3.0 * u.dB(1)  # Noise factor ~2.0
     expected_temp = 290 * u.K
-    result = noise.noise_figure_to_temperature(noise_figure)
+    result = noise.noise_factor_to_temperature(noise_figure)
     assert_quantity_allclose(result, expected_temp, rtol=1e-2)
 
     noise_figure = 0.0 * u.dB(1)
     expected_temp = 0 * u.K
-    result = noise.noise_figure_to_temperature(noise_figure)
+    result = noise.noise_factor_to_temperature(noise_figure)
     assert_quantity_allclose(result, expected_temp)
 
 

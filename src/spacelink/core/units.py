@@ -12,19 +12,6 @@ where:
 * :math:`c` is the speed of light (299,792,458 m/s)
 * :math:`f` is the frequency in Hz
 
-to_linear
----------
-
-The conversion from decibels to a linear (dimensionless) ratio is done using:
-
-.. math::
-   x = 10^{\frac{\text{X}_{\text{dB}}}{\text{factor}}}
-
-where:
-
-* :math:`\text{X}_{\text{dB}}` is the value in decibels
-* :math:`\text{factor}` is 10 for power quantities, 20 for field quantities
-
 Return Loss to VSWR
 -------------------
 
@@ -516,26 +503,6 @@ def frequency(wavelength: Wavelength) -> Frequency:
         If the input quantity has incompatible units
     """
     return constants.c / wavelength.to(u.m)
-
-
-@enforce_units
-def to_linear(x: Decibels, *, factor: float = 10.0) -> Dimensionless:
-    """
-    Convert decibels to a linear (dimensionless) ratio.
-
-    Parameters
-    ----------
-    x : Decibels
-        A quantity in decibels
-    factor : float, optional
-        10 for power quantities, 20 for field quantities
-
-    Returns
-    -------
-    Dimensionless
-    """
-    linear_value = np.power(10, x.value / factor)
-    return linear_value * u.dimensionless
 
 
 @enforce_units

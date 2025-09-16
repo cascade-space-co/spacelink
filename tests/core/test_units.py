@@ -98,18 +98,6 @@ def test_vswr_return_loss_conversions(vswr, return_loss):
     )
 
 
-@pytest.mark.parametrize(
-    "input_value, factor, expected",
-    [
-        (20 * u.dB(1), 10, 100 * u.dimensionless),
-        (30 * u.dB(1), 10, 1000 * u.dimensionless),
-        (20 * u.dB(1), 20, 10 * u.dimensionless),
-    ],
-)
-def test_to_linear(input_value, factor, expected):
-    assert_quantity_allclose(units.to_linear(input_value, factor=factor), expected)
-
-
 def test_return_loss_to_vswr_invalid_input():
     with pytest.raises(ValueError):
         units.return_loss_to_vswr(-1 * u.dB(1))
