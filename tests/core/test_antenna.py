@@ -23,7 +23,6 @@ from spacelink.core.units import (
     Dimensionless,
     Frequency,
     Length,
-    to_linear,
 )
 
 
@@ -35,8 +34,10 @@ def _assert_lin_gain_equals_eta_times_directivity(
     polarization: Polarization,
     eta: u.Quantity,
 ) -> None:
-    dir_lin = to_linear(pattern.directivity(theta, phi, polarization=polarization))
-    gain_lin = to_linear(pattern.gain(theta, phi, polarization=polarization))
+    dir_lin = pattern.directivity(theta, phi, polarization=polarization).to(
+        u.dimensionless
+    )
+    gain_lin = pattern.gain(theta, phi, polarization=polarization).to(u.dimensionless)
     assert_quantity_allclose(gain_lin, eta * dir_lin)
 
 
@@ -717,69 +718,57 @@ def test_antenna_pattern_calculations(test_case):
     pol_phi = Polarization(np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.gain(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.lhcp(),
-            )
-        ),
+        test_case.pattern.gain(
+            theta_interp[:, np.newaxis],
+            phi_interp,
+            polarization=Polarization.lhcp(),
+        ).to(u.dimensionless),
         test_case.expected_results.lhcp_gain,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.lhcp(),
-            )
-        ),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis],
+            phi_interp,
+            polarization=Polarization.lhcp(),
+        ).to(u.dimensionless),
         test_case.expected_results.lhcp_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.gain(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.rhcp(),
-            )
-        ),
+        test_case.pattern.gain(
+            theta_interp[:, np.newaxis],
+            phi_interp,
+            polarization=Polarization.rhcp(),
+        ).to(u.dimensionless),
         test_case.expected_results.rhcp_gain,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.rhcp(),
-            )
-        ),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis],
+            phi_interp,
+            polarization=Polarization.rhcp(),
+        ).to(u.dimensionless),
         test_case.expected_results.rhcp_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, polarization=pol_theta
-            )
-        ),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis], phi_interp, polarization=pol_theta
+        ).to(u.dimensionless),
         test_case.expected_results.theta_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, polarization=pol_phi
-            )
-        ),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis], phi_interp, polarization=pol_phi
+        ).to(u.dimensionless),
         test_case.expected_results.phi_directivity,
         atol=1e-10 * u.dimensionless,
     )
@@ -1172,17 +1161,17 @@ class TestRadiationPatternFactoryConstructors:
         )
 
         # LHCP directivity should be 1, RHCP should be 0, linear components 0.5 and 0.5
-        dir_lhcp = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        dir_lhcp = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp).to(
+            u.dimensionless
         )
-        dir_rhcp = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp)
+        dir_rhcp = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp).to(
+            u.dimensionless
         )
-        dir_theta = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta)
-        )
-        dir_phi = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi)
+        dir_theta = pat.directivity(
+            theta[:, np.newaxis], phi, polarization=pol_theta
+        ).to(u.dimensionless)
+        dir_phi = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi).to(
+            u.dimensionless
         )
 
         assert_quantity_allclose(dir_lhcp, 1.0 * u.dimensionless)
@@ -1231,11 +1220,11 @@ class TestRadiationPatternFactoryConstructors:
 
         pol_lhcp = Polarization.lhcp()
         pol_rhcp = Polarization.rhcp()
-        dir_lhcp = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        dir_lhcp = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp).to(
+            u.dimensionless
         )
-        dir_rhcp = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp)
+        dir_rhcp = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp).to(
+            u.dimensionless
         )
         assert_quantity_allclose(dir_lhcp, (0.25 / 0.75) * u.dimensionless)
         assert_quantity_allclose(
@@ -1279,14 +1268,14 @@ class TestRadiationPatternFactoryConstructors:
             np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT
         )
         pol_lhcp = Polarization.lhcp()
-        dir_theta = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta)
+        dir_theta = pat.directivity(
+            theta[:, np.newaxis], phi, polarization=pol_theta
+        ).to(u.dimensionless)
+        dir_phi = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi).to(
+            u.dimensionless
         )
-        dir_phi = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi)
-        )
-        dir_lhcp = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        dir_lhcp = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp).to(
+            u.dimensionless
         )
         assert_quantity_allclose(dir_theta, 1.0 * u.dimensionless)
         assert_quantity_allclose(

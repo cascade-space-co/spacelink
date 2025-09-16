@@ -66,7 +66,6 @@ from .units import (
     SolidAngle,
     Temperature,
     enforce_units,
-    to_linear,
     wavelength,
 )
 
@@ -98,8 +97,8 @@ def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
     """
     # Polarization mismatch angle is omitted (assumed to be 90 degrees)
     # https://www.microwaves101.com/encyclopedias/polarization-mismatch-between-antennas
-    gamma1 = to_linear(ar1, factor=20)
-    gamma2 = to_linear(ar2, factor=20)
+    gamma1 = np.sqrt(ar1.to(u.dimensionless))
+    gamma2 = np.sqrt(ar2.to(u.dimensionless))
 
     numerator = 4 * gamma1 * gamma2 - (1 - gamma1**2) * (1 - gamma2**2)
     denominator = (1 + gamma1**2) * (1 + gamma2**2)
