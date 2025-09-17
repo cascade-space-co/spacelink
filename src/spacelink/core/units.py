@@ -207,8 +207,8 @@ def _wrap_function_with_unit_enforcement(func: FuncOrClass) -> FuncOrClass:
                 else:
                     # Handle non-Quantity inputs
                     raise TypeError(
-                        f"Parameter '{name}' must be provided as an astropy Quantity, "
-                        f"not a raw number."
+                        f"Parameter '{name}' must be provided as an astropy Quantity "
+                        f"compatible with {unit}, not a raw number."
                     )
         return func(*bound.args, **bound.kwargs)
 
