@@ -163,7 +163,9 @@ def _extract_annotated_from_hint(hint: Any) -> tuple[type, u.Unit] | None:
     return None
 
 
-def _extract_tuple_annotations(hint: Any) -> list[tuple[type, u.Unit] | None] | None:
+def _extract_tuple_annotations(
+    hint: Any,
+) -> list[tuple[tuple[type, u.Unit] | None, Any]] | None:
     """
     Extract annotations from tuple type hints.
 
@@ -174,9 +176,10 @@ def _extract_tuple_annotations(hint: Any) -> list[tuple[type, u.Unit] | None] | 
 
     Returns
     -------
-    list[tuple[type, u.Unit] | None] | None
-        List of (quantity_type, unit) for each tuple element, or None if element
-        is not annotated. Returns None if hint is not a tuple.
+    list[tuple[tuple[type, u.Unit] | None, Any]] | None
+        List of ((quantity_type, unit), original_hint) for each tuple element,
+        where the first element is None if not annotated. Returns None if hint is not a
+        tuple.
     """
     origin = get_origin(hint)
     if origin is tuple:
@@ -184,7 +187,7 @@ def _extract_tuple_annotations(hint: Any) -> list[tuple[type, u.Unit] | None] | 
         annotations = []
         for arg in args:
             annotated_info = _extract_annotated_from_hint(arg)
-            annotations.append(annotated_info)  # None for non-annotated elements
+            annotations.append((annotated_info, arg))
         return annotations
     return None
 
@@ -197,8 +200,8 @@ def _validate_tuple_return(result, expected_annotations):
     ----------
     result : Any
         The actual return value (should be a tuple)
-    expected_annotations : list[tuple[type, u.Unit] | None]
-        List of expected annotations for each tuple element
+    expected_annotations : list[tuple[tuple[type, u.Unit] | None, Any]]
+        List of ((quantity_type, unit), original_hint) for each tuple element
     """
     if not isinstance(result, tuple):
         raise TypeError("Expected tuple return value.")
@@ -209,14 +212,23 @@ def _validate_tuple_return(result, expected_annotations):
             f"got {len(result)} elements."
         )
 
-    for i, (value, annotation) in enumerate(
+    for i, (value, (annotation, original_hint)) in enumerate(
         zip(result, expected_annotations, strict=False)
     ):
         if annotation is not None:  # Only check annotated elements
             _, expected_unit = annotation
 
             if value is None:
-                raise TypeError(f"tuple[{i}] is None but not annotated as Optional.")
+                # Check if None is allowed (Optional type)
+                origin = get_origin(original_hint)
+                if not (
+                    origin in (Union, getattr(types, "UnionType", ()))
+                    and type(None) in get_args(original_hint)
+                ):
+                    raise TypeError(
+                        f"tuple[{i}] is None but not annotated as Optional."
+                    )
+                continue
 
             if not isinstance(value, Quantity):
                 raise TypeError(f"tuple[{i}] must be an astropy Quantity.")

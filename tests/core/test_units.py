@@ -530,3 +530,21 @@ class TestEnforceUnitsReturns:
         # Test non-Quantity in tuple - should fail
         with pytest.raises(TypeError):
             non_quantity_in_tuple()
+
+        @enforce_units
+        def optional_tuple_correct() -> tuple[Frequency | None, Power]:
+            """Function that returns tuple with valid optional element."""
+            return None, 10.0 * u.W
+
+        @enforce_units
+        def optional_tuple_wrong_none() -> tuple[Frequency, Power]:
+            """Function that returns None in non-optional tuple element."""
+            return None, 10.0 * u.W  # None not allowed for Frequency
+
+        # Test optional element with None - should pass
+        result = optional_tuple_correct()
+        assert result == (None, 10.0 * u.W)
+
+        # Test None in non-optional element - should fail
+        with pytest.raises(TypeError):
+            optional_tuple_wrong_none()
