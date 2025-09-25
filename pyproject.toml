@@ -1,6 +1,6 @@
 [project]
 name = "spacelink"
-version = "0.1.8"
+version = "0.1.9"
 authors = [
   { name = "Jacob Portukalian", email = "jacob@cascade.space" },
   { name = "Arlen Abraham", email = "arlen@cascade.space" },
