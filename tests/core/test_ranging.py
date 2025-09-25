@@ -44,7 +44,7 @@ def test_pn_sequence_range_ambiguity(
     "ranging_clock_rate, prn0, expected_chip_snr",
     [
         # [4] p. 2-3.
-        (1.0 * u.MHz, 27 * u.dBHz, -33 * u.dB),
+        (1.0 * u.MHz, 27 * u.dBHz, -33 * u.dB(1)),
     ],
 )
 def test_chip_snr(
@@ -52,8 +52,8 @@ def test_chip_snr(
 ):
     chip_snr_result = ranging.chip_snr(ranging_clock_rate, prn0)
     # TODO: There is a subtle unit incompatibility here, requiring the use of
-    # `.to(u.dB)` to make `assert_quantity_allclose()` happy.
-    assert_quantity_allclose(chip_snr_result.to(u.dB), expected_chip_snr)
+    # `.to(u.dB(1))` to make `assert_quantity_allclose()` happy.
+    assert_quantity_allclose(chip_snr_result.to(u.dB(1)), expected_chip_snr)
 
 
 @pytest.mark.parametrize(
@@ -421,7 +421,7 @@ def gen_pn_acq_time_test_params():
                     ranging_to_noise_psd,
                     success_probability * u.dimensionless,
                     code,
-                    snr_db * u.dB - ranging_to_noise_psd,
+                    snr_db * u.dB(1) - ranging_to_noise_psd,
                     f"{code=}, T*Pr/N0={snr_db} dB, P_acq={success_probability}",
                 )
             )
@@ -530,7 +530,7 @@ def _get_dsn_plot_jitter_data(
         t_prcn0_db += list(
             np.array(t_prn0_db_list) + 20 * np.log10(ranging._CORR_COEFF_DSN[code][1])
         )
-    t_prcn0_db = np.array(t_prcn0_db) * u.dB
+    t_prcn0_db = np.array(t_prcn0_db) * u.dB(1)
 
     # We only have plots of the jitter expressions from [2] which are for the sine-sine
     # case, so to test other cases of range clock waveform and reference clock waveform

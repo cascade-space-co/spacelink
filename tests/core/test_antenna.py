@@ -23,7 +23,6 @@ from spacelink.core.units import (
     Dimensionless,
     Frequency,
     Length,
-    to_linear,
 )
 
 
@@ -35,8 +34,10 @@ def _assert_lin_gain_equals_eta_times_directivity(
     polarization: Polarization,
     eta: u.Quantity,
 ) -> None:
-    dir_lin = to_linear(pattern.directivity(theta, phi, polarization=polarization))
-    gain_lin = to_linear(pattern.gain(theta, phi, polarization=polarization))
+    dir_lin = pattern.directivity(theta, phi, polarization=polarization).to(
+        u.dimensionless
+    )
+    gain_lin = pattern.gain(theta, phi, polarization=polarization).to(u.dimensionless)
     assert_quantity_allclose(gain_lin, eta * dir_lin)
 
 
@@ -49,23 +50,33 @@ https://phillipmfeldman.org/Engineering/pol_mismatch_loss.html
 @pytest.mark.parametrize(
     "ar_tx_db, ar_rx_db, expected_loss_db, tol",
     [
-        (0 * u.dB, 0 * u.dB, 0.0 * u.dB, 0.01 * u.dB),  # matchy matchy
-        (0 * u.dB, 60 * u.dB, 3.002 * u.dB, 0.01 * u.dB),  # Circular to linear
-        (60 * u.dB, 0 * u.dB, 3.002 * u.dB, 0.01 * u.dB),  # Linear to circular
-        (1 * u.dB, 1 * u.dB, 0.057 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (3 * u.dB, 3 * u.dB, 0.508 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (1 * u.dB, 2 * u.dB, 0.128 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (2 * u.dB, 1 * u.dB, 0.128 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (2 * u.dB, 2 * u.dB, 0.228 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (2 * u.dB, 3 * u.dB, 0.354 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (3 * u.dB, 2 * u.dB, 0.354 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (3 * u.dB, 3 * u.dB, 0.508 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (3 * u.dB, 4 * u.dB, 0.684 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (4 * u.dB, 3 * u.dB, 0.684 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (4 * u.dB, 4 * u.dB, 0.890 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (4 * u.dB, 5 * u.dB, 1.114 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (5 * u.dB, 4 * u.dB, 1.114 * u.dB, 0.01 * u.dB),  # Small mismatch
-        (5 * u.dB, 5 * u.dB, 1.366 * u.dB, 0.01 * u.dB),  # Small mismatch
+        (0 * u.dB(1), 0 * u.dB(1), 0.0 * u.dB(1), 0.01 * u.dB(1)),  # matchy matchy
+        (
+            0 * u.dB(1),
+            60 * u.dB(1),
+            3.002 * u.dB(1),
+            0.01 * u.dB(1),
+        ),  # Circular to linear
+        (
+            60 * u.dB(1),
+            0 * u.dB(1),
+            3.002 * u.dB(1),
+            0.01 * u.dB(1),
+        ),  # Linear to circular
+        (1 * u.dB(1), 1 * u.dB(1), 0.057 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (3 * u.dB(1), 3 * u.dB(1), 0.508 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (1 * u.dB(1), 2 * u.dB(1), 0.128 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (2 * u.dB(1), 1 * u.dB(1), 0.128 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (2 * u.dB(1), 2 * u.dB(1), 0.228 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (2 * u.dB(1), 3 * u.dB(1), 0.354 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (3 * u.dB(1), 2 * u.dB(1), 0.354 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (3 * u.dB(1), 3 * u.dB(1), 0.508 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (3 * u.dB(1), 4 * u.dB(1), 0.684 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (4 * u.dB(1), 3 * u.dB(1), 0.684 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (4 * u.dB(1), 4 * u.dB(1), 0.890 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (4 * u.dB(1), 5 * u.dB(1), 1.114 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (5 * u.dB(1), 4 * u.dB(1), 1.114 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
+        (5 * u.dB(1), 5 * u.dB(1), 1.366 * u.dB(1), 0.01 * u.dB(1)),  # Small mismatch
     ],
 )
 def test_polarization_loss_calculation(ar_tx_db, ar_rx_db, expected_loss_db, tol):
@@ -81,12 +92,48 @@ def test_polarization_loss_calculation(ar_tx_db, ar_rx_db, expected_loss_db, tol
 @pytest.mark.parametrize(
     "diameter, frequency, efficiency, expected_gain_db, tol",
     [
-        (20.0 * u.m, 8.4 * u.GHz, 0.65 * u.dimensionless, 63.04 * u.dB, 0.01 * u.dB),
-        (1.0 * u.m, 2.4 * u.GHz, 0.65 * u.dimensionless, 26.14 * u.dB, 0.01 * u.dB),
-        (1.0 * u.m, 2.4 * u.GHz, 0.5 * u.dimensionless, 25.00 * u.dB, 0.01 * u.dB),
-        (20.0 * u.m, 2.4 * u.GHz, 0.65 * u.dimensionless, 52.16 * u.dB, 0.01 * u.dB),
-        (1.0 * u.m, 5.8 * u.GHz, 0.65 * u.dimensionless, 33.80 * u.dB, 0.01 * u.dB),
-        (1.0 * u.m, 900 * u.MHz, 0.65 * u.dimensionless, 17.62 * u.dB, 0.01 * u.dB),
+        (
+            20.0 * u.m,
+            8.4 * u.GHz,
+            0.65 * u.dimensionless,
+            63.04 * u.dB(1),
+            0.01 * u.dB(1),
+        ),
+        (
+            1.0 * u.m,
+            2.4 * u.GHz,
+            0.65 * u.dimensionless,
+            26.14 * u.dB(1),
+            0.01 * u.dB(1),
+        ),
+        (
+            1.0 * u.m,
+            2.4 * u.GHz,
+            0.5 * u.dimensionless,
+            25.00 * u.dB(1),
+            0.01 * u.dB(1),
+        ),
+        (
+            20.0 * u.m,
+            2.4 * u.GHz,
+            0.65 * u.dimensionless,
+            52.16 * u.dB(1),
+            0.01 * u.dB(1),
+        ),
+        (
+            1.0 * u.m,
+            5.8 * u.GHz,
+            0.65 * u.dimensionless,
+            33.80 * u.dB(1),
+            0.01 * u.dB(1),
+        ),
+        (
+            1.0 * u.m,
+            900 * u.MHz,
+            0.65 * u.dimensionless,
+            17.62 * u.dB(1),
+            0.01 * u.dB(1),
+        ),
     ],
 )
 def test_dish_gain_calculation(
@@ -595,7 +642,7 @@ def create_antenna_pattern_test_cases():
                 rhcp_directivity=0.5 * u.dimensionless,
                 theta_directivity=1.0 * u.dimensionless,
                 phi_directivity=0.0 * u.dimensionless,
-                axial_ratio=np.inf * u.dB,
+                axial_ratio=np.inf * u.dB(1),
             ),
         ),
         RadiationPatternTestCase(
@@ -615,7 +662,7 @@ def create_antenna_pattern_test_cases():
                 rhcp_directivity=0.5 * u.dimensionless,
                 theta_directivity=0.0 * u.dimensionless,
                 phi_directivity=1.0 * u.dimensionless,
-                axial_ratio=np.inf * u.dB,
+                axial_ratio=np.inf * u.dB(1),
             ),
         ),
         RadiationPatternTestCase(
@@ -635,7 +682,7 @@ def create_antenna_pattern_test_cases():
                 rhcp_directivity=0.0 * u.dimensionless,
                 theta_directivity=0.5 * u.dimensionless,
                 phi_directivity=0.5 * u.dimensionless,
-                axial_ratio=0.0 * u.dB,
+                axial_ratio=0.0 * u.dB(1),
             ),
         ),
         RadiationPatternTestCase(
@@ -655,7 +702,7 @@ def create_antenna_pattern_test_cases():
                 rhcp_directivity=0.1 * u.dimensionless,
                 theta_directivity=4 / 5 * u.dimensionless,
                 phi_directivity=1 / 5 * u.dimensionless,
-                axial_ratio=10 * math.log10(2) * u.dB,
+                axial_ratio=10 * math.log10(2) * u.dB(1),
             ),
         ),
     ]
@@ -671,69 +718,57 @@ def test_antenna_pattern_calculations(test_case):
     pol_phi = Polarization(np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT)
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.gain(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.lhcp(),
-            )
-        ),
+        test_case.pattern.gain(
+            theta_interp[:, np.newaxis],
+            phi_interp,
+            polarization=Polarization.lhcp(),
+        ).to(u.dimensionless),
         test_case.expected_results.lhcp_gain,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.lhcp(),
-            )
-        ),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis],
+            phi_interp,
+            polarization=Polarization.lhcp(),
+        ).to(u.dimensionless),
         test_case.expected_results.lhcp_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.gain(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.rhcp(),
-            )
-        ),
+        test_case.pattern.gain(
+            theta_interp[:, np.newaxis],
+            phi_interp,
+            polarization=Polarization.rhcp(),
+        ).to(u.dimensionless),
         test_case.expected_results.rhcp_gain,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis],
-                phi_interp,
-                polarization=Polarization.rhcp(),
-            )
-        ),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis],
+            phi_interp,
+            polarization=Polarization.rhcp(),
+        ).to(u.dimensionless),
         test_case.expected_results.rhcp_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, polarization=pol_theta
-            )
-        ),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis], phi_interp, polarization=pol_theta
+        ).to(u.dimensionless),
         test_case.expected_results.theta_directivity,
         atol=1e-10 * u.dimensionless,
     )
 
     assert_quantity_allclose(
-        to_linear(
-            test_case.pattern.directivity(
-                theta_interp[:, np.newaxis], phi_interp, polarization=pol_phi
-            )
-        ),
+        test_case.pattern.directivity(
+            theta_interp[:, np.newaxis], phi_interp, polarization=pol_phi
+        ).to(u.dimensionless),
         test_case.expected_results.phi_directivity,
         atol=1e-10 * u.dimensionless,
     )
@@ -741,7 +776,7 @@ def test_antenna_pattern_calculations(test_case):
     assert_quantity_allclose(
         test_case.pattern.axial_ratio(theta_interp[:, np.newaxis], phi_interp),
         test_case.expected_results.axial_ratio,
-        atol=1e-10 * u.dB,
+        atol=1e-10 * u.dB(1),
     )
 
 
@@ -1126,17 +1161,17 @@ class TestRadiationPatternFactoryConstructors:
         )
 
         # LHCP directivity should be 1, RHCP should be 0, linear components 0.5 and 0.5
-        dir_lhcp = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        dir_lhcp = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp).to(
+            u.dimensionless
         )
-        dir_rhcp = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp)
+        dir_rhcp = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp).to(
+            u.dimensionless
         )
-        dir_theta = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta)
-        )
-        dir_phi = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi)
+        dir_theta = pat.directivity(
+            theta[:, np.newaxis], phi, polarization=pol_theta
+        ).to(u.dimensionless)
+        dir_phi = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi).to(
+            u.dimensionless
         )
 
         assert_quantity_allclose(dir_lhcp, 1.0 * u.dimensionless)
@@ -1185,11 +1220,11 @@ class TestRadiationPatternFactoryConstructors:
 
         pol_lhcp = Polarization.lhcp()
         pol_rhcp = Polarization.rhcp()
-        dir_lhcp = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        dir_lhcp = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp).to(
+            u.dimensionless
         )
-        dir_rhcp = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp)
+        dir_rhcp = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_rhcp).to(
+            u.dimensionless
         )
         assert_quantity_allclose(dir_lhcp, (0.25 / 0.75) * u.dimensionless)
         assert_quantity_allclose(
@@ -1233,14 +1268,14 @@ class TestRadiationPatternFactoryConstructors:
             np.pi / 2 * u.rad, np.inf * u.dimensionless, Handedness.LEFT
         )
         pol_lhcp = Polarization.lhcp()
-        dir_theta = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_theta)
+        dir_theta = pat.directivity(
+            theta[:, np.newaxis], phi, polarization=pol_theta
+        ).to(u.dimensionless)
+        dir_phi = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi).to(
+            u.dimensionless
         )
-        dir_phi = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_phi)
-        )
-        dir_lhcp = to_linear(
-            pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp)
+        dir_lhcp = pat.directivity(theta[:, np.newaxis], phi, polarization=pol_lhcp).to(
+            u.dimensionless
         )
         assert_quantity_allclose(dir_theta, 1.0 * u.dimensionless)
         assert_quantity_allclose(
@@ -1345,11 +1380,11 @@ def test_surface_integral(theta, phi, values, expected_result, tol):
 def test_gain_from_g_over_t():
     # Test where temp is exactly 1 K
     gain = gain_from_g_over_t(10 * u.dB_per_K, 1 * u.K)
-    assert_quantity_allclose(gain, 10 * u.dB)
+    assert_quantity_allclose(gain, 10 * u.dB(1))
 
     # Test where temp is greater than 1 K
     gain_100_K = gain_from_g_over_t(10 * u.dB_per_K, 100 * u.K)
-    assert_quantity_allclose(gain_100_K, 30 * u.dB)
+    assert_quantity_allclose(gain_100_K, 30 * u.dB(1))
 
     # Test for negative temperature
     with pytest.raises(ValueError):
@@ -1358,5 +1393,5 @@ def test_gain_from_g_over_t():
 
 def test_temperature_from_g_over_t():
     # Test temperature calculation from G/T ratio
-    temperature = temperature_from_g_over_t(10 * u.dB_per_K, 20 * u.dB)
+    temperature = temperature_from_g_over_t(10 * u.dB_per_K, 20 * u.dB(1))
     assert_quantity_allclose(temperature, 10 * u.K)

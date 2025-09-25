@@ -66,9 +66,6 @@ from .units import (
     SolidAngle,
     Temperature,
     enforce_units,
-    safe_negate,
-    to_dB,
-    to_linear,
     wavelength,
 )
 
@@ -100,15 +97,15 @@ def polarization_loss(ar1: Decibels, ar2: Decibels) -> Decibels:
     """
     # Polarization mismatch angle is omitted (assumed to be 90 degrees)
     # https://www.microwaves101.com/encyclopedias/polarization-mismatch-between-antennas
-    gamma1 = to_linear(ar1, factor=20)
-    gamma2 = to_linear(ar2, factor=20)
+    gamma1 = np.sqrt(ar1.to(u.dimensionless))
+    gamma2 = np.sqrt(ar2.to(u.dimensionless))
 
     numerator = 4 * gamma1 * gamma2 - (1 - gamma1**2) * (1 - gamma2**2)
     denominator = (1 + gamma1**2) * (1 + gamma2**2)
 
     # Calculate polarization loss factor
     plf = 0.5 + 0.5 * (numerator / denominator)
-    return safe_negate(to_dB(plf))
+    return (1 / plf).to(u.dB(1))
 
 
 @enforce_units
@@ -142,7 +139,7 @@ def dish_gain(
 
     wl = wavelength(frequency)
     gain_linear = efficiency * (np.pi * diameter.to(u.m) / wl) ** 2
-    return to_dB(gain_linear)
+    return gain_linear.to(u.dB(1))
 
 
 class Handedness(enum.Enum):
@@ -813,12 +810,12 @@ class RadiationPattern:
             Directivity. Shape is determined by standard Numpy broadcasting rules from
             the shapes of theta and phi.
         """
-        return to_dB(
+        return (
             np.abs(
                 self.e_field(theta, phi, frequency=frequency, polarization=polarization)
             )
             ** 2
-        )
+        ).to(u.dB(1))
 
     @enforce_units
     def gain(
@@ -857,7 +854,7 @@ class RadiationPattern:
             Gain. Shape is determined by standard Numpy broadcasting rules from the
             shapes of theta and phi.
         """
-        return to_dB(self.rad_efficiency) + self.directivity(
+        return self.rad_efficiency.to(u.dB(1)) + self.directivity(
             theta, phi, frequency=frequency, polarization=polarization
         )
 
@@ -908,7 +905,7 @@ class RadiationPattern:
         lambda_max = eigvals[..., 1]
         # Suppress divide-by-zero warnings.
         with np.errstate(divide="ignore"):
-            return to_dB(np.sqrt(lambda_max / lambda_min) * u.dimensionless)
+            return (np.sqrt(lambda_max / lambda_min) * u.dimensionless).to(u.dB(1))
 
     @enforce_units
     def _e_jones(
@@ -968,7 +965,7 @@ def gain_from_g_over_t(
         raise ValueError("Temperature must be positive")
 
     gain = g_over_t + temperature.to(u.dBK)
-    return gain.to(u.dB)
+    return gain.to(u.dB(1))
 
 
 @enforce_units

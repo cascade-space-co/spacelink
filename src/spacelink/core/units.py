@@ -1,4 +1,17 @@
 r"""
+Decibel Units
+-------------
+
+To create a dimensionless quantity in decibels, use the ``u.dB(1)`` unit rather than
+``u.dB``. For example, ``3.01 * u.dB(1)``. The (1) informs Astropy that the reference
+level is 1, which allows conversion from decibels to linear scale via
+``.to(u.dimensionless)``. A bare ``u.dB`` has no defined reference level and Astropy
+will refuse to convert it to ``u.dimensionless``.
+
+For quantities with physical dimensions in decibels, use ``u.dB(unit)``. For example,
+``3.01 * u.dB(u.W)``. Or use one of the aliases defined in this module for common cases
+like ``u.dBW`` or ``u.dBm``.
+
 Wavelength
 ----------
 
@@ -11,31 +24,6 @@ where:
 
 * :math:`c` is the speed of light (299,792,458 m/s)
 * :math:`f` is the frequency in Hz
-
-
-to_dB
------
-
-The conversion to decibels is done using:
-
-.. math::
-   \text{X}_{\text{dB}} = \text{factor} \cdot \log_{10}(x)
-
-The result will have units of dB(input_unit), e.g. dBW, dBK, dBHz, etc.
-For dimensionless input, the result will have unit dB.
-
-to_linear
----------
-
-The conversion from decibels to a linear (dimensionless) ratio is done using:
-
-.. math::
-   x = 10^{\frac{\text{X}_{\text{dB}}}{\text{factor}}}
-
-where:
-
-* :math:`\text{X}_{\text{dB}}` is the value in decibels
-* :math:`\text{factor}` is 10 for power quantities, 20 for field quantities
 
 Return Loss to VSWR
 -------------------
@@ -105,7 +93,10 @@ if not hasattr(u, "dB_per_K"):  # pragma: no cover
 if not hasattr(u, "dimensionless"):  # pragma: no cover
     u.dimensionless = u.dimensionless_unscaled
 
-Decibels = Annotated[Quantity, u.dB]
+# Using u.dB(1) allows conversion from decibels to u.dimensionless_unscaled. The (1)
+# informs Astropy that the value is decibels relative to 1; without it a bare u.dB has
+# no defined reference point.
+Decibels = Annotated[Quantity, u.dB(1)]
 DecibelWatts = Annotated[Quantity, u.dB(u.W)]
 DecibelMilliwatts = Annotated[Quantity, u.dB(u.mW)]
 DecibelKelvins = Annotated[Quantity, u.dB(u.K)]
@@ -270,11 +261,18 @@ def _convert_parameter_units(name: str, value: Any, expected_unit: u.Unit) -> Qu
             f"compatible with {expected_unit}, not a raw number."
         )
 
+    # Units like deg_C are not automatically convertible to/from K
+    if expected_unit.is_equivalent(u.K, equivalencies=u.temperature()):
+        equivalencies = u.temperature()
+    elif value.unit == u.dB:
+        # Allows conversion from u.dB to u.dimensionless_unscaled as if
+        # value.unit was u.dB(1)
+        equivalencies = u.logarithmic()
+    else:
+        equivalencies = []
+
     try:
-        if expected_unit.is_equivalent(u.K):
-            return value.to(expected_unit, equivalencies=u.temperature())
-        else:
-            return value.to(expected_unit)
+        return value.to(expected_unit, equivalencies=equivalencies)
     except u.UnitConversionError as e:
         raise u.UnitConversionError(
             f"Parameter '{name}' requires unit compatible with {expected_unit}, "
@@ -521,56 +519,15 @@ def frequency(wavelength: Wavelength) -> Frequency:
 
 
 @enforce_units
-def to_dB(x: Dimensionless, *, factor: float = 10.0) -> Decibels:
-    r"""
-    Convert dimensionless quantity to decibels.
-
-    Note that for referenced logarithmic units, conversions should
-    be done using the .to(unit) method.
-    Parameters
-    ----------
-    x : Dimensionless
-        value to be converted
-    factor : float, optional
-        10 for power quantities, 20 for field quantities
-
-    Returns
-    -------
-    Decibels
-    """
-    with np.errstate(divide="ignore"):  # Suppress warnings for np.log10(0)
-        return factor * np.log10(x.value) * u.dB
-
-
-@enforce_units
-def to_linear(x: Decibels, *, factor: float = 10.0) -> Dimensionless:
-    """
-    Convert decibels to a linear (dimensionless) ratio.
-
-    Parameters
-    ----------
-    x : Decibels
-        A quantity in decibels
-    factor : float, optional
-        10 for power quantities, 20 for field quantities
-
-    Returns
-    -------
-    Dimensionless
-    """
-    linear_value = np.power(10, x.value / factor)
-    return linear_value * u.dimensionless
-
-
-@enforce_units
-def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
+def return_loss_to_vswr(return_loss: Dimensionless) -> Dimensionless:
     r"""
     Convert a return loss in decibels to voltage standing wave ratio (VSWR).
 
     Parameters
     ----------
-    return_loss : Quantity
-        Return loss in decibels (>= 0). Use float('inf') for a perfect match
+    return_loss : Dimensionless
+        Return loss. Must be >= 1 if provided as dimensionless or >= 0 if provided in
+        decibels. Use np.inf for a perfect match.
 
     Returns
     -------
@@ -580,14 +537,13 @@ def return_loss_to_vswr(return_loss: Decibels) -> Dimensionless:
     Raises
     ------
     ValueError
-        If return_loss is negative
+        If return_loss is < 0 dB
     """
-    if return_loss.value < 0:
-        raise ValueError(f"return loss must be >= 0 ({return_loss}).")
-    if return_loss.value == float("inf"):
-        return 1.0 * u.dimensionless
-    gamma = to_linear(-return_loss, factor=20)
-    return ((1 + gamma) / (1 - gamma)) * u.dimensionless
+    if np.any(return_loss.value < 1):
+        raise ValueError("Return loss must be >= 1.")
+
+    gamma = 1 / np.sqrt(return_loss)
+    return (1 + gamma) / (1 - gamma)
 
 
 @enforce_units
@@ -598,7 +554,7 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     Parameters
     ----------
     vswr : Quantity
-        VSWR value (> 1). Use 1 for a perfect match (infinite return loss)
+        VSWR value (>= 1). Use 1 for a perfect match (infinite return loss)
 
     Returns
     -------
@@ -610,10 +566,10 @@ def vswr_to_return_loss(vswr: Dimensionless) -> Decibels:
     ValueError
         If vswr is less than 1
     """
-    if vswr < 1.0:
-        raise ValueError(f"VSWR must be >= 1 ({vswr}).")
+    if np.any(vswr < 1.0):
+        raise ValueError("VSWR must be >= 1.")
     gamma = (vswr - 1) / (vswr + 1)
-    return safe_negate(to_dB(gamma, factor=20))
+    return (1 / np.abs(gamma) ** 2).to(u.dB(1))
 
 
 def safe_negate(quantity: Quantity) -> Quantity:

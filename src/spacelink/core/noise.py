@@ -63,8 +63,6 @@ from .units import (
     PowerDensity,
     Temperature,
     enforce_units,
-    to_dB,
-    to_linear,
 )
 
 T0 = 290.0 * u.K
@@ -114,6 +112,28 @@ def noise_power_density(temperature: Temperature) -> PowerDensity:
 
 
 @enforce_units
+def noise_factor_to_temperature(noise_factor: Dimensionless) -> Temperature:
+    r"""
+    Convert noise factor or noise figure to noise temperature.
+
+    Parameters
+    ----------
+    noise_factor : Dimensionless
+        Noise factor (dimensionless). Passing a noise figure with unit dB(1) is also
+        supported and will be converted to noise factor automatically.
+
+    Returns
+    -------
+    Temperature
+        Noise temperature in Kelvin
+    """
+    if noise_factor < 1:
+        raise ValueError(f"noise_factor must be >= 1 ({noise_factor})")
+    result = (noise_factor - 1.0) * T0
+    return result.to(u.K)
+
+
+@enforce_units
 def temperature_to_noise_factor(temperature: Temperature) -> Dimensionless:
     r"""
     Convert noise temperature to noise factor (linear).
@@ -132,46 +152,6 @@ def temperature_to_noise_factor(temperature: Temperature) -> Dimensionless:
 
 
 @enforce_units
-def noise_factor_to_temperature(noise_factor: Dimensionless) -> Temperature:
-    r"""
-    Convert noise factor (linear) to noise temperature.
-
-    Parameters
-    ----------
-    noise_factor : Dimensionless
-        Noise factor (dimensionless, linear)
-
-    Returns
-    -------
-    Temperature
-        Noise temperature in Kelvin
-    """
-    if noise_factor < 1:
-        raise ValueError(f"noise_factor must be >= 1 ({noise_factor})")
-    result = (noise_factor - 1.0) * T0
-    return result.to(u.K)
-
-
-@enforce_units
-def noise_figure_to_temperature(noise_figure: Decibels) -> Temperature:
-    r"""
-    Convert noise figure (in dB) to noise temperature (in Kelvin).
-
-    Parameters
-    ----------
-    noise_figure : Decibels
-        Noise figure in dB
-
-    Returns
-    -------
-    Temperature
-        Noise temperature in Kelvin
-    """
-    factor = to_linear(noise_figure)
-    return noise_factor_to_temperature(factor)
-
-
-@enforce_units
 def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
     r"""
     Convert noise temperature in Kelvin to noise figure in dB.
@@ -187,7 +167,7 @@ def temperature_to_noise_figure(temperature: Temperature) -> Decibels:
         Noise figure in dB
     """
     factor = temperature_to_noise_factor(temperature)
-    return to_dB(factor)
+    return factor.to(u.dB(1))
 
 
 @enforce_units
