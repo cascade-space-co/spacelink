@@ -288,7 +288,7 @@ class _ComplexInterpolator:
     @enforce_units
     def __call__(
         self, theta: Angle, phi: Angle, frequency: Frequency | None = None
-    ) -> Dimensionless:
+    ) -> u.Quantity:
         r"""
         Interpolate at the given coordinates.
 
