@@ -266,8 +266,8 @@ def _convert_parameter_units(name: str, value: Any, expected_unit: u.Unit) -> Qu
     """
     if not isinstance(value, Quantity):
         raise TypeError(
-            f"Parameter '{name}' must be provided as an astropy Quantity, "
-            f"not a raw number."
+            f"Parameter '{name}' must be provided as an astropy Quantity with unit "
+            f"compatible with {expected_unit}, not a raw number."
         )
 
     try:
