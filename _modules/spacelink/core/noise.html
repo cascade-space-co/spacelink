@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.core.noise &mdash; SpaceLink 0.1.8 documentation</title>
+  <title>spacelink.core.noise &mdash; SpaceLink 0.1.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=22607128"></script>
+        <script src="../../../_static/documentation_options.js?v=8618f531"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.8
+                0.1.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -144,8 +144,6 @@
     <span class="n">PowerDensity</span><span class="p">,</span>
     <span class="n">Temperature</span><span class="p">,</span>
     <span class="n">enforce_units</span><span class="p">,</span>
-    <span class="n">to_dB</span><span class="p">,</span>
-    <span class="n">to_linear</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">T0</span> <span class="o">=</span> <span class="mf">290.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span>
@@ -200,6 +198,31 @@
 
 
 
+<div class="viewcode-block" id="noise_factor_to_temperature">
+<a class="viewcode-back" href="../../../core/noise.html#spacelink.core.noise.noise_factor_to_temperature">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">noise_factor_to_temperature</span><span class="p">(</span><span class="n">noise_factor</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Temperature</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert noise factor or noise figure to noise temperature.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    noise_factor : Dimensionless</span>
+<span class="sd">        Noise factor (dimensionless). Passing a noise figure with unit dB(1) is also</span>
+<span class="sd">        supported and will be converted to noise factor automatically.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Temperature</span>
+<span class="sd">        Noise temperature in Kelvin</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">noise_factor</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;noise_factor must be &gt;= 1 (</span><span class="si">{</span><span class="n">noise_factor</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">noise_factor</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">T0</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="temperature_to_noise_factor">
 <a class="viewcode-back" href="../../../core/noise.html#spacelink.core.noise.temperature_to_noise_factor">[docs]</a>
 <span class="nd">@enforce_units</span>
@@ -221,52 +244,6 @@
 
 
 
-<div class="viewcode-block" id="noise_factor_to_temperature">
-<a class="viewcode-back" href="../../../core/noise.html#spacelink.core.noise.noise_factor_to_temperature">[docs]</a>
-<span class="nd">@enforce_units</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">noise_factor_to_temperature</span><span class="p">(</span><span class="n">noise_factor</span><span class="p">:</span> <span class="n">Dimensionless</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Temperature</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert noise factor (linear) to noise temperature.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    noise_factor : Dimensionless</span>
-<span class="sd">        Noise factor (dimensionless, linear)</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Temperature</span>
-<span class="sd">        Noise temperature in Kelvin</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">noise_factor</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;noise_factor must be &gt;= 1 (</span><span class="si">{</span><span class="n">noise_factor</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">noise_factor</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">T0</span>
-    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="noise_figure_to_temperature">
-<a class="viewcode-back" href="../../../core/noise.html#spacelink.core.noise.noise_figure_to_temperature">[docs]</a>
-<span class="nd">@enforce_units</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">noise_figure_to_temperature</span><span class="p">(</span><span class="n">noise_figure</span><span class="p">:</span> <span class="n">Decibels</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Temperature</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert noise figure (in dB) to noise temperature (in Kelvin).</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    noise_figure : Decibels</span>
-<span class="sd">        Noise figure in dB</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Temperature</span>
-<span class="sd">        Noise temperature in Kelvin</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">factor</span> <span class="o">=</span> <span class="n">to_linear</span><span class="p">(</span><span class="n">noise_figure</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">noise_factor_to_temperature</span><span class="p">(</span><span class="n">factor</span><span class="p">)</span></div>
-
-
-
 <div class="viewcode-block" id="temperature_to_noise_figure">
 <a class="viewcode-back" href="../../../core/noise.html#spacelink.core.noise.temperature_to_noise_figure">[docs]</a>
 <span class="nd">@enforce_units</span>
@@ -285,7 +262,7 @@
 <span class="sd">        Noise figure in dB</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">factor</span> <span class="o">=</span> <span class="n">temperature_to_noise_factor</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">to_dB</span><span class="p">(</span><span class="n">factor</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">factor</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">dB</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span></div>
 
 
 

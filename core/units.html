@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Units Module &mdash; SpaceLink 0.1.8 documentation</title>
+  <title>Units Module &mdash; SpaceLink 0.1.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=22607128"></script>
+        <script src="../_static/documentation_options.js?v=8618f531"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.8
+                0.1.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -55,9 +55,8 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Core Modules</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Units Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#decibel-units">Decibel Units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#wavelength">Wavelength</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#to-db">to_dB</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#to-linear">to_linear</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#return-loss-to-vswr">Return Loss to VSWR</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#vswr-to-return-loss">VSWR to Return Loss</a></li>
 </ul>
@@ -101,6 +100,17 @@
   <section id="units-module">
 <h1>Units Module<a class="headerlink" href="#units-module" title="Link to this heading"></a></h1>
 <p>The <strong>units</strong> module provides comprehensive unit handling and conversion utilities for RF system analysis, built on top of the Astropy units system.</p>
+<section id="decibel-units">
+<h2>Decibel Units<a class="headerlink" href="#decibel-units" title="Link to this heading"></a></h2>
+<p>To create a dimensionless quantity in decibels, use the <code class="docutils literal notranslate"><span class="pre">u.dB(1)</span></code> unit rather than
+<code class="docutils literal notranslate"><span class="pre">u.dB</span></code>. For example, <code class="docutils literal notranslate"><span class="pre">3.01</span> <span class="pre">*</span> <span class="pre">u.dB(1)</span></code>. The (1) informs Astropy that the reference
+level is 1, which allows conversion from decibels to linear scale via
+<code class="docutils literal notranslate"><span class="pre">.to(u.dimensionless)</span></code>. A bare <code class="docutils literal notranslate"><span class="pre">u.dB</span></code> has no defined reference level and Astropy
+will refuse to convert it to <code class="docutils literal notranslate"><span class="pre">u.dimensionless</span></code>.</p>
+<p>For quantities with physical dimensions in decibels, use <code class="docutils literal notranslate"><span class="pre">u.dB(unit)</span></code>. For example,
+<code class="docutils literal notranslate"><span class="pre">3.01</span> <span class="pre">*</span> <span class="pre">u.dB(u.W)</span></code>. Or use one of the aliases defined in this module for common cases
+like <code class="docutils literal notranslate"><span class="pre">u.dBW</span></code> or <code class="docutils literal notranslate"><span class="pre">u.dBm</span></code>.</p>
+</section>
 <section id="wavelength">
 <h2>Wavelength<a class="headerlink" href="#wavelength" title="Link to this heading"></a></h2>
 <p>The relationship between wavelength and frequency is given by:</p>
@@ -110,25 +120,6 @@
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(c\)</span> is the speed of light (299,792,458 m/s)</p></li>
 <li><p><span class="math notranslate nohighlight">\(f\)</span> is the frequency in Hz</p></li>
-</ul>
-</section>
-<section id="to-db">
-<h2>to_dB<a class="headerlink" href="#to-db" title="Link to this heading"></a></h2>
-<p>The conversion to decibels is done using:</p>
-<div class="math notranslate nohighlight">
-\[\text{X}_{\text{dB}} = \text{factor} \cdot \log_{10}(x)\]</div>
-<p>The result will have units of dB(input_unit), e.g. dBW, dBK, dBHz, etc.
-For dimensionless input, the result will have unit dB.</p>
-</section>
-<section id="to-linear">
-<h2>to_linear<a class="headerlink" href="#to-linear" title="Link to this heading"></a></h2>
-<p>The conversion from decibels to a linear (dimensionless) ratio is done using:</p>
-<div class="math notranslate nohighlight">
-\[x = 10^{\frac{\text{X}_{\text{dB}}}{\text{factor}}}\]</div>
-<p>where:</p>
-<ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(\text{X}_{\text{dB}}\)</span> is the value in decibels</p></li>
-<li><p><span class="math notranslate nohighlight">\(\text{factor}\)</span> is 10 for power quantities, 20 for field quantities</p></li>
 </ul>
 </section>
 <section id="return-loss-to-vswr">
@@ -158,7 +149,7 @@ done using:</p>
 </section>
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">enforce_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#enforce_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">enforce_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_or_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#enforce_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Decorator to enforce the units specified in function parameter type annotations.</p>
 <p>This decorator enforces some unit consistency rules for function parameters that
 annotated with one of the <code class="docutils literal notranslate"><span class="pre">Annotated</span></code> types in this module:</p>
@@ -173,15 +164,17 @@ automatically to the unit specified in for that type. For example, the <code cla
 type will be converted to <code class="docutils literal notranslate"><span class="pre">u.rad</span></code>, even if the argument is provided with a unit of
 <code class="docutils literal notranslate"><span class="pre">u.deg</span></code>. This allows functions to flexibly handle compatible units while keeping
 tedious unit conversion logic out of the function body.</p>
+<p>When applied to a dataclass, this decorator will wrap the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method
+to enforce units on dataclass field assignments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>func</strong> (<em>callable</em>) – The function to wrap.</p>
+<dd class="field-odd"><p><strong>func_or_class</strong> (<em>callable</em><em> or </em><em>class</em>) – The function or dataclass to wrap.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The wrapped function with unit enforcement.</p>
+<dd class="field-even"><p>The wrapped function or modified dataclass with unit enforcement.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>callable</p>
+<dd class="field-odd"><p>callable or class</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -234,47 +227,12 @@ tedious unit conversion logic out of the function body.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">to_dB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#to_dB"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Convert dimensionless quantity to decibels.</p>
-<p>Note that for referenced logarithmic units, conversions should
-be done using the .to(unit) method.
-:type x: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code></span>
-:param x: value to be converted
-:type x: Dimensionless
-:type factor: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>
-:param factor: 10 for power quantities, 20 for field quantities
-:type factor: float, optional</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Decibels</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">to_linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#to_linear"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Convert decibels to a linear (dimensionless) ratio.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>Decibels</em>) – A quantity in decibels</p></li>
-<li><p><strong>factor</strong> (<em>float</em><em>, </em><em>optional</em>) – 10 for power quantities, 20 for field quantities</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dimensionless</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py">
 <span class="sig-prename descclassname"><span class="pre">spacelink.core.units.</span></span><span class="sig-name descname"><span class="pre">return_loss_to_vswr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_loss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/units.html#return_loss_to_vswr"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert a return loss in decibels to voltage standing wave ratio (VSWR).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>return_loss</strong> (<em>Quantity</em>) – Return loss in decibels (&gt;= 0). Use float(‘inf’) for a perfect match</p>
+<dd class="field-odd"><p><strong>return_loss</strong> (<em>Dimensionless</em>) – Return loss. Must be &gt;= 1 if provided as dimensionless or &gt;= 0 if provided in
+decibels. Use np.inf for a perfect match.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>VSWR (&gt;= 1)</p>
@@ -283,7 +241,7 @@ be done using the .to(unit) method.
 <dd class="field-odd"><p>Dimensionless</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If return_loss is negative</p>
+<dd class="field-even"><p><strong>ValueError</strong> – If return_loss is &lt; 0 dB</p>
 </dd>
 </dl>
 </dd></dl>
@@ -294,7 +252,7 @@ be done using the .to(unit) method.
 <dd><p>Convert voltage standing wave ratio (VSWR) to return loss in decibels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>vswr</strong> (<em>Quantity</em>) – VSWR value (&gt; 1). Use 1 for a perfect match (infinite return loss)</p>
+<dd class="field-odd"><p><strong>vswr</strong> (<em>Quantity</em>) – VSWR value (&gt;= 1). Use 1 for a perfect match (infinite return loss)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Return loss in decibels</p>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Antenna Module &mdash; SpaceLink 0.1.8 documentation</title>
+  <title>Antenna Module &mdash; SpaceLink 0.1.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=22607128"></script>
+        <script src="../_static/documentation_options.js?v=8618f531"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.8
+                0.1.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -273,15 +273,11 @@ be at most 2π radians.</p></li>
 K &gt; 1. If None, the pattern is treated as frequency-invariant and 2D over
 (theta, phi).</p></li>
 <li><p><strong>e_theta</strong> (<em>Dimensionless</em>) – Complex array of <span class="math notranslate nohighlight">\(E_{\theta}(\theta, \phi[, f])\)</span> values normalized
-such that the magnitude squared is equal to directivity. The required
-shape depends on whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+such that the magnitude squared is equal to directivity. Shape is <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+if <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None, otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
 <li><p><strong>e_phi</strong> (<em>Dimensionless</em>) – Complex array of <span class="math notranslate nohighlight">\(E_{\phi}(\theta, \phi[, f])\)</span> values normalized
-such that the magnitude squared is equal to directivity. The required
-shape depends on whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+such that the magnitude squared is equal to directivity. Shape is <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
+if <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None, otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
 <li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in (0, 1].</p></li>
 <li><p><strong>default_polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Optional default polarization used when instance methods are called without
 an explicit polarization.</p></li>
@@ -327,15 +323,11 @@ be at most 2π radians.</p></li>
 If None, the pattern is treated as frequency-invariant and 2D over
 (theta, phi).</p></li>
 <li><p><strong>e_lhcp</strong> (<em>Dimensionless</em>) – Complex array of <span class="math notranslate nohighlight">\(E_{\text{LHCP}}(\theta, \phi[, f])\)</span> values
-normalized such that the magnitude squared is equal to directivity. The
-required shape depends on whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+normalized such that the magnitude squared is equal to directivity. Shape is
+<code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code> if <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None, otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
 <li><p><strong>e_rhcp</strong> (<em>Dimensionless</em>) – Complex array of <span class="math notranslate nohighlight">\(E_{\text{RHCP}}(\theta, \phi[, f])\)</span> values
-normalized such that the magnitude squared is equal to directivity. The
-required shape depends on whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+normalized such that the magnitude squared is equal to directivity. Shape is
+<code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code> if <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None, otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
 <li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in (0, 1].</p></li>
 <li><p><strong>default_polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Optional default polarization used when instance methods are called without
 an explicit polarization.</p></li>
@@ -362,22 +354,14 @@ be at most 2π radians.</p></li>
 <li><p><strong>frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Optional 1D array of strictly increasing frequencies with shape (K,).
 If None, the pattern is treated as frequency-invariant and 2D over
 (theta, phi).</p></li>
-<li><p><strong>gain_lhcp</strong> (<em>Dimensionless</em>) – Array of LHCP gain values. The required shape depends on whether
-<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
-<li><p><strong>gain_rhcp</strong> (<em>Dimensionless</em>) – Array of RHCP gain values. The required shape depends on whether
-<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
-<li><p><strong>phase_lhcp</strong> (<em>Angle</em>) – Array of LHCP phase angles. The required shape depends on whether
-<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
-<li><p><strong>phase_rhcp</strong> (<em>Angle</em>) – Array of RHCP phase angles. The required shape depends on whether
-<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>gain_lhcp</strong> (<em>Dimensionless</em>) – Array of LHCP gain values. Shape is <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code> if <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None,
+otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
+<li><p><strong>gain_rhcp</strong> (<em>Dimensionless</em>) – Array of RHCP gain values. Shape is <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code> if <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None,
+otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
+<li><p><strong>phase_lhcp</strong> (<em>Angle</em>) – Array of LHCP phase angles. Shape is <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code> if <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None,
+otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
+<li><p><strong>phase_rhcp</strong> (<em>Angle</em>) – Array of RHCP phase angles. Shape is <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code> if <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None,
+otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
 <li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in (0, 1].</p></li>
 <li><p><strong>default_polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Optional default polarization used when instance methods are called without
 an explicit polarization.</p></li>
@@ -404,22 +388,14 @@ be at most 2π radians.</p></li>
 <li><p><strong>frequency</strong> (<em>Frequency</em><em> | </em><em>None</em>) – Optional 1D array of strictly increasing frequencies with shape (K,).
 If None, the pattern is treated as frequency-invariant and 2D over
 (theta, phi).</p></li>
-<li><p><strong>gain_theta</strong> (<em>Dimensionless</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> gain values. The required shape depends on
-whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
-<li><p><strong>gain_phi</strong> (<em>Dimensionless</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\phi}\)</span> gain values. The required shape depends on
-whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
-<li><p><strong>phase_theta</strong> (<em>Angle</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> phase angles. The required shape depends on
-whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
-<li><p><strong>phase_phi</strong> (<em>Angle</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\phi}\)</span> phase angles. The required shape depends on
-whether <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is provided:
-- If <code class="docutils literal notranslate"><span class="pre">frequency</span> <span class="pre">is</span> <span class="pre">None</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code>
-- Else: shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code></p></li>
+<li><p><strong>gain_theta</strong> (<em>Dimensionless</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> gain values. Shape is <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code> if
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None, otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
+<li><p><strong>gain_phi</strong> (<em>Dimensionless</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\phi}\)</span> gain values. Shape is <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code> if
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None, otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
+<li><p><strong>phase_theta</strong> (<em>Angle</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> phase angles. Shape is <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code> if
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None, otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
+<li><p><strong>phase_phi</strong> (<em>Angle</em>) – Array of <span class="math notranslate nohighlight">\(\hat{\phi}\)</span> phase angles. Shape is <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M)</span></code> if
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is None, otherwise <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">M,</span> <span class="pre">K)</span></code>.</p></li>
 <li><p><strong>rad_efficiency</strong> (<em>Dimensionless</em>) – Radiation efficiency <span class="math notranslate nohighlight">\(\eta\)</span> in (0, 1].</p></li>
 <li><p><strong>default_polarization</strong> (<em>Polarization</em><em> | </em><em>None</em>) – Optional default polarization used when instance methods are called without
 an explicit polarization.</p></li>

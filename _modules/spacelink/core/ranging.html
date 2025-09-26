@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.core.ranging &mdash; SpaceLink 0.1.8 documentation</title>
+  <title>spacelink.core.ranging &mdash; SpaceLink 0.1.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=22607128"></script>
+        <script src="../../../_static/documentation_options.js?v=8618f531"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.8
+                0.1.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -103,10 +103,11 @@
 <span class="sd">5-448e85c647331d9cbaf66c096458bdd5/2025/01//414x0g2.pdf</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">astropy.constants</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">const</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">astropy.constants</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.integrate</span>
@@ -143,6 +144,26 @@
 
     <span class="n">BIPOLAR</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
     <span class="n">SINE_SUBCARRIER</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="RangeClockWaveform">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.RangeClockWaveform">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RangeClockWaveform</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The shape of the ranging clock component.&quot;&quot;&quot;</span>
+
+    <span class="n">SQUARE</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+    <span class="n">SINE</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="TrackingArchitecture">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.TrackingArchitecture">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TrackingArchitecture</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The architecture of the ranging clock tracking system.&quot;&quot;&quot;</span>
+
+    <span class="n">CLOSED_LOOP</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+    <span class="n">OPEN_LOOP</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span></div>
 
 
 
@@ -205,7 +226,7 @@
 
 <span class="sd">    `[4]`_ p. 2-2.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">CODE_LENGTH</span> <span class="o">*</span> <span class="n">const</span><span class="o">.</span><span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">ranging_clock_rate</span><span class="p">))</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">CODE_LENGTH</span> <span class="o">*</span> <span class="n">astropy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">ranging_clock_rate</span><span class="p">))</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span></div>
 
 
 
@@ -483,6 +504,47 @@
 <span class="p">}</span>
 
 
+<div class="viewcode-block" id="pn_component_to_ranging_power">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.pn_component_to_ranging_power">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pn_component_to_ranging_power</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="n">PnRangingCode</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dimensionless</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Usable PN component power to total ranging power ratio.</span>
+
+<span class="sd">    This returns the power ratio :math:`P_n / P_R` for the :math:`n`-th component of</span>
+<span class="sd">    the PN ranging signal. For :math:`n = 1` this is equivalent to</span>
+<span class="sd">    :math:`P_{RC} / P_R` where :math:`P_{RC}` is the usable power in the ranging clock</span>
+<span class="sd">    component.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    code : PnRangingCode</span>
+<span class="sd">        The PN ranging code type.</span>
+<span class="sd">    component : int</span>
+<span class="sd">        The component index :math:`n` in [1, 6]. Component 1 is the ranging clock.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Dimensionless</span>
+<span class="sd">        The fraction of usable ranging power :math:`P_n / P_R`.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    `[2]`_ Tables 3–5 (:math:`R_n` values; power fraction is :math:`R_n^2`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">coeff_dict</span> <span class="o">=</span> <span class="n">_CORR_COEFF_DSN</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pragma: no cover - defensive guard</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid PN ranging code: </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">corr_coeff</span> <span class="o">=</span> <span class="n">coeff_dict</span><span class="p">[</span><span class="n">component</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pragma: no cover - defensive guard</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid component index: </span><span class="si">{</span><span class="n">component</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">corr_coeff</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">dimensionless_unscaled</span></div>
+
+
+
 <div class="viewcode-block" id="pn_component_acquisition_probability">
 <a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.pn_component_acquisition_probability">[docs]</a>
 <span class="nd">@enforce_units</span>
@@ -667,6 +729,221 @@
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">solution</span><span class="o">.</span><span class="n">root</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span></div>
+
+
+
+<div class="viewcode-block" id="RangeJitterParameters">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.RangeJitterParameters">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RangeJitterParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Parameters for range estimator jitter or variance calculations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    loop_bandwidth : Frequency</span>
+<span class="sd">        The one-sided bandwidth :math:`B` of the ranging clock tracking loop. If the</span>
+<span class="sd">        tracking system uses an open-loop architecture then :math:`B = 1 / (2T)` where</span>
+<span class="sd">        :math:`T` is the integration time.</span>
+<span class="sd">    range_clock_to_noise_psd : DecibelHertz</span>
+<span class="sd">        The ranging-clock-to-noise power spectral density :math:`P_{RC}/N_0`. In general</span>
+<span class="sd">        this is smaller than the ranging-to-noise power spectral density :math:`P_R/N_0`</span>
+<span class="sd">        because the ranging clock is only one component of the composite ranging signal.</span>
+<span class="sd">    range_clock_waveform : RangeClockWaveform</span>
+<span class="sd">        The shape of the ranging clock.</span>
+<span class="sd">    reference_clock_waveform : RangeClockWaveform</span>
+<span class="sd">        The shape of the reference clock in the receiver, which may or may not be</span>
+<span class="sd">        matched to the transmitted ranging clock waveform.</span>
+<span class="sd">    tracking_architecture : TrackingArchitecture | None</span>
+<span class="sd">        The architecture of the ranging clock tracking system (open or closed loop).</span>
+<span class="sd">        Only required if the range clock and reference clock are both square.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">loop_bandwidth</span><span class="p">:</span> <span class="n">Frequency</span>
+    <span class="n">range_clock_to_noise_psd</span><span class="p">:</span> <span class="n">DecibelHertz</span>
+    <span class="n">range_clock_waveform</span><span class="p">:</span> <span class="n">RangeClockWaveform</span>
+    <span class="n">reference_clock_waveform</span><span class="p">:</span> <span class="n">RangeClockWaveform</span>
+    <span class="n">tracking_architecture</span><span class="p">:</span> <span class="n">TrackingArchitecture</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_range_jitter_coefficient</span><span class="p">(</span>
+    <span class="n">range_clock_waveform</span><span class="p">:</span> <span class="n">RangeClockWaveform</span><span class="p">,</span>
+    <span class="n">reference_clock_waveform</span><span class="p">:</span> <span class="n">RangeClockWaveform</span><span class="p">,</span>
+    <span class="n">tracking_architecture</span><span class="p">:</span> <span class="n">TrackingArchitecture</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Lookup the coefficient for the range estimator jitter expression.</span>
+
+<span class="sd">    The range jitter expressions in `[4]`_ typically have the form</span>
+<span class="sd">    :math:`\alpha \frac{c}{f_{RC}} \sqrt{\frac{B}{P_{RC}/N_0}}` where :math:`\alpha` is</span>
+<span class="sd">    the coefficient to be returned by this function.</span>
+
+<span class="sd">    If using a jitter expression in terms of integration time :math:`T`, which has the</span>
+<span class="sd">    form :math:`\beta \frac{c}{f_{RC}} \sqrt{\frac{1}{T \cdot P_{RC}/N_0}}`, then you</span>
+<span class="sd">    will need to divide the return value by :math:`\sqrt{2}` because :math:`2B = 1 / T`</span>
+<span class="sd">    and therefore :math:`\beta = \alpha / \sqrt{2}`.</span>
+
+<span class="sd">    These coefficients all come from jitter expressions in `[2]`_ and `[4]`_. See</span>
+<span class="sd">    comments in the code for references to specific equations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    range_clock_waveform : RangeClockWaveform</span>
+<span class="sd">        The shape of the ranging clock.</span>
+<span class="sd">    reference_clock_waveform : RangeClockWaveform</span>
+<span class="sd">        The shape of the reference clock in the receiver, which may or may not be</span>
+<span class="sd">        matched to the transmitted ranging clock waveform.</span>
+<span class="sd">    tracking_architecture : TrackingArchitecture | None = None</span>
+<span class="sd">        The architecture of the ranging clock tracking system (open or closed loop).</span>
+<span class="sd">        Only required if the range clock and reference clock are both square. In all</span>
+<span class="sd">        other cases the receiver architecture does not affect the return value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The coefficient for the range estimator jitter expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">match</span> <span class="p">(</span><span class="n">range_clock_waveform</span><span class="p">,</span> <span class="n">reference_clock_waveform</span><span class="p">,</span> <span class="n">tracking_architecture</span><span class="p">):</span>
+        <span class="k">case</span> <span class="p">(</span>
+            <span class="n">RangeClockWaveform</span><span class="o">.</span><span class="n">SQUARE</span><span class="p">,</span>
+            <span class="n">RangeClockWaveform</span><span class="o">.</span><span class="n">SQUARE</span><span class="p">,</span>
+            <span class="n">TrackingArchitecture</span><span class="o">.</span><span class="n">CLOSED_LOOP</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="c1"># [4] last equation in Section 2.5.1.</span>
+            <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">8</span>
+        <span class="k">case</span> <span class="p">(</span>
+            <span class="n">RangeClockWaveform</span><span class="o">.</span><span class="n">SQUARE</span><span class="p">,</span>
+            <span class="n">RangeClockWaveform</span><span class="o">.</span><span class="n">SQUARE</span><span class="p">,</span>
+            <span class="n">TrackingArchitecture</span><span class="o">.</span><span class="n">OPEN_LOOP</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="c1"># [4] part (c) of Section 2.7.2.1 times sqrt(2).</span>
+            <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="n">RangeClockWaveform</span><span class="o">.</span><span class="n">SINE</span><span class="p">,</span> <span class="n">RangeClockWaveform</span><span class="o">.</span><span class="n">SQUARE</span><span class="p">,</span> <span class="k">_</span><span class="p">):</span>
+            <span class="c1"># [4] last equation in Section 2.5.2,</span>
+            <span class="c1"># [4] part (a) of Section 2.7.2.1 times sqrt(2).</span>
+            <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="n">RangeClockWaveform</span><span class="o">.</span><span class="n">SINE</span><span class="p">,</span> <span class="n">RangeClockWaveform</span><span class="o">.</span><span class="n">SINE</span><span class="p">,</span> <span class="k">_</span><span class="p">):</span>
+            <span class="c1"># [4] near the bottom of page 2-34 in Section 2.5.3,</span>
+            <span class="c1"># [4] part (b) of Section 2.7.2.1 times sqrt(2),</span>
+            <span class="c1"># [2] equation (85) times sqrt(2),</span>
+            <span class="c1"># [2] equation (89).</span>
+            <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+        <span class="k">case</span> <span class="p">(</span><span class="n">RangeClockWaveform</span><span class="o">.</span><span class="n">SQUARE</span><span class="p">,</span> <span class="n">RangeClockWaveform</span><span class="o">.</span><span class="n">SQUARE</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Tracking architecture is required for square range clock with &quot;</span>
+                <span class="s2">&quot;square reference clock.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unsupported combination: range_clock=</span><span class="si">{</span><span class="n">range_clock_waveform</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;reference_clock=</span><span class="si">{</span><span class="n">reference_clock_waveform</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;tracking=</span><span class="si">{</span><span class="n">tracking_architecture</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_range_est_variance</span><span class="p">(</span>
+    <span class="n">range_clock_rate</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">,</span>
+    <span class="n">link_params</span><span class="p">:</span> <span class="n">RangeJitterParameters</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">u</span><span class="o">.</span><span class="n">Quantity</span><span class="p">[</span><span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="o">**</span><span class="mi">2</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the contribution of uplink or downlink to end-to-end range variance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    range_clock_rate : Frequency</span>
+<span class="sd">        Rate of the ranging clock (half the chip rate).</span>
+<span class="sd">    link_params : RangeJitterParameters</span>
+<span class="sd">        Uplink or downlink ranging parameters.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    u.Quantity[u.m**2]</span>
+<span class="sd">        The variance contributed to the end-to-end range estimator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">coeff</span> <span class="o">=</span> <span class="n">_range_jitter_coefficient</span><span class="p">(</span>
+        <span class="n">link_params</span><span class="o">.</span><span class="n">range_clock_waveform</span><span class="p">,</span>
+        <span class="n">link_params</span><span class="o">.</span><span class="n">reference_clock_waveform</span><span class="p">,</span>
+        <span class="n">link_params</span><span class="o">.</span><span class="n">tracking_architecture</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Distilled from many jitter expressions in both [2] and [4]. In particular, see</span>
+    <span class="c1"># equations (85) and (89) in [2] and Sections 2.5 and 2.7 in [4]. Most of the jitter</span>
+    <span class="c1"># expressions in these references are closely related to each other and can be</span>
+    <span class="c1"># manipulated into this form. Note that this is the variance and not the standard</span>
+    <span class="c1"># deviation, so this is the square of the jitter.</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">coeff</span> <span class="o">*</span> <span class="n">astropy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span> <span class="o">/</span> <span class="n">range_clock_rate</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">*</span> <span class="n">link_params</span><span class="o">.</span><span class="n">loop_bandwidth</span>
+        <span class="o">/</span> <span class="n">link_params</span><span class="o">.</span><span class="n">range_clock_to_noise_psd</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="pn_regen_end_to_end_jitter">
+<a class="viewcode-back" href="../../../core/ranging.html#spacelink.core.ranging.pn_regen_end_to_end_jitter">[docs]</a>
+<span class="nd">@enforce_units</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pn_regen_end_to_end_jitter</span><span class="p">(</span>
+    <span class="n">range_clock_rate</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">,</span>
+    <span class="n">uplink_params</span><span class="p">:</span> <span class="n">RangeJitterParameters</span><span class="p">,</span>
+    <span class="n">downlink_params</span><span class="p">:</span> <span class="n">RangeJitterParameters</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distance</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the standard deviation of end-to-end range measurement error for</span>
+<span class="sd">    regenerative pseudo-noise (PN) ranging.</span>
+
+<span class="sd">    An approximation is used to determine how much of the uplink jitter contributed to</span>
+<span class="sd">    the end-to-end jitter. This approximation is most accurate when the loop bandwidth</span>
+<span class="sd">    of the transponder is significantly different from the loop bandwidth of the ground</span>
+<span class="sd">    station. When the bandwidths are similar then the most accurate approach is to</span>
+<span class="sd">    multiply the transfer functions of the two systems but this is not implemented here.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    range_clock_rate : Frequency</span>
+<span class="sd">        Frequency of the ranging clock (half the chip rate).</span>
+<span class="sd">    uplink_params : RangeJitterParameters</span>
+<span class="sd">        Uplink ranging parameters.</span>
+<span class="sd">    downlink_params : RangeJitterParameters</span>
+<span class="sd">        Downlink ranging parameters.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Distance</span>
+<span class="sd">        The standard deviation of the end-to-end range estimation error (1-sigma).</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    `[2]`_ Section 2.5.4.</span>
+
+<span class="sd">    `[4]`_ Sections 2.5 and 2.7.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The transponder&#39;s regenerated range clock has some phase noise (jitter) that is</span>
+    <span class="c1"># contributed by the noise on the uplink. If the loop bandwidth of the transponder&#39;s</span>
+    <span class="c1"># range clock tracking loop is smaller than the bandwidth of the ground station&#39;s</span>
+    <span class="c1"># tracking loop then uplink noise bandwidth is controlled by the transponder&#39;s</span>
+    <span class="c1"># loop filter. On the other hand if the ground receiver&#39;s loop bandwidth is smaller</span>
+    <span class="c1"># then it becomes the narrower and thus determining filter bandwidth. If the two</span>
+    <span class="c1"># bandwidths are similar then the most accurate approach (not performed here) is to</span>
+    <span class="c1"># multiply the transfer functions of the two systems.</span>
+    <span class="n">uplink_params</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="n">uplink_params</span><span class="p">,</span>
+        <span class="n">loop_bandwidth</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span>
+            <span class="n">uplink_params</span><span class="o">.</span><span class="n">loop_bandwidth</span><span class="p">,</span> <span class="n">downlink_params</span><span class="o">.</span><span class="n">loop_bandwidth</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">uplink_range_variance</span> <span class="o">=</span> <span class="n">_range_est_variance</span><span class="p">(</span>
+        <span class="n">range_clock_rate</span><span class="p">,</span>
+        <span class="n">uplink_params</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">downlink_range_variance</span> <span class="o">=</span> <span class="n">_range_est_variance</span><span class="p">(</span>
+        <span class="n">range_clock_rate</span><span class="p">,</span>
+        <span class="n">downlink_params</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># [2] equation (88),</span>
+    <span class="c1"># [4] Section 2.7.3.2.2,</span>
+    <span class="c1"># [4] Section 2.7.3.2.3 (after some manipulation).</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">uplink_range_variance</span> <span class="o">+</span> <span class="n">downlink_range_variance</span><span class="p">)</span></div>
 
 </pre></div>
 

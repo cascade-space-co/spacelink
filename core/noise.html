@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Noise Module &mdash; SpaceLink 0.1.8 documentation</title>
+  <title>Noise Module &mdash; SpaceLink 0.1.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=22607128"></script>
+        <script src="../_static/documentation_options.js?v=8618f531"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.8
+                0.1.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -178,6 +178,24 @@ output.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_factor_to_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_factor_to_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Convert noise factor or noise figure to noise temperature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>noise_factor</strong> (<em>Dimensionless</em>) – Noise factor (dimensionless). Passing a noise figure with unit dB(1) is also
+supported and will be converted to noise factor automatically.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Noise temperature in Kelvin</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Temperature</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
 <span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">temperature_to_noise_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#temperature_to_noise_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert noise temperature to noise factor (linear).</p>
 <dl class="field-list simple">
@@ -189,40 +207,6 @@ output.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Dimensionless</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_factor_to_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_factor_to_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Convert noise factor (linear) to noise temperature.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>noise_factor</strong> (<em>Dimensionless</em>) – Noise factor (dimensionless, linear)</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Noise temperature in Kelvin</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Temperature</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">spacelink.core.noise.</span></span><span class="sig-name descname"><span class="pre">noise_figure_to_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_figure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/core/noise.html#noise_figure_to_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Convert noise figure (in dB) to noise temperature (in Kelvin).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>noise_figure</strong> (<em>Decibels</em>) – Noise figure in dB</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Noise temperature in Kelvin</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Temperature</p>
 </dd>
 </dl>
 </dd></dl>

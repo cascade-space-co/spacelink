@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; SpaceLink 0.1.8 documentation</title>
+  <title>Index &mdash; SpaceLink 0.1.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=22607128"></script>
+        <script src="_static/documentation_options.js?v=8618f531"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.8
+                0.1.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -92,9 +92,11 @@
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
  
@@ -102,9 +104,11 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.__init__">__init__() (spacelink.phy.performance.ModePerformance method)</a>
+      <li><a href="core/ranging.html#spacelink.core.ranging.RangeJitterParameters.__init__">__init__() (spacelink.core.ranging.RangeJitterParameters method)</a>
 
       <ul>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.__init__">(spacelink.phy.performance.ModePerformance method)</a>
+</li>
         <li><a href="phy/registry.html#spacelink.phy.registry.Registry.__init__">(spacelink.phy.registry.Registry method)</a>
 </li>
       </ul></li>
@@ -138,10 +142,12 @@
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.chip_snr">chip_snr() (in module spacelink.core.ranging)</a>
 </li>
-      <li><a href="phy/mode.html#spacelink.phy.mode.Code">Code (class in spacelink.phy.mode)</a>
+      <li><a href="core/ranging.html#spacelink.core.ranging.TrackingArchitecture.CLOSED_LOOP">CLOSED_LOOP (spacelink.core.ranging.TrackingArchitecture attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/mode.html#spacelink.phy.mode.Code">Code (class in spacelink.phy.mode)</a>
+</li>
       <li><a href="core/ranging.html#spacelink.core.ranging.CODE_LENGTH">CODE_LENGTH (in module spacelink.core.ranging)</a>
 </li>
       <li><a href="phy/mode.html#spacelink.phy.mode.CodeChain">CodeChain (class in spacelink.phy.mode)</a>
@@ -226,11 +232,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode">LinkMode (class in spacelink.phy.mode)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="phy/registry.html#spacelink.phy.registry.Registry.load">load() (spacelink.phy.registry.Registry method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/pattern_io.html#spacelink.core.pattern_io.load_radiation_pattern_npz">load_radiation_pattern_npz() (in module spacelink.core.pattern_io)</a>
+</li>
+      <li><a href="core/ranging.html#spacelink.core.ranging.RangeJitterParameters.loop_bandwidth">loop_bandwidth (spacelink.core.ranging.RangeJitterParameters attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -296,6 +304,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core/ranging.html#spacelink.core.ranging.TrackingArchitecture.OPEN_LOOP">OPEN_LOOP (spacelink.core.ranging.TrackingArchitecture attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -305,8 +321,12 @@
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.pn_component_acquisition_probability">pn_component_acquisition_probability() (in module spacelink.core.ranging)</a>
 </li>
+      <li><a href="core/ranging.html#spacelink.core.ranging.pn_component_to_ranging_power">pn_component_to_ranging_power() (in module spacelink.core.ranging)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core/ranging.html#spacelink.core.ranging.pn_regen_end_to_end_jitter">pn_regen_end_to_end_jitter() (in module spacelink.core.ranging)</a>
+</li>
       <li><a href="core/ranging.html#spacelink.core.ranging.pn_sequence_range_ambiguity">pn_sequence_range_ambiguity() (in module spacelink.core.ranging)</a>
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.PnRangingCode">PnRangingCode (class in spacelink.core.ranging)</a>
@@ -319,22 +339,32 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core/ranging.html#spacelink.core.ranging.RangeJitterParameters.range_clock_to_noise_psd">range_clock_to_noise_psd (spacelink.core.ranging.RangeJitterParameters attribute)</a>
+</li>
+      <li><a href="core/ranging.html#spacelink.core.ranging.RangeJitterParameters.range_clock_waveform">range_clock_waveform (spacelink.core.ranging.RangeJitterParameters attribute)</a>
+</li>
+      <li><a href="core/ranging.html#spacelink.core.ranging.RangeClockWaveform">RangeClockWaveform (class in spacelink.core.ranging)</a>
+</li>
+      <li><a href="core/ranging.html#spacelink.core.ranging.RangeJitterParameters">RangeJitterParameters (class in spacelink.core.ranging)</a>
+</li>
       <li><a href="core/ranging.html#spacelink.core.ranging.ranging_to_total_power">ranging_to_total_power() (in module spacelink.core.ranging)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="phy/mode.html#spacelink.phy.mode.Code.rate">rate (spacelink.phy.mode.Code attribute)</a>
 
       <ul>
         <li><a href="phy/mode.html#spacelink.phy.mode.CodeChain.rate">(spacelink.phy.mode.CodeChain property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.ref">ref (spacelink.phy.mode.LinkMode attribute)</a>
 
       <ul>
         <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.ref">(spacelink.phy.performance.ModePerformance attribute)</a>
 </li>
       </ul></li>
+      <li><a href="core/ranging.html#spacelink.core.ranging.RangeJitterParameters.reference_clock_waveform">reference_clock_waveform (spacelink.core.ranging.RangeJitterParameters attribute)</a>
+</li>
       <li><a href="phy/registry.html#spacelink.phy.registry.Registry">Registry (class in spacelink.phy.registry)</a>
 </li>
   </ul></td>
@@ -344,6 +374,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core/pattern_io.html#spacelink.core.pattern_io.save_radiation_pattern_npz">save_radiation_pattern_npz() (in module spacelink.core.pattern_io)</a>
+</li>
+      <li><a href="core/ranging.html#spacelink.core.ranging.RangeClockWaveform.SINE">SINE (spacelink.core.ranging.RangeClockWaveform attribute)</a>
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.DataModulation.SINE_SUBCARRIER">SINE_SUBCARRIER (spacelink.core.ranging.DataModulation attribute)</a>
 </li>
@@ -384,7 +416,21 @@
         <li><a href="phy/registry.html#module-spacelink.phy.registry">module</a>
 </li>
       </ul></li>
+      <li><a href="core/ranging.html#spacelink.core.ranging.RangeClockWaveform.SQUARE">SQUARE (spacelink.core.ranging.RangeClockWaveform attribute)</a>
+</li>
       <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.symbol_rate">symbol_rate() (spacelink.phy.mode.LinkMode method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core/ranging.html#spacelink.core.ranging.RangeJitterParameters.tracking_architecture">tracking_architecture (spacelink.core.ranging.RangeJitterParameters attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core/ranging.html#spacelink.core.ranging.TrackingArchitecture">TrackingArchitecture (class in spacelink.core.ranging)</a>
 </li>
   </ul></td>
 </tr></table>
