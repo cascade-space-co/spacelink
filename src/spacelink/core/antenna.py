@@ -257,6 +257,7 @@ class _ComplexInterpolator:
         if frequency is None:
             values = values[:, :, np.newaxis]
             frequency = np.array([0.0]) * u.Hz  # Dummy frequency for 2D case
+        assert frequency is not None
 
         delta_phi = np.diff(phi)[0]  # Assume equal spacing
         full_circle = delta_phi * phi.size >= 2 * np.pi * u.rad - (delta_phi / 2)
@@ -281,6 +282,74 @@ class _ComplexInterpolator:
             method="linear",
             bounds_error=True,
         )
+
+        # Store bounds for error checking
+        self._theta_bounds = (np.min(theta), np.max(theta))
+        self._phi_bounds = (np.min(phi), np.max(phi))
+        self._frequency_bounds = (np.min(frequency), np.max(frequency))
+
+    @enforce_units
+    def _check_bounds(
+        self,
+        theta: Angle,
+        phi_wrapped: Angle,
+        frequency: Frequency,
+        original_error: Exception,
+    ) -> None:
+        """Check if inputs are within bounds and raise helpful error if not.
+
+        Parameters
+        ----------
+        theta : Angle
+            Polar angles to check.
+        phi_wrapped : Angle
+            Wrapped azimuthal angles to check.
+        frequency : Frequency
+            Frequency to check.
+        original_error : Exception
+            The original exception from the interpolator to chain.
+
+        Raises
+        ------
+        ValueError
+            If any parameter is out of bounds, with a helpful message chained
+            to the original error.
+        """
+        theta_min, theta_max = self._theta_bounds
+        phi_min, phi_max = self._phi_bounds
+        freq_min, freq_max = self._frequency_bounds
+
+        # Check theta bounds
+        if np.any(theta < theta_min) or np.any(theta > theta_max):
+            theta_actual_min = np.min(theta)
+            theta_actual_max = np.max(theta)
+            raise ValueError(
+                f"theta values must be in [{theta_min:.6f}, {theta_max:.6f}], "
+                f"but got values in range "
+                f"[{theta_actual_min:.6f}, {theta_actual_max:.6f}]"
+            ) from original_error
+
+        # Check phi bounds (on wrapped values)
+        if np.any(phi_wrapped < phi_min) or np.any(phi_wrapped > phi_max):
+            phi_actual_min = np.min(phi_wrapped)
+            phi_actual_max = np.max(phi_wrapped)
+            raise ValueError(
+                f"phi values must be in [{phi_min:.6f}, {phi_max:.6f}], "
+                f"but got values in range "
+                f"[{phi_actual_min:.6f}, {phi_actual_max:.6f}]"
+            ) from original_error
+
+        # Check frequency bounds (only for 3D interpolators)
+        if self._is_3d:
+            if np.any(frequency < freq_min) or np.any(frequency > freq_max):
+                freq_actual_min = np.min(frequency)
+                freq_actual_max = np.max(frequency)
+                raise ValueError(
+                    f"frequency values must be in "
+                    f"[{freq_min:.6e}, {freq_max:.6e}], "
+                    f"but got values in range "
+                    f"[{freq_actual_min:.6e}, {freq_actual_max:.6e}]"
+                ) from original_error
 
     @enforce_units
     def __call__(
@@ -316,14 +385,24 @@ class _ComplexInterpolator:
                 raise ValueError("Frequency must be provided for 3D interpolators")
         else:
             frequency = 0.0 * u.Hz
+        assert frequency is not None
+
+        phi_wrapped = phi % (2 * np.pi * u.rad)
 
         points = (
             theta.value,
-            (phi % (2 * np.pi * u.rad)).value,
+            phi_wrapped.value,
             frequency.value,
         )
 
-        return self._interp(points) * self.unit
+        try:
+            return self._interp(points) * self.unit
+        except ValueError as e:
+            # Interpolation failed - check if it's a bounds error and if so raise
+            # ValueError with a helpful message.
+            self._check_bounds(theta, phi_wrapped, frequency, original_error=e)
+            # No bounds violation found - re-raise the original ValueError
+            raise
 
 
 class RadiationPattern:
