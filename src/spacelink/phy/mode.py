@@ -24,17 +24,22 @@ class Modulation(pydantic.BaseModel):
 
 class Code(pydantic.BaseModel):
     r"""
-    Represents a single forward error correction code.
+    Represents a single PHY layer component that adds overhead.
+
+    This class is primarily used for forward error correction codes, but can also
+    represent other PHY layer components that add overhead such as framing structures
+    (e.g., DVB-S2 PLFRAME and BBFRAME).
 
     Parameters
     ----------
     name : str
-        Name of the code.
+        Name of the code or PHY layer component.
     rate : Fraction
-        Code rate.
+        Code rate or efficiency representing the ratio of information bits to total
+        bits.
     interleaver_depth : int | None
-        Interleaver depth for codes such as Reed Solomon that are commonly paired with
-        an interleaver.
+        Interleaver depth for codes such as Reed Solomon that are commonly
+        paired with an interleaver. May be None if not applicable.
     """
 
     name: str
@@ -44,17 +49,19 @@ class Code(pydantic.BaseModel):
 
 class CodeChain(pydantic.BaseModel):
     r"""
-    Represents a chain of forward error correction codes.
+    Represents a chain of PHY layer components that add overhead.
 
-    This provides the flexibility to handle concatenated codes such as Reed Solomon
-    paired with convolutional code but also single codes and even the absence of forward
-    error correction.
+    This provides the flexibility to handle concatenated codes such as Reed
+    Solomon paired with convolutional code, framing structures (e.g., DVB-S2
+    PLFRAME and BBFRAME), single codes, and even the absence of forward error
+    correction.
 
     Parameters
     ----------
     codes : list[Code]
-        List of codes in in encoding order from outermost to innermost code. If no error
-        correction is used the list will be empty.
+        List of codes or PHY layer components in encoding order from outermost
+        to innermost. If no overhead-adding components are used, the list will
+        be empty.
     """
 
     codes: list[Code]
@@ -62,13 +69,16 @@ class CodeChain(pydantic.BaseModel):
     @property
     def rate(self) -> Fraction:
         r"""
-        The overall code rate of the chain, which is the product of the individual code
-        rates or 1 if no error correction is used.
+        The overall rate of the chain, which is the product of the individual rates.
+
+        This represents the cumulative efficiency of all PHY layer components,
+        accounting for overhead from FEC codes, framing structures, and other
+        components. If no overhead-adding components are present, the rate is 1.
 
         Returns
         -------
         Fraction
-            Code rate.
+            Overall rate of the chain.
         """
         return math.prod((code.rate for code in self.codes), start=Fraction(1))
 
@@ -84,7 +94,7 @@ class LinkMode(pydantic.BaseModel):
     modulation : Modulation
         Modulation scheme.
     coding : CodeChain
-        Forward error correction code chain.
+        Chain of PHY layer components that add overhead (FEC codes, framing, etc.).
     ref : str, optional
         Reference or source of the mode definition.
     """
