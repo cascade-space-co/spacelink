@@ -1,0 +1,462 @@
+# DVB-S2 MODCODs (Normal Frames)
+# Reference: ETSI EN 302 307-1 V1.4.1
+# Normal FECFRAME length: 64800 bits
+# BCH + LDPC concatenated coding
+
+# QPSK MODCODs (11 code rates)
+# Table 5a from ETSI EN 302 307-1 V1.4.1
+# PLFRAME overhead: 90 symbols per frame, S=360 slots for QPSK
+- id: DVBS2_QPSK_1/4
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "15928/16008"
+      - name: BCH (16200, 16008)
+        rate: "16008/16200"
+      - name: LDPC (64800, 16200)
+        rate: "16200/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_QPSK_1/3
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "21328/21408"
+      - name: BCH (21600, 21408)
+        rate: "21408/21600"
+      - name: LDPC (64800, 21600)
+        rate: "21600/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_QPSK_2/5
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "25648/25728"
+      - name: BCH (25920, 25728)
+        rate: "25728/25920"
+      - name: LDPC (64800, 25920)
+        rate: "25920/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_QPSK_1/2
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "32128/32208"
+      - name: BCH (32400, 32208)
+        rate: "32208/32400"
+      - name: LDPC (64800, 32400)
+        rate: "32400/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_QPSK_3/5
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "38608/38688"
+      - name: BCH (38880, 38688)
+        rate: "38688/38880"
+      - name: LDPC (64800, 38880)
+        rate: "38880/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_QPSK_2/3
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "42960/43040"
+      - name: BCH (43200, 43040)
+        rate: "43040/43200"
+      - name: LDPC (64800, 43200)
+        rate: "43200/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_QPSK_3/4
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "48328/48408"
+      - name: BCH (48600, 48408)
+        rate: "48408/48600"
+      - name: LDPC (64800, 48600)
+        rate: "48600/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_QPSK_4/5
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "51568/51648"
+      - name: BCH (51840, 51648)
+        rate: "51648/51840"
+      - name: LDPC (64800, 51840)
+        rate: "51840/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_QPSK_5/6
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "53760/53840"
+      - name: BCH (54000, 53840)
+        rate: "53840/54000"
+      - name: LDPC (64800, 54000)
+        rate: "54000/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_QPSK_8/9
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "57392/57472"
+      - name: BCH (57600, 57472)
+        rate: "57472/57600"
+      - name: LDPC (64800, 57600)
+        rate: "57600/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_QPSK_9/10
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "58112/58192"
+      - name: BCH (58320, 58192)
+        rate: "58192/58320"
+      - name: LDPC (64800, 58320)
+        rate: "58320/64800"
+      - name: PLFRAME overhead (QPSK, no pilots)
+        rate: "360/361"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+# 8PSK MODCODs (6 code rates)
+# PLFRAME overhead: 90 symbols per frame, S=240 slots for 8PSK
+- id: DVBS2_8PSK_3/5
+  modulation:
+    name: 8PSK
+    bits_per_symbol: 3
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "38608/38688"
+      - name: BCH (38880, 38688)
+        rate: "38688/38880"
+      - name: LDPC (64800, 38880)
+        rate: "38880/64800"
+      - name: PLFRAME overhead (8PSK, no pilots)
+        rate: "240/241"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_8PSK_2/3
+  modulation:
+    name: 8PSK
+    bits_per_symbol: 3
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "42960/43040"
+      - name: BCH (43200, 43040)
+        rate: "43040/43200"
+      - name: LDPC (64800, 43200)
+        rate: "43200/64800"
+      - name: PLFRAME overhead (8PSK, no pilots)
+        rate: "240/241"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_8PSK_3/4
+  modulation:
+    name: 8PSK
+    bits_per_symbol: 3
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "48328/48408"
+      - name: BCH (48600, 48408)
+        rate: "48408/48600"
+      - name: LDPC (64800, 48600)
+        rate: "48600/64800"
+      - name: PLFRAME overhead (8PSK, no pilots)
+        rate: "240/241"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_8PSK_5/6
+  modulation:
+    name: 8PSK
+    bits_per_symbol: 3
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "53760/53840"
+      - name: BCH (54000, 53840)
+        rate: "53840/54000"
+      - name: LDPC (64800, 54000)
+        rate: "54000/64800"
+      - name: PLFRAME overhead (8PSK, no pilots)
+        rate: "240/241"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_8PSK_8/9
+  modulation:
+    name: 8PSK
+    bits_per_symbol: 3
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "57392/57472"
+      - name: BCH (57600, 57472)
+        rate: "57472/57600"
+      - name: LDPC (64800, 57600)
+        rate: "57600/64800"
+      - name: PLFRAME overhead (8PSK, no pilots)
+        rate: "240/241"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_8PSK_9/10
+  modulation:
+    name: 8PSK
+    bits_per_symbol: 3
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "58112/58192"
+      - name: BCH (58320, 58192)
+        rate: "58192/58320"
+      - name: LDPC (64800, 58320)
+        rate: "58320/64800"
+      - name: PLFRAME overhead (8PSK, no pilots)
+        rate: "240/241"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+# 16APSK MODCODs (6 code rates)
+# PLFRAME overhead: 90 symbols per frame, S=180 slots for 16APSK
+- id: DVBS2_16APSK_2/3
+  modulation:
+    name: 16APSK
+    bits_per_symbol: 4
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "42960/43040"
+      - name: BCH (43200, 43040)
+        rate: "43040/43200"
+      - name: LDPC (64800, 43200)
+        rate: "43200/64800"
+      - name: PLFRAME overhead (16APSK, no pilots)
+        rate: "180/181"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_16APSK_3/4
+  modulation:
+    name: 16APSK
+    bits_per_symbol: 4
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "48328/48408"
+      - name: BCH (48600, 48408)
+        rate: "48408/48600"
+      - name: LDPC (64800, 48600)
+        rate: "48600/64800"
+      - name: PLFRAME overhead (16APSK, no pilots)
+        rate: "180/181"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_16APSK_4/5
+  modulation:
+    name: 16APSK
+    bits_per_symbol: 4
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "51568/51648"
+      - name: BCH (51840, 51648)
+        rate: "51648/51840"
+      - name: LDPC (64800, 51840)
+        rate: "51840/64800"
+      - name: PLFRAME overhead (16APSK, no pilots)
+        rate: "180/181"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_16APSK_5/6
+  modulation:
+    name: 16APSK
+    bits_per_symbol: 4
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "53760/53840"
+      - name: BCH (54000, 53840)
+        rate: "53840/54000"
+      - name: LDPC (64800, 54000)
+        rate: "54000/64800"
+      - name: PLFRAME overhead (16APSK, no pilots)
+        rate: "180/181"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_16APSK_8/9
+  modulation:
+    name: 16APSK
+    bits_per_symbol: 4
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "57392/57472"
+      - name: BCH (57600, 57472)
+        rate: "57472/57600"
+      - name: LDPC (64800, 57600)
+        rate: "57600/64800"
+      - name: PLFRAME overhead (16APSK, no pilots)
+        rate: "180/181"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_16APSK_9/10
+  modulation:
+    name: 16APSK
+    bits_per_symbol: 4
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "58112/58192"
+      - name: BCH (58320, 58192)
+        rate: "58192/58320"
+      - name: LDPC (64800, 58320)
+        rate: "58320/64800"
+      - name: PLFRAME overhead (16APSK, no pilots)
+        rate: "180/181"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+# 32APSK MODCODs (5 code rates)
+# PLFRAME overhead: 90 symbols per frame, S=144 slots for 32APSK
+- id: DVBS2_32APSK_3/4
+  modulation:
+    name: 32APSK
+    bits_per_symbol: 5
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "48328/48408"
+      - name: BCH (48600, 48408)
+        rate: "48408/48600"
+      - name: LDPC (64800, 48600)
+        rate: "48600/64800"
+      - name: PLFRAME overhead (32APSK, no pilots)
+        rate: "144/145"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_32APSK_4/5
+  modulation:
+    name: 32APSK
+    bits_per_symbol: 5
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "51568/51648"
+      - name: BCH (51840, 51648)
+        rate: "51648/51840"
+      - name: LDPC (64800, 51840)
+        rate: "51840/64800"
+      - name: PLFRAME overhead (32APSK, no pilots)
+        rate: "144/145"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_32APSK_5/6
+  modulation:
+    name: 32APSK
+    bits_per_symbol: 5
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "53760/53840"
+      - name: BCH (54000, 53840)
+        rate: "53840/54000"
+      - name: LDPC (64800, 54000)
+        rate: "54000/64800"
+      - name: PLFRAME overhead (32APSK, no pilots)
+        rate: "144/145"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_32APSK_8/9
+  modulation:
+    name: 32APSK
+    bits_per_symbol: 5
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "57392/57472"
+      - name: BCH (57600, 57472)
+        rate: "57472/57600"
+      - name: LDPC (64800, 57600)
+        rate: "57600/64800"
+      - name: PLFRAME overhead (32APSK, no pilots)
+        rate: "144/145"
+  ref: ETSI EN 302 307-1 V1.4.1
+
+- id: DVBS2_32APSK_9/10
+  modulation:
+    name: 32APSK
+    bits_per_symbol: 5
+  coding:
+    codes:
+      - name: BBFRAME overhead (80 bits)
+        rate: "58112/58192"
+      - name: BCH (58320, 58192)
+        rate: "58192/58320"
+      - name: LDPC (64800, 58320)
+        rate: "58320/64800"
+      - name: PLFRAME overhead (32APSK, no pilots)
+        rate: "144/145"
+  ref: ETSI EN 302 307-1 V1.4.1
+
