@@ -1,0 +1,7 @@
+mode_ids: [DVBS2_16APSK_2/3]
+metric: packet error rate
+threshold:
+  ebn0: 4.76
+  error_rate: 1.0e-7
+ref: ETSI EN 302 307-1 V1.4.1 Table 13
+
