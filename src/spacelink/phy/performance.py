@@ -16,11 +16,12 @@ class ErrorMetric(str, enum.Enum):
     BER = "bit error rate"
     WER = "codeword error rate"
     FER = "frame error rate"
+    PER = "packet error rate"
 
 
-class ModePerformance(pydantic.BaseModel):
+class ModePerformanceCurve(pydantic.BaseModel):
     r"""
-    Performance characteristics for specific link modes.
+    Performance characteristics for specific link modes with interpolatable curves.
 
     This class provides methods to convert between Eb/N0 and error rates for given
     modulation and coding schemes.
@@ -171,3 +172,135 @@ class ModePerformance(pydantic.BaseModel):
         uncoded_ebn0 = uncoded.error_rate_to_ebn0(error_rate)
         coded_ebn0 = self.error_rate_to_ebn0(error_rate)
         return uncoded_ebn0 - coded_ebn0
+
+
+class ModePerformanceThreshold(pydantic.BaseModel):
+    r"""
+    Operating point threshold performance for specific link modes.
+
+    This class represents performance data with a single operating point threshold,
+    typically used for standards like DVB-S2 where only quasi-error-free (QEF)
+    operating points are published.
+
+    Parameters
+    ----------
+    modes : list[LinkMode]
+        The link mode configurations.
+    metric : ErrorMetric
+        Type of error metric (bit error rate, codeword error rate, etc.).
+    ebn0 : float
+        Eb/N0 threshold in dB for quasi-error-free operation.
+    error_rate : float
+        Error rate at the threshold point (dimensionless).
+    ref : str, optional
+        Reference or source of the performance data (default: "").
+    """
+
+    modes: list[LinkMode]
+    metric: ErrorMetric
+    ebn0: float
+    error_rate: float
+    ref: str = ""
+
+    @property
+    def threshold_ebn0(self) -> Decibels:
+        """
+        Get the Eb/N0 threshold with proper units.
+
+        Returns
+        -------
+        Decibels
+            Eb/N0 threshold value.
+        """
+        return self.ebn0 * u.dB(1)
+
+    @property
+    def threshold_error_rate(self) -> Dimensionless:
+        """
+        Get the error rate threshold with proper units.
+
+        Returns
+        -------
+        Dimensionless
+            Error rate threshold value.
+        """
+        return self.error_rate * u.dimensionless
+
+    @enforce_units
+    def meets_threshold(self, ebn0: Decibels) -> bool | np.ndarray:
+        """
+        Check if the given Eb/N0 meets or exceeds the quasi-error-free threshold.
+
+        Parameters
+        ----------
+        ebn0 : Decibels
+            Energy per bit to noise power spectral density ratio :math:`E_b/N_0`.
+
+        Returns
+        -------
+        bool or np.ndarray
+            True where Eb/N0 meets or exceeds the threshold. Scalar if input is scalar,
+            array if input is array.
+        """
+        result = ebn0.value >= self.ebn0
+
+        # Return scalar if input was scalar
+        if np.isscalar(ebn0.value):
+            return bool(result)
+        return result
+
+    @enforce_units
+    def margin_to_threshold(self, ebn0: Decibels) -> Decibels:
+        """
+        Calculate the margin (positive) or shortfall (negative) relative to threshold.
+
+        Parameters
+        ----------
+        ebn0 : Decibels
+            Energy per bit to noise power spectral density ratio :math:`E_b/N_0`.
+
+        Returns
+        -------
+        Decibels
+            Margin in dB. Positive values indicate the link exceeds the threshold,
+            negative values indicate it falls short. Same shape as ``ebn0``.
+        """
+        return (ebn0.value - self.ebn0) * u.dB(1)
+
+    def coding_gain(self, uncoded: typing.Self) -> Decibels:
+        r"""
+        Calculate the coding gain relative to an uncoded threshold.
+
+        The coding gain is the difference in required Eb/N0 between the uncoded and
+        coded systems at the threshold error rate.
+
+        Parameters
+        ----------
+        uncoded : ModePerformanceThreshold
+            Threshold specification for the uncoded reference system. Must use the same
+            error metric and have the same error rate threshold as this object.
+
+        Returns
+        -------
+        Decibels
+            Coding gain in decibels.
+
+        Raises
+        ------
+        ValueError
+            If the uncoded threshold has a different error metric or error rate.
+        """
+        if uncoded.metric != self.metric:
+            raise ValueError(f"Uncoded metric {uncoded.metric} ≠ {self.metric}.")
+
+        if not np.isclose(uncoded.error_rate, self.error_rate, rtol=1e-9, atol=1e-15):
+            raise ValueError(
+                f"Error rates must match for threshold comparison. "
+                f"Uncoded error rate {uncoded.error_rate} ≠ {self.error_rate}."
+            )
+
+        return (uncoded.ebn0 - self.ebn0) * u.dB(1)
+
+
+# Backwards compatibility alias
+ModePerformance = ModePerformanceCurve
