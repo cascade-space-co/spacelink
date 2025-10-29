@@ -117,6 +117,6 @@ class TestDVBS2Modes:
             # Convert stored Eb/N0 back to Es/N0 using the mode's spectral efficiency
             # Es/N0 [dB] = Eb/N0 [dB] + 10*log10(spectral_efficiency)
             spectral_efficiency = float(mode.info_bits_per_symbol)
-            actual_esn0_db = threshold.ebn0 + 10 * math.log10(spectral_efficiency)
+            actual_esn0_db = threshold.ebn0.value + 10 * math.log10(spectral_efficiency)
 
             assert actual_esn0_db == pytest.approx(expected_esn0_db, abs=1e-2)

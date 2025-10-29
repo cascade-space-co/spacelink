@@ -198,12 +198,12 @@ class ModePerformanceThreshold(pydantic.BaseModel):
 
     modes: list[LinkMode]
     metric: ErrorMetric
-    ebn0: float
-    error_rate: float
+    ebn0_val: float = pydantic.Field(alias="ebn0")
+    error_rate_val: float = pydantic.Field(alias="error_rate")
     ref: str = ""
 
     @property
-    def threshold_ebn0(self) -> Decibels:
+    def ebn0(self) -> Decibels:
         """
         Get the Eb/N0 threshold with proper units.
 
@@ -212,10 +212,10 @@ class ModePerformanceThreshold(pydantic.BaseModel):
         Decibels
             Eb/N0 threshold value.
         """
-        return self.ebn0 * u.dB(1)
+        return self.ebn0_val * u.dB(1)
 
     @property
-    def threshold_error_rate(self) -> Dimensionless:
+    def error_rate(self) -> Dimensionless:
         """
         Get the error rate threshold with proper units.
 
@@ -224,10 +224,10 @@ class ModePerformanceThreshold(pydantic.BaseModel):
         Dimensionless
             Error rate threshold value.
         """
-        return self.error_rate * u.dimensionless
+        return self.error_rate_val * u.dimensionless
 
     @enforce_units
-    def meets_threshold(self, ebn0: Decibels) -> bool | np.ndarray:
+    def check(self, ebn0: Decibels) -> bool | np.ndarray:
         """
         Check if the given Eb/N0 meets or exceeds the quasi-error-free threshold.
 
@@ -242,7 +242,7 @@ class ModePerformanceThreshold(pydantic.BaseModel):
             True where Eb/N0 meets or exceeds the threshold. Scalar if input is scalar,
             array if input is array.
         """
-        result = ebn0.value >= self.ebn0
+        result = ebn0.value >= self.ebn0_val
 
         # Return scalar if input was scalar
         if np.isscalar(ebn0.value):
@@ -250,7 +250,7 @@ class ModePerformanceThreshold(pydantic.BaseModel):
         return result
 
     @enforce_units
-    def margin_to_threshold(self, ebn0: Decibels) -> Decibels:
+    def margin(self, ebn0: Decibels) -> Decibels:
         """
         Calculate the margin (positive) or shortfall (negative) relative to threshold.
 
@@ -265,7 +265,7 @@ class ModePerformanceThreshold(pydantic.BaseModel):
             Margin in dB. Positive values indicate the link exceeds the threshold,
             negative values indicate it falls short. Same shape as ``ebn0``.
         """
-        return (ebn0.value - self.ebn0) * u.dB(1)
+        return ebn0 - self.ebn0  # pyright: ignore[reportReturnType]
 
     def coding_gain(self, uncoded: typing.Self) -> Decibels:
         r"""
@@ -296,10 +296,11 @@ class ModePerformanceThreshold(pydantic.BaseModel):
         if not np.isclose(uncoded.error_rate, self.error_rate, rtol=1e-9, atol=1e-15):
             raise ValueError(
                 f"Error rates must match for threshold comparison. "
-                f"Uncoded error rate {uncoded.error_rate} ≠ {self.error_rate}."
+                f"Uncoded error rate {uncoded.error_rate_val} "
+                f"≠ {self.error_rate_val}."
             )
 
-        return (uncoded.ebn0 - self.ebn0) * u.dB(1)
+        return uncoded.ebn0 - self.ebn0  # pyright: ignore[reportReturnType]
 
 
 # Backwards compatibility alias

@@ -1,8 +1,10 @@
 import tempfile
 from pathlib import Path
 
+import astropy.units as u
 import pytest
 import yaml
+from astropy.tests.helper import assert_quantity_allclose
 
 from spacelink.phy.performance import ErrorMetric, ModePerformanceThreshold
 from spacelink.phy.registry import (
@@ -204,8 +206,8 @@ class TestThresholdLoading:
             "DVB_S2_QPSK_1_4", ErrorMetric.FER
         )
         assert isinstance(threshold, ModePerformanceThreshold)
-        assert threshold.ebn0 == 5.0
-        assert threshold.error_rate == 1.0e-7
+        assert_quantity_allclose(threshold.ebn0, 5.0 * u.dB(1))
+        assert_quantity_allclose(threshold.error_rate, 1.0e-7 * u.dimensionless)
 
     def test_get_performance_threshold_key_error(self):
         registry = Registry()

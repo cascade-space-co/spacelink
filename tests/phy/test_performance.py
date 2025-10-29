@@ -278,8 +278,10 @@ class TestModePerformanceThreshold:
             ref="ETSI EN 302 307-1",
         )
 
-        assert model.ebn0 == DVB_S2_THRESHOLD_EBN0
-        assert model.error_rate == DVB_S2_THRESHOLD_ERROR_RATE
+        assert_quantity_allclose(model.ebn0, DVB_S2_THRESHOLD_EBN0 * u.dB(1))
+        assert_quantity_allclose(
+            model.error_rate, DVB_S2_THRESHOLD_ERROR_RATE * u.dimensionless
+        )
         assert model.metric == ErrorMetric.FER
 
     def test_threshold_properties(self, qpsk_ldpc_mode):
@@ -291,12 +293,12 @@ class TestModePerformanceThreshold:
             error_rate=DVB_S2_THRESHOLD_ERROR_RATE,
         )
 
-        assert_quantity_allclose(model.threshold_ebn0, DVB_S2_THRESHOLD_EBN0 * u.dB(1))
+        assert_quantity_allclose(model.ebn0, DVB_S2_THRESHOLD_EBN0 * u.dB(1))
         assert_quantity_allclose(
-            model.threshold_error_rate, DVB_S2_THRESHOLD_ERROR_RATE * u.dimensionless
+            model.error_rate, DVB_S2_THRESHOLD_ERROR_RATE * u.dimensionless
         )
 
-    def test_meets_threshold(self, qpsk_ldpc_mode):
+    def test_check(self, qpsk_ldpc_mode):
         """Test threshold checking for scalar and array inputs."""
         model = ModePerformanceThreshold(
             modes=[qpsk_ldpc_mode],
@@ -305,15 +307,15 @@ class TestModePerformanceThreshold:
             error_rate=DVB_S2_THRESHOLD_ERROR_RATE,
         )
 
-        assert model.meets_threshold(6.0 * u.dB(1)) is True
-        assert model.meets_threshold(5.0 * u.dB(1)) is True
-        assert model.meets_threshold(4.5 * u.dB(1)) is False
+        assert model.check(6.0 * u.dB(1)) is True
+        assert model.check(5.0 * u.dB(1)) is True
+        assert model.check(4.5 * u.dB(1)) is False
 
         ebn0_array = np.array([4.0, 5.0, 6.0]) * u.dB(1)
         expected = np.array([False, True, True])
-        np.testing.assert_array_equal(model.meets_threshold(ebn0_array), expected)
+        np.testing.assert_array_equal(model.check(ebn0_array), expected)
 
-    def test_margin_to_threshold(self, qpsk_ldpc_mode):
+    def test_margin(self, qpsk_ldpc_mode):
         model = ModePerformanceThreshold(
             modes=[qpsk_ldpc_mode],
             metric=ErrorMetric.FER,
@@ -321,18 +323,12 @@ class TestModePerformanceThreshold:
             error_rate=DVB_S2_THRESHOLD_ERROR_RATE,
         )
 
-        assert_quantity_allclose(
-            model.margin_to_threshold(6.0 * u.dB(1)), 1.0 * u.dB(1)
-        )
-        assert_quantity_allclose(
-            model.margin_to_threshold(5.0 * u.dB(1)), 0.0 * u.dB(1)
-        )
-        assert_quantity_allclose(
-            model.margin_to_threshold(4.0 * u.dB(1)), -1.0 * u.dB(1)
-        )
+        assert_quantity_allclose(model.margin(6.0 * u.dB(1)), 1.0 * u.dB(1))
+        assert_quantity_allclose(model.margin(5.0 * u.dB(1)), 0.0 * u.dB(1))
+        assert_quantity_allclose(model.margin(4.0 * u.dB(1)), -1.0 * u.dB(1))
 
         ebn0_array = np.array([4.0, 5.0, 6.0]) * u.dB(1)
-        margins = model.margin_to_threshold(ebn0_array)
+        margins = model.margin(ebn0_array)
         assert_quantity_allclose(margins, np.array([-1.0, 0.0, 1.0]) * u.dB(1))
 
     def test_coding_gain_matching_error_rate(self, qpsk_ldpc_mode, qpsk_uncoded_mode):
