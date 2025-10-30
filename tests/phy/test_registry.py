@@ -1,347 +1,307 @@
 import tempfile
 from pathlib import Path
 
+import astropy.units as u
 import pytest
 import yaml
+from astropy.tests.helper import assert_quantity_allclose
 
-from spacelink.phy.performance import ErrorMetric
+from spacelink.phy.performance import ErrorMetric, ModePerformanceThreshold
 from spacelink.phy.registry import (
     DuplicateRegistryEntryError,
     NoRegistryFilesError,
     Registry,
 )
 
+# Test constants
+STANDARD_CURVE_POINTS = [[0.0, 1e-1], [1.0, 1e-2]]
+STANDARD_THRESHOLD = {"ebn0": 5.0, "error_rate": 1.0e-7}
 
-class TestRegistry:
-    def test_load_with_valid_data(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            modes_dir = temp_path / "modes"
-            perf_dir = temp_path / "perf"
-            modes_dir.mkdir()
-            perf_dir.mkdir()
 
-            # Create a test mode file
-            mode_data = [
-                {
-                    "id": "TEST_BPSK_UNCODED",
-                    "modulation": {"name": "BPSK", "bits_per_symbol": 1},
-                    "coding": {"codes": []},
-                    "ref": "Test Reference",
-                },
-                {
-                    "id": "TEST_QPSK_CODED",
-                    "modulation": {"name": "QPSK", "bits_per_symbol": 2},
-                    "coding": {"codes": [{"name": "Test Code", "rate": "1/2"}]},
-                },
-            ]
+# Fixtures
+@pytest.fixture
+def temp_dirs():
+    """Create temporary directories for mode and performance data."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        modes_dir = temp_path / "modes"
+        perf_dir = temp_path / "perf"
+        modes_dir.mkdir()
+        perf_dir.mkdir()
+        yield modes_dir, perf_dir
 
-            mode_file = modes_dir / "test_modes.yaml"
-            with open(mode_file, "w") as f:
-                yaml.dump(mode_data, f)
 
-            # Create a test performance file
-            perf_data = {
-                "mode_ids": ["TEST_BPSK_UNCODED"],
-                "metric": "bit error rate",
-                "ref": "Test Performance Reference",
-                "points": [[0.0, 1e-1], [1.0, 3e-2], [2.0, 5e-3], [3.0, 1e-4]],
+@pytest.fixture
+def basic_mode():
+    """Return basic mode data dictionary."""
+    return {
+        "id": "TEST_MODE",
+        "modulation": {"name": "BPSK", "bits_per_symbol": 1},
+        "coding": {"codes": []},
+    }
+
+
+def create_mode_yaml(
+    modes_dir: Path, mode_data: list[dict], filename: str = "modes.yaml"
+):
+    """Create a mode YAML file."""
+    with open(modes_dir / filename, "w") as f:
+        yaml.dump(mode_data, f)
+
+
+def create_curve_yaml(
+    perf_dir: Path,
+    mode_ids: list[str],
+    metric: str = "bit error rate",
+    points: list | None = None,
+    filename: str = "perf.yaml",
+):
+    """Create a curve performance YAML file."""
+    if points is None:
+        points = STANDARD_CURVE_POINTS
+    data = {"mode_ids": mode_ids, "metric": metric, "points": points}
+    with open(perf_dir / filename, "w") as f:
+        yaml.dump(data, f)
+
+
+def create_threshold_yaml(
+    perf_dir: Path,
+    mode_ids: list[str],
+    metric: str = "frame error rate",
+    threshold: dict | None = None,
+    filename: str = "threshold.yaml",
+    ref: str = "",
+):
+    """Create a threshold performance YAML file."""
+    if threshold is None:
+        threshold = STANDARD_THRESHOLD
+    data = {
+        "mode_ids": mode_ids,
+        "metric": metric,
+        "threshold": threshold,
+    }
+    if ref:
+        data["ref"] = ref
+    with open(perf_dir / filename, "w") as f:
+        yaml.dump(data, f)
+
+
+class TestBasicLoading:
+    def test_load_with_valid_data(self, temp_dirs, basic_mode):
+        modes_dir, perf_dir = temp_dirs
+
+        mode_data = [
+            basic_mode,
+            {
+                "id": "TEST_QPSK_CODED",
+                "modulation": {"name": "QPSK", "bits_per_symbol": 2},
+                "coding": {"codes": [{"name": "Test Code", "rate": "1/2"}]},
+            },
+        ]
+        create_mode_yaml(modes_dir, mode_data)
+        create_curve_yaml(perf_dir, ["TEST_MODE"], points=STANDARD_CURVE_POINTS)
+
+        registry = Registry()
+        registry.load(modes_dir, perf_dir)
+
+        assert len(registry.modes) == 2
+        assert "TEST_MODE" in registry.modes
+        assert "TEST_QPSK_CODED" in registry.modes
+
+        assert len(registry.curve_index) == 1
+        assert ("TEST_MODE", ErrorMetric.BER) in registry.curve_index
+
+        perf = registry.curve_index[("TEST_MODE", ErrorMetric.BER)]
+        assert perf.metric == ErrorMetric.BER
+
+    def test_load_with_multiple_mode_files(self, temp_dirs):
+        modes_dir, perf_dir = temp_dirs
+
+        mode_data1 = [
+            {
+                "id": "MODE1",
+                "modulation": {"name": "BPSK", "bits_per_symbol": 1},
+                "coding": {"codes": []},
             }
-
-            perf_file = perf_dir / "test_performance.yaml"
-            with open(perf_file, "w") as f:
-                yaml.dump(perf_data, f)
-
-            # Test loading
-            registry = Registry()
-            registry.load(modes_dir, perf_dir)
-
-            # Test the Registry's core logic: loading and indexing
-            assert len(registry.modes) == 2
-            assert "TEST_BPSK_UNCODED" in registry.modes
-            assert "TEST_QPSK_CODED" in registry.modes
-
-            # Verify performance index was built correctly (the key Registry logic)
-            assert len(registry.perf_index) == 1
-            assert ("TEST_BPSK_UNCODED", ErrorMetric.BER) in registry.perf_index
-
-            # Test that we can retrieve the performance data
-            perf = registry.perf_index[("TEST_BPSK_UNCODED", ErrorMetric.BER)]
-            assert perf.metric == ErrorMetric.BER
-
-    def test_get_performance(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            modes_dir = temp_path / "modes"
-            perf_dir = temp_path / "perf"
-            modes_dir.mkdir()
-            perf_dir.mkdir()
-
-            # Create test data
-            mode_data = [
-                {
-                    "id": "TEST_MODE",
-                    "modulation": {"name": "BPSK", "bits_per_symbol": 1},
-                    "coding": {"codes": []},
-                }
-            ]
-
-            mode_file = modes_dir / "test_modes.yaml"
-            with open(mode_file, "w") as f:
-                yaml.dump(mode_data, f)
-
-            # Create performance data for multiple metrics
-            ber_data = {
-                "mode_ids": ["TEST_MODE"],
-                "metric": "bit error rate",
-                "points": [[0.0, 1e-1], [1.0, 1e-2]],
+        ]
+        mode_data2 = [
+            {
+                "id": "MODE2",
+                "modulation": {"name": "QPSK", "bits_per_symbol": 2},
+                "coding": {"codes": []},
             }
+        ]
 
-            fer_data = {
-                "mode_ids": ["TEST_MODE"],
-                "metric": "frame error rate",
-                "points": [[0.0, 2e-1], [1.0, 2e-2]],
-            }
+        create_mode_yaml(modes_dir, mode_data1, "modes1.yaml")
+        create_mode_yaml(modes_dir, mode_data2, "modes2.yaml")
 
-            ber_file = perf_dir / "test_ber.yaml"
-            with open(ber_file, "w") as f:
-                yaml.dump(ber_data, f)
+        registry = Registry()
+        registry.load(modes_dir, perf_dir=None)
 
-            fer_file = perf_dir / "test_fer.yaml"
-            with open(fer_file, "w") as f:
-                yaml.dump(fer_data, f)
+        assert len(registry.modes) == 2
+        assert "MODE1" in registry.modes
+        assert "MODE2" in registry.modes
 
-            # Load and test
-            registry = Registry()
-            registry.load(modes_dir, perf_dir)
+    def test_load_with_perf_dir_none(self, temp_dirs, basic_mode):
+        modes_dir, perf_dir = temp_dirs
 
-            # Test get_performance retrieves correct objects
-            ber_perf = registry.get_performance("TEST_MODE", ErrorMetric.BER)
-            fer_perf = registry.get_performance("TEST_MODE", ErrorMetric.FER)
+        create_mode_yaml(modes_dir, [basic_mode])
 
-            # Verify they are different objects with correct metrics
-            assert ber_perf is not fer_perf
-            assert ber_perf.metric == ErrorMetric.BER
-            assert fer_perf.metric == ErrorMetric.FER
+        registry = Registry()
+        registry.load(modes_dir, perf_dir=None)
 
-    def test_get_performance_key_error(self):
+        assert len(registry.modes) == 1
+        assert "TEST_MODE" in registry.modes
+        assert len(registry.curves) == 0
+        assert len(registry.thresholds) == 0
+        assert len(registry.curve_index) == 0
+        assert len(registry.threshold_index) == 0
+
+
+class TestCurveLoading:
+    def test_get_performance_curve_multiple_metrics(self, temp_dirs, basic_mode):
+        modes_dir, perf_dir = temp_dirs
+
+        create_mode_yaml(modes_dir, [basic_mode])
+        create_curve_yaml(perf_dir, ["TEST_MODE"], "bit error rate", None, "ber.yaml")
+        create_curve_yaml(perf_dir, ["TEST_MODE"], "frame error rate", None, "fer.yaml")
+
+        registry = Registry()
+        registry.load(modes_dir, perf_dir)
+
+        ber_perf = registry.get_performance_curve("TEST_MODE", ErrorMetric.BER)
+        fer_perf = registry.get_performance_curve("TEST_MODE", ErrorMetric.FER)
+
+        assert ber_perf is not fer_perf
+        assert ber_perf.metric == ErrorMetric.BER
+        assert fer_perf.metric == ErrorMetric.FER
+
+    def test_get_performance_curve_key_error(self):
         registry = Registry()
         with pytest.raises(KeyError):
-            registry.get_performance("NONEXISTENT_MODE", ErrorMetric.BER)
+            registry.get_performance_curve("NONEXISTENT_MODE", ErrorMetric.BER)
 
-    def test_load_with_multiple_mode_files(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            modes_dir = temp_path / "modes"
-            perf_dir = temp_path / "perf"
-            modes_dir.mkdir()
-            perf_dir.mkdir()
 
-            # Create multiple mode files
-            mode_data1 = [
-                {
-                    "id": "MODE1",
-                    "modulation": {"name": "BPSK", "bits_per_symbol": 1},
-                    "coding": {"codes": []},
-                }
-            ]
-            mode_data2 = [
-                {
-                    "id": "MODE2",
-                    "modulation": {"name": "QPSK", "bits_per_symbol": 2},
-                    "coding": {"codes": []},
-                }
-            ]
+class TestThresholdLoading:
+    def test_load_threshold_data(self, temp_dirs):
+        modes_dir, perf_dir = temp_dirs
 
-            with open(modes_dir / "modes1.yaml", "w") as f:
-                yaml.dump(mode_data1, f)
-            with open(modes_dir / "modes2.yaml", "w") as f:
-                yaml.dump(mode_data2, f)
-
-            registry = Registry()
-            registry.load(modes_dir, perf_dir=None)
-
-            # Test that Registry correctly loads from multiple files
-            assert len(registry.modes) == 2
-            assert "MODE1" in registry.modes
-            assert "MODE2" in registry.modes
-
-    def test_load_performance_with_missing_mode_id(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            modes_dir = temp_path / "modes"
-            perf_dir = temp_path / "perf"
-            modes_dir.mkdir()
-            perf_dir.mkdir()
-
-            # Create mode file with one mode
-            mode_data = [
-                {
-                    "id": "EXISTING_MODE",
-                    "modulation": {"name": "BPSK", "bits_per_symbol": 1},
-                    "coding": {"codes": []},
-                }
-            ]
-            with open(modes_dir / "modes.yaml", "w") as f:
-                yaml.dump(mode_data, f)
-
-            # Create performance file referencing non-existent mode
-            perf_data = {
-                "mode_ids": ["NONEXISTENT_MODE"],
-                "metric": "bit error rate",
-                "points": [[0.0, 1e-1]],
+        mode_data = [
+            {
+                "id": "DVB_S2_QPSK_1_4",
+                "modulation": {"name": "QPSK", "bits_per_symbol": 2},
+                "coding": {"codes": [{"name": "LDPC", "rate": "1/4"}]},
             }
-            with open(perf_dir / "perf.yaml", "w") as f:
-                yaml.dump(perf_data, f)
+        ]
+        create_mode_yaml(modes_dir, mode_data)
+        create_threshold_yaml(perf_dir, ["DVB_S2_QPSK_1_4"], ref="ETSI EN 302 307-1")
 
-            registry = Registry()
+        registry = Registry()
+        registry.load(modes_dir, perf_dir)
 
-            with pytest.raises(KeyError):
-                registry.load(modes_dir, perf_dir)
+        assert len(registry.thresholds) == 1
+        assert len(registry.threshold_index) == 1
 
-    def test_load_with_duplicate_mode_ids(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            modes_dir = temp_path / "modes"
-            perf_dir = temp_path / "perf"
-            modes_dir.mkdir()
-            perf_dir.mkdir()
+        threshold = registry.get_performance_threshold(
+            "DVB_S2_QPSK_1_4", ErrorMetric.FER
+        )
+        assert isinstance(threshold, ModePerformanceThreshold)
+        assert_quantity_allclose(threshold.ebn0, 5.0 * u.dB(1))
+        assert_quantity_allclose(threshold.error_rate, 1.0e-7 * u.dimensionless)
 
-            # Create two mode files with the same mode ID
-            mode_data1 = [
-                {
-                    "id": "DUPLICATE_MODE",
-                    "modulation": {"name": "BPSK", "bits_per_symbol": 1},
-                    "coding": {"codes": []},
-                }
-            ]
-            mode_data2 = [
-                {
-                    "id": "DUPLICATE_MODE",  # Same ID as above
-                    "modulation": {"name": "QPSK", "bits_per_symbol": 2},
-                    "coding": {"codes": []},
-                }
-            ]
+    def test_get_performance_threshold_key_error(self):
+        registry = Registry()
+        with pytest.raises(KeyError):
+            registry.get_performance_threshold("NONEXISTENT_MODE", ErrorMetric.FER)
 
-            with open(modes_dir / "modes1.yaml", "w") as f:
-                yaml.dump(mode_data1, f)
-            with open(modes_dir / "modes2.yaml", "w") as f:
-                yaml.dump(mode_data2, f)
 
-            registry = Registry()
+class TestErrorHandling:
+    def test_load_performance_with_missing_mode_id(self, temp_dirs, basic_mode):
+        modes_dir, perf_dir = temp_dirs
 
-            with pytest.raises(DuplicateRegistryEntryError):
-                registry.load(modes_dir, perf_dir)
+        create_mode_yaml(modes_dir, [basic_mode])
+        create_curve_yaml(perf_dir, ["NONEXISTENT_MODE"])
 
-    def test_load_with_duplicate_performance_entries(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            modes_dir = temp_path / "modes"
-            perf_dir = temp_path / "perf"
-            modes_dir.mkdir()
-            perf_dir.mkdir()
+        registry = Registry()
+        with pytest.raises(KeyError):
+            registry.load(modes_dir, perf_dir)
 
-            # Create a mode file
-            mode_data = [
-                {
-                    "id": "TEST_MODE",
-                    "modulation": {"name": "BPSK", "bits_per_symbol": 1},
-                    "coding": {"codes": []},
-                }
-            ]
-            with open(modes_dir / "modes.yaml", "w") as f:
-                yaml.dump(mode_data, f)
+    def test_load_with_duplicate_mode_ids(self, temp_dirs):
+        modes_dir, perf_dir = temp_dirs
 
-            # Create two performance files with the same mode_id and metric
-            perf_data1 = {
-                "mode_ids": ["TEST_MODE"],
-                "metric": "bit error rate",
-                "points": [[0.0, 1e-1], [1.0, 1e-2]],
-            }
-            perf_data2 = {
-                "mode_ids": ["TEST_MODE"],
-                "metric": "bit error rate",  # Same mode and metric as above
-                "points": [[0.0, 2e-1], [1.0, 2e-2]],
-            }
+        duplicate_mode = {
+            "id": "DUPLICATE_MODE",
+            "modulation": {"name": "BPSK", "bits_per_symbol": 1},
+            "coding": {"codes": []},
+        }
+        create_mode_yaml(modes_dir, [duplicate_mode], "modes1.yaml")
+        create_mode_yaml(modes_dir, [duplicate_mode], "modes2.yaml")
 
-            with open(perf_dir / "perf1.yaml", "w") as f:
-                yaml.dump(perf_data1, f)
-            with open(perf_dir / "perf2.yaml", "w") as f:
-                yaml.dump(perf_data2, f)
+        registry = Registry()
+        with pytest.raises(DuplicateRegistryEntryError):
+            registry.load(modes_dir, perf_dir)
 
-            registry = Registry()
+    def test_load_with_duplicate_performance_entries(self, temp_dirs, basic_mode):
+        modes_dir, perf_dir = temp_dirs
 
-            with pytest.raises(DuplicateRegistryEntryError):
-                registry.load(modes_dir, perf_dir)
+        create_mode_yaml(modes_dir, [basic_mode])
+        create_curve_yaml(perf_dir, ["TEST_MODE"], filename="perf1.yaml")
+        create_curve_yaml(perf_dir, ["TEST_MODE"], filename="perf2.yaml")
 
-    def test_load_with_no_mode_files(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            modes_dir = temp_path / "modes"
-            perf_dir = temp_path / "perf"
-            modes_dir.mkdir()
-            perf_dir.mkdir()
+        registry = Registry()
+        with pytest.raises(DuplicateRegistryEntryError):
+            registry.load(modes_dir, perf_dir)
 
-            # Create only a performance file, no mode files
-            perf_data = {
-                "mode_ids": ["TEST_MODE"],
-                "metric": "bit error rate",
-                "points": [[0.0, 1e-1]],
-            }
-            with open(perf_dir / "perf.yaml", "w") as f:
-                yaml.dump(perf_data, f)
+    def test_load_with_no_mode_files(self, temp_dirs):
+        modes_dir, perf_dir = temp_dirs
 
-            registry = Registry()
+        create_curve_yaml(perf_dir, ["TEST_MODE"])
 
-            with pytest.raises(NoRegistryFilesError):
-                registry.load(modes_dir, perf_dir)
+        registry = Registry()
+        with pytest.raises(NoRegistryFilesError):
+            registry.load(modes_dir, perf_dir)
 
-    def test_load_with_no_performance_files(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            modes_dir = temp_path / "modes"
-            perf_dir = temp_path / "perf"
-            modes_dir.mkdir()
-            perf_dir.mkdir()
+    def test_load_with_no_performance_files(self, temp_dirs, basic_mode):
+        modes_dir, perf_dir = temp_dirs
 
-            # Create only a mode file, no performance files
-            mode_data = [
-                {
-                    "id": "TEST_MODE",
-                    "modulation": {"name": "BPSK", "bits_per_symbol": 1},
-                    "coding": {"codes": []},
-                }
-            ]
-            with open(modes_dir / "modes.yaml", "w") as f:
-                yaml.dump(mode_data, f)
+        create_mode_yaml(modes_dir, [basic_mode])
 
-            registry = Registry()
+        registry = Registry()
+        with pytest.raises(NoRegistryFilesError):
+            registry.load(modes_dir, perf_dir)
 
-            with pytest.raises(NoRegistryFilesError):
-                registry.load(modes_dir, perf_dir)
 
-    def test_load_with_perf_dir_none(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            modes_dir = temp_path / "modes"
-            modes_dir.mkdir()
+class TestYAMLValidation:
+    def test_yaml_with_both_points_and_threshold(self, temp_dirs, basic_mode):
+        modes_dir, perf_dir = temp_dirs
 
-            # Create only a mode file
-            mode_data = [
-                {
-                    "id": "TEST_MODE",
-                    "modulation": {"name": "BPSK", "bits_per_symbol": 1},
-                    "coding": {"codes": []},
-                }
-            ]
-            with open(modes_dir / "modes.yaml", "w") as f:
-                yaml.dump(mode_data, f)
+        create_mode_yaml(modes_dir, [basic_mode])
 
-            registry = Registry()
-            registry.load(modes_dir, perf_dir=None)
+        invalid_data = {
+            "mode_ids": ["TEST_MODE"],
+            "metric": "bit error rate",
+            "points": STANDARD_CURVE_POINTS,
+            "threshold": STANDARD_THRESHOLD,
+        }
+        with open(perf_dir / "invalid.yaml", "w") as f:
+            yaml.dump(invalid_data, f)
 
-            # Should load modes but not performance data
-            assert len(registry.modes) == 1
-            assert "TEST_MODE" in registry.modes
-            assert len(registry.perfs) == 0
-            assert len(registry.perf_index) == 0
+        registry = Registry()
+        with pytest.raises(ValueError):
+            registry.load(modes_dir, perf_dir)
+
+    def test_yaml_with_neither_points_nor_threshold(self, temp_dirs, basic_mode):
+        modes_dir, perf_dir = temp_dirs
+
+        create_mode_yaml(modes_dir, [basic_mode])
+
+        invalid_data = {
+            "mode_ids": ["TEST_MODE"],
+            "metric": "bit error rate",
+        }
+        with open(perf_dir / "invalid.yaml", "w") as f:
+            yaml.dump(invalid_data, f)
+
+        registry = Registry()
+        with pytest.raises(ValueError):
+            registry.load(modes_dir, perf_dir)
