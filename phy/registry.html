@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registry Module &mdash; SpaceLink 0.1.9 documentation</title>
+  <title>Registry Module &mdash; SpaceLink 0.1.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=8618f531"></script>
+        <script src="../_static/documentation_options.js?v=bafade30"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -40,7 +40,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.9
+                0.1.10
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -62,6 +62,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#spacelink.phy.registry.Registry"><code class="docutils literal notranslate"><span class="pre">Registry</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.registry.Registry.__init__"><code class="docutils literal notranslate"><span class="pre">Registry.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.registry.Registry.load"><code class="docutils literal notranslate"><span class="pre">Registry.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.registry.Registry.get_performance_curve"><code class="docutils literal notranslate"><span class="pre">Registry.get_performance_curve()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.registry.Registry.get_performance_threshold"><code class="docutils literal notranslate"><span class="pre">Registry.get_performance_threshold()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.registry.Registry.get_performance"><code class="docutils literal notranslate"><span class="pre">Registry.get_performance()</span></code></a></li>
 </ul>
 </li>
@@ -150,9 +152,9 @@ performance data will be loaded.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="spacelink.phy.registry.Registry.get_performance">
-<span class="sig-name descname"><span class="pre">get_performance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/registry.html#Registry.get_performance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.registry.Registry.get_performance" title="Link to this definition"></a></dt>
-<dd><p>Look up the performance object for a given mode and metric.</p>
+<dt class="sig sig-object py" id="spacelink.phy.registry.Registry.get_performance_curve">
+<span class="sig-name descname"><span class="pre">get_performance_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/registry.html#Registry.get_performance_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.registry.Registry.get_performance_curve" title="Link to this definition"></a></dt>
+<dd><p>Get performance curve data for a mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -161,10 +163,64 @@ performance data will be loaded.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Performance object.</p>
+<dd class="field-even"><p>Performance curve object with multiple data points for interpolation.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="performance.html#spacelink.phy.performance.ModePerformance" title="spacelink.phy.performance.ModePerformance">ModePerformance</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="performance.html#spacelink.phy.performance.ModePerformanceCurve" title="spacelink.phy.performance.ModePerformanceCurve">ModePerformanceCurve</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>KeyError</strong> – If no curve data is available for the specified mode and metric.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.registry.Registry.get_performance_threshold">
+<span class="sig-name descname"><span class="pre">get_performance_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/registry.html#Registry.get_performance_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.registry.Registry.get_performance_threshold" title="Link to this definition"></a></dt>
+<dd><p>Get performance threshold data for a mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode_id</strong> (<em>str</em>) – ID of the link mode.</p></li>
+<li><p><strong>metric</strong> (<a class="reference internal" href="performance.html#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><em>ErrorMetric</em></a>) – Error metric.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Performance threshold object with single quasi-error-free operating point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="performance.html#spacelink.phy.performance.ModePerformanceThreshold" title="spacelink.phy.performance.ModePerformanceThreshold">ModePerformanceThreshold</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>KeyError</strong> – If no threshold data is available for the specified mode and metric.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.registry.Registry.get_performance">
+<span class="sig-name descname"><span class="pre">get_performance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/registry.html#Registry.get_performance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.registry.Registry.get_performance" title="Link to this definition"></a></dt>
+<dd><p>Get performance curve data for a mode.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.2.0: </span>Use <a class="reference internal" href="#spacelink.phy.registry.Registry.get_performance_curve" title="spacelink.phy.registry.Registry.get_performance_curve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_performance_curve()</span></code></a> or
+<a class="reference internal" href="#spacelink.phy.registry.Registry.get_performance_threshold" title="spacelink.phy.registry.Registry.get_performance_threshold"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_performance_threshold()</span></code></a> instead. This method only
+returns curve data and will raise KeyError for threshold data.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode_id</strong> (<em>str</em>) – ID of the link mode.</p></li>
+<li><p><strong>metric</strong> (<a class="reference internal" href="performance.html#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><em>ErrorMetric</em></a>) – Error metric.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Performance curve object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="performance.html#spacelink.phy.performance.ModePerformanceCurve" title="spacelink.phy.performance.ModePerformanceCurve">ModePerformanceCurve</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>KeyError</strong> – If no curve data is available for the specified mode and metric.</p>
 </dd>
 </dl>
 </dd></dl>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.phy.registry &mdash; SpaceLink 0.1.9 documentation</title>
+  <title>spacelink.phy.registry &mdash; SpaceLink 0.1.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=8618f531"></script>
+        <script src="../../../_static/documentation_options.js?v=bafade30"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.9
+                0.1.10
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -84,7 +84,11 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.mode</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkMode</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.performance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorMetric</span><span class="p">,</span> <span class="n">ModePerformance</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spacelink.phy.performance</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ErrorMetric</span><span class="p">,</span>
+    <span class="n">ModePerformanceCurve</span><span class="p">,</span>
+    <span class="n">ModePerformanceThreshold</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">MODES_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data/modes&quot;</span>
 <span class="n">PERF_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data/perf&quot;</span>
@@ -118,8 +122,12 @@
 <span class="sd">        Create an empty registry.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">LinkMode</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">perfs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ModePerformance</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">perf_index</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ErrorMetric</span><span class="p">],</span> <span class="n">ModePerformance</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curves</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ModePerformanceCurve</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ModePerformanceThreshold</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curve_index</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ErrorMetric</span><span class="p">],</span> <span class="n">ModePerformanceCurve</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold_index</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ErrorMetric</span><span class="p">],</span> <span class="n">ModePerformanceThreshold</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
 <div class="viewcode-block" id="Registry.load">
@@ -145,6 +153,121 @@
 <span class="sd">        NoRegistryFilesError</span>
 <span class="sd">            If no YAML files are found in the specified directories.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_modes</span><span class="p">(</span><span class="n">mode_dir</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">perf_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">perf_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">perf_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.yaml&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">perf_files</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoRegistryFilesError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No YAML files found in performance directory &#39;</span><span class="si">{</span><span class="n">perf_dir</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">perf_files</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_performance_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Registry.get_performance_curve">
+<a class="viewcode-back" href="../../../phy/registry.html#spacelink.phy.registry.Registry.get_performance_curve">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_performance_curve</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mode_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">ErrorMetric</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModePerformanceCurve</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get performance curve data for a mode.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mode_id : str</span>
+<span class="sd">            ID of the link mode.</span>
+<span class="sd">        metric : ErrorMetric</span>
+<span class="sd">            Error metric.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ModePerformanceCurve</span>
+<span class="sd">            Performance curve object with multiple data points for interpolation.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            If no curve data is available for the specified mode and metric.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">curve_index</span><span class="p">[(</span><span class="n">mode_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="Registry.get_performance_threshold">
+<a class="viewcode-back" href="../../../phy/registry.html#spacelink.phy.registry.Registry.get_performance_threshold">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_performance_threshold</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mode_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">ErrorMetric</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModePerformanceThreshold</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get performance threshold data for a mode.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mode_id : str</span>
+<span class="sd">            ID of the link mode.</span>
+<span class="sd">        metric : ErrorMetric</span>
+<span class="sd">            Error metric.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ModePerformanceThreshold</span>
+<span class="sd">            Performance threshold object with single quasi-error-free operating point.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            If no threshold data is available for the specified mode and metric.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold_index</span><span class="p">[(</span><span class="n">mode_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="Registry.get_performance">
+<a class="viewcode-back" href="../../../phy/registry.html#spacelink.phy.registry.Registry.get_performance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_performance</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mode_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">ErrorMetric</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModePerformanceCurve</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get performance curve data for a mode.</span>
+
+<span class="sd">        .. deprecated:: 0.2.0</span>
+<span class="sd">            Use :meth:`get_performance_curve` or</span>
+<span class="sd">            :meth:`get_performance_threshold` instead. This method only</span>
+<span class="sd">            returns curve data and will raise KeyError for threshold data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mode_id : str</span>
+<span class="sd">            ID of the link mode.</span>
+<span class="sd">        metric : ErrorMetric</span>
+<span class="sd">            Error metric.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ModePerformanceCurve</span>
+<span class="sd">            Performance curve object.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            If no curve data is available for the specified mode and metric.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;get_performance() is deprecated, use get_performance_curve() or &quot;</span>
+            <span class="s2">&quot;get_performance_threshold() instead&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_performance_curve</span><span class="p">(</span><span class="n">mode_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_modes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load link modes from YAML files.&quot;&quot;&quot;</span>
         <span class="n">mode_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mode_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.yaml&quot;</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">mode_files</span><span class="p">:</span>
@@ -163,60 +286,73 @@
                         <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="p">[</span><span class="n">mode</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">mode</span>
 
-        <span class="k">if</span> <span class="n">perf_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_performance_curve</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">mode_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">metric</span><span class="p">:</span> <span class="n">ErrorMetric</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load curve performance data from parsed YAML.&quot;&quot;&quot;</span>
+        <span class="n">perf</span> <span class="o">=</span> <span class="n">ModePerformanceCurve</span><span class="p">(</span>
+            <span class="n">modes</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="p">[</span><span class="n">mode_id</span><span class="p">]</span> <span class="k">for</span> <span class="n">mode_id</span> <span class="ow">in</span> <span class="n">mode_ids</span><span class="p">],</span>
+            <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+            <span class="n">points</span><span class="o">=</span><span class="n">raw</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">],</span>
+            <span class="n">ref</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perf</span><span class="p">)</span>
 
-        <span class="n">perf_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">perf_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.yaml&quot;</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">perf_files</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NoRegistryFilesError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;No YAML files found in performance directory &#39;</span><span class="si">{</span><span class="n">perf_dir</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
-            <span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">perf_files</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">raw</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                <span class="n">mode_ids</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="s2">&quot;mode_ids&quot;</span><span class="p">]</span>
-                <span class="n">metric</span> <span class="o">=</span> <span class="n">ErrorMetric</span><span class="p">(</span><span class="n">raw</span><span class="p">[</span><span class="s2">&quot;metric&quot;</span><span class="p">])</span>
-
-                <span class="n">perf</span> <span class="o">=</span> <span class="n">ModePerformance</span><span class="p">(</span>
-                    <span class="n">modes</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="p">[</span><span class="n">mode_id</span><span class="p">]</span> <span class="k">for</span> <span class="n">mode_id</span> <span class="ow">in</span> <span class="n">mode_ids</span><span class="p">],</span>
-                    <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
-                    <span class="n">points</span><span class="o">=</span><span class="n">raw</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">],</span>
-                    <span class="n">ref</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="k">for</span> <span class="n">mode_id</span> <span class="ow">in</span> <span class="n">mode_ids</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">mode_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">curve_index</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DuplicateRegistryEntryError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Duplicate curve performance entry for mode &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">mode_id</span><span class="si">}</span><span class="s2">&#39; and metric &#39;</span><span class="si">{</span><span class="n">metric</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39; found&quot;</span>
                 <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">perfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perf</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curve_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">perf</span>
 
-                <span class="k">for</span> <span class="n">mode_id</span> <span class="ow">in</span> <span class="n">mode_ids</span><span class="p">:</span>
-                    <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">mode_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">perf_index</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">DuplicateRegistryEntryError</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Duplicate performance entry for mode &#39;</span><span class="si">{</span><span class="n">mode_id</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;and metric &#39;</span><span class="si">{</span><span class="n">metric</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39; found&quot;</span>
-                        <span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">perf_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">perf</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_performance_threshold</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">mode_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">metric</span><span class="p">:</span> <span class="n">ErrorMetric</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load threshold performance data from parsed YAML.&quot;&quot;&quot;</span>
+        <span class="n">threshold_data</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">]</span>
+        <span class="n">perf</span> <span class="o">=</span> <span class="n">ModePerformanceThreshold</span><span class="p">(</span>
+            <span class="n">modes</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="p">[</span><span class="n">mode_id</span><span class="p">]</span> <span class="k">for</span> <span class="n">mode_id</span> <span class="ow">in</span> <span class="n">mode_ids</span><span class="p">],</span>
+            <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+            <span class="n">ebn0</span><span class="o">=</span><span class="n">threshold_data</span><span class="p">[</span><span class="s2">&quot;ebn0&quot;</span><span class="p">],</span>
+            <span class="n">error_rate</span><span class="o">=</span><span class="n">threshold_data</span><span class="p">[</span><span class="s2">&quot;error_rate&quot;</span><span class="p">],</span>
+            <span class="n">ref</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perf</span><span class="p">)</span>
 
+        <span class="k">for</span> <span class="n">mode_id</span> <span class="ow">in</span> <span class="n">mode_ids</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">mode_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold_index</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DuplicateRegistryEntryError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Duplicate threshold performance entry for &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;mode &#39;</span><span class="si">{</span><span class="n">mode_id</span><span class="si">}</span><span class="s2">&#39; and metric &#39;</span><span class="si">{</span><span class="n">metric</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39; found&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">threshold_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">perf</span>
 
-<div class="viewcode-block" id="Registry.get_performance">
-<a class="viewcode-back" href="../../../phy/registry.html#spacelink.phy.registry.Registry.get_performance">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">ErrorMetric</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModePerformance</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Look up the performance object for a given mode and metric.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_performance_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a single performance YAML file.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">raw</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">mode_ids</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="s2">&quot;mode_ids&quot;</span><span class="p">]</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="n">ErrorMetric</span><span class="p">(</span><span class="n">raw</span><span class="p">[</span><span class="s2">&quot;metric&quot;</span><span class="p">])</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        mode_id : str</span>
-<span class="sd">            ID of the link mode.</span>
-<span class="sd">        metric : ErrorMetric</span>
-<span class="sd">            Error metric.</span>
+            <span class="c1"># Auto-detect performance type based on YAML structure</span>
+            <span class="n">has_points</span> <span class="o">=</span> <span class="s2">&quot;points&quot;</span> <span class="ow">in</span> <span class="n">raw</span>
+            <span class="n">has_threshold</span> <span class="o">=</span> <span class="s2">&quot;threshold&quot;</span> <span class="ow">in</span> <span class="n">raw</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        ModePerformance</span>
-<span class="sd">            Performance object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">perf_index</span><span class="p">[(</span><span class="n">mode_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">)]</span></div>
-</div>
+            <span class="k">if</span> <span class="n">has_points</span> <span class="ow">and</span> <span class="n">has_threshold</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Invalid YAML in </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">: cannot have both &#39;points&#39; and &#39;threshold&#39;&quot;</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">has_points</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load_performance_curve</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">mode_ids</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">has_threshold</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load_performance_threshold</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">mode_ids</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Invalid YAML in </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">: must have either &#39;points&#39; or &#39;threshold&#39;&quot;</span>
+                <span class="p">)</span></div>
 
 </pre></div>
 

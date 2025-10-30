@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.phy.mode &mdash; SpaceLink 0.1.9 documentation</title>
+  <title>spacelink.phy.mode &mdash; SpaceLink 0.1.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=8618f531"></script>
+        <script src="../../../_static/documentation_options.js?v=bafade30"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.9
+                0.1.10
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -110,17 +110,22 @@
 <a class="viewcode-back" href="../../../phy/mode.html#spacelink.phy.mode.Code">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Code</span><span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Represents a single forward error correction code.</span>
+<span class="sd">    Represents a single PHY layer component that adds overhead.</span>
+
+<span class="sd">    This class is primarily used for forward error correction codes, but can also</span>
+<span class="sd">    represent other PHY layer components that add overhead such as framing structures</span>
+<span class="sd">    (e.g., DVB-S2 PLFRAME and BBFRAME).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    name : str</span>
-<span class="sd">        Name of the code.</span>
+<span class="sd">        Name of the code or PHY layer component.</span>
 <span class="sd">    rate : Fraction</span>
-<span class="sd">        Code rate.</span>
+<span class="sd">        Code rate or efficiency representing the ratio of information bits to total</span>
+<span class="sd">        bits.</span>
 <span class="sd">    interleaver_depth : int | None</span>
-<span class="sd">        Interleaver depth for codes such as Reed Solomon that are commonly paired with</span>
-<span class="sd">        an interleaver.</span>
+<span class="sd">        Interleaver depth for codes such as Reed Solomon that are commonly</span>
+<span class="sd">        paired with an interleaver. May be None if not applicable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
@@ -133,17 +138,19 @@
 <a class="viewcode-back" href="../../../phy/mode.html#spacelink.phy.mode.CodeChain">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CodeChain</span><span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Represents a chain of forward error correction codes.</span>
+<span class="sd">    Represents a chain of PHY layer components that add overhead.</span>
 
-<span class="sd">    This provides the flexibility to handle concatenated codes such as Reed Solomon</span>
-<span class="sd">    paired with convolutional code but also single codes and even the absence of forward</span>
-<span class="sd">    error correction.</span>
+<span class="sd">    This provides the flexibility to handle concatenated codes such as Reed</span>
+<span class="sd">    Solomon paired with convolutional code, framing structures (e.g., DVB-S2</span>
+<span class="sd">    PLFRAME and BBFRAME), single codes, and even the absence of forward error</span>
+<span class="sd">    correction.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    codes : list[Code]</span>
-<span class="sd">        List of codes in in encoding order from outermost to innermost code. If no error</span>
-<span class="sd">        correction is used the list will be empty.</span>
+<span class="sd">        List of codes or PHY layer components in encoding order from outermost</span>
+<span class="sd">        to innermost. If no overhead-adding components are used, the list will</span>
+<span class="sd">        be empty.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">codes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Code</span><span class="p">]</span>
@@ -151,13 +158,16 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fraction</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The overall code rate of the chain, which is the product of the individual code</span>
-<span class="sd">        rates or 1 if no error correction is used.</span>
+<span class="sd">        The overall rate of the chain, which is the product of the individual rates.</span>
+
+<span class="sd">        This represents the cumulative efficiency of all PHY layer components,</span>
+<span class="sd">        accounting for overhead from FEC codes, framing structures, and other</span>
+<span class="sd">        components. If no overhead-adding components are present, the rate is 1.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Fraction</span>
-<span class="sd">            Code rate.</span>
+<span class="sd">            Overall rate of the chain.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">((</span><span class="n">code</span><span class="o">.</span><span class="n">rate</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">codes</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span></div>
 
@@ -176,7 +186,7 @@
 <span class="sd">    modulation : Modulation</span>
 <span class="sd">        Modulation scheme.</span>
 <span class="sd">    coding : CodeChain</span>
-<span class="sd">        Forward error correction code chain.</span>
+<span class="sd">        Chain of PHY layer components that add overhead (FEC codes, framing, etc.).</span>
 <span class="sd">    ref : str, optional</span>
 <span class="sd">        Reference or source of the mode definition.</span>
 <span class="sd">    &quot;&quot;&quot;</span>

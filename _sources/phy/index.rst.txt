@@ -5,7 +5,7 @@ The **PHY** subpackage provides physical-layer constructs for link analysis, ena
 
 **Available Modules:**
 
-* **mode**: Link mode definitions combining modulation schemes and forward error correction coding chains with support for concatenated codes and interleaving
+* **mode**: Link mode definitions combining modulation schemes and coding chains (FEC, framing, etc.) with support for concatenated codes and interleaving
 * **performance**: Performance curves (Eb/N0 vs. error rate) and coding gain calculations with interpolation support for BER, WER, and FER metrics
 * **registry**: A registry system that loads modes and performance data from YAML files for easy configuration management and data persistence
 

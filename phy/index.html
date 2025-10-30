@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PHY Modules &mdash; SpaceLink 0.1.9 documentation</title>
+  <title>PHY Modules &mdash; SpaceLink 0.1.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=8618f531"></script>
+        <script src="../_static/documentation_options.js?v=bafade30"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.9
+                0.1.10
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -92,7 +92,7 @@
 <p>The <strong>PHY</strong> subpackage provides physical-layer constructs for link analysis, enabling comprehensive modeling of communication system performance. These modules build upon the <strong>Core</strong> subpackage to provide higher-level abstractions for link mode definitions and performance analysis.</p>
 <p><strong>Available Modules:</strong></p>
 <ul class="simple">
-<li><p><strong>mode</strong>: Link mode definitions combining modulation schemes and forward error correction coding chains with support for concatenated codes and interleaving</p></li>
+<li><p><strong>mode</strong>: Link mode definitions combining modulation schemes and coding chains (FEC, framing, etc.) with support for concatenated codes and interleaving</p></li>
 <li><p><strong>performance</strong>: Performance curves (Eb/N0 vs. error rate) and coding gain calculations with interpolation support for BER, WER, and FER metrics</p></li>
 <li><p><strong>registry</strong>: A registry system that loads modes and performance data from YAML files for easy configuration management and data persistence</p></li>
 </ul>
@@ -129,6 +129,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance Module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="performance.html#spacelink.phy.performance.ErrorMetric"><code class="docutils literal notranslate"><span class="pre">ErrorMetric</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#spacelink.phy.performance.ModePerformanceCurve"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance.html#spacelink.phy.performance.ModePerformanceThreshold"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="performance.html#spacelink.phy.performance.ModePerformance"><code class="docutils literal notranslate"><span class="pre">ModePerformance</span></code></a></li>
 </ul>
 </li>

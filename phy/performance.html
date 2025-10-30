@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Performance Module &mdash; SpaceLink 0.1.9 documentation</title>
+  <title>Performance Module &mdash; SpaceLink 0.1.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=8618f531"></script>
+        <script src="../_static/documentation_options.js?v=bafade30"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -41,7 +41,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.9
+                0.1.10
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -61,23 +61,39 @@
 <li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric.BER"><code class="docutils literal notranslate"><span class="pre">ErrorMetric.BER</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric.WER"><code class="docutils literal notranslate"><span class="pre">ErrorMetric.WER</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric.FER"><code class="docutils literal notranslate"><span class="pre">ErrorMetric.FER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric.PER"><code class="docutils literal notranslate"><span class="pre">ErrorMetric.PER</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance"><code class="docutils literal notranslate"><span class="pre">ModePerformance</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.modes"><code class="docutils literal notranslate"><span class="pre">ModePerformance.modes</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.metric"><code class="docutils literal notranslate"><span class="pre">ModePerformance.metric</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.points"><code class="docutils literal notranslate"><span class="pre">ModePerformance.points</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.ref"><code class="docutils literal notranslate"><span class="pre">ModePerformance.ref</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.validate_minimum_points"><code class="docutils literal notranslate"><span class="pre">ModePerformance.validate_minimum_points()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.validate_points_sorted"><code class="docutils literal notranslate"><span class="pre">ModePerformance.validate_points_sorted()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.validate_error_values_decreasing"><code class="docutils literal notranslate"><span class="pre">ModePerformance.validate_error_values_decreasing()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.__init__"><code class="docutils literal notranslate"><span class="pre">ModePerformance.__init__()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.ebn0_to_error_rate"><code class="docutils literal notranslate"><span class="pre">ModePerformance.ebn0_to_error_rate()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.error_rate_to_ebn0"><code class="docutils literal notranslate"><span class="pre">ModePerformance.error_rate_to_ebn0()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.coding_gain"><code class="docutils literal notranslate"><span class="pre">ModePerformance.coding_gain()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance.model_config"><code class="docutils literal notranslate"><span class="pre">ModePerformance.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.modes"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.modes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.metric"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.metric</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.points"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.points</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.ref"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.ref</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.validate_minimum_points"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.validate_minimum_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.validate_points_sorted"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.validate_points_sorted()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.validate_error_values_decreasing"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.validate_error_values_decreasing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.__init__"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.ebn0_to_error_rate"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.ebn0_to_error_rate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.error_rate_to_ebn0"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.error_rate_to_ebn0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.coding_gain"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.coding_gain()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve.model_config"><code class="docutils literal notranslate"><span class="pre">ModePerformanceCurve.model_config</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.modes"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.modes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.metric"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.metric</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.ebn0_val"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.ebn0_val</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.error_rate_val"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.error_rate_val</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.ref"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.ref</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.ebn0"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.ebn0</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.error_rate"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.error_rate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.check"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.margin"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.margin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.coding_gain"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.coding_gain()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold.model_config"><code class="docutils literal notranslate"><span class="pre">ModePerformanceThreshold.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#spacelink.phy.performance.ModePerformance"><code class="docutils literal notranslate"><span class="pre">ModePerformance</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="registry.html">Registry Module</a></li>
@@ -133,13 +149,18 @@
 <span class="sig-name descname"><span class="pre">FER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'frame</span> <span class="pre">error</span> <span class="pre">rate'</span></em><a class="headerlink" href="#spacelink.phy.performance.ErrorMetric.FER" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ErrorMetric.PER">
+<span class="sig-name descname"><span class="pre">PER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'packet</span> <span class="pre">error</span> <span class="pre">rate'</span></em><a class="headerlink" href="#spacelink.phy.performance.ErrorMetric.PER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.performance.</span></span><span class="sig-name descname"><span class="pre">ModePerformance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="mode.html#spacelink.phy.mode.LinkMode" title="spacelink.phy.mode.LinkMode"><span class="pre">LinkMode</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><span class="pre">ErrorMetric</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.performance.</span></span><span class="sig-name descname"><span class="pre">ModePerformanceCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="mode.html#spacelink.phy.mode.LinkMode" title="spacelink.phy.mode.LinkMode"><span class="pre">LinkMode</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><span class="pre">ErrorMetric</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceCurve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Performance characteristics for specific link modes.</p>
+<p>Performance characteristics for specific link modes with interpolatable curves.</p>
 <p>This class provides methods to convert between Eb/N0 and error rates for given
 modulation and coding schemes.</p>
 <dl class="field-list simple">
@@ -154,43 +175,43 @@ modulation and coding schemes.</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.modes">
-<span class="sig-name descname"><span class="pre">modes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="mode.html#spacelink.phy.mode.LinkMode" title="spacelink.phy.mode.LinkMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkMode</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.modes" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.modes">
+<span class="sig-name descname"><span class="pre">modes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="mode.html#spacelink.phy.mode.LinkMode" title="spacelink.phy.mode.LinkMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkMode</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.modes" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.metric">
-<span class="sig-name descname"><span class="pre">metric</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorMetric</span></code></a></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.metric" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.metric">
+<span class="sig-name descname"><span class="pre">metric</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorMetric</span></code></a></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.metric" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.points">
-<span class="sig-name descname"><span class="pre">points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.points" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.points">
+<span class="sig-name descname"><span class="pre">points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.points" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.ref">
-<span class="sig-name descname"><span class="pre">ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.ref" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.ref">
+<span class="sig-name descname"><span class="pre">ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.ref" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.validate_minimum_points">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_minimum_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.validate_minimum_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.validate_minimum_points" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.validate_minimum_points">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_minimum_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceCurve.validate_minimum_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.validate_minimum_points" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.validate_points_sorted">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_points_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.validate_points_sorted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.validate_points_sorted" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.validate_points_sorted">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_points_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceCurve.validate_points_sorted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.validate_points_sorted" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.validate_error_values_decreasing">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_error_values_decreasing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.validate_error_values_decreasing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.validate_error_values_decreasing" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.validate_error_values_decreasing">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_error_values_decreasing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceCurve.validate_error_values_decreasing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.validate_error_values_decreasing" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.__init__" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceCurve.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.__init__" title="Link to this definition"></a></dt>
 <dd><p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -198,8 +219,8 @@ validated to form a valid model.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.ebn0_to_error_rate">
-<span class="sig-name descname"><span class="pre">ebn0_to_error_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ebn0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.ebn0_to_error_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.ebn0_to_error_rate" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.ebn0_to_error_rate">
+<span class="sig-name descname"><span class="pre">ebn0_to_error_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ebn0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceCurve.ebn0_to_error_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.ebn0_to_error_rate" title="Link to this definition"></a></dt>
 <dd><p>Find the error rate corresponding to the given Eb/N0.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -216,8 +237,8 @@ data. Same shape as <code class="docutils literal notranslate"><span class="pre"
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.error_rate_to_ebn0">
-<span class="sig-name descname"><span class="pre">error_rate_to_ebn0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.error_rate_to_ebn0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.error_rate_to_ebn0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.error_rate_to_ebn0">
+<span class="sig-name descname"><span class="pre">error_rate_to_ebn0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceCurve.error_rate_to_ebn0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.error_rate_to_ebn0" title="Link to this definition"></a></dt>
 <dd><p>Find Eb/N0 required to achieve the target error rate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -235,15 +256,15 @@ error rate is outside the range of available performance data. Same shape as
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.coding_gain">
-<span class="sig-name descname"><span class="pre">coding_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uncoded</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformance.coding_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.coding_gain" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.coding_gain">
+<span class="sig-name descname"><span class="pre">coding_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uncoded</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceCurve.coding_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.coding_gain" title="Link to this definition"></a></dt>
 <dd><p>Calculate the coding gain relative to an uncoded reference.</p>
 <p>The coding gain is the difference in required Eb/N0 between the uncoded and
 coded systems at the same error rate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>uncoded</strong> (<a class="reference internal" href="#spacelink.phy.performance.ModePerformance" title="spacelink.phy.performance.ModePerformance"><em>ModePerformance</em></a>) – Performance model for the uncoded reference system. Must use the same error
+<li><p><strong>uncoded</strong> (<em>ModePerformance</em>) – Performance model for the uncoded reference system. Must use the same error
 metric as this object.</p></li>
 <li><p><strong>error_rate</strong> (<em>Dimensionless</em>) – Error rate at which to evaluate the coding gain.</p></li>
 </ul>
@@ -262,11 +283,156 @@ the available performance data. Same shape as <code class="docutils literal notr
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformance.model_config" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceCurve.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceCurve.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.performance.</span></span><span class="sig-name descname"><span class="pre">ModePerformanceThreshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceThreshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Operating point threshold performance for specific link modes.</p>
+<p>This class represents performance data with a single operating point threshold,
+typically used for standards like DVB-S2 where only quasi-error-free (QEF)
+operating points are published.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>modes</strong> (<em>list</em><em>[</em><a class="reference internal" href="mode.html#spacelink.phy.mode.LinkMode" title="spacelink.phy.mode.LinkMode"><em>LinkMode</em></a><em>]</em>) – The link mode configurations.</p></li>
+<li><p><strong>metric</strong> (<a class="reference internal" href="#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><em>ErrorMetric</em></a>) – Type of error metric (bit error rate, codeword error rate, etc.).</p></li>
+<li><p><strong>ebn0</strong> (<em>float</em>) – Eb/N0 threshold in dB for quasi-error-free operation.</p></li>
+<li><p><strong>error_rate</strong> (<em>float</em>) – Error rate at the threshold point (dimensionless).</p></li>
+<li><p><strong>ref</strong> (<em>str</em><em>, </em><em>optional</em>) – Reference or source of the performance data (default: “”).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.modes">
+<span class="sig-name descname"><span class="pre">modes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="mode.html#spacelink.phy.mode.LinkMode" title="spacelink.phy.mode.LinkMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkMode</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.modes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.metric">
+<span class="sig-name descname"><span class="pre">metric</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#spacelink.phy.performance.ErrorMetric" title="spacelink.phy.performance.ErrorMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorMetric</span></code></a></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.metric" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.ebn0_val">
+<span class="sig-name descname"><span class="pre">ebn0_val</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.ebn0_val" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.error_rate_val">
+<span class="sig-name descname"><span class="pre">error_rate_val</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.error_rate_val" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.ref">
+<span class="sig-name descname"><span class="pre">ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.ref" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.ebn0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ebn0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="s"><span class="pre">'dB(1)'</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.ebn0" title="Link to this definition"></a></dt>
+<dd><p>Get the Eb/N0 threshold with proper units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Eb/N0 threshold value.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Decibels</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.error_rate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">error_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Unit</span><span class="p"><span class="pre">(</span></span><span class="pre">dimensionless</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.error_rate" title="Link to this definition"></a></dt>
+<dd><p>Get the error rate threshold with proper units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Error rate threshold value.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dimensionless</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ebn0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceThreshold.check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.check" title="Link to this definition"></a></dt>
+<dd><p>Check if the given Eb/N0 meets or exceeds the quasi-error-free threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ebn0</strong> (<em>Decibels</em>) – Energy per bit to noise power spectral density ratio <span class="math notranslate nohighlight">\(E_b/N_0\)</span>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True where Eb/N0 meets or exceeds the threshold. Scalar if input is scalar,
+array if input is array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool or np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.margin">
+<span class="sig-name descname"><span class="pre">margin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ebn0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceThreshold.margin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.margin" title="Link to this definition"></a></dt>
+<dd><p>Calculate the margin (positive) or shortfall (negative) relative to threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ebn0</strong> (<em>Decibels</em>) – Energy per bit to noise power spectral density ratio <span class="math notranslate nohighlight">\(E_b/N_0\)</span>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Margin in dB. Positive values indicate the link exceeds the threshold,
+negative values indicate it falls short. Same shape as <code class="docutils literal notranslate"><span class="pre">ebn0</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decibels</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.coding_gain">
+<span class="sig-name descname"><span class="pre">coding_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uncoded</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/performance.html#ModePerformanceThreshold.coding_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.coding_gain" title="Link to this definition"></a></dt>
+<dd><p>Calculate the coding gain relative to an uncoded threshold.</p>
+<p>The coding gain is the difference in required Eb/N0 between the uncoded and
+coded systems at the threshold error rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>uncoded</strong> (<a class="reference internal" href="#spacelink.phy.performance.ModePerformanceThreshold" title="spacelink.phy.performance.ModePerformanceThreshold"><em>ModePerformanceThreshold</em></a>) – Threshold specification for the uncoded reference system. Must use the same
+error metric and have the same error rate threshold as this object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Coding gain in decibels.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decibels</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the uncoded threshold has a different error metric or error rate.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformanceThreshold.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#spacelink.phy.performance.ModePerformanceThreshold.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spacelink.phy.performance.ModePerformance">
+<span class="sig-prename descclassname"><span class="pre">spacelink.phy.performance.</span></span><span class="sig-name descname"><span class="pre">ModePerformance</span></span><a class="headerlink" href="#spacelink.phy.performance.ModePerformance" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#spacelink.phy.performance.ModePerformanceCurve" title="spacelink.phy.performance.ModePerformanceCurve"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModePerformanceCurve</span></code></a></p>
 </dd></dl>
 
 </section>

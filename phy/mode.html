@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mode Module &mdash; SpaceLink 0.1.9 documentation</title>
+  <title>Mode Module &mdash; SpaceLink 0.1.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
@@ -18,7 +18,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=8618f531"></script>
+        <script src="../_static/documentation_options.js?v=bafade30"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -40,7 +40,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.9
+                0.1.10
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -158,14 +158,18 @@
 <dt class="sig sig-object py" id="spacelink.phy.mode.Code">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.mode.</span></span><span class="sig-name descname"><span class="pre">Code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/mode.html#Code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.mode.Code" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Represents a single forward error correction code.</p>
+<p>Represents a single PHY layer component that adds overhead.</p>
+<p>This class is primarily used for forward error correction codes, but can also
+represent other PHY layer components that add overhead such as framing structures
+(e.g., DVB-S2 PLFRAME and BBFRAME).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – Name of the code.</p></li>
-<li><p><strong>rate</strong> (<em>Fraction</em>) – Code rate.</p></li>
-<li><p><strong>interleaver_depth</strong> (<em>int</em><em> | </em><em>None</em>) – Interleaver depth for codes such as Reed Solomon that are commonly paired with
-an interleaver.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of the code or PHY layer component.</p></li>
+<li><p><strong>rate</strong> (<em>Fraction</em>) – Code rate or efficiency representing the ratio of information bits to total
+bits.</p></li>
+<li><p><strong>interleaver_depth</strong> (<em>int</em><em> | </em><em>None</em>) – Interleaver depth for codes such as Reed Solomon that are commonly
+paired with an interleaver. May be None if not applicable.</p></li>
 </ul>
 </dd>
 </dl>
@@ -196,14 +200,16 @@ an interleaver.</p></li>
 <dt class="sig sig-object py" id="spacelink.phy.mode.CodeChain">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spacelink.phy.mode.</span></span><span class="sig-name descname"><span class="pre">CodeChain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spacelink/phy/mode.html#CodeChain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spacelink.phy.mode.CodeChain" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Represents a chain of forward error correction codes.</p>
-<p>This provides the flexibility to handle concatenated codes such as Reed Solomon
-paired with convolutional code but also single codes and even the absence of forward
-error correction.</p>
+<p>Represents a chain of PHY layer components that add overhead.</p>
+<p>This provides the flexibility to handle concatenated codes such as Reed
+Solomon paired with convolutional code, framing structures (e.g., DVB-S2
+PLFRAME and BBFRAME), single codes, and even the absence of forward error
+correction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>codes</strong> (<em>list</em><em>[</em><a class="reference internal" href="#spacelink.phy.mode.Code" title="spacelink.phy.mode.Code"><em>Code</em></a><em>]</em>) – List of codes in in encoding order from outermost to innermost code. If no error
-correction is used the list will be empty.</p>
+<dd class="field-odd"><p><strong>codes</strong> (<em>list</em><em>[</em><a class="reference internal" href="#spacelink.phy.mode.Code" title="spacelink.phy.mode.Code"><em>Code</em></a><em>]</em>) – List of codes or PHY layer components in encoding order from outermost
+to innermost. If no overhead-adding components are used, the list will
+be empty.</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -214,11 +220,13 @@ correction is used the list will be empty.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="spacelink.phy.mode.CodeChain.rate">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span></em><a class="headerlink" href="#spacelink.phy.mode.CodeChain.rate" title="Link to this definition"></a></dt>
-<dd><p>The overall code rate of the chain, which is the product of the individual code
-rates or 1 if no error correction is used.</p>
+<dd><p>The overall rate of the chain, which is the product of the individual rates.</p>
+<p>This represents the cumulative efficiency of all PHY layer components,
+accounting for overhead from FEC codes, framing structures, and other
+components. If no overhead-adding components are present, the rate is 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Code rate.</p>
+<dd class="field-odd"><p>Overall rate of the chain.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Fraction</p>
@@ -244,7 +252,7 @@ rates or 1 if no error correction is used.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id</strong> (<em>str</em>) – Unique identifier for the link mode.</p></li>
 <li><p><strong>modulation</strong> (<a class="reference internal" href="#spacelink.phy.mode.Modulation" title="spacelink.phy.mode.Modulation"><em>Modulation</em></a>) – Modulation scheme.</p></li>
-<li><p><strong>coding</strong> (<a class="reference internal" href="#spacelink.phy.mode.CodeChain" title="spacelink.phy.mode.CodeChain"><em>CodeChain</em></a>) – Forward error correction code chain.</p></li>
+<li><p><strong>coding</strong> (<a class="reference internal" href="#spacelink.phy.mode.CodeChain" title="spacelink.phy.mode.CodeChain"><em>CodeChain</em></a>) – Chain of PHY layer components that add overhead (FEC codes, framing, etc.).</p></li>
 <li><p><strong>ref</strong> (<em>str</em><em>, </em><em>optional</em>) – Reference or source of the mode definition.</p></li>
 </ul>
 </dd>

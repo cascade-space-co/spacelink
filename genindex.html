@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; SpaceLink 0.1.9 documentation</title>
+  <title>Index &mdash; SpaceLink 0.1.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=8618f531"></script>
+        <script src="_static/documentation_options.js?v=bafade30"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.9
+                0.1.10
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -107,7 +107,7 @@
       <li><a href="core/ranging.html#spacelink.core.ranging.RangeJitterParameters.__init__">__init__() (spacelink.core.ranging.RangeJitterParameters method)</a>
 
       <ul>
-        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.__init__">(spacelink.phy.performance.ModePerformance method)</a>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.__init__">(spacelink.phy.performance.ModePerformanceCurve method)</a>
 </li>
         <li><a href="phy/registry.html#spacelink.phy.registry.Registry.__init__">(spacelink.phy.registry.Registry method)</a>
 </li>
@@ -140,6 +140,8 @@
 </li>
       <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.channel_bits_per_symbol">channel_bits_per_symbol (spacelink.phy.mode.LinkMode property)</a>
 </li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.check">check() (spacelink.phy.performance.ModePerformanceThreshold method)</a>
+</li>
       <li><a href="core/ranging.html#spacelink.core.ranging.chip_snr">chip_snr() (in module spacelink.core.ranging)</a>
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.TrackingArchitecture.CLOSED_LOOP">CLOSED_LOOP (spacelink.core.ranging.TrackingArchitecture attribute)</a>
@@ -156,8 +158,12 @@
 </li>
       <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.coding">coding (spacelink.phy.mode.LinkMode attribute)</a>
 </li>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.coding_gain">coding_gain() (spacelink.phy.performance.ModePerformance method)</a>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.coding_gain">coding_gain() (spacelink.phy.performance.ModePerformanceCurve method)</a>
+
+      <ul>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.coding_gain">(spacelink.phy.performance.ModePerformanceThreshold method)</a>
 </li>
+      </ul></li>
       <li><a href="core/ranging.html#spacelink.core.ranging.COMPONENT_LENGTHS">COMPONENT_LENGTHS (in module spacelink.core.ranging)</a>
 </li>
   </ul></td>
@@ -182,11 +188,19 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.ebn0_to_error_rate">ebn0_to_error_rate() (spacelink.phy.performance.ModePerformance method)</a>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.ebn0">ebn0 (spacelink.phy.performance.ModePerformanceThreshold property)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.ebn0_to_error_rate">ebn0_to_error_rate() (spacelink.phy.performance.ModePerformanceCurve method)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.ebn0_val">ebn0_val (spacelink.phy.performance.ModePerformanceThreshold attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.error_rate_to_ebn0">error_rate_to_ebn0() (spacelink.phy.performance.ModePerformance method)</a>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.error_rate">error_rate (spacelink.phy.performance.ModePerformanceThreshold property)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.error_rate_to_ebn0">error_rate_to_ebn0() (spacelink.phy.performance.ModePerformanceCurve method)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.error_rate_val">error_rate_val (spacelink.phy.performance.ModePerformanceThreshold attribute)</a>
 </li>
       <li><a href="phy/performance.html#spacelink.phy.performance.ErrorMetric">ErrorMetric (class in spacelink.phy.performance)</a>
 </li>
@@ -205,6 +219,12 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="phy/registry.html#spacelink.phy.registry.Registry.get_performance">get_performance() (spacelink.phy.registry.Registry method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/registry.html#spacelink.phy.registry.Registry.get_performance_curve">get_performance_curve() (spacelink.phy.registry.Registry method)</a>
+</li>
+      <li><a href="phy/registry.html#spacelink.phy.registry.Registry.get_performance_threshold">get_performance_threshold() (spacelink.phy.registry.Registry method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -246,8 +266,14 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.metric">metric (spacelink.phy.performance.ModePerformance attribute)</a>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.margin">margin() (spacelink.phy.performance.ModePerformanceThreshold method)</a>
 </li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.metric">metric (spacelink.phy.performance.ModePerformanceCurve attribute)</a>
+
+      <ul>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.metric">(spacelink.phy.performance.ModePerformanceThreshold attribute)</a>
+</li>
+      </ul></li>
       <li><a href="phy/mode.html#spacelink.phy.mode.Code.model_config">model_config (spacelink.phy.mode.Code attribute)</a>
 
       <ul>
@@ -257,15 +283,25 @@
 </li>
         <li><a href="phy/mode.html#spacelink.phy.mode.Modulation.model_config">(spacelink.phy.mode.Modulation attribute)</a>
 </li>
-        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.model_config">(spacelink.phy.performance.ModePerformance attribute)</a>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.model_config">(spacelink.phy.performance.ModePerformanceCurve attribute)</a>
+</li>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.model_config">(spacelink.phy.performance.ModePerformanceThreshold attribute)</a>
 </li>
       </ul></li>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance">ModePerformance (class in spacelink.phy.performance)</a>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance">ModePerformance (in module spacelink.phy.performance)</a>
 </li>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.modes">modes (spacelink.phy.performance.ModePerformance attribute)</a>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve">ModePerformanceCurve (class in spacelink.phy.performance)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold">ModePerformanceThreshold (class in spacelink.phy.performance)</a>
+</li>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.modes">modes (spacelink.phy.performance.ModePerformanceCurve attribute)</a>
+
+      <ul>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.modes">(spacelink.phy.performance.ModePerformanceThreshold attribute)</a>
+</li>
+      </ul></li>
       <li><a href="phy/mode.html#spacelink.phy.mode.Modulation">Modulation (class in spacelink.phy.mode)</a>
 </li>
       <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.modulation">modulation (spacelink.phy.mode.LinkMode attribute)</a>
@@ -315,23 +351,25 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ErrorMetric.PER">PER (spacelink.phy.performance.ErrorMetric attribute)</a>
+</li>
       <li><a href="core/ranging.html#spacelink.core.ranging.pn_acquisition_probability">pn_acquisition_probability() (in module spacelink.core.ranging)</a>
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.pn_acquisition_time">pn_acquisition_time() (in module spacelink.core.ranging)</a>
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.pn_component_acquisition_probability">pn_component_acquisition_probability() (in module spacelink.core.ranging)</a>
 </li>
-      <li><a href="core/ranging.html#spacelink.core.ranging.pn_component_to_ranging_power">pn_component_to_ranging_power() (in module spacelink.core.ranging)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core/ranging.html#spacelink.core.ranging.pn_component_to_ranging_power">pn_component_to_ranging_power() (in module spacelink.core.ranging)</a>
+</li>
       <li><a href="core/ranging.html#spacelink.core.ranging.pn_regen_end_to_end_jitter">pn_regen_end_to_end_jitter() (in module spacelink.core.ranging)</a>
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.pn_sequence_range_ambiguity">pn_sequence_range_ambiguity() (in module spacelink.core.ranging)</a>
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.PnRangingCode">PnRangingCode (class in spacelink.core.ranging)</a>
 </li>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.points">points (spacelink.phy.performance.ModePerformance attribute)</a>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.points">points (spacelink.phy.performance.ModePerformanceCurve attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -349,18 +387,20 @@
 </li>
       <li><a href="core/ranging.html#spacelink.core.ranging.ranging_to_total_power">ranging_to_total_power() (in module spacelink.core.ranging)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="phy/mode.html#spacelink.phy.mode.Code.rate">rate (spacelink.phy.mode.Code attribute)</a>
 
       <ul>
         <li><a href="phy/mode.html#spacelink.phy.mode.CodeChain.rate">(spacelink.phy.mode.CodeChain property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="phy/mode.html#spacelink.phy.mode.LinkMode.ref">ref (spacelink.phy.mode.LinkMode attribute)</a>
 
       <ul>
-        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.ref">(spacelink.phy.performance.ModePerformance attribute)</a>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.ref">(spacelink.phy.performance.ModePerformanceCurve attribute)</a>
+</li>
+        <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceThreshold.ref">(spacelink.phy.performance.ModePerformanceThreshold attribute)</a>
 </li>
       </ul></li>
       <li><a href="core/ranging.html#spacelink.core.ranging.RangeJitterParameters.reference_clock_waveform">reference_clock_waveform (spacelink.core.ranging.RangeJitterParameters attribute)</a>
@@ -438,13 +478,13 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.validate_error_values_decreasing">validate_error_values_decreasing() (spacelink.phy.performance.ModePerformance class method)</a>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.validate_error_values_decreasing">validate_error_values_decreasing() (spacelink.phy.performance.ModePerformanceCurve class method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.validate_minimum_points">validate_minimum_points() (spacelink.phy.performance.ModePerformance class method)</a>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.validate_minimum_points">validate_minimum_points() (spacelink.phy.performance.ModePerformanceCurve class method)</a>
 </li>
-      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformance.validate_points_sorted">validate_points_sorted() (spacelink.phy.performance.ModePerformance class method)</a>
+      <li><a href="phy/performance.html#spacelink.phy.performance.ModePerformanceCurve.validate_points_sorted">validate_points_sorted() (spacelink.phy.performance.ModePerformanceCurve class method)</a>
 </li>
   </ul></td>
 </tr></table>

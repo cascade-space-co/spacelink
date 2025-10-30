@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spacelink.core.antenna &mdash; SpaceLink 0.1.9 documentation</title>
+  <title>spacelink.core.antenna &mdash; SpaceLink 0.1.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=a6a68382" />
@@ -17,7 +17,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=8618f531"></script>
+        <script src="../../../_static/documentation_options.js?v=bafade30"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -37,7 +37,7 @@
             SpaceLink
           </a>
               <div class="version">
-                0.1.9
+                0.1.10
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -359,6 +359,7 @@
         <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
             <span class="n">frequency</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">])</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>  <span class="c1"># Dummy frequency for 2D case</span>
+        <span class="k">assert</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
         <span class="n">delta_phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">phi</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Assume equal spacing</span>
         <span class="n">full_circle</span> <span class="o">=</span> <span class="n">delta_phi</span> <span class="o">*</span> <span class="n">phi</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span> <span class="o">-</span> <span class="p">(</span><span class="n">delta_phi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
@@ -383,6 +384,74 @@
             <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
             <span class="n">bounds_error</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
+
+        <span class="c1"># Store bounds for error checking</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_theta_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_phi_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">phi</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frequency_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">frequency</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">frequency</span><span class="p">))</span>
+
+    <span class="nd">@enforce_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_bounds</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">theta</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">phi_wrapped</span><span class="p">:</span> <span class="n">Angle</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">:</span> <span class="n">Frequency</span><span class="p">,</span>
+        <span class="n">original_error</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if inputs are within bounds and raise helpful error if not.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        theta : Angle</span>
+<span class="sd">            Polar angles to check.</span>
+<span class="sd">        phi_wrapped : Angle</span>
+<span class="sd">            Wrapped azimuthal angles to check.</span>
+<span class="sd">        frequency : Frequency</span>
+<span class="sd">            Frequency to check.</span>
+<span class="sd">        original_error : Exception</span>
+<span class="sd">            The original exception from the interpolator to chain.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If any parameter is out of bounds, with a helpful message chained</span>
+<span class="sd">            to the original error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">theta_min</span><span class="p">,</span> <span class="n">theta_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_bounds</span>
+        <span class="n">phi_min</span><span class="p">,</span> <span class="n">phi_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_phi_bounds</span>
+        <span class="n">freq_min</span><span class="p">,</span> <span class="n">freq_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frequency_bounds</span>
+
+        <span class="c1"># Check theta bounds</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">theta</span> <span class="o">&lt;</span> <span class="n">theta_min</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">theta</span> <span class="o">&gt;</span> <span class="n">theta_max</span><span class="p">):</span>
+            <span class="n">theta_actual_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+            <span class="n">theta_actual_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;theta values must be in [</span><span class="si">{</span><span class="n">theta_min</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">theta_max</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">], &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;but got values in range &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">theta_actual_min</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">theta_actual_max</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">]&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">original_error</span>
+
+        <span class="c1"># Check phi bounds (on wrapped values)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">phi_wrapped</span> <span class="o">&lt;</span> <span class="n">phi_min</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">phi_wrapped</span> <span class="o">&gt;</span> <span class="n">phi_max</span><span class="p">):</span>
+            <span class="n">phi_actual_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">phi_wrapped</span><span class="p">)</span>
+            <span class="n">phi_actual_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">phi_wrapped</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;phi values must be in [</span><span class="si">{</span><span class="n">phi_min</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">phi_max</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">], &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;but got values in range &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">phi_actual_min</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">phi_actual_max</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">]&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">original_error</span>
+
+        <span class="c1"># Check frequency bounds (only for 3D interpolators)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_3d</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">frequency</span> <span class="o">&lt;</span> <span class="n">freq_min</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">frequency</span> <span class="o">&gt;</span> <span class="n">freq_max</span><span class="p">):</span>
+                <span class="n">freq_actual_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+                <span class="n">freq_actual_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;frequency values must be in &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">freq_min</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">freq_max</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">], &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;but got values in range &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">freq_actual_min</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">freq_actual_max</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">]&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">original_error</span>
 
     <span class="nd">@enforce_units</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
@@ -418,14 +487,24 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Frequency must be provided for 3D interpolators&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">frequency</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">Hz</span>
+        <span class="k">assert</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="n">phi_wrapped</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span>
 
         <span class="n">points</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">theta</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-            <span class="p">(</span><span class="n">phi</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">rad</span><span class="p">))</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">phi_wrapped</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="n">frequency</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Interpolation failed - check if it&#39;s a bounds error and if so raise</span>
+            <span class="c1"># ValueError with a helpful message.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_bounds</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi_wrapped</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">original_error</span><span class="o">=</span><span class="n">e</span><span class="p">)</span>
+            <span class="c1"># No bounds violation found - re-raise the original ValueError</span>
+            <span class="k">raise</span>
 
 
 <div class="viewcode-block" id="RadiationPattern">
