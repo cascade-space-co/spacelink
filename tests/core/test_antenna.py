@@ -560,6 +560,63 @@ class TestComplexInterpolator:
         with pytest.raises(ValueError):
             interpolator(0.95 * np.pi * u.rad, phi[0])
 
+    @pytest.mark.parametrize(
+        "is_3d,frequency,values_shape,test_frequency",
+        [
+            # 2D case: no frequency parameter
+            (
+                False,
+                None,
+                (10, 12),
+                None,
+            ),
+            # 3D case: with in-bounds frequency
+            (
+                True,
+                np.array([1.0, 2.0]) * u.GHz,
+                (10, 12, 2),
+                1.5 * u.GHz,  # Within [1.0, 2.0] GHz
+            ),
+        ],
+    )
+    def test_non_bounds_value_error_is_re_raised(
+        self, is_3d, frequency, values_shape, test_frequency
+    ):
+        """Test that a ValueError from interpolator that isn't a bounds error
+        is re-raised.
+
+        This tests where the original ValueError is re-raised when _check_bounds
+        doesn't raise (the error wasn't a bounds error). Covers both 2D
+        and 3D interpolator cases.
+        """
+        from unittest.mock import MagicMock
+
+        theta = np.linspace(0.1, np.pi - 0.1, 10) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
+        values = np.ones(values_shape) * u.dimensionless
+
+        interpolator = _ComplexInterpolator(theta, phi, frequency, values)
+
+        # Mock _interp to raise a ValueError that isn't bounds-related
+        # Use a message that clearly isn't about bounds
+        non_bounds_error = ValueError(
+            "Internal interpolation error: invalid data format"
+        )
+        interpolator._interp = MagicMock(side_effect=non_bounds_error)
+
+        # Call with values that are within bounds (so _check_bounds won't raise)
+        test_theta = np.pi / 2 * u.rad
+        test_phi = np.pi * u.rad
+
+        # The original ValueError should be re-raised when _check_bounds
+        # doesn't find a bounds violation
+        if is_3d:
+            with pytest.raises(ValueError, match="Internal interpolation error"):
+                interpolator(test_theta, test_phi, test_frequency)
+        else:
+            with pytest.raises(ValueError, match="Internal interpolation error"):
+                interpolator(test_theta, test_phi)
+
     def test_3d_interpolator_requires_frequency(self):
         """Test that 3D interpolator raises error when called without frequency."""
         theta = np.linspace(0, np.pi, 10) * u.rad
