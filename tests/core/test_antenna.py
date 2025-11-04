@@ -560,6 +560,68 @@ class TestComplexInterpolator:
         with pytest.raises(ValueError):
             interpolator(0.95 * np.pi * u.rad, phi[0])
 
+    def test_non_bounds_value_error_is_re_raised(self):
+        """Test that a ValueError from interpolator that isn't a bounds error
+        is re-raised.
+
+        This tests where the original ValueError is re-raised when _check_bounds
+        doesn't raise (i.e., the error wasn't a bounds error).
+        """
+        from unittest.mock import MagicMock
+
+        theta = np.linspace(0.1, np.pi - 0.1, 10) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
+        values = np.ones((10, 12)) * u.dimensionless
+
+        interpolator = _ComplexInterpolator(theta, phi, None, values)
+
+        # Mock _interp to raise a ValueError that isn't bounds-related
+        # Use a message that clearly isn't about bounds
+        non_bounds_error = ValueError(
+            "Internal interpolation error: invalid data format"
+        )
+        interpolator._interp = MagicMock(side_effect=non_bounds_error)
+
+        # Call with values that are within bounds (so _check_bounds won't raise)
+        test_theta = np.pi / 2 * u.rad
+        test_phi = np.pi * u.rad
+
+        # The original ValueError should be re-raised (line 405)
+        with pytest.raises(ValueError, match="Internal interpolation error"):
+            interpolator(test_theta, test_phi)
+
+    def test_3d_non_bounds_value_error_with_in_bounds_frequency(self):
+        """Test that a ValueError from 3D interpolator with in-bounds frequency
+        is re-raised.
+
+        This tests the "else" branch, where frequency is in bounds
+        but the interpolator still raises a ValueError for a non-bounds reason.
+        """
+        from unittest.mock import MagicMock
+
+        theta = np.linspace(0.1, np.pi - 0.1, 10) * u.rad
+        phi = np.linspace(0, 2 * np.pi, 12, endpoint=False) * u.rad
+        frequency = np.array([1.0, 2.0]) * u.GHz
+        values = np.ones((10, 12, 2)) * u.dimensionless
+
+        interpolator = _ComplexInterpolator(theta, phi, frequency, values)
+
+        # Mock _interp to raise a ValueError that isn't bounds-related
+        non_bounds_error = ValueError(
+            "Internal interpolation error: invalid data format"
+        )
+        interpolator._interp = MagicMock(side_effect=non_bounds_error)
+
+        # Call with values that are within bounds, including frequency
+        test_theta = np.pi / 2 * u.rad
+        test_phi = np.pi * u.rad
+        test_frequency = 1.5 * u.GHz  # Within [1.0, 2.0] GHz
+
+        # The original ValueError should be re-raised
+        # This ensures condition evaluates to False (frequency in bounds)
+        with pytest.raises(ValueError, match="Internal interpolation error"):
+            interpolator(test_theta, test_phi, test_frequency)
+
     def test_3d_interpolator_requires_frequency(self):
         """Test that 3D interpolator raises error when called without frequency."""
         theta = np.linspace(0, np.pi, 10) * u.rad
