@@ -1,6 +1,6 @@
-mode_ids: [UNCODED_BPSK]
+mode_ids: [UNCODED_BPSK, UNCODED_QPSK]
 metric: bit error rate
-ref: Bit error rate for BPSK in AWGN is 0.5 * erfc(sqrt(2 * Eb/N0))
+ref: Bit error rate for BPSK and QPSK in AWGN is 0.5 * erfc(sqrt(Eb/N0))
 points:
   - [-10, 3.27360423e-01]
   - [-9, 3.07910471e-01]
