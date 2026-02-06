@@ -1,4 +1,4 @@
-mode_ids: [CCSDS_TM_TURBO1784-13_BPSK]
+mode_ids: [CCSDS_TM_TURBO1784-13_BPSK, CCSDS_TM_TURBO1784-13_QPSK]
 metric: bit error rate
 ref: CCSDS 130.1-G-3 Figure 7-6
 points:

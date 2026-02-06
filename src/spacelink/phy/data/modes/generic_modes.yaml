@@ -1,0 +1,12 @@
+- id: UNCODED_BPSK
+  modulation:
+    name: BPSK
+    bits_per_symbol: 1
+  coding:
+    codes: []
+- id: UNCODED_QPSK
+  modulation:
+    name: QPSK
+    bits_per_symbol: 2
+  coding:
+    codes: []
