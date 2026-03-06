@@ -134,7 +134,7 @@ def dish_gain(
     ValueError
         If frequency is not positive
     """
-    if frequency <= 0 * u.Hz:
+    if np.any(frequency <= 0 * u.Hz):
         raise ValueError("Frequency must be positive")
 
     wl = wavelength(frequency)
@@ -180,7 +180,7 @@ class Polarization:
             propagation.
         """
 
-        if axial_ratio < 1:
+        if np.any(axial_ratio < 1):
             raise ValueError("Axial ratio must be ≥ 1 (≥ 0 dB)")
 
         self.tilt_angle = tilt_angle

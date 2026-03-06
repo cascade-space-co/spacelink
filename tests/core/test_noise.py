@@ -1,6 +1,7 @@
 """Tests for the noise module."""
 
 import astropy.units as u
+import numpy as np
 import pytest
 from astropy.tests.helper import assert_quantity_allclose
 
@@ -120,3 +121,49 @@ def test_ebn0_cn0_conversions(ebn0, bitrate, cn0):
     assert_quantity_allclose(cn0_result, cn0)
     ebn0_result = noise.cn0_to_ebn0(cn0, bitrate)
     assert_quantity_allclose(ebn0_result, ebn0)
+
+
+# ---------------------------------------------------------------------------
+# Array-valued Quantity tests (vectorized batch analysis support)
+# ---------------------------------------------------------------------------
+
+
+def test_noise_power_array_bandwidth():
+    """noise_power must accept array-valued bandwidth Quantities."""
+    bws = np.array([1e6, 2e6, 5e6]) * u.Hz
+    result = noise.noise_power(bws)
+    assert result.shape == (3,)
+    # Verify values scale linearly with bandwidth
+    assert_quantity_allclose(result[1] / result[0], 2.0, rtol=1e-10)
+    assert_quantity_allclose(result[2] / result[0], 5.0, rtol=1e-10)
+
+
+def test_noise_power_array_negative_bandwidth_raises():
+    """noise_power must reject arrays containing negative bandwidth values."""
+    bws = np.array([1e6, -2e6, 5e6]) * u.Hz
+    with pytest.raises(ValueError, match="negative"):
+        noise.noise_power(bws)
+
+
+def test_noise_power_density_array():
+    """noise_power_density must accept array-valued temperature Quantities."""
+    temps = np.array([100, 290, 500]) * u.K
+    result = noise.noise_power_density(temps)
+    assert result.shape == (3,)
+
+
+def test_noise_factor_to_temperature_array():
+    """noise_factor_to_temperature must accept array-valued noise factors."""
+    factors = np.array([1.0, 2.0, 3.0]) * u.dimensionless
+    result = noise.noise_factor_to_temperature(factors)
+    assert result.shape == (3,)
+    assert_quantity_allclose(result[0], 0 * u.K)
+    assert_quantity_allclose(result[1], 290 * u.K)
+    assert_quantity_allclose(result[2], 580 * u.K)
+
+
+def test_noise_factor_to_temperature_array_invalid_raises():
+    """noise_factor_to_temperature must reject arrays with factor < 1."""
+    factors = np.array([2.0, 0.5, 3.0]) * u.dimensionless
+    with pytest.raises(ValueError, match="noise_factor must be >= 1"):
+        noise.noise_factor_to_temperature(factors)

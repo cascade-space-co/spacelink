@@ -1452,3 +1452,31 @@ def test_temperature_from_g_over_t():
     # Test temperature calculation from G/T ratio
     temperature = temperature_from_g_over_t(10 * u.dB_per_K, 20 * u.dB(1))
     assert_quantity_allclose(temperature, 10 * u.K)
+
+
+# ---------------------------------------------------------------------------
+# Array-valued Quantity tests (vectorized batch analysis support)
+# ---------------------------------------------------------------------------
+
+
+def test_dish_gain_array_frequency():
+    """dish_gain must accept array-valued frequency Quantities."""
+    freqs = np.array([2.4, 5.8, 10.0]) * u.GHz
+    result = dish_gain(3.0 * u.m, freqs, 0.55 * u.dimensionless)
+    assert result.shape == (3,)
+    # Higher frequency => higher gain for same dish diameter
+    assert result[2] > result[1] > result[0]
+
+
+def test_dish_gain_array_zero_frequency_raises():
+    """dish_gain must reject arrays containing non-positive frequency values."""
+    freqs = np.array([2.4, 0.0, 10.0]) * u.GHz
+    with pytest.raises(ValueError, match="positive"):
+        dish_gain(3.0 * u.m, freqs, 0.55 * u.dimensionless)
+
+
+def test_polarization_array_axial_ratio_raises():
+    """Polarization must reject axial_ratio < 1 even in array context."""
+    # Scalar case — this should still raise for invalid axial ratio
+    with pytest.raises(ValueError, match="Axial ratio must be"):
+        Polarization(0.0 * u.rad, 0.5 * u.dimensionless, Handedness.LEFT)
