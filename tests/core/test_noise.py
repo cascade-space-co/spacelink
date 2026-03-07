@@ -150,6 +150,9 @@ def test_noise_power_density_array():
     temps = np.array([100, 290, 500]) * u.K
     result = noise.noise_power_density(temps)
     assert result.shape == (3,)
+    # Values should scale linearly with temperature (N0 = kT)
+    assert_quantity_allclose(result[1] / result[0], 2.9, rtol=1e-10)
+    assert_quantity_allclose(result[2] / result[0], 5.0, rtol=1e-10)
 
 
 def test_noise_factor_to_temperature_array():
