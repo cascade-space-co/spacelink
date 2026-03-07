@@ -1040,7 +1040,7 @@ def gain_from_g_over_t(
     Decibels
         Gain in dB.
     """
-    if temperature < 0 * u.K:
+    if np.any(temperature < 0 * u.K):
         raise ValueError("Temperature must be positive")
 
     gain = g_over_t + temperature.to(u.dBK)

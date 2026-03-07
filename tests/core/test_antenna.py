@@ -1475,8 +1475,15 @@ def test_dish_gain_array_zero_frequency_raises():
         dish_gain(3.0 * u.m, freqs, 0.55 * u.dimensionless)
 
 
-def test_polarization_array_axial_ratio_raises():
-    """Polarization must reject axial_ratio < 1 even in array context."""
-    # Scalar case — this should still raise for invalid axial ratio
+def test_polarization_scalar_axial_ratio_raises():
+    """Polarization must reject scalar axial_ratio < 1."""
     with pytest.raises(ValueError, match="Axial ratio must be"):
         Polarization(0.0 * u.rad, 0.5 * u.dimensionless, Handedness.LEFT)
+
+
+def test_polarization_array_axial_ratio_raises():
+    """Polarization must reject arrays containing axial_ratio < 1."""
+    with pytest.raises(ValueError, match="Axial ratio must be"):
+        Polarization(
+            0.0 * u.rad, np.array([2.0, 0.5, 3.0]) * u.dimensionless, Handedness.LEFT
+        )
