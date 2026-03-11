@@ -1452,3 +1452,67 @@ def test_temperature_from_g_over_t():
     # Test temperature calculation from G/T ratio
     temperature = temperature_from_g_over_t(10 * u.dB_per_K, 20 * u.dB(1))
     assert_quantity_allclose(temperature, 10 * u.K)
+
+
+# ---------------------------------------------------------------------------
+# Array-valued Quantity tests (vectorized batch analysis support)
+# ---------------------------------------------------------------------------
+
+
+def test_dish_gain_array_frequency():
+    """dish_gain must accept array-valued frequency Quantities."""
+    freqs = np.array([2.4, 5.8, 10.0]) * u.GHz
+    result = dish_gain(3.0 * u.m, freqs, 0.55 * u.dimensionless)
+    assert result.shape == (3,)
+    # Higher frequency => higher gain for same dish diameter
+    assert result[2] > result[1] > result[0]
+
+
+def test_dish_gain_array_zero_frequency_raises():
+    """dish_gain must reject arrays containing non-positive frequency values."""
+    freqs = np.array([2.4, 0.0, 10.0]) * u.GHz
+    with pytest.raises(ValueError, match="positive"):
+        dish_gain(3.0 * u.m, freqs, 0.55 * u.dimensionless)
+
+
+def test_polarization_scalar_axial_ratio_raises():
+    """Polarization must reject scalar axial_ratio < 1."""
+    with pytest.raises(ValueError, match="Axial ratio must be"):
+        Polarization(0.0 * u.rad, 0.5 * u.dimensionless, Handedness.LEFT)
+
+
+def test_polarization_array_axial_ratio_raises():
+    """Polarization must reject arrays containing axial_ratio < 1."""
+    with pytest.raises(ValueError, match="Axial ratio must be"):
+        Polarization(
+            0.0 * u.rad, np.array([2.0, 0.5, 3.0]) * u.dimensionless, Handedness.LEFT
+        )
+
+
+def test_gain_from_g_over_t_array():
+    """gain_from_g_over_t must accept array-valued temperature Quantities."""
+    from spacelink.core.antenna import gain_from_g_over_t
+
+    temps = np.array([100, 290, 500]) * u.K
+    g_over_t = 10 * u.dB(1 / u.K)
+    result = gain_from_g_over_t(g_over_t, temps)
+    assert result.shape == (3,)
+    # Higher temperature → higher gain (G = G/T + T_dBK)
+    assert result[2] > result[1] > result[0]
+
+
+def test_gain_from_g_over_t_zero_temperature_raises():
+    """gain_from_g_over_t must reject zero temperature (would give -inf dB)."""
+    from spacelink.core.antenna import gain_from_g_over_t
+
+    with pytest.raises(ValueError, match="positive"):
+        gain_from_g_over_t(10 * u.dB(1 / u.K), 0 * u.K)
+
+
+def test_gain_from_g_over_t_array_zero_temperature_raises():
+    """gain_from_g_over_t must reject arrays containing zero temperature."""
+    from spacelink.core.antenna import gain_from_g_over_t
+
+    temps = np.array([100, 0, 500]) * u.K
+    with pytest.raises(ValueError, match="positive"):
+        gain_from_g_over_t(10 * u.dB(1 / u.K), temps)

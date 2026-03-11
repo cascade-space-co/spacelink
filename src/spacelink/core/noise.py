@@ -52,6 +52,7 @@ output.
 """
 
 import astropy.units as u
+import numpy as np
 from astropy.constants import k_B as BOLTZMANN
 
 from .units import (
@@ -85,7 +86,7 @@ def noise_power(bandwidth: Frequency, temperature: Temperature = T0) -> Power:
     Power
         Noise power in Watts
     """
-    if bandwidth < 0 * u.Hz:
+    if np.any(bandwidth < 0 * u.Hz):
         raise ValueError("Bandwidth cannot be negative")
 
     result = BOLTZMANN * temperature.to(u.K) * bandwidth.to(u.Hz)
@@ -120,14 +121,15 @@ def noise_factor_to_temperature(noise_factor: Dimensionless) -> Temperature:
     ----------
     noise_factor : Dimensionless
         Noise factor (dimensionless). Passing a noise figure with unit dB(1) is also
-        supported and will be converted to noise factor automatically.
+        supported; the ``@enforce_units`` decorator converts it to linear noise factor
+        before this function executes.
 
     Returns
     -------
     Temperature
         Noise temperature in Kelvin
     """
-    if noise_factor < 1:
+    if np.any(noise_factor < 1):
         raise ValueError(f"noise_factor must be >= 1 ({noise_factor})")
     result = (noise_factor - 1.0) * T0
     return result.to(u.K)
