@@ -121,7 +121,8 @@ def noise_factor_to_temperature(noise_factor: Dimensionless) -> Temperature:
     ----------
     noise_factor : Dimensionless
         Noise factor (dimensionless). Passing a noise figure with unit dB(1) is also
-        supported and will be converted to noise factor automatically.
+        supported; the ``@enforce_units`` decorator converts it to linear noise factor
+        before this function executes.
 
     Returns
     -------
