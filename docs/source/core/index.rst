@@ -11,6 +11,7 @@ The **Core** subpackage provides fundamental calculations, units, constants, and
 * **noise**: Noise power and density calculations, conversions between noise temperature, noise figure/factor, and Eb/N0 ↔ C/N0 relationships
 * **path**: Path loss calculations for radio communications, including free space path loss, spreading loss, and aperture loss calculations
 * **ranging**: Two-way sequential and PN radiometric ranging, including acquisition probability/time calculations and power allocation among carrier, ranging, and data signals
+* **cassegrain**: Cassegrain dual-reflector antenna geometry design (Granet 1998), including minimum-blockage design, surface profiles, and gain calculation
 
 .. toctree::
    :maxdepth: 2
@@ -21,3 +22,4 @@ The **Core** subpackage provides fundamental calculations, units, constants, and
    noise
    path
    ranging
+   cassegrain

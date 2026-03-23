@@ -10,6 +10,7 @@ The examples are provided as Jupyter notebooks in the ``notebooks/`` directory:
 
 * **Link Budget Analysis** (``examples/leo_link_budget.ipynb``): Complete LEO satellite link budget calculation
 * **Modulation and Coding** (``examples/modulation_and_coding.ipynb``): Performance analysis of different modulation schemes
+* **Cassegrain Antenna Design** (``examples/cassegrain_design.ipynb``): Cassegrain dual-reflector antenna geometry design with cross-section ray-tracing diagram and gain calculation
 
 Theory and Background
 ---------------------
