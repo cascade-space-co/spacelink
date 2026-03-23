@@ -221,14 +221,11 @@ def design_min_blockage(
     f = (F - Lm) / 2
     if f <= 0 * u.m:
         raise ValueError(
-            f"f = (F - Lm) / 2 = {f:.4f} must be positive. "
-            f"Ensure Lm < F (= {F:.4f})."
+            f"f = (F - Lm) / 2 = {f:.4f} must be positive. Ensure Lm < F (= {F:.4f})."
         )
 
     if Df <= 0 * u.m:
-        raise ValueError(
-            f"Df = {Df:.4f} must be positive (feed aperture diameter)."
-        )
+        raise ValueError(f"Df = {Df:.4f} must be positive (feed aperture diameter).")
 
     # Step (ii): subreflector diameter — minimum-blockage condition, Eq. 25
     Ds = F * Df / (2 * f)

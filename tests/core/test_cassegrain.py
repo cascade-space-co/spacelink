@@ -18,6 +18,7 @@ from spacelink.core.cassegrain import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def ref_geometry() -> CassegrainGeometry:
     """Reference geometry from the Excel-verified test case in cassegrain_design.md."""
@@ -32,6 +33,7 @@ def ref_geometry() -> CassegrainGeometry:
 # ---------------------------------------------------------------------------
 # design_min_blockage — reference case
 # ---------------------------------------------------------------------------
+
 
 def test_design_min_blockage_focal_length(ref_geometry: CassegrainGeometry) -> None:
     assert_quantity_allclose(ref_geometry.F, 1.585 * u.m, rtol=1e-4)
@@ -61,6 +63,7 @@ def test_design_min_blockage_a(ref_geometry: CassegrainGeometry) -> None:
 # CassegrainGeometry properties
 # ---------------------------------------------------------------------------
 
+
 def test_eccentricity(ref_geometry: CassegrainGeometry) -> None:
     """Eccentricity e = f/a must be > 1 (hyperboloid) and match reference."""
     e = ref_geometry.eccentricity
@@ -76,6 +79,7 @@ def test_total_length(ref_geometry: CassegrainGeometry) -> None:
 # ---------------------------------------------------------------------------
 # main_reflector_profile
 # ---------------------------------------------------------------------------
+
 
 def test_main_reflector_profile_vertex() -> None:
     """At r = 0 the vertex is at z = -F."""
@@ -100,6 +104,7 @@ def test_main_reflector_profile_array() -> None:
 # subreflector_profile
 # ---------------------------------------------------------------------------
 
+
 def test_subreflector_profile_vertex(ref_geometry: CassegrainGeometry) -> None:
     """At r = 0 the apex is at z = a - f."""
     z = subreflector_profile(0 * u.m, ref_geometry.a, ref_geometry.f)
@@ -121,11 +126,10 @@ def test_subreflector_profile_array(ref_geometry: CassegrainGeometry) -> None:
 # cassegrain_gain
 # ---------------------------------------------------------------------------
 
+
 def test_cassegrain_gain_units(ref_geometry: CassegrainGeometry) -> None:
     """Return value must be in dB."""
-    gain = cassegrain_gain(
-        ref_geometry, 2.2 * u.GHz, 1.0 * u.dimensionless_unscaled
-    )
+    gain = cassegrain_gain(ref_geometry, 2.2 * u.GHz, 1.0 * u.dimensionless_unscaled)
     assert gain.unit == u.dB(1)
 
 
@@ -139,19 +143,16 @@ def test_cassegrain_gain_reference_value(ref_geometry: CassegrainGeometry) -> No
     from astropy.constants import c
 
     wl = (c / freq).to(u.m)
-    expected_linear = (
-        eta
-        * np.pi**2
-        * (ref_geometry.Dm**2 - ref_geometry.Ds**2)
-        / wl**2
-    )
+    expected_linear = eta * np.pi**2 * (ref_geometry.Dm**2 - ref_geometry.Ds**2) / wl**2
     expected_db = expected_linear.to(u.dB(1))
     assert_quantity_allclose(gain, expected_db, rtol=1e-6)
     # Physically reasonable for a 5 m dish at 2.2 GHz (η = 1)
     assert 40.0 < gain.value < 45.0
 
 
-def test_cassegrain_gain_scales_with_efficiency(ref_geometry: CassegrainGeometry) -> None:
+def test_cassegrain_gain_scales_with_efficiency(
+    ref_geometry: CassegrainGeometry,
+) -> None:
     """Halving efficiency reduces gain by ~3 dB."""
     freq = 2.2 * u.GHz
     g1 = cassegrain_gain(ref_geometry, freq, 1.0 * u.dimensionless_unscaled)
@@ -162,6 +163,7 @@ def test_cassegrain_gain_scales_with_efficiency(ref_geometry: CassegrainGeometry
 # ---------------------------------------------------------------------------
 # Validity guards — design_min_blockage
 # ---------------------------------------------------------------------------
+
 
 def test_invalid_lm_nonpositive() -> None:
     """Lm <= 0 must raise ValueError."""
@@ -233,6 +235,7 @@ def test_invalid_ds_ge_dm() -> None:
 # Validity guards — cassegrain_gain
 # ---------------------------------------------------------------------------
 
+
 def test_cassegrain_gain_invalid_efficiency_zero() -> None:
     """efficiency = 0 must raise ValueError."""
     with pytest.raises(ValueError, match="out of range"):
@@ -288,6 +291,7 @@ def test_cassegrain_gain_invalid_geometry() -> None:
 # ---------------------------------------------------------------------------
 # Unit enforcement
 # ---------------------------------------------------------------------------
+
 
 def test_design_min_blockage_requires_quantities() -> None:
     """Plain floats (no units) must raise TypeError."""
