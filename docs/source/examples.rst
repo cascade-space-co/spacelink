@@ -39,3 +39,87 @@ Then start Jupyter notebook using Poetry:
 
 
 All examples use the SpaceLink library and include detailed explanations of the underlying theory and implementation.
+
+Serialization Examples
+----------------------
+
+These examples show how to use ``QuantityModel`` and ``QuantityRangeModel`` to
+serialize and deserialize astropy quantities for use in APIs, databases, or
+configuration files.
+
+Scalar quantity round-trip
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   import astropy.units as u
+   from spacelink.serialization import QuantityModel
+
+   # Create a quantity
+   eirp = 47.3 * u.dB(u.W)
+
+   # Serialize to a dict (JSON-safe)
+   model = QuantityModel.from_astropy(eirp)
+   data = model.model_dump()
+   # {'value': 47.3, 'unit': 'dB(W)'}
+
+   # Deserialize back to an astropy Quantity
+   eirp2 = QuantityModel.model_validate(data).to_astropy()
+   # <Quantity 47.3 dB(W)>
+
+Array quantity round-trip
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   import numpy as np
+   import astropy.units as u
+   from spacelink.serialization import QuantityModel
+
+   gains = np.array([30.0, 31.5, 32.0]) * u.dB(1)
+
+   model = QuantityModel.from_astropy(gains)
+   data = model.model_dump()
+   # {'value': [30.0, 31.5, 32.0], 'unit': 'dB'}
+
+   gains2 = QuantityModel.model_validate(data).to_astropy()
+   # <Quantity [30. , 31.5, 32. ] dB>
+
+Frequency range
+^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   from spacelink.serialization import QuantityModel, QuantityRangeModel
+
+   x_band = QuantityRangeModel(
+       min=QuantityModel(value=8.0, unit="GHz"),
+       max=QuantityModel(value=8.4, unit="GHz"),
+   )
+
+   data = x_band.model_dump()
+   # {'min': {'value': 8.0, 'unit': 'GHz'}, 'max': {'value': 8.4, 'unit': 'GHz'}}
+
+   band2 = QuantityRangeModel.model_validate(data)
+   low = band2.min.to_astropy()   # <Quantity 8. GHz>
+   high = band2.max.to_astropy()  # <Quantity 8.4 GHz>
+
+Legacy dB unit strings
+^^^^^^^^^^^^^^^^^^^^^^
+
+When reading JSON produced by older cascade-designer data, short-form dB strings
+are automatically resolved:
+
+.. code-block:: python
+
+   from spacelink.serialization import QuantityModel
+
+   # cascade-designer stores G/T as "dB/K"
+   gt = QuantityModel(value=-25.0, unit="dB/K")
+   q = gt.to_astropy()
+   # <Quantity -25. dB(1 / K)>
+
+   # Canonical astropy form works identically
+   gt2 = QuantityModel(value=-25.0, unit="dB(1/K)")
+   q2 = gt2.to_astropy()
+   # <Quantity -25. dB(1 / K)>
