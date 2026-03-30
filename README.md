@@ -16,6 +16,7 @@ https://cascade-space-co.github.io/spacelink/
 - **Noise Calculations**: System noise temperature and related parameters
 - **Space Communications**: Built-in support for satellite link analysis
 - **Unit-Aware Calculations**: Integrated unit handling for RF parameters
+- **Serialization**: `QuantityModel` and `QuantityRangeModel` for JSON-safe astropy unit round-trips
 
 ## Installation
 
