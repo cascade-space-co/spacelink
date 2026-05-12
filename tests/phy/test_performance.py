@@ -54,6 +54,10 @@ class TestModePerformanceCurve:
         )
 
         assert model.points == STANDARD_CURVE_POINTS
+        assert_quantity_allclose(model.ebn0_range[0], 0.0 * u.dB(1))
+        assert_quantity_allclose(model.ebn0_range[1], 3.0 * u.dB(1))
+        assert_quantity_allclose(model.error_rate_range[0], 1e-4 * u.dimensionless)
+        assert_quantity_allclose(model.error_rate_range[1], 1e-1 * u.dimensionless)
 
     def test_ebn0_to_error_rate_exact_points(self, basic_bpsk_mode):
         model = ModePerformanceCurve(

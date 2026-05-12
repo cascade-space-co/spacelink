@@ -102,6 +102,30 @@ class ModePerformanceCurve(pydantic.BaseModel):
             extrapolate=False,
         )
 
+    @property
+    def ebn0_range(self) -> tuple[Decibels, Decibels]:
+        r"""
+        Valid Eb/N0 input range covered by this performance curve.
+
+        Returns
+        -------
+        tuple[Decibels, Decibels]
+            Minimum and maximum Eb/N0 values in decibels.
+        """
+        return self.points[0][0] * u.dB(1), self.points[-1][0] * u.dB(1)
+
+    @property
+    def error_rate_range(self) -> tuple[Dimensionless, Dimensionless]:
+        r"""
+        Valid error rate input range covered by this performance curve.
+
+        Returns
+        -------
+        tuple[Dimensionless, Dimensionless]
+            Minimum and maximum error rate values.
+        """
+        return self.points[-1][1] * u.dimensionless, self.points[0][1] * u.dimensionless
+
     @enforce_units
     def ebn0_to_error_rate(self, ebn0: Decibels) -> Dimensionless:
         r"""
