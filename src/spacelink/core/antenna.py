@@ -1017,8 +1017,8 @@ def _surface_integral(theta: Angle, phi: Angle, values: Dimensionless) -> SolidA
         The result of the surface integral.
     """
     integrand = values * np.sin(theta[:, np.newaxis])
-    int_phi = scipy.integrate.simpson(integrand, phi, axis=1)
-    return scipy.integrate.simpson(int_phi, theta) * u.sr
+    int_phi = scipy.integrate.simpson(integrand, x=phi.to_value(u.rad), axis=1)
+    return scipy.integrate.simpson(int_phi, x=theta.to_value(u.rad)) * u.sr
 
 
 @enforce_units
