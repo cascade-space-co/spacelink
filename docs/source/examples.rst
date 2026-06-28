@@ -104,17 +104,17 @@ Frequency range
    low = band2.min.to_astropy()   # <Quantity 8. GHz>
    high = band2.max.to_astropy()  # <Quantity 8.4 GHz>
 
-Legacy dB unit strings
-^^^^^^^^^^^^^^^^^^^^^^
+dB short-form unit strings
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When reading JSON produced by older cascade-designer data, short-form dB strings
-are automatically resolved:
+Short-form dB strings common in RF engineering notation are automatically
+resolved when read:
 
 .. code-block:: python
 
    from spacelink.serialization import QuantityModel
 
-   # cascade-designer stores G/T as "dB/K"
+   # G/T is commonly written as "dB/K"
    gt = QuantityModel(value=-25.0, unit="dB/K")
    q = gt.to_astropy()
    # <Quantity -25. dB(1 / K)>

@@ -34,8 +34,8 @@ Unit Handling
 ``"dB(W)"``, etc.) are resolved via ``astropy.units.Unit()``, which handles all
 composite forms automatically.
 
-**Legacy dB short-forms** from cascade-designer JSON are handled via an explicit
-alias table:
+**dB short-forms** common in RF engineering notation are not accepted by
+astropy's parser, so they are resolved via an explicit alias table:
 
 .. list-table::
    :header-rows: 1
@@ -56,8 +56,15 @@ alias table:
    * - ``"dB/K"``
      - ``u.dB(1 / u.K)`` — G/T quantities
 
-The canonical astropy forms (``"dB(W)"``, ``"dB(mW)"``, etc.) pass directly to
-``u.Unit()`` and do not need aliases.
+The ``"dB/K"`` alias is required for correctness, not just convenience:
+``u.Unit("dB / K")`` parses to a *linear* dB÷K composite rather than the
+*logarithmic* ``dB(1 / K)`` that G/T quantities need. Whitespace around the
+slash is normalized before lookup, so ``"dB / K"`` resolves the same way.
+
+The canonical astropy forms (``"dB(W)"``, ``"dB(mW)"``, ``"dB(1 / K)"``, etc.)
+pass directly to ``u.Unit()`` and do not need aliases. ``from_astropy()`` always
+stores these canonical forms, so the alias table only comes into play when
+reading short-form strings produced elsewhere.
 
 ``unit=None`` or an absent ``unit`` field is treated as dimensionless.
 

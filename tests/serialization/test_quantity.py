@@ -26,6 +26,10 @@ from spacelink.serialization.quantity import (
         ("dBHz", u.dB(u.Hz)),
         ("dBK", u.dB(u.K)),
         ("dB/K", u.dB(1 / u.K)),
+        # Internal whitespace around the slash must still hit the alias, not
+        # fall through to u.Unit() (which would parse a linear dB÷K composite).
+        ("dB / K", u.dB(1 / u.K)),
+        ("  dB/K  ", u.dB(1 / u.K)),
         ("m", u.Unit("m")),
         ("Hz", u.Unit("Hz")),
         ("K / m", u.Unit("K / m")),
@@ -42,6 +46,29 @@ def test_resolve_unit_valid(unit_str, expected):
 def test_resolve_unit_bad_raises():
     with pytest.raises(ValueError, match="Cannot resolve unit: 'badunit'"):
         _resolve_unit("badunit")
+
+
+def test_resolve_unit_spaced_dbk_is_logarithmic():
+    # Guard against regression: "dB / K" must be the logarithmic dB(1/K), not
+    # the linear dB÷K composite that u.Unit("dB / K") would produce.
+    assert _resolve_unit("dB / K") != u.Unit("dB / K")
+    assert _resolve_unit("dB / K") == u.dB(1 / u.K)
+
+
+# ---------------------------------------------------------------------------
+# value validation (reject NaN / inf)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), float("-inf")])
+def test_value_rejects_non_finite_scalar(bad):
+    with pytest.raises(ValueError, match="finite"):
+        QuantityModel(value=bad, unit="m")
+
+
+def test_value_rejects_non_finite_in_array():
+    with pytest.raises(ValueError, match="finite"):
+        QuantityModel(value=[1.0, float("nan"), 3.0], unit="m")
 
 
 # ---------------------------------------------------------------------------
@@ -136,7 +163,7 @@ def test_round_trip(original):
 
 
 # ---------------------------------------------------------------------------
-# Canonical dB forms go through u.Unit() (NOT in _LEGACY_ALIASES)
+# Canonical dB forms go through u.Unit() (NOT in _DB_SHORT_FORMS)
 # ---------------------------------------------------------------------------
 
 

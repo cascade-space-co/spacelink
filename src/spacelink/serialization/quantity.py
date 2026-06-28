@@ -1,10 +1,18 @@
+import math
+import re
+
 import astropy.units as u
 import numpy as np
 from astropy.units import Quantity
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-_LEGACY_ALIASES: dict[str, u.UnitBase] = {
-    "dB": u.dB(1),  # bare "dB" → dB(1), i.e. dB relative to 1 (dimensionless ratio)
+# Common dB short-forms from RF engineering notation that astropy's parser
+# does not accept (or parses wrongly). "dB/K" must be aliased: u.Unit() parses
+# it as a *linear* dB÷K composite, not the *logarithmic* dB(1/K) that G/T
+# requires. _resolve_unit normalizes whitespace, so "dB / K" maps here too.
+# Canonical forms ("dB(W)", "dB(1 / K)", etc.) resolve via u.Unit() directly.
+_DB_SHORT_FORMS: dict[str, u.UnitBase] = {
+    "dB": u.dB(1),  # intentionally resolved as dB(1), the dimensionless dB ratio
     "dBW": u.dB(u.W),
     "dBm": u.dB(u.mW),
     "dBHz": u.dB(u.Hz),
@@ -17,16 +25,20 @@ def _resolve_unit(unit_str: str | None) -> u.UnitBase:
     """Return the astropy unit object for a unit string.
 
     Falls back to u.Unit() for standard and composite units (e.g. "K / m",
-    "W / Hz", "dB(W)"). _LEGACY_ALIASES handles the dB short-forms that
-    cascade-designer stores in JSON and that u.Unit() cannot parse.
+    "W / Hz", "dB(W)"). _DB_SHORT_FORMS handles the dB short-forms that
+    u.Unit() cannot parse (or parses incorrectly, e.g. "dB/K").
     """
     if not unit_str:
         return u.dimensionless_unscaled
     unit_str = unit_str.strip()
     if not unit_str or unit_str == "dimensionless":
         return u.dimensionless_unscaled
-    if unit_str in _LEGACY_ALIASES:
-        return _LEGACY_ALIASES[unit_str]
+    # Normalize whitespace around the slash for the alias lookup only, so that
+    # "dB / K" matches the "dB/K" short-form instead of falling through to
+    # u.Unit() (which would parse it as a linear composite).
+    alias_key = re.sub(r"\s*/\s*", "/", unit_str)
+    if alias_key in _DB_SHORT_FORMS:
+        return _DB_SHORT_FORMS[alias_key]
     try:
         return u.Unit(unit_str)
     except ValueError:
@@ -40,6 +52,14 @@ class QuantityModel(BaseModel):
     unit: str | None = Field(None, description="Unit string (None → dimensionless)")
 
     model_config = ConfigDict(extra="forbid")
+
+    @field_validator("value")
+    @classmethod
+    def _reject_non_finite(cls, value: float | list[float]) -> float | list[float]:
+        values = value if isinstance(value, list) else [value]
+        if not all(math.isfinite(v) for v in values):
+            raise ValueError("value must be finite (no NaN or inf)")
+        return value
 
     @classmethod
     def from_astropy(cls, q: Quantity) -> "QuantityModel":
