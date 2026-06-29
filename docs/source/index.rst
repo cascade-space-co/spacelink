@@ -18,6 +18,7 @@ Key Features
 * **Space Communications**: Built-in support for satellite link analysis with path loss and atmospheric effects
 * **Unit-Aware Calculations**: All calculations use proper units through the Astropy units system
 * **Physical Layer Support**: Link mode definitions with modulation, coding, and performance curves for comprehensive link analysis
+* **Serialization**: JSON-safe ``QuantityModel`` and ``QuantityRangeModel`` for storing and transmitting RF quantities across APIs and databases
 
 Getting Started
 ---------------
@@ -44,10 +45,11 @@ View the source code at the `GitHub Repository <https://github.com/cascade-space
 Library Structure
 -----------------
 
-SpaceLink is organized into two main subpackages:
+SpaceLink is organized into three subpackages:
 
 * **Core**: Fundamental calculations, units, constants, and validation logic with minimal dependencies
 * **PHY**: Physical-layer definitions including modulation/coding link modes, performance curves, and a registry backed by YAML data
+* **Serialization**: JSON-safe round-trip serialization for astropy ``Quantity`` objects via Pydantic models
 
 .. toctree::
    :maxdepth: 2
@@ -55,6 +57,7 @@ SpaceLink is organized into two main subpackages:
 
    core/index
    phy/index
+   serialization/index
    examples
 
 Indices and tables
