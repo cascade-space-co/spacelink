@@ -1,0 +1,42 @@
+context:
+  version: "0.1.9"
+
+package:
+  name: spacelink
+  version: ${{ version }}
+
+source:
+  path: ..
+  use_gitignore: false
+
+build:
+  number: 0
+  noarch: python
+  script:
+    - $PYTHON -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.11
+    - pip
+    - poetry-core >=2.0.0
+  run:
+    - python >=3.11
+    - astropy >=7.0.1,<8.0.0
+    - numpy >=2.0.0,<3.0.0
+    - pandas >=2.3.1,<3.0.0
+    - pydantic >=2.11.7,<3.0.0
+    - scipy >=1.10.0,<2.0.0
+
+tests:
+  - script:
+      - python -c "import spacelink"
+      - python -c "import spacelink.core"
+      - python -c "import spacelink.phy"
+
+about:
+  homepage: https://github.com/cascade-space-co/spacelink
+  repository: https://github.com/cascade-space-co/spacelink
+  license: MIT
+  license_file: LICENSE
+  summary: Space link budget calculation package

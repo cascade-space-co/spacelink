@@ -1,0 +1,50 @@
+# Builds a conda package using rattler-build and uploads to prefix.dev
+name: Rattler Build (spacelink)
+
+on:
+  push:
+    branches: [brett/rattler-recipe]
+  workflow_dispatch:
+
+concurrency:
+  group: rattler-build-spacelink-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install rattler-build
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-name: rattler-build-env
+          create-args: -c conda-forge rattler-build=0.76.0
+
+      - name: Build spacelink conda package
+        shell: micromamba-shell {0}
+        run: |
+          rattler-build build \
+            --recipe recipe/recipe.yaml \
+            --output-dir output \
+            -c conda-forge
+
+      - name: Upload built package (workflow artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: spacelink-conda-package
+          path: output/noarch/*.conda
+          if-no-files-found: error
+
+      - name: Publish to prefix.dev (cascade channel)
+        shell: micromamba-shell {0}
+        run: |
+          rattler-build upload prefix -c cascade output/noarch/*.conda
