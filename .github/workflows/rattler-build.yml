@@ -33,7 +33,7 @@ jobs:
         shell: micromamba-shell {0}
         run: |
           rattler-build build \
-            --recipe recipe/recipe.yaml \
+            --recipe .conda/recipe/recipe.yaml \
             --output-dir output \
             -c conda-forge
 

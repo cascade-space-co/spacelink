@@ -6,7 +6,7 @@ package:
   version: ${{ version }}
 
 source:
-  path: ..
+  path: ../..
   use_gitignore: false
 
 build:
